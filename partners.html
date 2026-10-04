@@ -1,0 +1,901 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http%3A//www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%230066FF'/><g transform='translate(16,35.9) scale(0.08124)'><path d='M171 0 L403 0 L613 210 L613 0 L837 0 L837 198 L689 346 L461 346 L295 179 L131 346 L0 346 L0 174 Z' fill='%23fff'/></g></svg>">
+<link rel="icon" type="image/png" sizes="180x180" href="favicon.png">
+<link rel="apple-touch-icon" href="favicon.png">
+<title>For distributors &middot; Nazryx</title>
+<meta name="description" content="Nazryx runs the data, sourcing and market intelligence function for a small number of pharmaceutical companies. Here is exactly what that covers.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap">
+<style>
+:root{
+  /* dark theme, derived from the Nazryx brand */
+  --blue:#0066FF;            /* fills */
+  --acc:#5AA2FF;             /* accent on dark */
+  --blue-deep:#0D3082; --blue-mid:#0F4AB6;
+  --ground:#0A0C11;          /* page */
+  --card:#12151D;            /* raised */
+  --panel:#161A24;           /* recessed */
+  --soft:#141E31;            /* blue-tinted hover */
+  --ink:#F2F1EC;             /* primary text, warm like the brand off-white */
+  --ink-2:#A9A9A2;
+  --ink-3:#8A8A82;
+  --line:#20242E;
+  --t1:#0F1B33; --t1i:#5AA2FF;
+  --t2:#0D2018; --t2i:#48C97C;
+  --t3:#241708; --t3i:#FF9A3D;
+  --t4:#191233; --t4i:#9B8CFF;
+  --r-lg:26px; --r-md:18px; --maxw:1120px;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth;color-scheme:dark}
+body{margin:0;background:var(--ground);color:var(--ink);
+  font-family:"Inter","Helvetica Neue",Helvetica,Arial,sans-serif;
+  font-feature-settings:"ss01" 1,"cv11" 1;font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased}
+img{max-width:100%} a{color:inherit}
+h1,h2,h3,h4{font-family:"Inter Tight","Inter",Helvetica,Arial,sans-serif;font-feature-settings:"ss01" 1;
+  font-weight:700;letter-spacing:-.035em;line-height:1.03;text-wrap:balance;margin:0}
+p{margin:0}
+.blue{color:var(--acc)}
+.wrap{max-width:var(--maxw);margin:0 auto;padding-inline:20px}
+:focus-visible{outline:3px solid var(--acc);outline-offset:3px;border-radius:6px}
+section{padding-block:72px}
+.eyebrow{font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--acc);margin-bottom:14px}
+h2{font-size:clamp(29px,3.9vw,44px)}
+.lede{font-size:17px;color:var(--ink-2);max-width:62ch;line-height:1.62}
+
+/* nav */
+.nav{position:sticky;top:0;z-index:50;background:rgba(10,12,17,.82);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+.nav-in{max-width:var(--maxw);margin:0 auto;padding:14px 20px;display:flex;align-items:center;gap:18px}
+.aud{display:inline-flex;background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:3px;gap:2px;flex:0 0 auto}
+.aud a{text-decoration:none;font-size:13px;font-weight:600;padding:7px 13px;border-radius:999px;color:var(--ink-2);white-space:nowrap}
+.aud a.on{background:var(--blue);color:#fff}
+.aud a:hover:not(.on){color:var(--ink)}
+@media(max-width:760px){.nav-links{display:none}.aud{margin-left:auto}.aud a{padding:6px 11px;font-size:12.5px}}
+@media(max-width:520px){.nav-in{gap:10px}.nav-in>.btn{display:none}}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;flex:0 0 auto}
+.brand svg{width:29px;height:auto;display:block}
+.brand b{font-family:"Inter Tight",sans-serif;font-size:19px;letter-spacing:-.04em}
+.nav-links{display:flex;gap:24px;margin-left:auto;font-size:14.5px;color:var(--ink-2)}
+.nav-links a{text-decoration:none}
+.nav-links a:hover{color:var(--acc)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:11px 20px;border-radius:999px;
+  font-size:14.5px;font-weight:600;text-decoration:none;border:1px solid transparent;
+  transition:background .15s ease,color .15s ease,border-color .15s ease;white-space:nowrap}
+.btn-blue{background:var(--blue);color:#fff} .btn-blue:hover{background:#0052D6}
+.btn-ghost{background:transparent;color:var(--ink);border-color:#333846} .btn-ghost:hover{border-color:var(--ink)}
+.btn-white{background:#fff;color:var(--blue)} .btn-white:hover{background:#EAF1FF}
+
+/* hero */
+.hero{padding-block:64px 52px}
+.hero-grid{display:grid;grid-template-columns:1.2fr .8fr;gap:48px;align-items:start}
+h1{font-size:clamp(40px,5.8vw,68px)}
+.hero .lede{margin-top:24px;font-size:18px;max-width:48ch}
+.hero-cta{display:flex;flex-wrap:wrap;gap:12px;margin-top:30px}
+.intake{background:#0B4BC7;color:#fff;border-radius:var(--r-lg);padding:26px;display:flex;flex-direction:column;gap:18px;
+  background-image:linear-gradient(150deg,#0C63F5 0%,#0B4BC7 52%,#0D3082 100%)}
+.intake-top{display:flex;align-items:flex-start;justify-content:space-between;gap:16px}
+.intake-chip{width:40px;height:40px;border-radius:12px;background:rgba(255,255,255,.16);display:grid;place-items:center}
+.intake-chip svg{width:20px;height:auto}
+.intake-top .r{text-align:right;font-size:12.5px;color:rgba(255,255,255,.88);line-height:1.4}
+.intake-top .r b{display:block;font-family:"Inter Tight",sans-serif;font-size:16px;letter-spacing:-.02em;color:#fff}
+.intake-rows{display:flex;flex-direction:column;border-top:1px solid rgba(255,255,255,.22)}
+.intake-rows div{display:flex;justify-content:space-between;gap:14px;padding:11px 0;
+  border-bottom:1px solid rgba(255,255,255,.15);font-size:13px}
+.intake-rows span{color:rgba(255,255,255,.88)}
+.intake-rows b{font-weight:600;text-align:right}
+
+/* stats */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.stat{border-radius:var(--r-md);padding:22px 20px;display:flex;flex-direction:column;gap:10px;min-height:132px}
+.stat b{font-family:"Inter Tight",sans-serif;font-size:33px;letter-spacing:-.04em;line-height:1;font-variant-numeric:tabular-nums}
+.stat span{font-size:13px;line-height:1.42;color:var(--ink-2);margin-top:auto}
+.s1{background:var(--t1)} .s1 b{color:var(--t1i)}
+.s2{background:var(--t2)} .s2 b{color:var(--t2i)}
+.s3{background:var(--t3)} .s3 b{color:var(--t3i)}
+.s4{background:var(--t4)} .s4 b{color:var(--t4i)}
+
+/* section header */
+.head2{display:grid;grid-template-columns:1fr 1fr;gap:44px;align-items:end;margin-bottom:38px}
+
+/* problems */
+.probs{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+.prob{background:var(--card);border:1px solid var(--line);border-radius:var(--r-md);padding:24px}
+.prob b{display:block;font-family:"Inter Tight",sans-serif;font-size:17px;letter-spacing:-.02em;margin-bottom:8px}
+.prob p{font-size:14px;color:var(--ink-2);line-height:1.55}
+.prob i{font-style:normal;display:inline-block;font-size:11px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;
+  color:var(--t3i);background:var(--t3);border-radius:999px;padding:4px 10px;margin-bottom:12px}
+
+/* features */
+.feats{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+.feat{background:var(--card);border:1px solid var(--line);border-radius:var(--r-lg);padding:28px;display:flex;flex-direction:column;gap:12px}
+.feat-n{font-size:11px;font-weight:600;color:var(--acc);letter-spacing:.06em;font-variant-numeric:tabular-nums}
+.feat h3{font-size:21px}
+.feat p{font-size:14.5px;color:var(--ink-2);line-height:1.58}
+.feat ul{list-style:none;margin:4px 0 0;padding:0;display:flex;flex-direction:column;gap:7px}
+.feat li{position:relative;padding-left:22px;font-size:13.5px;color:var(--ink-2);line-height:1.5}
+.feat li::before{content:"";position:absolute;left:0;top:6px;width:10px;height:6px;
+  border-left:2px solid var(--acc);border-bottom:2px solid var(--acc);transform:rotate(-45deg)}
+.feat.wide{grid-column:1 / -1;background:var(--panel);border-color:transparent}
+
+/* portal mock */
+.portal{display:grid;grid-template-columns:1fr 1fr;gap:30px;align-items:center}
+.portal-ui{background:var(--blue-deep);border-radius:var(--r-md);padding:20px;display:flex;flex-direction:column;gap:10px;
+  background-image:linear-gradient(140deg,#123F9E 0%,#0D3082 100%)}
+.pu-row{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.07);border-radius:10px;padding:11px 13px;color:#fff}
+.pu-row em{font-style:normal;font-size:10px;font-weight:700;letter-spacing:.05em;padding:3px 8px;border-radius:999px;flex:0 0 auto}
+.pu-new{background:#E2FFE3;color:#0C5C2A}
+.pu-warn{background:#FCE7D6;color:#8F3D00}
+.pu-info{background:rgba(255,255,255,.18);color:#fff}
+.pu-row b{font-size:13px;font-weight:600}
+.pu-row span{font-size:12px;color:rgba(255,255,255,.66);margin-left:auto;text-align:right;white-space:nowrap}
+
+/* timeline */
+.tl{display:flex;flex-direction:column;gap:12px}
+.tl-item{background:var(--card);border:1px solid var(--line);border-radius:var(--r-md);padding:22px 24px;
+  display:grid;grid-template-columns:132px 1fr;gap:22px;align-items:start}
+.tl-when{font-family:"Inter Tight",sans-serif;font-weight:700;letter-spacing:-.02em;font-size:15px;color:var(--acc)}
+.tl-item b{display:block;font-family:"Inter Tight",sans-serif;font-size:17px;letter-spacing:-.02em;margin-bottom:6px}
+.tl-item p{font-size:14px;color:var(--ink-2);line-height:1.55}
+
+/* proof */
+.proof{background:#0E1526;border:1px solid #23304B;color:var(--ink);border-radius:var(--r-lg);padding:clamp(30px,4vw,48px);
+  background-image:radial-gradient(120% 140% at 0% 0%, #1B2C52 0%, #0E1526 62%)}
+.proof .eyebrow{color:#4D9BFF}
+.proof h2{color:#fff;max-width:20ch}
+.proof-body{display:grid;grid-template-columns:1.1fr .9fr;gap:40px;align-items:center;margin-top:26px}
+.proof p{color:var(--ink-2);font-size:15px;line-height:1.62}
+.proof p + p{margin-top:12px}
+.proof-fig{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.12);border-radius:var(--r-md);padding:24px;
+  display:flex;flex-direction:column;gap:16px}
+.pf{display:flex;justify-content:space-between;align-items:baseline;gap:14px;
+  padding-bottom:13px;border-bottom:1px solid rgba(255,255,255,.1)}
+.pf:last-child{border-bottom:0;padding-bottom:0}
+.pf span{font-size:12.5px;color:var(--ink-3)}
+.pf b{font-family:"Inter Tight",sans-serif;font-size:26px;letter-spacing:-.04em;color:#fff;font-variant-numeric:tabular-nums}
+.pf.hi b{color:var(--acc)}
+
+/* fit */
+.fit{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.fit-card{border-radius:var(--r-lg);padding:28px}
+.fit-yes{background:var(--t1);border:1px solid #1E2E4F}
+.fit-no{background:var(--card);border:1px solid var(--line)}
+.fit-card h3{font-size:19px;margin-bottom:16px}
+.fit-card ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:11px}
+.fit-card li{position:relative;padding-left:26px;font-size:14px;line-height:1.5;color:var(--ink-2)}
+.fit-yes li::before{content:"";position:absolute;left:0;top:6px;width:11px;height:7px;
+  border-left:2px solid var(--acc);border-bottom:2px solid var(--acc);transform:rotate(-45deg)}
+.fit-no li::before{content:"";position:absolute;left:1px;top:9px;width:11px;height:2px;background:var(--ink-3)}
+
+/* faq */
+.faq{display:flex;flex-direction:column;gap:10px}
+.q{border:1px solid var(--line);border-radius:var(--r-md);background:var(--card);overflow:hidden}
+.q > summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:14px;padding:20px 22px;
+  font-family:"Inter Tight",sans-serif;font-weight:600;letter-spacing:-.02em;font-size:16.5px;transition:background .15s ease}
+.q > summary::-webkit-details-marker{display:none}
+.q > summary:hover{background:var(--soft)}
+.q .chev{width:18px;height:18px;margin-left:auto;flex:0 0 auto;color:var(--ink-3);transition:transform .2s ease}
+.q[open] .chev{transform:rotate(180deg)}
+.q[open] > summary{border-bottom:1px solid var(--line)}
+.q-body{padding:18px 22px 22px;font-size:14.5px;color:var(--ink-2);line-height:1.62}
+.q-body p + p{margin-top:10px}
+
+/* cta */
+.cta{background:#0B0E15;color:#fff;border:1px solid #26324A;border-radius:var(--r-lg);padding:clamp(32px,4.5vw,52px);
+  background-image:radial-gradient(115% 135% at 100% 0%, #1A3364 0%, #0B0E15 62%);
+  display:grid;grid-template-columns:1.2fr .8fr;gap:40px;align-items:center}
+.cta h2{color:#fff;max-width:16ch}
+.cta p{color:#B9B9B2;font-size:15.5px;line-height:1.6;margin-top:16px;max-width:46ch}
+.cta-side{display:flex;flex-direction:column;gap:10px}
+.cta-side .btn{width:100%}
+.cta-note{font-size:12.5px;color:var(--ink-3);line-height:1.5;margin-top:4px}
+
+/* footer */
+.foot{border-top:1px solid var(--line);padding-block:36px;display:flex;justify-content:space-between;
+  gap:20px;flex-wrap:wrap;font-size:13px;color:var(--ink-3)}
+.foot a{text-decoration:none} .foot a:hover{color:var(--acc)}
+.foot-links{display:flex;gap:20px;flex-wrap:wrap}
+
+@media (max-width:900px){
+  .hero-grid,.head2,.portal,.proof-body,.cta{grid-template-columns:1fr;gap:26px}
+  .head2{align-items:start}
+  .probs,.feats,.fit{grid-template-columns:1fr}
+  .stats{grid-template-columns:1fr 1fr}
+  section{padding-block:52px}
+  .tl-item{grid-template-columns:1fr;gap:8px}
+}
+@media (max-width:520px){
+  h1{font-size:38px}
+  .stat{min-height:0;padding:16px}
+  .stat b{font-size:27px}
+  .pu-row{flex-wrap:wrap}
+  .pu-row span{margin-left:0;width:100%;text-align:left}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* nzx-narrow-nav */
+@media(max-width:430px){.nav-in{flex-wrap:wrap;gap:10px!important;row-gap:8px}.nav-in>.btn,.nav-in a.btn{font-size:13px;padding:9px 13px}.nav-in .tagchip{order:9;flex-basis:100%;text-align:center}}
+
+
+/* ---------- moved from the home page ---------- */
+.svc-head{display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:end;margin-bottom:44px}
+.caps{display:flex;flex-direction:column;gap:16px;margin-top:44px}
+.cap{background:var(--card);border:1px solid var(--line);border-radius:var(--r-lg);padding:32px;
+  display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:center}
+.cap h3{font-size:26px;margin-bottom:14px}
+.cap p{color:var(--ink-2);font-size:15.5px;line-height:1.6}
+.cap p + p{margin-top:12px}
+.cap-visual{align-self:stretch;display:flex}
+.dims{display:flex;flex-wrap:wrap;gap:8px;align-self:center;width:100%}
+.dim{background:var(--soft);color:var(--acc);border:1px solid #1E2E4F;font-size:13px;font-weight:500;
+  padding:8px 13px;border-radius:999px}
+.thesis{background:var(--blue-deep);color:#fff;border-radius:var(--r-lg);padding:clamp(32px,5vw,60px);
+  display:grid;grid-template-columns:1.1fr .9fr;gap:clamp(30px,4vw,56px);align-items:center;
+  background-image:linear-gradient(140deg,#123F9E 0%,#0D3082 62%,#08205C 100%)}
+.thesis h2{color:#fff;font-size:clamp(28px,3.4vw,40px)}
+.thesis .eyebrow{color:#BBD6FF}
+.ask{display:flex;flex-direction:column;gap:18px}
+.ask div{border-left:2px solid rgba(255,255,255,.22);padding-left:18px}
+.ask div.now{border-left-color:#fff}
+.ask small{display:block;font-size:12.5px;color:rgba(255,255,255,.68);margin-bottom:6px}
+.ask q{font-family:"Inter Tight",sans-serif;font-size:19px;letter-spacing:-.025em;font-weight:600;
+  line-height:1.25;quotes:"\201C" "\201D";color:rgba(255,255,255,.86);display:block}
+.ask div.now q{color:#fff}
+.thesis-out{display:flex;flex-direction:column;gap:6px;margin-top:26px}
+.thesis-out b{font-family:"Inter Tight",sans-serif;font-size:17px;letter-spacing:-.02em;color:#fff}
+@media (max-width:900px){.svc-head,.cap,.thesis{grid-template-columns:1fr;gap:26px}}
+
+/* visuals inside the moved blocks, adapted to the dark theme */
+.consol{width:100%;background:var(--panel);border:1px solid var(--line);border-radius:var(--r-md);padding:24px;
+  display:flex;flex-direction:column;gap:14px;justify-content:center}
+.consol-row{display:flex;align-items:center;gap:10px}
+.pill{background:var(--card);border:1px solid var(--line);border-radius:9px;font-size:12px;font-weight:600;
+  padding:7px 10px;color:var(--ink-2);white-space:nowrap}
+.consol-note{font-size:12.5px;color:var(--ink-3)}
+.fan{display:flex;align-items:center;gap:12px}
+.fan-col{display:flex;flex-direction:column;gap:6px}
+.arrow{color:var(--acc);flex:0 0 auto}
+.winner{background:#0B4BC7;color:#fff;border-radius:11px;padding:12px 14px;font-size:13px;font-weight:600;line-height:1.3;
+  background-image:linear-gradient(150deg,#0C63F5 0%,#0B4BC7 60%,#0D3082 100%)}
+.winner span{display:block;font-size:11.5px;font-weight:500;color:rgba(255,255,255,.9);margin-top:3px}
+.mkt-chips{display:flex;flex-wrap:wrap;gap:8px;align-self:center}
+.mkt-chips i{font-style:normal;background:var(--soft);border:1px solid #1E2E4F;color:var(--acc);
+  border-radius:999px;padding:8px 13px;font-size:13px}
+.flow{width:100%;background:var(--blue-deep);border-radius:var(--r-md);padding:24px;display:flex;
+  flex-direction:column;gap:10px;justify-content:center;
+  background-image:linear-gradient(140deg,#123F9E 0%,#0D3082 100%)}
+.flow-step{display:flex;align-items:center;gap:12px;color:#fff}
+.flow-step em{font-style:normal;width:26px;height:26px;border-radius:8px;background:rgba(255,255,255,.14);
+  display:grid;place-items:center;font-size:12px;font-weight:600;flex:0 0 auto;font-variant-numeric:tabular-nums}
+.flow-step b{font-family:"Inter Tight",sans-serif;font-size:16px;letter-spacing:-.02em;font-weight:600}
+.flow-step span{font-size:12.5px;color:rgba(255,255,255,.66);margin-left:auto;text-align:right}
+@media (max-width:900px){
+  .cap > div{min-width:0}
+  .fan,.consol-row{flex-wrap:wrap}
+  .pill{white-space:normal}
+  .flow-step{flex-wrap:wrap}
+  .flow-step span{margin-left:0;text-align:left;flex-basis:100%}
+  .svc-head{align-items:start;gap:22px}
+}
+
+/* ---------- what the function produces ---------- */
+.out{display:grid;grid-template-columns:1.05fr .95fr;gap:clamp(30px,4vw,52px);align-items:center}
+.out .btn{margin-top:26px}
+.docm{background:var(--card);border:1px solid var(--line);border-radius:var(--r-lg);padding:24px;
+  display:flex;flex-direction:column;gap:12px;box-shadow:0 24px 60px -30px rgba(0,0,0,.9)}
+.docm-top{display:flex;align-items:baseline;justify-content:space-between;gap:14px;
+  padding-bottom:14px;border-bottom:1px solid var(--line)}
+.docm-top b{font-family:"Inter Tight",sans-serif;font-size:15px;letter-spacing:-.02em}
+.docm-top span{font-size:10.5px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--t3i);background:var(--t3);border-radius:999px;padding:4px 9px}
+.docm-row{display:grid;grid-template-columns:26px 1fr;gap:12px;align-items:start}
+.docm-row em{font-style:normal;font-size:10.5px;font-weight:600;color:var(--acc);
+  font-variant-numeric:tabular-nums;padding-top:2px}
+.docm-row b{display:block;font-family:"Inter Tight",sans-serif;font-size:14px;letter-spacing:-.02em;margin-bottom:7px}
+.docm-row i{display:block;height:7px;border-radius:999px;background:linear-gradient(90deg,#20242E,#171B24);margin-bottom:5px}
+.docm-row i:nth-of-type(2){width:82%}
+.docm-row i:nth-of-type(3){width:58%}
+.docm-foot{font-size:12px;color:var(--ink-3);padding-top:12px;border-top:1px solid var(--line)}
+
+/* ---------- commitments ---------- */
+.commit{background:var(--card);border:1px solid var(--line);border-radius:var(--r-lg);
+  padding:clamp(30px,4vw,48px);background-image:radial-gradient(110% 130% at 0% 0%,#16203A 0%,#12151D 58%)}
+.commit h2{color:#fff;max-width:18ch}
+.commit .lede{margin-top:16px}
+.cgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:32px}
+.citem{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:var(--r-md);
+  padding:22px;display:flex;gap:14px;align-items:flex-start}
+.citem .tick{flex:0 0 auto;width:24px;height:24px;border-radius:999px;background:rgba(90,162,255,.16);
+  display:grid;place-items:center;margin-top:2px}
+.citem .tick::after{content:"";width:10px;height:6px;border-left:2px solid var(--acc);
+  border-bottom:2px solid var(--acc);transform:rotate(-45deg) translate(1px,-1px)}
+.citem b{display:block;font-family:"Inter Tight",sans-serif;font-size:15.5px;letter-spacing:-.02em;margin-bottom:6px}
+.citem p{font-size:13.5px;color:var(--ink-2);line-height:1.55}
+.csign{display:flex;align-items:center;gap:14px;margin-top:28px;padding-top:22px;
+  border-top:1px solid rgba(255,255,255,.12);font-size:13px;color:var(--ink-3)}
+.csign b{font-family:"Inter Tight",sans-serif;font-size:15px;letter-spacing:-.02em;color:var(--ink)}
+
+/* ---------- registration control ---------- */
+.reg{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:8px}
+.reg-step{background:var(--card);border:1px solid var(--line);border-radius:var(--r-md);padding:24px;position:relative}
+.reg-step em{font-style:normal;display:inline-block;font-size:10.5px;font-weight:700;letter-spacing:.07em;
+  text-transform:uppercase;color:var(--acc);background:var(--t1);border-radius:999px;padding:5px 11px;margin-bottom:14px}
+.reg-step b{display:block;font-family:"Inter Tight",sans-serif;font-size:19px;letter-spacing:-.025em;margin-bottom:8px}
+.reg-step p{font-size:13.5px;color:var(--ink-2);line-height:1.55}
+.reg-step.key{background:#0B4BC7;border-color:transparent;
+  background-image:linear-gradient(150deg,#0C63F5 0%,#0B4BC7 56%,#0D3082 100%)}
+.reg-step.key em{background:rgba(255,255,255,.18);color:#fff}
+.reg-step.key b{color:#fff}.reg-step.key p{color:rgba(255,255,255,.9)}
+.reg-note{background:var(--panel);border:1px solid var(--line);border-radius:var(--r-md);padding:22px 24px;
+  margin-top:14px;font-size:14.5px;color:var(--ink-2);line-height:1.6}
+.reg-note b{color:var(--ink)}
+@media (max-width:900px){.out,.cgrid,.reg{grid-template-columns:1fr;gap:22px}}
+</style>
+
+<nav class="nav">
+  <div class="nav-in">
+    <a class="brand" href="index.html">
+      <svg viewBox="0 0 837 346" aria-hidden="true"><path d="M171 0 L403 0 L613 210 L613 0 L837 0 L837 198 L689 346 L461 346 L295 179 L131 346 L0 346 L0 174 Z" fill="#0066FF"/></svg>
+      <b>Nazryx</b>
+    </a>
+    <div class="nav-links"><a href="index.html">Home</a></div>
+    <span class="aud">
+      <a class="on" href="partners.html">For distributors</a>
+      <a href="manufacturers.html">For manufacturers</a>
+    </span>
+    <a class="btn btn-blue" href="https://calendly.com/nazryx/meeting-with-omar" target="_blank" rel="noopener noreferrer">Have a quick chat</a>
+  </div>
+</nav>
+
+<main>
+
+<!-- HERO -->
+<div class="wrap hero">
+  <div class="hero-grid">
+    <div>
+      <div class="eyebrow">For distributors</div>
+      <h1>We don't sell you data. We <span class="blue">run the function.</span></h1>
+      <p class="lede">Market intelligence, manufacturer discovery, registration tracking and pricing &mdash; operated by our team, on your catalogue, every week. Not a dashboard you have to learn. A function you stop having to staff.</p>
+      <div class="hero-cta">
+        <a class="btn btn-blue" href="https://calendly.com/nazryx/meeting-with-omar" target="_blank" rel="noopener noreferrer">Have a quick chat</a>
+        <a class="btn btn-ghost" href="partners.html#what">See what we run</a>
+      </div>
+    </div>
+    <div class="intake">
+      <div class="intake-top">
+        <div class="intake-chip">
+          <svg viewBox="0 0 837 346" aria-hidden="true"><path d="M171 0 L403 0 L613 210 L613 0 L837 0 L837 198 L689 346 L461 346 L295 179 L131 346 L0 346 L0 174 Z" fill="#fff"/></svg>
+        </div>
+        <div class="r"><b>Limited intake</b><span>A few partners at a time</span></div>
+      </div>
+      <div class="intake-rows">
+        <div><span>Built around</span><b>One catalogue</b></div>
+        <div><span>Onboarding</span><b>About a week</b></div>
+        <div><span>You provide</span><b>One point of contact</b></div>
+        <div><span>Markets</span><b>All you operate in</b></div>
+        <div><span>Reporting</span><b>Weekly, plus a live portal</b></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- STATS -->
+<div class="wrap stats">
+  <div class="stat s1"><b>500+</b><span>Sources compiled into the sourcing model</span></div>
+  <div class="stat s2"><b>120+</b><span>Direct manufacturer and supplier relationships</span></div>
+  <div class="stat s3"><b>60+</b><span>Therapeutic classes covered</span></div>
+  <div class="stat s4"><b>7</b><span>Markets across Africa and Asia</span></div>
+</div>
+
+<!-- PROBLEM -->
+<section class="wrap">
+  <div class="head2">
+    <div>
+      <div class="eyebrow">Why companies come to us</div>
+      <h2>Most sourcing decisions are made on last year's information.</h2>
+    </div>
+    <p class="lede">None of these are failures of effort. They are what happens when the work of gathering, checking and connecting information has no owner &mdash; so it gets done in the gaps between everything else, by people whose actual job is selling.</p>
+  </div>
+  <div class="probs">
+    <div class="prob">
+      <i>Time</i>
+      <b>Every supplier approach is evaluated from scratch</b>
+      <p>Dozens of inbound offers a month, each needing dossier review, pricing checks and back-and-forth. Most go nowhere, and nothing learned is kept for the next one.</p>
+    </div>
+    <div class="prob">
+      <i>Margin</i>
+      <b>Underperforming products get dropped, not diagnosed</b>
+      <p>A line stops moving and comes off the list. Whether the cause was pricing, competition, registration timing or promotion is rarely established, so the same mistake repeats in the next category.</p>
+    </div>
+    <div class="prob">
+      <i>Cash</i>
+      <b>Stock decisions run ahead of demand evidence</b>
+      <p>Overstock ties up working capital; stockouts hand the shelf to a competitor. Both are forecasting problems, and forecasting is a data problem before it is a judgement one.</p>
+    </div>
+    <div class="prob">
+      <i>Risk</i>
+      <b>Registration timelines are discovered, not planned</b>
+      <p>A product is chosen, then the regulatory pathway is investigated. When that order is reversed, whole categories open up that looked closed &mdash; and dead ends get spotted before money moves.</p>
+    </div>
+  </div>
+</section>
+
+<!-- WHAT WE RUN -->
+<section id="what" class="wrap" style="padding-top:0">
+  <div class="head2">
+    <div>
+      <div class="eyebrow">What we run</div>
+      <h2>Eight functions, operated continuously.</h2>
+    </div>
+    <p class="lede">Each of these exists inside most pharmaceutical companies already, done partially, by someone with another job. We take them over as a set &mdash; because they only compound when they share the same underlying data.</p>
+  </div>
+
+  <div class="feats">
+
+    <article class="feat">
+      <div class="feat-n">01</div>
+      <h3>Market and demand intelligence</h3>
+      <p>Demand patterns, competitive positioning and regulatory trends studied per molecule, per market &mdash; so a product enters a country because the evidence supports it, not because it was available.</p>
+      <ul>
+        <li>Consumption and procurement patterns by geography</li>
+        <li>Competitive density and pricing depth per presentation</li>
+        <li>Tender and programme calendars worth timing against</li>
+      </ul>
+    </article>
+
+    <article class="feat">
+      <div class="feat-n">02</div>
+      <h3>Manufacturer discovery and vetting</h3>
+      <p>We search manufacturer portfolios across markets by molecule, dosage form, capability, certification and market presence &mdash; then assess who is actually credible before a name reaches you.</p>
+      <ul>
+        <li>Capability and certification checks against your requirement</li>
+        <li>Regulatory history and commercial suitability</li>
+        <li>Shortlists built to be small, not comprehensive</li>
+      </ul>
+    </article>
+
+    <article class="feat">
+      <div class="feat-n">03</div>
+      <h3>Portfolio consolidation</h3>
+      <p>Finding one manufacturer for one product is easy. Finding the one who can cover eight of your lines is the work &mdash; and it is where the savings actually sit.</p>
+      <ul>
+        <li>Overlap analysis across your full requirement</li>
+        <li>Fewer supplier relationships and quality audits</li>
+        <li>Consolidated shipments and simpler logistics</li>
+      </ul>
+    </article>
+
+    <article class="feat">
+      <div class="feat-n">04</div>
+      <h3>Registration and regulatory tracking</h3>
+      <p>Live registration counts per presentation, pathway assessment and realistic timelines &mdash; monitored, so a lapse in your own portfolio or an opening in someone else's is something you hear about rather than discover.</p>
+      <ul>
+        <li>Registration position by molecule and market</li>
+        <li>CTD dossier assessment</li>
+        <li>Alerts on lapses, new entrants and pathway changes</li>
+      </ul>
+    </article>
+
+    <article class="feat">
+      <div class="feat-n">05</div>
+      <h3>Pricing and RFQ workflow</h3>
+      <p>Once a shortlist is right, we run the quotation round. You receive a comparison, not a stack of unfiltered emails to work through.</p>
+      <ul>
+        <li>RFQs issued and chased on your behalf</li>
+        <li>Quotes normalised so they are actually comparable</li>
+        <li>Price, capability and regulatory position side by side</li>
+      </ul>
+    </article>
+
+    <article class="feat">
+      <div class="feat-n">06</div>
+      <h3>Buyer and distributor analytics</h3>
+      <p>Your existing customer base is usually the most underused asset in the business. We work it as data: what to offer whom, where promotion pays, and which accounts are quietly declining.</p>
+      <ul>
+        <li>Account-level demand and reorder patterns</li>
+        <li>Product-to-buyer matching across your catalogue</li>
+        <li>Early warning on accounts losing momentum</li>
+      </ul>
+    </article>
+
+    <article class="feat wide">
+      <div class="feat-n">07</div>
+      <h3>Your private portal</h3>
+      <p>Everything above lands in one place, built around your catalogue and shared across your team &mdash; so the analysis does not live in one person's inbox. It updates continuously and acts as a team-wide brain rather than a monthly report nobody opens.</p>
+      <div class="portal">
+        <ul>
+          <li>Your catalogue, supplier list and category targets loaded at onboarding</li>
+          <li>Opportunities, alerts and shortlists as they are found</li>
+          <li>Registration and competitive position per line</li>
+          <li>Access for your whole team, not a single licence</li>
+        </ul>
+        <div class="portal-ui" aria-label="Example of alerts in the partner portal">
+          <div class="pu-row"><em class="pu-new">Opening</em><b>Norepinephrine 1 mg/ml</b><span>No registration in market</span></div>
+          <div class="pu-row"><em class="pu-warn">Lapse</em><b>Your line &mdash; injectable</b><span>Registration expired</span></div>
+          <div class="pu-row"><em class="pu-info">Overlap</em><b>4 lines, one manufacturer</b><span>Consolidation available</span></div>
+          <div class="pu-row"><em class="pu-info">RFQ</em><b>6 quotes normalised</b><span>Comparison ready</span></div>
+        </div>
+      </div>
+    </article>
+
+    <article class="feat">
+      <div class="feat-n">08</div>
+      <h3>Quarterly growth reviews</h3>
+      <p>Every quarter we sit down with your team and go through what moved, what did not and why &mdash; then reset the targets. With our analysts, not a dashboard export.</p>
+      <ul>
+        <li>Category performance against the plan</li>
+        <li>What the data changed its mind about</li>
+        <li>Next quarter's priorities, agreed jointly</li>
+      </ul>
+    </article>
+
+    <article class="feat">
+      <div class="feat-n">&mdash;</div>
+      <h3>And the part that isn't a feature</h3>
+      <p>Someone who already knows your catalogue, on the other end of the phone. Most of what partners actually use us for starts with a question that would take their own team two days to answer.</p>
+    </article>
+
+  </div>
+</section>
+
+<!-- MOVED FROM HOME: the platform -->
+<section id="platform" class="wrap" style="padding-top:0">
+  <div class="svc-head">
+    <div>
+      <div class="eyebrow">The platform</div>
+      <h2>Pharmaceutical sourcing, simplified by data.</h2>
+    </div>
+    <p class="lede">Nazryx brings together manufacturer portfolios, market intelligence, regulatory information and pricing workflows to simplify the process of finding, comparing and working with pharmaceutical suppliers.</p>
+  </div>
+
+  <div class="caps">
+
+    <article class="cap">
+      <div>
+        <h3>Find the right manufacturers</h3>
+        <p>Search across vetted pharmaceutical manufacturers by molecule, dosage form, therapeutic category, manufacturing capability, certification and market presence.</p>
+        <p>Whether you need common generics, specialised molecules or an entire product portfolio, Nazryx helps identify manufacturers that actually fit your requirements.</p>
+      </div>
+      <div class="cap-visual">
+        <div class="dims">
+          <span class="dim">Molecule</span><span class="dim">Dosage form</span><span class="dim">Therapeutic category</span>
+          <span class="dim">Manufacturing capability</span><span class="dim">Certification</span><span class="dim">Market presence</span>
+          <span class="dim">Regulatory readiness</span><span class="dim">Portfolio overlap</span>
+        </div>
+      </div>
+    </article>
+
+    <article class="cap">
+      <div>
+        <h3>Consolidate fragmented supply chains</h3>
+        <p>Finding a manufacturer for one product is easy. Finding one manufacturer capable of supplying several products is much harder.</p>
+        <p>Nazryx analyses overlapping manufacturer portfolios to identify the smallest number of suppliers capable of covering your complete requirement &mdash; reducing unnecessary supplier relationships, simplifying quality management and consolidating shipments.</p>
+      </div>
+      <div class="cap-visual">
+        <div class="consol">
+          <div class="consol-note">5 products required. Hundreds of possible manufacturers.</div>
+          <div class="fan">
+            <div class="fan-col">
+              <span class="pill">Product A</span><span class="pill">Product B</span><span class="pill">Product C</span>
+              <span class="pill">Product D</span><span class="pill">Product E</span>
+            </div>
+            <svg class="arrow" width="34" height="16" viewBox="0 0 34 16" aria-hidden="true"><path d="M0 8h29M23 2l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+            <div class="winner">One manufacturer<span>Covers all 5 requirements</span></div>
+          </div>
+          <div class="consol-note">Fewer suppliers. Fewer shipments. One quality relationship.</div>
+        </div>
+      </div>
+    </article>
+
+    <article class="cap">
+      <div>
+        <h3>Compare existing suppliers against new options</h3>
+        <p>Nazryx isn't only for finding new suppliers. Companies can compare their existing supply base against alternative manufacturers and identify where there is room to improve.</p>
+        <p>Instead of adding suppliers unnecessarily, Nazryx helps determine whether a new manufacturer can replace or consolidate existing relationships.</p>
+      </div>
+      <div class="cap-visual">
+        <div class="dims">
+          <span class="dim">Product coverage</span><span class="dim">Pricing</span><span class="dim">Manufacturing capabilities</span>
+          <span class="dim">Regulatory readiness</span><span class="dim">Certifications</span><span class="dim">Geographic presence</span>
+          <span class="dim">Portfolio overlap</span><span class="dim">Supplier consolidation</span>
+        </div>
+      </div>
+    </article>
+
+    <article class="cap">
+      <div>
+        <h3>Source difficult and specialised products</h3>
+        <p>When a molecule is difficult to find, traditional sourcing means contacting manufacturers one at a time.</p>
+        <p>Nazryx searches manufacturer portfolios across markets to identify producers capable of manufacturing specialised molecules, uncommon formulations and difficult-to-source generics. Requirements can be searched individually or as complete portfolios.</p>
+      </div>
+      <div class="cap-visual">
+        <div class="consol">
+          <div class="consol-row"><span class="pill">Specialised molecules</span><span class="pill">Uncommon formulations</span></div>
+          <div class="consol-row"><span class="pill">Difficult-to-source generics</span><span class="pill">Full portfolios</span></div>
+          <div class="consol-note">Searched individually, or as one complete procurement list.</div>
+        </div>
+      </div>
+    </article>
+
+    <article class="cap">
+      <div>
+        <h3>Understand the market before entering it</h3>
+        <p>Sourcing decisions don't happen in isolation. Nazryx combines supplier discovery with pharmaceutical market intelligence so teams can evaluate not only who can manufacture a product, but where that product makes commercial sense.</p>
+        <p style="color:var(--ink-3);font-size:14px">Coverage depends on the market and the data available in it.</p>
+      </div>
+      <div class="cap-visual">
+        <div class="mkt-chips">
+          <i>Market competition</i><i>Existing registrations</i><i>Supplier presence</i><i>Pricing dynamics</i>
+          <i>Regulatory pathways</i><i>Portfolio gaps</i><i>Potential market opportunities</i>
+        </div>
+      </div>
+    </article>
+
+    <article class="cap">
+      <div>
+        <h3>Request pricing faster</h3>
+        <p>Once suitable manufacturers are identified, pricing requests can be initiated directly through Nazryx.</p>
+        <p>Instead of repeatedly identifying suppliers, finding contacts, explaining requirements and collecting quotations by hand, buyers shortlist manufacturers and initiate RFQs from a single workflow.</p>
+      </div>
+      <div class="cap-visual">
+        <div class="flow">
+          <div class="flow-step"><em>1</em><b>Search</b><span>By molecule or full list</span></div>
+          <div class="flow-step"><em>2</em><b>Compare</b><span>Capability, price, regulatory</span></div>
+          <div class="flow-step"><em>3</em><b>Consolidate</b><span>Fewest viable suppliers</span></div>
+          <div class="flow-step"><em>4</em><b>Request pricing</b><span>RFQs from one workflow</span></div>
+        </div>
+      </div>
+    </article>
+
+  </div>
+</section>
+<!-- MOVED FROM HOME: the objective -->
+<section class="wrap" style="padding-top:0">
+  <div class="thesis">
+    <div>
+      <div class="eyebrow" style="color:#BBD6FF">The difference</div>
+      <h2>The objective isn't the largest list of manufacturers. It's the smallest relevant one.</h2>
+      <div class="thesis-out">
+        <b>Fewer searches.</b>
+        <b>Fewer unnecessary suppliers.</b>
+        <b>Better sourcing decisions.</b>
+      </div>
+    </div>
+    <div class="ask">
+      <div>
+        <small>Traditional pharmaceutical sourcing asks</small>
+        <q>Who manufactures this product?</q>
+      </div>
+      <div class="now">
+        <small>Nazryx asks</small>
+        <q>Which manufacturer is the best fit for everything you need?</q>
+      </div>
+      <p style="font-size:14px;color:rgba(255,255,255,.86);line-height:1.6">Give us one molecule or an entire procurement list. Nazryx identifies suitable manufacturers, finds portfolio overlaps, compares alternatives, highlights market and regulatory considerations, and helps initiate pricing.</p>
+    </div>
+  </div>
+</section>
+<!-- PROOF -->
+<section class="wrap" style="padding-top:0">
+  <div class="proof">
+    <div class="eyebrow">What this looks like in practice</div>
+    <h2>Fifty-three registrations. Not one of them usable.</h2>
+    <div class="proof-body">
+      <div>
+        <p>Screening a market for a client, we checked a widely used antiparasitic against the national register. It came back with 53 active registrations &mdash; on paper, a saturated molecule nobody should enter.</p>
+        <p>Every single one was veterinary. There was no human-medicine registration in the country at all, against a substantial disease burden. What read as the most crowded line in the category was the most open position on the list.</p>
+        <p>That distinction is four minutes of work if you know to look for it, and invisible if you don't. It is the difference between a supplier list and an analysis &mdash; and it is the kind of thing we are looking for on your catalogue every week.</p>
+      </div>
+      <div class="proof-fig">
+        <div class="pf"><span>Registrations found</span><b>53</b></div>
+        <div class="pf"><span>Veterinary</span><b>53</b></div>
+        <div class="pf hi"><span>Human medicine</span><b>0</b></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- OUTPUT -->
+<section class="wrap" style="padding-top:0">
+  <div class="out">
+    <div>
+      <div class="eyebrow">The output</div>
+      <h2>A working document, not a newsletter.</h2>
+      <p class="lede" style="margin-top:16px">Everything we run produces one thing your team opens and acts on: where your categories stand, what moved in them, what is open, and what we would do about each. Nobody has to learn a dashboard or interpret a chart.</p>
+      <p class="lede" style="margin-top:16px">The section headings are below. What sits under them belongs to the company it was written for, so ask and we will walk you through a real one.</p>
+      <a class="btn btn-blue" href="https://calendly.com/nazryx/meeting-with-omar">Ask for a sample</a>
+    </div>
+    <div class="docm">
+      <div class="docm-top"><b>Your categories</b><span>Confidential</span></div>
+      <div class="docm-row"><em>01</em><div><b>Where you stand</b><i></i><i></i><i></i></div></div>
+      <div class="docm-row"><em>02</em><div><b>What moved, and who moved it</b><i></i><i></i><i></i></div></div>
+      <div class="docm-row"><em>03</em><div><b>Open positions in your categories</b><i></i><i></i><i></i></div></div>
+      <div class="docm-row"><em>04</em><div><b>Sourced, priced and ready to quote</b><i></i><i></i><i></i></div></div>
+      <div class="docm-row"><em>05</em><div><b>Regulatory position on each</b><i></i><i></i><i></i></div></div>
+      <div class="docm-row"><em>06</em><div><b>What we would do next</b><i></i><i></i><i></i></div></div>
+      <div class="docm-foot">Prepared for one company. Not circulated.</div>
+    </div>
+  </div>
+</section>
+
+<!-- COMMITMENTS -->
+<section class="wrap" style="padding-top:0">
+  <div class="commit">
+    <div class="eyebrow">The partnership</div>
+    <h2>What we are on the hook for.</h2>
+    <p class="lede">A partnership is only worth the things the other side will put in writing. These are ours.</p>
+    <div class="cgrid">
+      <div class="citem"><span class="tick"></span><div><b>Your data never leaves us</b><p>Catalogue, supplier list and pricing are not sold, not pooled with anyone else’s, and not shown to another company. They exist to make your answers better, nothing else.</p></div></div>
+      <div class="citem"><span class="tick"></span><div><b>Not two of you in the same category</b><p>We hold a small number of partnerships, and we will not run the same work for a direct competitor in the same city and category. The seat is genuinely exclusive.</p></div></div>
+      <div class="citem"><span class="tick"></span><div><b>We tell you when to walk away</b><p>If a line is not worth chasing you hear it from us before you spend on it, not after. Saying no early costs us less than a year of effort that goes nowhere.</p></div></div>
+      <div class="citem"><span class="tick"></span><div><b>What we build stays yours</b><p>If we ever part ways, the catalogue work, supplier mapping and category analysis built around your business goes with you.</p></div></div>
+    </div>
+    <div class="csign"><b>Omar Nazir</b><span>Principal Director, Nazryx &mdash; these are commitments, not preferences.</span></div>
+  </div>
+</section>
+
+<!-- ONBOARDING -->
+<section id="onboarding" class="wrap" style="padding-top:0">
+  <div class="head2">
+    <div>
+      <div class="eyebrow">Onboarding</div>
+      <h2>About a week, and one person from your side.</h2>
+    </div>
+    <p class="lede">The model is only as good as what it knows about you, so the first week is spent loading your business into it properly. After that the work runs without pulling on your team.</p>
+  </div>
+  <div class="tl">
+    <div class="tl-item">
+      <div class="tl-when">Before we start</div>
+      <div>
+        <b>A scoping call</b>
+        <p>Twenty minutes on your categories, your markets and where the friction actually is. If we are not the right fit we will say so on that call rather than after an invoice.</p>
+      </div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-when">Days 1&ndash;3</div>
+      <div>
+        <b>We load your business</b>
+        <p>Existing catalogue, supplier and buyer lists, category preferences, target markets and current goals. This is the part that needs your point of contact; most of it is exports you already have.</p>
+      </div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-when">Days 4&ndash;7</div>
+      <div>
+        <b>We tune the model and build your portal</b>
+        <p>Scoring weighted to your economics, not a generic template. A distributor optimising cash flow and a manufacturer chasing registrations need different answers from the same data.</p>
+      </div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-when">Week 2 onward</div>
+      <div>
+        <b>The function runs</b>
+        <p>Weekly reporting, live portal, opportunities and alerts as they are found, RFQs on request. Quarterly reviews with our team to reset direction.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FIT -->
+<section class="wrap" style="padding-top:0">
+  <div class="head2">
+    <div>
+      <div class="eyebrow">Fit</div>
+      <h2>We would rather say no early.</h2>
+    </div>
+    <p class="lede">We hold a small number of partnerships because each one is built around a single catalogue. That only works if the fit is real, so it is worth being direct about where it is and is not.</p>
+  </div>
+  <div class="fit">
+    <div class="fit-card fit-yes">
+      <h3>This works well if you</h3>
+      <ul>
+        <li>Distribute, manufacture or source pharmaceuticals in Africa, Asia or the Middle East</li>
+        <li>Carry a real catalogue &mdash; enough lines that portfolio decisions actually matter</li>
+        <li>Have a sales team whose time is going into research rather than selling</li>
+        <li>Are entering a new market, or expanding within one you already know</li>
+        <li>Can put one person on onboarding for a week</li>
+      </ul>
+    </div>
+    <div class="fit-card fit-no">
+      <h3>This is the wrong fit if you</h3>
+      <ul>
+        <li>Want a database subscription you log into yourself &mdash; we run the work, we do not sell access</li>
+        <li>Need a one-off report rather than an ongoing function</li>
+        <li>Handle a handful of products where a spreadsheet genuinely suffices</li>
+        <li>Cannot share catalogue and supplier data &mdash; without it the model is generic and worth little</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section id="faq" class="wrap" style="padding-top:0">
+  <div class="head2">
+    <div>
+      <div class="eyebrow">Questions</div>
+      <h2>The things people ask on the first call.</h2>
+    </div>
+  </div>
+  <div class="faq">
+    <details class="q">
+      <summary>Is this software, or people?<svg class="chev" viewBox="0 0 20 20" aria-hidden="true"><path d="M5 8l5 5 5-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
+      <div class="q-body">
+        <p>Both, and the order matters. We built the software because the analysis is not possible by hand at this scale. But you are not buying a login &mdash; our team operates it, and what reaches you is worked output rather than a screen you have to interpret.</p>
+        <p>The portal exists so your team can see and use that output. It is not the product.</p>
+      </div>
+    </details>
+    <details class="q">
+      <summary>What do you need from us, realistically?<svg class="chev" viewBox="0 0 20 20" aria-hidden="true"><path d="M5 8l5 5 5-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
+      <div class="q-body">
+        <p>One person, for about a week, at onboarding. Your product catalogue, supplier list, the markets you sell into and your category priorities. Most of it is exports you already have; none of it needs to be tidy first.</p>
+        <p>After onboarding, the demand on your side drops sharply &mdash; a weekly read and a call when something needs a decision.</p>
+      </div>
+    </details>
+    <details class="q">
+      <summary>How is this different from a market research report?<svg class="chev" viewBox="0 0 20 20" aria-hidden="true"><path d="M5 8l5 5 5-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
+      <div class="q-body">
+        <p>A report describes a market on the day it was written and then starts ageing. Registers change, suppliers exit, registrations lapse, tenders open.</p>
+        <p>We are not producing a document. We are watching a specific catalogue against live sources and telling you when something moves &mdash; and then doing the sourcing and quotation work that follows.</p>
+      </div>
+    </details>
+    <details class="q">
+      <summary>Do you replace our sales team?<svg class="chev" viewBox="0 0 20 20" aria-hidden="true"><path d="M5 8l5 5 5-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
+      <div class="q-body">
+        <p>No, and we would be suspicious of anyone claiming to. We take the research, qualification and comparison work off them so they spend their time in front of buyers instead of in spreadsheets.</p>
+      </div>
+    </details>
+    <details class="q">
+      <summary>What happens to our data?<svg class="chev" viewBox="0 0 20 20" aria-hidden="true"><path d="M5 8l5 5 5-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
+      <div class="q-body">
+        <p>Your catalogue, supplier lists and buyer data are used for your partnership and nothing else. They are not pooled, resold, or used to advise anyone else. Terms are written into the agreement rather than left to trust.</p>
+      </div>
+    </details>
+    <details class="q">
+      <summary>Which markets do you cover?<svg class="chev" viewBox="0 0 20 20" aria-hidden="true"><path d="M5 8l5 5 5-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
+      <div class="q-body">
+        <p>We work across seven distribution markets in Africa and Asia today, with partner offices in Lahore, London and Almaty. Sourcing runs through five manufacturing markets &mdash; Pakistan, Turkey, Egypt, Malaysia and Russia &mdash; with others on a need basis where a molecule or a certification calls for it.</p>
+        <p>If your market is not one we cover, we will tell you on the first call.</p>
+      </div>
+    </details>
+    <details class="q">
+      <summary>Why is intake limited?<svg class="chev" viewBox="0 0 20 20" aria-hidden="true"><path d="M5 8l5 5 5-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
+      <div class="q-body">
+        <p>Because the model is tuned per catalogue and the work is done by people. A partnership that is spread thin is not worth having on either side, so we hold a small number at a time and take on new ones when there is genuine capacity.</p>
+      </div>
+    </details>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="wrap" style="padding-top:0">
+  <div class="cta">
+    <div>
+      <h2>Start with twenty minutes.</h2>
+      <p>Tell us what you carry and where you sell it. We will tell you what we would look at first, and whether there is enough there to be worth either of our time. No preparation needed on your side.</p>
+    </div>
+    <div class="cta-side">
+      <a class="btn btn-white" href="https://calendly.com/nazryx/meeting-with-omar" target="_blank" rel="noopener noreferrer">Book a call with us</a>
+      <a class="btn btn-white" style="background:rgba(255,255,255,.14);color:#fff" href="https://nazryx.com/cdn-cgi/l/email-protection#a3cccec2d1e3cdc2d9d1dadb8dc0ccce9cd0d6c1c9c6c0d79eedc2d9d1dadb869193d3c2d1d7cdc6d1d0cbcad38691938e869193cacdcad7cac2cf869193c0cccdd5c6d1d0c2d7cacccd">Email instead</a>
+      <span class="cta-note">Nazryx &mdash; a company of Nazir &amp; Company International (PVT) Limited</span>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<div class="wrap">
+  <div class="foot">
+    <span>&copy; <span id="yr">2026</span> Nazryx &mdash; a company of Nazir &amp; Company.</span>
+    <div class="foot-links">
+      <a href="index.html">Home</a>
+      <a href="manufacturers.html">For manufacturers</a>
+      <a href="tel:+923390555568">0339-0555568</a>
+      <a href="https://nazryx.com/cdn-cgi/l/email-protection#1e71737f6c5e707f646c6766307d7173"><span class="__cf_email__" data-cfemail="07686a66754769667d757e7f2964686a">[email&#160;protected]</span></a>
+    </div>
+  </div>
+</div>
+
+<script data-cfasync="false" src="cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+document.getElementById('yr').textContent = new Date().getFullYear();
+</script>
+
+<script src="assets/nzx-track.js" defer></script>

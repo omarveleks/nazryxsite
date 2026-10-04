@@ -1,0 +1,828 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http%3A//www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%230066FF'/><g transform='translate(16,35.9) scale(0.08124)'><path d='M171 0 L403 0 L613 210 L613 0 L837 0 L837 198 L689 346 L461 346 L295 179 L131 346 L0 346 L0 174 Z' fill='%23fff'/></g></svg>">
+<link rel="icon" type="image/png" sizes="180x180" href="favicon.png">
+<link rel="apple-touch-icon" href="favicon.png">
+<title>For manufacturers &middot; Nazryx</title>
+<meta name="description" content="Nazryx places manufacturers into African and Asian markets: distribution partners found and vetted, portfolio built on register evidence, registration carried to approval, and the sales growth after it.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap">
+<style>
+:root{
+  --blue:#0066FF;
+  --acc:#5AA2FF;
+  --blue-deep:#0D3082; --blue-mid:#0F4AB6;
+  --ground:#0A0C11;
+  --card:#12151D;
+  --panel:#161A24;
+  --soft:#141E31;
+  --ink:#F2F1EC;
+  --ink-2:#A9A9A2;
+  --ink-3:#8A8A82;
+  --line:#20242E;
+  --t1:#0F1B33; --t1i:#5AA2FF;
+  --t2:#0D2018; --t2i:#48C97C;
+  --t3:#241708; --t3i:#FF9A3D;
+  --t4:#191233; --t4i:#9B8CFF;
+  --r-lg:26px; --r-md:18px; --maxw:1120px;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth;color-scheme:dark}
+body{margin:0;background:var(--ground);color:var(--ink);
+  font-family:"Inter","Helvetica Neue",Helvetica,Arial,sans-serif;
+  font-feature-settings:"ss01" 1,"cv11" 1;font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased}
+img{max-width:100%} a{color:inherit}
+h1,h2,h3,h4{font-family:"Inter Tight","Inter",Helvetica,Arial,sans-serif;font-feature-settings:"ss01" 1;
+  font-weight:700;letter-spacing:-.035em;line-height:1.03;text-wrap:balance;margin:0}
+p{margin:0}
+.blue{color:var(--acc)}
+.wrap{max-width:var(--maxw);margin:0 auto;padding-inline:20px}
+:focus-visible{outline:3px solid var(--acc);outline-offset:3px;border-radius:6px}
+section{padding-block:72px}
+.eyebrow{font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--acc);margin-bottom:14px}
+h2{font-size:clamp(29px,3.9vw,44px)}
+.lede{font-size:17px;color:var(--ink-2);max-width:62ch;line-height:1.62}
+
+/* nav */
+.nav{position:sticky;top:0;z-index:50;background:rgba(10,12,17,.82);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+.nav-in{max-width:var(--maxw);margin:0 auto;padding:14px 20px;display:flex;align-items:center;gap:18px}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;flex:0 0 auto}
+.brand svg{width:29px;height:auto;display:block}
+.brand b{font-family:"Inter Tight",sans-serif;font-size:19px;letter-spacing:-.04em}
+.nav-links{display:flex;gap:24px;margin-left:auto;font-size:14.5px;color:var(--ink-2)}
+.nav-links a{text-decoration:none}
+.nav-links a:hover{color:var(--acc)}
+.aud{display:inline-flex;background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:3px;gap:2px;flex:0 0 auto}
+.aud a{text-decoration:none;font-size:13px;font-weight:600;padding:7px 13px;border-radius:999px;color:var(--ink-2);white-space:nowrap}
+.aud a.on{background:var(--blue);color:#fff}
+.aud a:hover:not(.on){color:var(--ink)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:11px 20px;border-radius:999px;
+  font-size:14.5px;font-weight:600;text-decoration:none;border:1px solid transparent;
+  transition:background .15s ease,color .15s ease,border-color .15s ease;white-space:nowrap}
+.btn-blue{background:var(--blue);color:#fff} .btn-blue:hover{background:#0052D6}
+.btn-ghost{background:transparent;color:var(--ink);border-color:#333846} .btn-ghost:hover{border-color:var(--ink)}
+.btn-white{background:#fff;color:var(--blue)} .btn-white:hover{background:#EAF1FF}
+
+/* hero */
+.hero{padding-block:64px 52px}
+.hero-grid{display:grid;grid-template-columns:1.2fr .8fr;gap:48px;align-items:start}
+h1{font-size:clamp(40px,5.8vw,68px)}
+.hero .lede{margin-top:24px;font-size:18px;max-width:48ch}
+.hero-cta{display:flex;flex-wrap:wrap;gap:12px;margin-top:30px}
+.intake{background:#0B4BC7;color:#fff;border-radius:var(--r-lg);padding:26px;display:flex;flex-direction:column;gap:18px;
+  background-image:linear-gradient(150deg,#0C63F5 0%,#0B4BC7 52%,#0D3082 100%)}
+.intake-top{display:flex;align-items:flex-start;justify-content:space-between;gap:16px}
+.intake-chip{width:40px;height:40px;border-radius:12px;background:rgba(255,255,255,.16);display:grid;place-items:center}
+.intake-chip svg{width:20px;height:auto}
+.intake-top .r{text-align:right;font-size:12.5px;color:rgba(255,255,255,.88);line-height:1.4}
+.intake-top .r b{display:block;font-family:"Inter Tight",sans-serif;font-size:16px;letter-spacing:-.02em;color:#fff}
+.intake-rows{display:flex;flex-direction:column;border-top:1px solid rgba(255,255,255,.22)}
+.intake-rows div{display:flex;justify-content:space-between;gap:14px;padding:11px 0;
+  border-bottom:1px solid rgba(255,255,255,.15);font-size:13px}
+.intake-rows span{color:rgba(255,255,255,.88)}
+.intake-rows b{font-weight:600;text-align:right}
+
+/* stats */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.stat{border-radius:var(--r-md);padding:22px 20px;display:flex;flex-direction:column;gap:10px;min-height:132px}
+.stat b{font-family:"Inter Tight",sans-serif;font-size:33px;letter-spacing:-.04em;line-height:1;font-variant-numeric:tabular-nums}
+.stat span{font-size:13px;line-height:1.42;color:var(--ink-2);margin-top:auto}
+.s1{background:var(--t1)} .s1 b{color:var(--t1i)}
+.s2{background:var(--t2)} .s2 b{color:var(--t2i)}
+.s3{background:var(--t3)} .s3 b{color:var(--t3i)}
+.s4{background:var(--t4)} .s4 b{color:var(--t4i)}
+
+.head2{display:grid;grid-template-columns:1fr 1fr;gap:44px;align-items:end;margin-bottom:38px}
+
+/* problems */
+.probs{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+.prob{background:var(--card);border:1px solid var(--line);border-radius:var(--r-md);padding:24px}
+.prob b{display:block;font-family:"Inter Tight",sans-serif;font-size:17px;letter-spacing:-.02em;margin-bottom:8px}
+.prob p{font-size:14px;color:var(--ink-2);line-height:1.55}
+.prob i{font-style:normal;display:inline-block;font-size:11px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;
+  color:var(--t3i);background:var(--t3);border-radius:999px;padding:4px 10px;margin-bottom:12px}
+
+/* features */
+.feats{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+.feat{background:var(--card);border:1px solid var(--line);border-radius:var(--r-lg);padding:28px;display:flex;flex-direction:column;gap:12px}
+.feat-n{font-size:11px;font-weight:600;color:var(--acc);letter-spacing:.06em;font-variant-numeric:tabular-nums}
+.feat h3{font-size:21px}
+.feat p{font-size:14.5px;color:var(--ink-2);line-height:1.58}
+.feat ul{list-style:none;margin:4px 0 0;padding:0;display:flex;flex-direction:column;gap:7px}
+.feat li{position:relative;padding-left:22px;font-size:13.5px;color:var(--ink-2);line-height:1.5}
+.feat li::before{content:"";position:absolute;left:0;top:6px;width:10px;height:6px;
+  border-left:2px solid var(--acc);border-bottom:2px solid var(--acc);transform:rotate(-45deg)}
+.feat.wide{grid-column:1 / -1;background:var(--panel);border-color:transparent}
+
+/* timeline */
+.tl{display:flex;flex-direction:column;gap:12px}
+.tl-item{background:var(--card);border:1px solid var(--line);border-radius:var(--r-md);padding:22px 24px;
+  display:grid;grid-template-columns:132px 1fr;gap:22px;align-items:start}
+.tl-when{font-family:"Inter Tight",sans-serif;font-weight:700;letter-spacing:-.02em;font-size:15px;color:var(--acc)}
+.tl-item b{display:block;font-family:"Inter Tight",sans-serif;font-size:17px;letter-spacing:-.02em;margin-bottom:6px}
+.tl-item p{font-size:14px;color:var(--ink-2);line-height:1.55}
+
+/* origin band */
+.origin{background:#0B4BC7;color:#fff;border-radius:var(--r-lg);padding:clamp(30px,4.4vw,52px);
+  background-image:linear-gradient(145deg,#0C63F5 0%,#0B4BC7 54%,#0D3082 100%);
+  display:grid;grid-template-columns:1.25fr .75fr;gap:clamp(28px,4vw,48px);align-items:center}
+.origin .eyebrow{color:rgba(255,255,255,.76)}
+.origin h2{color:#fff;font-size:clamp(28px,3.5vw,42px);max-width:19ch}
+.origin p{color:rgba(255,255,255,.9);font-size:15.5px;line-height:1.62;margin-top:16px;max-width:52ch}
+.flags{display:flex;flex-wrap:wrap;gap:8px;margin-top:24px}
+.flags i{font-style:normal;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.24);
+  border-radius:999px;padding:8px 14px;font-size:13.5px;font-weight:600}
+.origin-side{display:flex;flex-direction:column;gap:10px}
+.origin-side .btn{width:100%}
+.origin-note{font-size:12.5px;color:rgba(255,255,255,.72);line-height:1.5;margin-top:4px}
+
+/* proof */
+.proof{background:#0E1526;border:1px solid #23304B;color:var(--ink);border-radius:var(--r-lg);padding:clamp(30px,4vw,48px);
+  background-image:radial-gradient(120% 140% at 0% 0%, #1B2C52 0%, #0E1526 62%)}
+.proof .eyebrow{color:#4D9BFF}
+.proof h2{color:#fff;max-width:20ch}
+.proof-body{display:grid;grid-template-columns:1.1fr .9fr;gap:40px;align-items:center;margin-top:26px}
+.proof p{color:var(--ink-2);font-size:15px;line-height:1.62}
+.proof p + p{margin-top:12px}
+.proof-fig{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.12);border-radius:var(--r-md);padding:24px;
+  display:flex;flex-direction:column;gap:16px}
+.pf{display:flex;justify-content:space-between;align-items:baseline;gap:14px;
+  padding-bottom:13px;border-bottom:1px solid rgba(255,255,255,.1)}
+.pf:last-child{border-bottom:0;padding-bottom:0}
+.pf span{font-size:12.5px;color:var(--ink-3)}
+.pf b{font-family:"Inter Tight",sans-serif;font-size:26px;letter-spacing:-.04em;color:#fff;font-variant-numeric:tabular-nums}
+.pf.hi b{color:var(--acc)}
+
+/* market band */
+.mkts{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:30px}
+.mkt{background:var(--card);border:1px solid var(--line);border-radius:var(--r-md);padding:20px}
+.mkt b{display:block;font-family:"Inter Tight",sans-serif;font-size:17px;letter-spacing:-.02em;margin-bottom:6px}
+.mkt p{font-size:13.5px;color:var(--ink-2);line-height:1.5}
+
+/* fit */
+.fit{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.fit-card{border-radius:var(--r-lg);padding:28px}
+.fit-yes{background:var(--t1);border:1px solid #1E2E4F}
+.fit-no{background:var(--card);border:1px solid var(--line)}
+.fit-card h3{font-size:19px;margin-bottom:16px}
+.fit-card ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:11px}
+.fit-card li{position:relative;padding-left:26px;font-size:14px;line-height:1.5;color:var(--ink-2)}
+.fit-yes li::before{content:"";position:absolute;left:0;top:6px;width:11px;height:7px;
+  border-left:2px solid var(--acc);border-bottom:2px solid var(--acc);transform:rotate(-45deg)}
+.fit-no li::before{content:"";position:absolute;left:1px;top:9px;width:11px;height:2px;background:var(--ink-3)}
+
+/* faq */
+.faq{display:flex;flex-direction:column;gap:10px}
+.q{border:1px solid var(--line);border-radius:var(--r-md);background:var(--card);overflow:hidden}
+.q > summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:14px;padding:20px 22px;
+  font-family:"Inter Tight",sans-serif;font-weight:600;letter-spacing:-.02em;font-size:16.5px;transition:background .15s ease}
+.q > summary::-webkit-details-marker{display:none}
+.q > summary:hover{background:var(--soft)}
+.q .chev{width:18px;height:18px;margin-left:auto;flex:0 0 auto;color:var(--ink-3);transition:transform .2s ease}
+.q[open] .chev{transform:rotate(180deg)}
+.q[open] > summary{border-bottom:1px solid var(--line)}
+.q-body{padding:18px 22px 22px;font-size:14.5px;color:var(--ink-2);line-height:1.62}
+.q-body p + p{margin-top:10px}
+
+/* cta */
+.cta{background:#0B0E15;color:#fff;border:1px solid #26324A;border-radius:var(--r-lg);padding:clamp(32px,4.5vw,52px);
+  background-image:radial-gradient(115% 135% at 100% 0%, #1A3364 0%, #0B0E15 62%);
+  display:grid;grid-template-columns:1.2fr .8fr;gap:40px;align-items:center}
+.cta h2{color:#fff;max-width:16ch}
+.cta p{color:#B9B9B2;font-size:15.5px;line-height:1.6;margin-top:16px;max-width:46ch}
+.cta-side{display:flex;flex-direction:column;gap:10px}
+.cta-side .btn{width:100%}
+.cta-note{font-size:12.5px;color:var(--ink-3);line-height:1.5;margin-top:4px}
+
+/* footer */
+.foot{border-top:1px solid var(--line);padding-block:36px;display:flex;justify-content:space-between;
+  gap:20px;flex-wrap:wrap;font-size:13px;color:var(--ink-3)}
+.foot a{text-decoration:none} .foot a:hover{color:var(--acc)}
+.foot-links{display:flex;gap:20px;flex-wrap:wrap}
+
+@media (max-width:900px){
+  .hero-grid,.head2,.proof-body,.cta,.origin{grid-template-columns:1fr;gap:26px}
+  .head2{align-items:start}
+  .probs,.feats,.fit{grid-template-columns:1fr}
+  .stats,.mkts{grid-template-columns:1fr 1fr}
+  section{padding-block:52px}
+  .tl-item{grid-template-columns:1fr;gap:8px}
+}
+@media (max-width:760px){
+  .nav-links{display:none}
+  .aud{margin-left:auto}
+  .aud a{padding:6px 11px;font-size:12.5px}
+}
+@media (max-width:520px){
+  h1{font-size:38px}
+  .stat{min-height:0;padding:16px}
+  .stat b{font-size:27px}
+  .mkts{grid-template-columns:1fr}
+  .nav-in{gap:10px}
+  .nav-in .btn{display:none}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* ---------- what the function produces ---------- */
+.out{display:grid;grid-template-columns:1.05fr .95fr;gap:clamp(30px,4vw,52px);align-items:center}
+.out .btn{margin-top:26px}
+.docm{background:var(--card);border:1px solid var(--line);border-radius:var(--r-lg);padding:24px;
+  display:flex;flex-direction:column;gap:12px;box-shadow:0 24px 60px -30px rgba(0,0,0,.9)}
+.docm-top{display:flex;align-items:baseline;justify-content:space-between;gap:14px;
+  padding-bottom:14px;border-bottom:1px solid var(--line)}
+.docm-top b{font-family:"Inter Tight",sans-serif;font-size:15px;letter-spacing:-.02em}
+.docm-top span{font-size:10.5px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--t3i);background:var(--t3);border-radius:999px;padding:4px 9px}
+.docm-row{display:grid;grid-template-columns:26px 1fr;gap:12px;align-items:start}
+.docm-row em{font-style:normal;font-size:10.5px;font-weight:600;color:var(--acc);
+  font-variant-numeric:tabular-nums;padding-top:2px}
+.docm-row b{display:block;font-family:"Inter Tight",sans-serif;font-size:14px;letter-spacing:-.02em;margin-bottom:7px}
+.docm-row i{display:block;height:7px;border-radius:999px;background:linear-gradient(90deg,#20242E,#171B24);margin-bottom:5px}
+.docm-row i:nth-of-type(2){width:82%}
+.docm-row i:nth-of-type(3){width:58%}
+.docm-foot{font-size:12px;color:var(--ink-3);padding-top:12px;border-top:1px solid var(--line)}
+
+/* ---------- commitments ---------- */
+.commit{background:var(--card);border:1px solid var(--line);border-radius:var(--r-lg);
+  padding:clamp(30px,4vw,48px);background-image:radial-gradient(110% 130% at 0% 0%,#16203A 0%,#12151D 58%)}
+.commit h2{color:#fff;max-width:18ch}
+.commit .lede{margin-top:16px}
+.cgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:32px}
+.citem{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:var(--r-md);
+  padding:22px;display:flex;gap:14px;align-items:flex-start}
+.citem .tick{flex:0 0 auto;width:24px;height:24px;border-radius:999px;background:rgba(90,162,255,.16);
+  display:grid;place-items:center;margin-top:2px}
+.citem .tick::after{content:"";width:10px;height:6px;border-left:2px solid var(--acc);
+  border-bottom:2px solid var(--acc);transform:rotate(-45deg) translate(1px,-1px)}
+.citem b{display:block;font-family:"Inter Tight",sans-serif;font-size:15.5px;letter-spacing:-.02em;margin-bottom:6px}
+.citem p{font-size:13.5px;color:var(--ink-2);line-height:1.55}
+.csign{display:flex;align-items:center;gap:14px;margin-top:28px;padding-top:22px;
+  border-top:1px solid rgba(255,255,255,.12);font-size:13px;color:var(--ink-3)}
+.csign b{font-family:"Inter Tight",sans-serif;font-size:15px;letter-spacing:-.02em;color:var(--ink)}
+
+/* ---------- registration control ---------- */
+.reg{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:8px}
+.reg-step{background:var(--card);border:1px solid var(--line);border-radius:var(--r-md);padding:24px;position:relative}
+.reg-step em{font-style:normal;display:inline-block;font-size:10.5px;font-weight:700;letter-spacing:.07em;
+  text-transform:uppercase;color:var(--acc);background:var(--t1);border-radius:999px;padding:5px 11px;margin-bottom:14px}
+.reg-step b{display:block;font-family:"Inter Tight",sans-serif;font-size:19px;letter-spacing:-.025em;margin-bottom:8px}
+.reg-step p{font-size:13.5px;color:var(--ink-2);line-height:1.55}
+.reg-step.key{background:#0B4BC7;border-color:transparent;
+  background-image:linear-gradient(150deg,#0C63F5 0%,#0B4BC7 56%,#0D3082 100%)}
+.reg-step.key em{background:rgba(255,255,255,.18);color:#fff}
+.reg-step.key b{color:#fff}.reg-step.key p{color:rgba(255,255,255,.9)}
+.reg-note{background:var(--panel);border:1px solid var(--line);border-radius:var(--r-md);padding:22px 24px;
+  margin-top:14px;font-size:14.5px;color:var(--ink-2);line-height:1.6}
+.reg-note b{color:var(--ink)}
+@media (max-width:900px){.out,.cgrid,.reg{grid-template-columns:1fr;gap:22px}}
+</style>
+<nav class="nav">
+  <div class="nav-in">
+    <a class="brand" href="index.html">
+      <svg viewBox="0 0 837 346" aria-hidden="true"><path d="M171 0 L403 0 L613 210 L613 0 L837 0 L837 198 L689 346 L461 346 L295 179 L131 346 L0 346 L0 174 Z" fill="#0066FF"/></svg>
+      <b>Nazryx</b>
+    </a>
+    <div class="nav-links"><a href="index.html">Home</a></div>
+    <span class="aud">
+      <a href="partners.html">For distributors</a>
+      <a class="on" href="manufacturers.html">For manufacturers</a>
+    </span>
+    <a class="btn btn-blue" href="https://calendly.com/nazryx/meeting-with-omar" target="_blank" rel="noopener noreferrer">Have a quick chat</a>
+  </div>
+</nav>
+<main>
+
+<!-- HERO -->
+<div class="wrap hero">
+  <div class="hero-grid">
+    <div>
+      <div class="eyebrow">For manufacturers</div>
+      <h1>Your products, in markets that <span class="blue">already need them.</span></h1>
+      <p class="lede">We find the distributors worth working with, prove the demand from the register before
+        you commit a dime, and carry the registration through to submission. Then we keep selling it with
+        them.</p>
+      <div class="hero-cta">
+        <a class="btn btn-blue" href="https://calendly.com/nazryx/meeting-with-omar" target="_blank" rel="noopener noreferrer">Have a quick chat</a>
+        <a class="btn btn-ghost" href="manufacturers.html#what">See what we run</a>
+      </div>
+    </div>
+    <div class="intake">
+      <div class="intake-top">
+        <div class="intake-chip">
+          <svg viewBox="0 0 837 346" aria-hidden="true"><path d="M171 0 L403 0 L613 210 L613 0 L837 0 L837 198 L689 346 L461 346 L295 179 L131 346 L0 346 L0 174 Z" fill="#fff"/></svg>
+        </div>
+        <div class="r"><b>Representation</b><span>Not an introduction service</span></div>
+      </div>
+      <div class="intake-rows">
+        <div><span>Built around</span><b>One portfolio</b></div>
+        <div><span>We find</span><b>Distributors, then prove them</b></div>
+        <div><span>Registration</span><b>Route, dossier, submission</b></div>
+        <div><span>Markets</span><b>Africa, Asia, the Middle East</b></div>
+        <div><span>After launch</span><b>We stay on the account</b></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- STATS -->
+<div class="wrap stats">
+  <div class="stat s1"><b>14,000+</b><span>Registration records read line by line across our markets</span></div>
+  <div class="stat s2"><b>300+</b><span>Distributors and agents profiled, with their real portfolios</span></div>
+  <div class="stat s3"><b>60+</b><span>Therapeutic classes covered</span></div>
+  <div class="stat s4"><b>7</b><span>Markets across Africa and Asia</span></div>
+</div>
+
+<!-- PROBLEM -->
+<section class="wrap">
+  <div class="head2">
+    <div>
+      <div class="eyebrow">Why manufacturers come to us</div>
+      <h2>Most export failures are decided before the first shipment.</h2>
+    </div>
+    <p class="lede">Not by the product, and rarely by the price. By choosing a market on a brochure, a partner
+      on whoever answered the email, and a registration pathway after the product was already picked.</p>
+  </div>
+  <div class="probs">
+    <div class="prob">
+      <i>Partner</i>
+      <b>The distributor was chosen because they replied</b>
+      <p>Responsiveness at the enquiry stage tells you nothing about whether a company sells your category,
+        calls on the right prescribers, or already carries three competing lines it would rather push.</p>
+    </div>
+    <div class="prob">
+      <i>Evidence</i>
+      <b>The market was assessed from a catalogue</b>
+      <p>Whether a molecule is crowded or wide open is a fact sitting in the national register. Entering
+        without reading it is how a company files into a category with forty suppliers and misses the one
+        next door with none.</p>
+    </div>
+    <div class="prob">
+      <i>Sequence</i>
+      <b>Registration is discovered, not planned</b>
+      <p>The product is chosen, then the pathway is investigated. Reversed, whole categories open up that
+        looked closed &mdash; and the dead ends are spotted before money moves.</p>
+    </div>
+    <div class="prob">
+      <i>Control</i>
+      <b>After the agency is signed, visibility stops</b>
+      <p>Orders arrive or they do not, and nobody can tell you why. Who registered against you, what the
+        shelf price became, whether the distributor is still pushing the line &mdash; all of it goes dark.</p>
+    </div>
+  </div>
+</section>
+
+<!-- WHAT WE RUN -->
+<section id="what" class="wrap" style="padding-top:0">
+  <div class="head2">
+    <div>
+      <div class="eyebrow">What we run</div>
+      <h2>Eight functions, from first market read to steady reorders.</h2>
+    </div>
+    <p class="lede">We are your commercial and regulatory arm in these markets, not a broker who makes an
+      introduction and disappears. Everything below is work our team carries out on your portfolio.</p>
+  </div>
+  <div class="feats">
+
+    <article class="feat">
+      <div class="feat-n">01</div>
+      <h3>Finding great distribution partners</h3>
+      <p>We do not send you a directory. Every distributor in our markets is profiled from the register
+        itself &mdash; what they actually hold, in which categories, from which manufacturers &mdash; so a
+        shortlist is built on evidence rather than on who has a website.</p>
+      <ul>
+        <li>Ranked by real portfolio overlap with your products</li>
+        <li>Category strength and national standing, not self-description</li>
+        <li>Who they already represent, and where you would conflict</li>
+        <li>Warm introduction and negotiation support through to agency</li>
+      </ul>
+    </article>
+
+    <article class="feat">
+      <div class="feat-n">02</div>
+      <h3>Building and analysing your portfolio</h3>
+      <p>Which of your existing products belong in which market, in what order, and what you should add.
+        We map your catalogue against each market's register and essential medicines list and rank it by
+        what is genuinely open.</p>
+      <ul>
+        <li>Your lines scored per market on supplier depth and demand</li>
+        <li>The thin positions where you would set price rather than match it</li>
+        <li>Gaps worth developing, with the volume signal behind each</li>
+        <li>Products to leave out, and the reason, in writing</li>
+      </ul>
+    </article>
+
+    <article class="feat">
+      <div class="feat-n">03</div>
+      <h3>Regulatory checking and registration</h3>
+      <p>Site registration, product dossier, pathway and timeline &mdash; established before you commit,
+        then carried through to submission. In several of our markets the plant must be approved before a
+        single product can be filed, and that order catches people out.</p>
+      <ul>
+        <li>Country-by-country route, requirement and realistic timeline</li>
+        <li>Dossier compiled, gaps in your existing pack identified early</li>
+        <li>Zone IVb stability and labelling requirements checked up front</li>
+        <li>Agency documentation, legalisation and filing handled locally</li>
+      </ul>
+    </article>
+
+    <article class="feat">
+      <div class="feat-n">04</div>
+      <h3>Quality and compliance</h3>
+      <p>Buyers in these markets are increasingly unwilling to take a GMP certificate on trust, and
+        regulators are tightening. We make sure what you present stands up before it is in front of either.</p>
+      <ul>
+        <li>GMP, CPP and certification pack reviewed against each market's rules</li>
+        <li>Animal-origin, halal and excipient declarations prepared where required</li>
+        <li>Batch documentation and CoA formats aligned to local expectations</li>
+        <li>Queries from the regulator handled rather than forwarded</li>
+      </ul>
+    </article>
+
+    <article class="feat">
+      <div class="feat-n">05</div>
+      <h3>Pricing and positioning</h3>
+      <p>What a line can actually be sold for, per market, per pack &mdash; taken from registered prices
+        and from what competing products are really quoting, not from a target margin worked backwards.</p>
+      <ul>
+        <li>Landed and shelf price benchmarks against real competitors</li>
+        <li>Where you hold leverage and where you would be undercut</li>
+        <li>Pack and presentation choices that change the price bracket</li>
+        <li>Tender and institutional pricing where the market is programme-led</li>
+      </ul>
+    </article>
+
+    <article class="feat">
+      <div class="feat-n">06</div>
+      <h3>Sales and marketing growth</h3>
+      <p>A registration is not a sale. We work with the distributor after launch on the things that decide
+        whether your line moves: who is detailing it, to whom, with what, and against what.</p>
+      <ul>
+        <li>Launch planning with the distributor's own sales team</li>
+        <li>Promotional material and product training prepared locally</li>
+        <li>Target prescriber and institution mapping by geography</li>
+        <li>Reorder tracking, with the diagnosis when a line slows</li>
+      </ul>
+    </article>
+
+    <article class="feat">
+      <div class="feat-n">07</div>
+      <h3>Market and demand intelligence</h3>
+      <p>The same engine we run for distributors, pointed at your side of the table. What is being granted,
+        to whom, in your categories &mdash; every week, per market.</p>
+      <ul>
+        <li>New registrations in your categories, and who took them</li>
+        <li>Competitors entering or lapsing out of a molecule</li>
+        <li>Essential medicines list changes and procurement signals</li>
+        <li>Renewal dates tracked ahead of the deadline, not after it</li>
+      </ul>
+    </article>
+
+    <article class="feat">
+      <div class="feat-n">08</div>
+      <h3>Account management and reporting</h3>
+      <p>One point of contact for every market, and a written view of what happened in each one. You should
+        not have to chase four distributors in three time zones to know how your export business is doing.</p>
+      <ul>
+        <li>Weekly written reporting per market</li>
+        <li>Order, stock and reorder visibility from the distributor side</li>
+        <li>Quarterly review of what to push, fix or drop</li>
+        <li>Escalation handled by us, in market, in person where needed</li>
+      </ul>
+    </article>
+
+    <article class="feat wide">
+      <div class="feat-n">And the part that is not a feature</div>
+      <h3>We are on the ground, and we are accountable for the outcome.</h3>
+      <p>A broker earns on the introduction and has no stake in what happens next. We earn when your product
+        actually sells, which means our interest and yours point the same way from the first call. If a line
+        is not going to work in a market, you will hear that from us early &mdash; it costs us less than
+        selling you a year of effort that goes nowhere.</p>
+    </article>
+  </div>
+</section>
+
+<!-- PROOF -->
+<section class="wrap" style="padding-top:0">
+  <div class="proof">
+    <div class="eyebrow">What this looks like in practice</div>
+    <h2>Twelve ophthalmic products. No supplier in the country.</h2>
+    <div class="proof-body">
+      <div>
+        <p>Reading one market's full register against its national essential medicines list, we found twelve
+          ophthalmic molecules with no human-medicine registration in the country at all &mdash; not a thin
+          market, an empty one. Glaucoma drops, diagnostic mydriatics, topical anaesthetics, an antifungal
+          for a condition that blinds people there every year.</p>
+        <p>Weeks earlier, one of the larger distributors in that market had asked us for one of those twelve
+          by name, unprompted. Demand on one side, nothing registered on the other, and no way for either
+          party to see the other without reading 9,000 certificates line by line.</p>
+        <p>For a manufacturer with a sterile ophthalmic line, that is not a lead. It is a category with no
+          incumbent to displace and a buyer already asking. That is the kind of position we are looking for
+          on your portfolio.</p>
+      </div>
+      <div class="proof-fig">
+        <div class="pf"><span>Essential medicines cross-referenced</span><b>664</b></div>
+        <div class="pf"><span>Ophthalmic molecules with no supplier</span><b>12</b></div>
+        <div class="pf hi"><span>Registered in the country</span><b>0</b></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MARKETS -->
+<section class="wrap" style="padding-top:0">
+  <div class="head2">
+    <div>
+      <div class="eyebrow">Where we place product</div>
+      <h2>Seven markets, read properly rather than listed.</h2>
+    </div>
+    <p class="lede">We work where we can actually do the regulatory and commercial work ourselves, with
+      partner offices in Lahore, London and Almaty. If your market is not one we cover, we will say so on
+      the first call rather than learn it with your money.</p>
+  </div>
+  <div class="mkts">
+    <div class="mkt"><b>East Africa</b><p>Tanzania, Kenya and neighbours. Register-led, tender-heavy, and
+      the market we know in the most depth.</p></div>
+    <div class="mkt"><b>Sudan and the Horn</b><p>Site registration before product registration, a large
+      import dependency, and an established South Asian supply route.</p></div>
+    <div class="mkt"><b>Central Asia</b><p>Reached through our Almaty office, with different documentation
+      norms and a very different competitive set.</p></div>
+    <div class="mkt"><b>Selected Asian and MENA markets</b><p>Taken on where a molecule, a certification or
+      an existing relationship makes the route real.</p></div>
+  </div>
+</section>
+
+<!-- ORIGIN -->
+<section class="wrap" style="padding-top:0">
+  <div class="origin">
+    <div>
+      <div class="eyebrow">Exporting from</div>
+      <h2>Want to export from Bangladesh, Turkey, Pakistan or Egypt?</h2>
+      <p>Those are the plants we work with every day, and we connect them to markets globally. We already
+        know which of your products will clear registration in which country, who will actually sell them
+        once they land, and what they can be sold for. One conversation is enough to find out whether your
+        portfolio has a route worth taking.</p>
+      <div class="flags">
+        <i>Bangladesh</i><i>Turkey</i><i>Pakistan</i><i>Egypt</i><i>Elsewhere &mdash; ask us</i>
+      </div>
+    </div>
+    <div class="origin-side">
+      <a class="btn btn-white" href="https://calendly.com/nazryx/meeting-with-omar" target="_blank" rel="noopener noreferrer">Book a call</a>
+      <a class="btn btn-white" style="background:rgba(255,255,255,.16);color:#fff" href="https://wa.me/923228447519" target="_blank" rel="noopener noreferrer">Message on WhatsApp</a>
+      <span class="origin-note">Twenty minutes, no preparation needed. Bring your product list.</span>
+    </div>
+  </div>
+</section>
+
+<!-- REGISTRATION CONTROL -->
+<section class="wrap" style="padding-top:0">
+  <div class="head2">
+    <div>
+      <div class="eyebrow">Control</div>
+      <h2>Who holds the registration?</h2>
+    </div>
+    <p class="lede">It is the question that decides everything else, and it is usually left until the
+      paperwork is already in front of you. Here is the plain version before you ask.</p>
+  </div>
+  <div class="reg">
+    <div class="reg-step">
+      <em>Stays yours</em>
+      <b>You</b>
+      <p>The product, the dossier, the plant and the brand are yours throughout. Nothing in how we work
+        changes that, in any market.</p>
+    </div>
+    <div class="reg-step key">
+      <em>The part that matters</em>
+      <b>The registration holder</b>
+      <p>In most of our markets the certificate names a local party, and whoever is named controls that
+        product on the ground. Who it should be differs by country &mdash; and it is decided before filing,
+        not after.</p>
+    </div>
+    <div class="reg-step">
+      <em>Replaceable</em>
+      <b>Your distributor</b>
+      <p>Stocks it, sells it, details it. If they stop performing they can be changed &mdash; provided the
+        step to their left was set up with that in mind.</p>
+    </div>
+  </div>
+  <div class="reg-note"><b>The registration never goes in Nazryx&rsquo;s name.</b> We are your agent, not a
+    party that holds your product hostage. Before anything is filed we tell you who should hold it in that
+    market, and exactly what changing partner would involve later.</div>
+</section>
+
+<!-- OUTPUT -->
+<section class="wrap" style="padding-top:0">
+  <div class="out">
+    <div>
+      <div class="eyebrow">The output</div>
+      <h2>What comes back, and how it reads.</h2>
+      <p class="lede" style="margin-top:16px">Everything we run produces one working document per market: what is open, who could sell it, what the registration route looks like and what it is worth. Written to be acted on, not filed.</p>
+      <p class="lede" style="margin-top:16px">The section headings are below. What sits under them belongs to the company it was written for, so ask and we will walk you through a real one.</p>
+      <a class="btn btn-blue" href="https://calendly.com/nazryx/meeting-with-omar">Ask for a sample</a>
+    </div>
+    <div class="docm">
+      <div class="docm-top"><b>Market read</b><span>Confidential</span></div>
+      <div class="docm-row"><em>01</em><div><b>The market, honestly assessed</b><i></i><i></i><i></i></div></div>
+      <div class="docm-row"><em>02</em><div><b>Your portfolio ranked against it</b><i></i><i></i><i></i></div></div>
+      <div class="docm-row"><em>03</em><div><b>Distributor shortlist, with why</b><i></i><i></i><i></i></div></div>
+      <div class="docm-row"><em>04</em><div><b>Registration route and timeline</b><i></i><i></i><i></i></div></div>
+      <div class="docm-row"><em>05</em><div><b>Pricing position per line</b><i></i><i></i><i></i></div></div>
+      <div class="docm-row"><em>06</em><div><b>What we would do next</b><i></i><i></i><i></i></div></div>
+      <div class="docm-foot">Prepared for one manufacturer. Not circulated.</div>
+    </div>
+  </div>
+</section>
+
+<!-- COMMITMENTS -->
+<section class="wrap" style="padding-top:0">
+  <div class="commit">
+    <div class="eyebrow">The partnership</div>
+    <h2>What we are on the hook for.</h2>
+    <p class="lede">Handing your products to an agent is an act of trust. These are the things we will put in writing before you do it.</p>
+    <div class="cgrid">
+      <div class="citem"><span class="tick"></span><div><b>No competing line in your category</b><p>We will not represent a directly competing product in the same category in the same market. You are not one of four names in a folder.</p></div></div>
+      <div class="citem"><span class="tick"></span><div><b>The registration never goes in our name</b><p>We are your agent, not a party holding your product. Who should hold the certificate in each market is settled with you before anything is filed.</p></div></div>
+      <div class="citem"><span class="tick"></span><div><b>We tell you when not to enter</b><p>If a market is crowded or the economics do not work, you hear that before you pay for a dossier. It costs us less to say so than to run a filing that leads nowhere.</p></div></div>
+      <div class="citem"><span class="tick"></span><div><b>Your documentation stays yours</b><p>Portfolio, pricing and certification pack stay confidential and stay in your control. If we part ways, nothing of yours stays behind with us.</p></div></div>
+    </div>
+    <div class="csign"><b>Omar Nazir</b><span>Principal Director, Nazryx &mdash; these are commitments, not preferences.</span></div>
+  </div>
+</section>
+
+<!-- HOW IT STARTS -->
+<section id="onboarding" class="wrap" style="padding-top:0">
+  <div class="head2">
+    <div>
+      <div class="eyebrow">How it starts</div>
+      <h2>You will see the market read before you commit to anything.</h2>
+    </div>
+    <p class="lede">The first piece of work is evidence, not a contract. If the register says your products
+      are walking into a crowded category, you should know that before you have paid for a dossier.</p>
+  </div>
+  <div class="tl">
+    <div class="tl-item">
+      <div class="tl-when">Before we start</div>
+      <div>
+        <b>A scoping call</b>
+        <p>Twenty minutes on your portfolio, your certifications and which markets you are curious about. If
+          we are not the right fit we will say so on the call rather than after an invoice.</p>
+      </div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-when">Week 1</div>
+      <div>
+        <b>We load your portfolio</b>
+        <p>Product list, dosage forms, certifications, existing export markets and any registrations you
+          already hold. Mostly exports you already have; none of it needs tidying first.</p>
+      </div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-when">Weeks 2&ndash;3</div>
+      <div>
+        <b>The market read</b>
+        <p>Your catalogue against the register and essential medicines list of each target market: what is
+          open, what is crowded, what the registration route and timeline looks like, and what it is worth.</p>
+      </div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-when">Weeks 3&ndash;5</div>
+      <div>
+        <b>The distributor shortlist</b>
+        <p>Named companies ranked on portfolio fit and category standing, with what they already carry and
+          where you would conflict. Introductions made and negotiations supported by us.</p>
+      </div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-when">From week 5</div>
+      <div>
+        <b>Registration and launch</b>
+        <p>Dossier compiled, filing run in market, and the launch worked with the distributor's sales team
+          once approval lands. Weekly reporting runs from here on.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FIT -->
+<section class="wrap" style="padding-top:0">
+  <div class="head2">
+    <div>
+      <div class="eyebrow">Fit</div>
+      <h2>We would rather say no early.</h2>
+    </div>
+    <p class="lede">We take on a small number of manufacturers because each one means real regulatory and
+      commercial work in market. It is worth being direct about where this fits and where it does not.</p>
+  </div>
+  <div class="fit">
+    <div class="fit-card fit-yes">
+      <h3>This works well if you</h3>
+      <ul>
+        <li>Manufacture finished pharmaceuticals to a recognised GMP standard</li>
+        <li>Want to enter or grow in African, Asian or Middle Eastern markets</li>
+        <li>Have a real portfolio &mdash; enough lines that which ones to push actually matters</li>
+        <li>Can support registration with a dossier and the documentation behind it</li>
+        <li>Would rather have one accountable partner than five distributors you cannot see</li>
+      </ul>
+    </div>
+    <div class="fit-card fit-no">
+      <h3>This is the wrong fit if you</h3>
+      <ul>
+        <li>Want a list of buyer contacts to email yourself &mdash; we represent, we do not sell leads</li>
+        <li>Need a single container moved once, with no interest in the market after it</li>
+        <li>Cannot share your product list and certifications &mdash; without them the read is generic</li>
+        <li>Are looking for someone to take your existing distributor relationship and simply re-paper it</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section id="faq" class="wrap" style="padding-top:0">
+  <div class="head2">
+    <div>
+      <div class="eyebrow">Questions</div>
+      <h2>The things manufacturers ask on the first call.</h2>
+    </div>
+  </div>
+  <div class="faq">
+    <details class="q">
+      <summary>Are you an agent, a consultant, or a distributor?<svg class="chev" viewBox="0 0 20 20" aria-hidden="true"><path d="M5 8l5 5 5-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
+      <div class="q-body">
+        <p>We act as your trade and regulatory arm in the markets we cover. We do not buy and resell your
+          product, and we do not take title to stock. We find and manage the distributor who does, and we run
+          the registration and market work around it.</p>
+        <p>In practice that means you get the control of a direct relationship with the distributor, and we
+          are the party accountable for the market working.</p>
+      </div>
+    </details>
+    <details class="q">
+      <summary>How are you paid?<svg class="chev" viewBox="0 0 20 20" aria-hidden="true"><path d="M5 8l5 5 5-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
+      <div class="q-body">
+        <p>Commission on business that actually moves, agreed per market before anything starts. Where a
+          registration programme requires sustained regulatory work ahead of any revenue, that is scoped and
+          agreed separately &mdash; we will not dress up a year of filing work as free.</p>
+        <p>What we will not do is charge for an introduction. If nothing sells, we have not earned.</p>
+      </div>
+    </details>
+    <details class="q">
+      <summary>We already have a distributor in that market.<svg class="chev" viewBox="0 0 20 20" aria-hidden="true"><path d="M5 8l5 5 5-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
+      <div class="q-body">
+        <p>Then the useful question is whether they are the right one, and that is answerable from the
+          register rather than from the relationship. We can show you where they actually rank in your
+          categories, what else they carry, and whether your line is a priority for them or a shelf filler.</p>
+        <p>Often the answer is that the distributor is fine and the problem is elsewhere &mdash; pricing,
+          registration timing, or nobody detailing the product. We would rather fix that than replace them.</p>
+      </div>
+    </details>
+    <details class="q">
+      <summary>How long does registration actually take?<svg class="chev" viewBox="0 0 20 20" aria-hidden="true"><path d="M5 8l5 5 5-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
+      <div class="q-body">
+        <p>It varies by market and we will give you a real number per country rather than an average. What is
+          consistent is the sequence: in several of our markets the manufacturing site has to be registered
+          before any product from it can be filed, so a plant that is not yet approved is the first thing to
+          fix, not the dossier.</p>
+        <p>We tell you the route and the timeline before you spend anything on it.</p>
+      </div>
+    </details>
+    <details class="q">
+      <summary>What do you need from us to start?<svg class="chev" viewBox="0 0 20 20" aria-hidden="true"><path d="M5 8l5 5 5-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
+      <div class="q-body">
+        <p>Your product list with dosage forms and strengths, your GMP and certification pack, the markets
+          you already export to, and one person we can ask questions of. That is enough for the market read.</p>
+        <p>Dossiers and legalised documents come later, and only for the products you decide to take forward.</p>
+      </div>
+    </details>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="wrap" style="padding-top:0">
+  <div class="cta">
+    <div>
+      <h2>Start with the market read.</h2>
+      <p>Send us your product list and tell us which market you are curious about. We will come back with
+        what is open, what is crowded, and which distributors would actually sell it &mdash; before either of
+        us talks about an agreement.</p>
+    </div>
+    <div class="cta-side">
+      <a class="btn btn-white" href="https://calendly.com/nazryx/meeting-with-omar" target="_blank" rel="noopener noreferrer">Book a call with us</a>
+      <a class="btn btn-white" style="background:rgba(255,255,255,.14);color:#fff" href="https://nazryx.com/cdn-cgi/l/email-protection#16797b77645678776c646f6e3875797b296563747c7375622b58776c646f6e3324263b3324267b7778637077756263647364332426737867637f646f">Email instead</a>
+      <span class="cta-note">Nazryx &mdash; a company of Nazir &amp; Company International (PVT) Limited</span>
+    </div>
+  </div>
+</section>
+</main>
+<div class="wrap">
+  <div class="foot">
+    <span>&copy; <span id="yr">2026</span> Nazryx &mdash; a company of Nazir &amp; Company.</span>
+    <div class="foot-links">
+      <a href="index.html">Home</a>
+      <a href="partners.html">For distributors</a>
+      <a href="tel:+923390555568">0339-0555568</a>
+      <a href="https://nazryx.com/cdn-cgi/l/email-protection#cea1a3afbc8ea0afb4bcb7b6e0ada1a3"><span class="__cf_email__" data-cfemail="f59a989487b59b948f878c8ddb969a98">[email&#160;protected]</span></a>
+    </div>
+  </div>
+</div>
+<script data-cfasync="false" src="cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>document.getElementById('yr').textContent=new Date().getFullYear();</script>
+
+<script src="assets/nzx-track.js" defer></script>

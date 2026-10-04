@@ -1,0 +1,9 @@
+User-agent: *
+Disallow: /offers/
+Disallow: /supply-plan
+Disallow: /generics-offer
+
+Disallow: /o/
+Disallow: /crm
+Disallow: /api/
+Disallow: /position
