@@ -1,0 +1,12 @@
+.env
+.env.*
+.dev.vars
+*.xlsx
+*.xls
+*.csv
+*.zip
+data/
+dumps/
+node_modules/
+.wrangler/
+.DS_Store
