@@ -321,6 +321,14 @@ h1{font-size:clamp(40px,5.8vw,68px)}
 .kz-table tr:last-child>*{border-bottom:0}
 .pf b.kz-sm{font-size:17px}
 .kz-note{font-size:12px!important;color:var(--ink-3)!important;margin-top:22px}
+.do3{padding-block:8px 48px}
+.do3 h2{max-width:20ch}
+.do3-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:28px}
+.do3-grid .stat{min-height:200px}
+.do3-grid h3{font-size:22px;margin-top:6px;color:var(--ink)}
+.do3-grid .stat span{font-size:14px}
+.do3-how{margin-top:18px;font-size:14px;color:var(--ink-3)}
+@media (max-width:900px){.do3-grid{grid-template-columns:1fr}.do3-grid .stat{min-height:0}}
 </style>
 <nav class="nav">
   <div class="nav-in">
@@ -343,10 +351,9 @@ h1{font-size:clamp(40px,5.8vw,68px)}
   <div class="hero-grid">
     <div>
       <div class="eyebrow">For manufacturers</div>
-      <h1>Your products, in markets that <span class="blue">already need them.</span></h1>
-      <p class="lede">We find the distributors worth working with, prove the demand from the register before
-        you commit a dime, and carry the registration through to submission. Then we keep selling it with
-        them.</p>
+      <h1>We grow your <span class="blue">exports.</span></h1>
+      <p class="lede">You make the medicines. We sell more of them abroad: in new markets, and in the ones you
+        already ship to.</p>
       <div class="hero-cta">
         <a data-track="calendly" class="btn btn-blue" href="https://calendly.com/nazryx/meeting-with-omar" target="_blank" rel="noopener noreferrer">Have a quick chat</a>
         <a class="btn btn-ghost" href="/manufacturers#what">See what we run</a>
@@ -357,18 +364,28 @@ h1{font-size:clamp(40px,5.8vw,68px)}
         <div class="intake-chip">
           <svg viewBox="0 0 837 346" aria-hidden="true"><path d="M171 0 L403 0 L613 210 L613 0 L837 0 L837 198 L689 346 L461 346 L295 179 L131 346 L0 346 L0 174 Z" fill="#fff"/></svg>
         </div>
-        <div class="r"><b>Representation</b><span>Not an introduction service</span></div>
+        <div class="r"><b>Your export team</b><span>Not an introduction service</span></div>
       </div>
       <div class="intake-rows">
-        <div><span>Built around</span><b>One portfolio</b></div>
-        <div><span>We find</span><b>Distributors, then prove them</b></div>
-        <div><span>Registration</span><b>Route, dossier, submission</b></div>
-        <div><span>Markets</span><b>Africa, Asia, the Middle East</b></div>
+        <div><span>Markets</span><b>Africa, Asia, Central Asia</b></div>
+        <div><span>Offices</span><b>Lahore, London, Almaty</b></div>
         <div><span>After launch</span><b>We stay on the account</b></div>
       </div>
     </div>
   </div>
 </div>
+
+<!-- WHAT WE DO -->
+<section class="wrap do3">
+  <div class="eyebrow">What we do</div>
+  <h2>Three things. That's it.</h2>
+  <div class="do3-grid">
+    <div class="stat s1"><b>01</b><h3>Increase your exports</h3><span>More volume, more orders, more reorders from abroad.</span></div>
+    <div class="stat s2"><b>02</b><h3>Enter new markets</h3><span>We pick the market, register you and find the right partner.</span></div>
+    <div class="stat s3"><b>03</b><h3>Grow where you already sell</h3><span>Better partners, better pricing, more of your lines on the shelf.</span></div>
+  </div>
+  <p class="do3-how">How: distributors, registration, pricing and sales, run by our team in each market. Details below.</p>
+</section>
 
 <!-- STATS -->
 <div class="wrap stats">
