@@ -23,7 +23,9 @@ export async function onRequestPost({ request, env }) {
   const key = await sessionKey(env);
   if (!pw || !key) return form(true);
   const url = new URL(request.url);
-  if (request.headers.get('origin') && request.headers.get('origin') !== url.origin) return form(true);
+  // Browsers send Origin: null here because these pages use Referrer-Policy: no-referrer.
+  const origin = request.headers.get('origin');
+  if (origin && origin !== 'null' && origin !== url.origin) return form(true);
   const ip = request.headers.get('cf-connecting-ip') || '0';
   const iph = await sha256(key + '|login|' + ip);
   const now = Date.now();
