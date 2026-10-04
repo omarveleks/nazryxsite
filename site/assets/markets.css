@@ -84,3 +84,13 @@
 .mk-soon p{color:var(--ink-2);margin-top:auto}
 @media (max-width:900px){.mk-flowsec .flow{grid-template-columns:1fr 1fr}}
 @media (max-width:560px){.mk-flowsec .flow{grid-template-columns:1fr}.mk-vis .fan{flex-direction:column}.mk-vis .arrow{transform:rotate(90deg)}}
+/* nav: three equal text links */
+.aud{background:none!important;border:0!important;padding:0!important;gap:inherit!important;border-radius:0}
+.aud a,.nav-mk{padding:0!important;font-size:14px!important;font-weight:600;color:var(--ink-2);background:none!important;border-radius:0;text-decoration:none;white-space:nowrap}
+.aud a.on,.nav-mk.on,.aud a:hover,.nav-mk:hover{color:var(--acc,var(--blue))!important;background:none!important}
+@media(max-width:560px){.aud a,.nav-mk{font-size:13px!important}}
+.mk-route{flex-direction:row;align-items:center;gap:14px;margin-top:16px;border-radius:var(--r-lg)}
+.mk-route .flow-step{flex:1;flex-direction:column;align-items:flex-start;gap:6px}
+.mk-route .flow-step span{margin-left:0;text-align:left}
+.mk-arr{color:rgba(255,255,255,.5);flex:0 0 auto}
+@media (max-width:760px){.mk-route{flex-direction:column;align-items:stretch}.mk-arr{transform:rotate(90deg);align-self:center}}

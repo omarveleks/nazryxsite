@@ -59,6 +59,7 @@ export function renderMarket(m) {
     <p class="lede">${esc(r.lede)}</p>
   </div>
   <div class="mk-region">${table}${side}</div>
+  <div class="flow mk-route" aria-hidden="true">${r.rows.map((row, i) => `<div class="flow-step"><em>${String(i + 1).padStart(2, '0')}</em><b>${esc(row[0])}</b><span>${esc(row[3])}</span></div>`).join('<svg class="mk-arr" width="24" height="14" viewBox="0 0 24 14"><path d="M0 7h20M15 2l5 5-5 5" fill="none" stroke="currentColor" stroke-width="2"/></svg>')}</div>
   <p class="mk-note">${esc(r.foot)}</p>
 </section>
 
