@@ -100,11 +100,30 @@ export function renderIndex(markets) {
       <span class="door-eye">${esc(m.card.eyebrow)}</span><h3>${esc(m.card.title)}</h3><p>${esc(m.card.text)}</p>
       <span class="door-go">Open ${esc(m.name)} <em>&rarr;</em></span></a>`).join('');
   const body = `
-<div class="wrap hero mk-hero">
-  <div class="eyebrow">Market expansion</div>
-  <h1>You make medicines.<br><span class="blue">We run your markets.</span></h1>
-  <p>Registration, partners, tenders, pricing and physicians, run by one team on the ground. Not a report to act on. A function you don't have to build.</p>
-  <div class="hero-cta"><a class="btn btn-blue" href="#pick" data-track="cta:pick">Pick your market</a></div>
+<div class="wrap hero">
+  <div class="hero-grid">
+    <div class="mk-hero">
+      <div class="eyebrow">Market expansion</div>
+      <h1>You make medicines.<br><span class="blue">We run your markets.</span></h1>
+      <p>Registration, partners, tenders, pricing and physicians, run by one team on the ground. Not a report to act on. A function you don't have to build.</p>
+      <div class="hero-cta"><a class="btn btn-blue" href="#pick" data-track="cta:pick">Pick your market</a></div>
+    </div>
+    <div class="consol mk-vis" aria-hidden="true">
+      <div class="fan">
+        <div class="fan-col"><span class="pill">Regulator</span><span class="pill">State buyer</span><span class="pill">Distributors</span><span class="pill">Physicians</span></div>
+        <svg class="arrow" width="28" height="16" viewBox="0 0 28 16"><path d="M0 8h24M18 2l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+        <div class="winner">One team<span>on the ground, for you</span></div>
+      </div>
+      <p class="consol-note">Four counterparts. One function you don't have to build.</p>
+    </div>
+  </div>
+</div>
+
+<div class="wrap stats" aria-hidden="true">
+  <div class="stat s1"><b>7</b><span>functions we run</span></div>
+  <div class="stat s2"><b>3</b><span>phases, one partnership</span></div>
+  <div class="stat s3"><b>100+</b><span>distributor relationships</span></div>
+  <div class="stat s4"><b>1,000+</b><span>physicians in our network</span></div>
 </div>
 
 <section class="wrap" style="padding-top:0">
@@ -125,10 +144,19 @@ export function renderIndex(markets) {
   </div>
 </section>
 
+<section class="wrap mk-flowsec" aria-hidden="true">
+  <div class="flow">
+    <div class="flow-step"><em>01</em><b>Brief</b><span>Your lines, read against the market</span></div>
+    <div class="flow-step"><em>02</em><b>Register</b><span>Dossier, filing, authority</span></div>
+    <div class="flow-step"><em>03</em><b>Partner</b><span>Distributors, tenders, physicians</span></div>
+    <div class="flow-step"><em>04</em><b>Sell</b><span>Orders and reorders</span></div>
+  </div>
+</section>
+
 <section class="wrap" id="pick" style="padding-top:0">
   <div class="eyebrow">Pick your market</div>
   <h2 style="max-width:20ch">Where do you want to sell?</h2>
-  <div class="doors mk-pick">${picker}</div>
+  <div class="doors mk-pick">${picker}<div class="door mk-soon" aria-hidden="true"><span class="door-eye">Next</span><div class="dims"><span class="dim">Registration</span><span class="dim">Partners</span><span class="dim">Tenders</span><span class="dim">Pricing</span><span class="dim">Physicians</span><span class="dim">Orders</span><span class="dim">Portfolio</span></div><p>The same seven functions, in every market we open.</p></div></div>
   <p class="mk-more">More markets opening. <a href="/#contact" data-track="cta:more-markets">Tell us where you want to go.</a></p>
 </section>
 `;

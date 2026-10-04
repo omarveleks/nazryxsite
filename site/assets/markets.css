@@ -70,3 +70,17 @@
   .mk-table td::before{content:attr(data-l);color:var(--ink-3);font-size:12.5px}
   .mk-kv div{flex-direction:column;gap:2px}.mk-kv strong{text-align:left}
 }
+/* markets index visuals */
+.mk-vis{align-self:stretch;border-radius:var(--r-lg)}
+.mk-vis .fan{justify-content:center}
+.mk-vis .pill{font-size:13px;padding:9px 12px}
+.mk-vis .winner{font-size:16px;padding:16px 18px}
+.mk-flowsec{padding-top:0}
+.mk-flowsec .flow{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;border-radius:var(--r-lg)}
+.mk-flowsec .flow-step{flex-direction:column;align-items:flex-start;gap:8px}
+.mk-flowsec .flow-step span{margin-left:0;text-align:left}
+.mk-soon{background:var(--card);border:1px solid var(--line);color:var(--ink)}
+.mk-soon .door-eye{color:var(--blue-txt)}
+.mk-soon p{color:var(--ink-2);margin-top:auto}
+@media (max-width:900px){.mk-flowsec .flow{grid-template-columns:1fr 1fr}}
+@media (max-width:560px){.mk-flowsec .flow{grid-template-columns:1fr}.mk-vis .fan{flex-direction:column}.mk-vis .arrow{transform:rotate(90deg)}}
