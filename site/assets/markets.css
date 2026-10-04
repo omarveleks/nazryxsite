@@ -110,3 +110,16 @@
 .mk-tall{grid-row:span 2}.mk-tall b{font-size:34px!important}
 .mk-wide{grid-column:span 2}
 @media (max-width:420px){.mk-hub-grid{grid-template-columns:1fr 1fr}.mk-tall{grid-row:auto;grid-column:span 2}.mk-tall b{font-size:28px!important}}
+/* dark blocks: same treatment as the home page partner box */
+.mk-dark{background:var(--ink);color:#fff;border-radius:var(--r-lg);padding:clamp(28px,4vw,48px);
+  background-image:radial-gradient(120% 140% at 100% 0%,#16244A 0%,#0A0A0A 58%)}
+.mk-dark .eyebrow{color:#4D9BFF!important}
+.mk-dark h2{color:#fff}
+.mk-dark .mk-list li{border-color:rgba(255,255,255,.12)}
+.mk-dark .mk-list em{color:#4D9BFF}
+.mk-dark .mk-list b{color:#fff}
+.mk-dark .mk-list p{color:#B4B4AE}
+.mk-dark .ask div{border-left-color:rgba(255,255,255,.16)}
+.mk-dark .ask div.now{border-left-color:#4D9BFF}
+.mk-dark .ask small{color:#8C8C86}
+.mk-dark .mk-ph-p,.mk-dark .mk-ph-note{color:#B4B4AE}

@@ -10,3 +10,5 @@ dumps/
 node_modules/
 .wrangler/
 .DS_Store
+*.png
+!site/**/*.png

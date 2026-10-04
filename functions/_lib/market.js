@@ -64,7 +64,7 @@ export function renderMarket(m) {
 </section>
 
 <section class="wrap">
-  <div class="mk-run">
+  <div class="mk-run mk-dark">
     <div><div class="eyebrow">${esc(m.run.eyebrow)}</div><h2>${esc(m.run.h2)}</h2></div>
     <ol class="mk-list">${run}</ol>
   </div>
@@ -143,7 +143,7 @@ export function renderIndex(markets) {
 </section>
 
 <section class="wrap" style="padding-top:0">
-  <div class="thesis mk-phases">
+  <div class="thesis mk-phases mk-dark">
     <div>
       <div class="eyebrow" style="color:rgba(255,255,255,.74)">How it works</div>
       <h2>One partnership, three phases.</h2>
