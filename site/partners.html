@@ -331,6 +331,9 @@ h1{font-size:clamp(40px,5.8vw,68px)}
   margin-top:14px;font-size:14.5px;color:var(--ink-2);line-height:1.6}
 .reg-note b{color:var(--ink)}
 @media (max-width:900px){.out,.cgrid,.reg{grid-template-columns:1fr;gap:22px}}
+.nav-mk{font-size:14px;font-weight:600;text-decoration:none;color:var(--ink-2);white-space:nowrap}.nav-mk:hover{color:var(--blue)}
+@media(max-width:520px){.nav-in{flex-wrap:wrap;row-gap:8px}.nav-mk{font-size:13px}}
+.anon{display:block;flex-basis:100%;font-size:12px;color:var(--ink-3)}
 </style>
 
 <nav class="nav">
@@ -344,7 +347,8 @@ h1{font-size:clamp(40px,5.8vw,68px)}
       <a class="on" href="/partners">For distributors</a>
       <a href="/manufacturers">For manufacturers</a>
     </span>
-    <a class="btn btn-blue" href="https://calendly.com/nazryx/meeting-with-omar" target="_blank" rel="noopener noreferrer">Have a quick chat</a>
+    <a class="nav-mk" data-track="nav:markets" href="/markets">Markets</a>
+    <a data-track="calendly" class="btn btn-blue" href="https://calendly.com/nazryx/meeting-with-omar" target="_blank" rel="noopener noreferrer">Have a quick chat</a>
   </div>
 </nav>
 
@@ -358,7 +362,7 @@ h1{font-size:clamp(40px,5.8vw,68px)}
       <h1>We don't sell you data. We <span class="blue">run the function.</span></h1>
       <p class="lede">Market intelligence, manufacturer discovery, registration tracking and pricing &mdash; operated by our team, on your catalogue, every week. Not a dashboard you have to learn. A function you stop having to staff.</p>
       <div class="hero-cta">
-        <a class="btn btn-blue" href="https://calendly.com/nazryx/meeting-with-omar" target="_blank" rel="noopener noreferrer">Have a quick chat</a>
+        <a data-track="calendly" class="btn btn-blue" href="https://calendly.com/nazryx/meeting-with-omar" target="_blank" rel="noopener noreferrer">Have a quick chat</a>
         <a class="btn btn-ghost" href="/partners#what">See what we run</a>
       </div>
     </div>
@@ -703,7 +707,7 @@ h1{font-size:clamp(40px,5.8vw,68px)}
       <h2>A working document, not a newsletter.</h2>
       <p class="lede" style="margin-top:16px">Everything we run produces one thing your team opens and acts on: where your categories stand, what moved in them, what is open, and what we would do about each. Nobody has to learn a dashboard or interpret a chart.</p>
       <p class="lede" style="margin-top:16px">The section headings are below. What sits under them belongs to the company it was written for, so ask and we will walk you through a real one.</p>
-      <a class="btn btn-blue" href="https://calendly.com/nazryx/meeting-with-omar">Ask for a sample</a>
+      <a data-track="calendly" class="btn btn-blue" href="https://calendly.com/nazryx/meeting-with-omar">Ask for a sample</a>
     </div>
     <div class="docm">
       <div class="docm-top"><b>Your categories</b><span>Confidential</span></div>
@@ -873,8 +877,8 @@ h1{font-size:clamp(40px,5.8vw,68px)}
       <p>Tell us what you carry and where you sell it. We will tell you what we would look at first, and whether there is enough there to be worth either of our time. No preparation needed on your side.</p>
     </div>
     <div class="cta-side">
-      <a class="btn btn-white" href="https://calendly.com/nazryx/meeting-with-omar" target="_blank" rel="noopener noreferrer">Book a call with us</a>
-      <a class="btn btn-white" style="background:rgba(255,255,255,.14);color:#fff" href="https://nazryx.com/cdn-cgi/l/email-protection#a3cccec2d1e3cdc2d9d1dadb8dc0ccce9cd0d6c1c9c6c0d79eedc2d9d1dadb869193d3c2d1d7cdc6d1d0cbcad38691938e869193cacdcad7cac2cf869193c0cccdd5c6d1d0c2d7cacccd">Email instead</a>
+      <a data-track="calendly" class="btn btn-white" href="https://calendly.com/nazryx/meeting-with-omar" target="_blank" rel="noopener noreferrer">Book a call with us</a>
+      <a data-track="email" class="btn btn-white" style="background:rgba(255,255,255,.14);color:#fff" href="mailto:omar@nazryx.com?subject=Nazryx%20partnership%20-%20initial%20conversation">Email instead</a>
       <span class="cta-note">Nazryx &mdash; a company of Nazir &amp; Company International (PVT) Limited</span>
     </div>
   </div>
@@ -888,14 +892,17 @@ h1{font-size:clamp(40px,5.8vw,68px)}
     <div class="foot-links">
       <a href="/">Home</a>
       <a href="/manufacturers">For manufacturers</a>
-      <a href="tel:+923390555568">0339-0555568</a>
-      <a href="https://nazryx.com/cdn-cgi/l/email-protection#1e71737f6c5e707f646c6766307d7173"><span class="__cf_email__" data-cfemail="07686a66754769667d757e7f2964686a">[email&#160;protected]</span></a>
+      <a href="tel:+447466253544" data-track="phone:+447466253544">+44 7466 253544</a>
+        <a href="tel:+923254307967" data-track="phone:+923254307967">+92 325 4307967</a>
+        <a href="tel:+77086922409" data-track="phone:+77086922409">+7 708 692 2409</a>
+      <a data-track="email" href="mailto:omar@nazryx.com">omar@nazryx.com</a>
     </div>
+    <span class="anon">Anonymous analytics. No cookies. No IP addresses stored.</span>
   </div>
 </div>
 
-<script data-cfasync="false" src="cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+<script>
 document.getElementById('yr').textContent = new Date().getFullYear();
 </script>
 
-<script src="assets/nzx-track.js" defer></script>
+<script src="/assets/a.js" defer></script>

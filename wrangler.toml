@@ -1,0 +1,9 @@
+name = "nazryx"
+compatibility_date = "2026-09-01"
+pages_build_output_dir = "site"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "nazryx-analytics"
+database_id = "36c2f080-c1ca-4a37-84b8-b4ee5c38e13b"
+migrations_dir = "migrations"

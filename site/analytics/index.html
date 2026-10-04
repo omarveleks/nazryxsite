@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Analytics · Nazryx</title>
+<link rel="icon" type="image/png" href="/favicon.png">
+<link rel="stylesheet" href="/assets/nzx.css">
+<link rel="stylesheet" href="/analytics/dash.css">
+</head>
+<body>
+<nav class="nav"><div class="nav-in">
+  <span class="brand"><svg viewBox="0 0 837 346" aria-hidden="true"><path d="M171 0 L403 0 L613 210 L613 0 L837 0 L837 198 L689 346 L461 346 L295 179 L131 346 L0 346 L0 174 Z" fill="#0066FF"/></svg><b>Analytics</b></span>
+  <form method="post" action="/analytics/logout" class="an-out"><button class="btn btn-ghost" type="submit">Log out</button></form>
+</div></nav>
+<main class="wrap an">
+  <div class="an-bar">
+    <div class="aud an-range" role="group" aria-label="Date range">
+      <button data-r="0">Today</button><button data-r="7" class="on">7 days</button><button data-r="30">30 days</button><button data-r="90">90 days</button><button data-r="c">Custom</button>
+    </div>
+    <span class="an-custom" hidden><input type="date" id="f"> <input type="date" id="t"> <button class="btn btn-ghost" id="go">Apply</button></span>
+    <label class="an-cmp"><input type="checkbox" id="cmp" checked> Compare to previous period</label>
+    <a class="btn btn-blue" id="csv" href="#">Download CSV</a>
+  </div>
+  <p class="an-status" id="status">Loading…</p>
+
+  <section><h2>Overview</h2><div class="an-kpis" id="kpis"></div></section>
+  <section><div class="an-h"><h2>Traffic over time</h2><div class="aud an-metric"><button data-m="visitors" class="on">Visitors</button><button data-m="pageviews">Pageviews</button></div></div><div class="an-card" id="chart"></div></section>
+  <section><h2>Kazakhstan funnel</h2><div class="an-funnel" id="funnel"></div></section>
+  <section><h2>Top pages</h2><div class="an-card an-tbl" id="pages"></div></section>
+  <section><h2>Sources</h2>
+    <div class="an-2"><div class="an-card" id="sources"></div><div class="an-card" id="referrers"></div></div>
+    <div class="an-card an-tbl" id="utms"></div>
+    <div class="an-card an-builder">
+      <h3>Link builder</h3>
+      <div class="an-form">
+        <label>Page<select id="lb-p"><option>/markets/kazakhstan</option><option>/markets</option><option>/manufacturers</option><option>/</option><option>/partners</option></select></label>
+        <label>Source<input id="lb-s" placeholder="whatsapp"></label>
+        <label>Campaign<input id="lb-c" placeholder="kz-oct"></label>
+        <label>Lead ref<input id="lb-r" placeholder="lead-name"></label>
+      </div>
+      <div class="an-link"><code id="lb-out">https://nazryx.com/markets/kazakhstan</code><button class="btn btn-blue" id="lb-copy">Copy</button></div>
+    </div>
+  </section>
+  <section><h2>Warm leads</h2><p class="an-sub">Visits that arrived with a <code>?ref=</code> link, most recent first.</p><div class="an-card an-tbl" id="leads"></div></section>
+  <section><h2>Audience</h2><div class="an-3" id="audience"></div></section>
+  <section><h2>Actions</h2><div class="an-card an-tbl" id="actions"></div></section>
+  <section><h2>Recent activity</h2><div class="an-card an-tbl" id="recent"></div></section>
+</main>
+<script src="/analytics/dash.js"></script>
+</body>
+</html>

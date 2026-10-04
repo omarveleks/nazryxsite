@@ -7,3 +7,7 @@ Disallow: /o/
 Disallow: /crm
 Disallow: /api/
 Disallow: /position
+
+Disallow: /analytics
+
+Sitemap: https://nazryx.com/sitemap.xml

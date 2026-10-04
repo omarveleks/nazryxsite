@@ -1,0 +1,10 @@
+/analytics*
+  Cache-Control: no-store
+  Content-Security-Policy: default-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'self'
+  X-Frame-Options: DENY
+  Referrer-Policy: no-referrer
+  X-Robots-Tag: noindex, nofollow
+
+/api/stats*
+  Cache-Control: no-store
+  X-Robots-Tag: noindex, nofollow

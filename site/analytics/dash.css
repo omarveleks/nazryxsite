@@ -1,0 +1,61 @@
+/* Analytics dashboard: reuses nzx.css tokens. Flat. Self-hosted only (CSP: self). */
+body{font-family:"Inter","Helvetica Neue",Helvetica,Arial,sans-serif}
+.nav{background:var(--ground);backdrop-filter:none}
+.an-out{margin-left:auto}.an-out .btn{cursor:pointer;font:inherit;font-size:14px;font-weight:600}
+.an section{padding-block:28px}
+.an h2{font-size:clamp(22px,3vw,28px);margin-bottom:16px}
+.an h3{font-size:18px;margin-bottom:12px}
+.an-bar{display:flex;flex-wrap:wrap;gap:12px;align-items:center;padding-top:24px}
+.aud button{font:inherit;font-size:13px;font-weight:600;padding:7px 13px;border-radius:999px;border:0;background:transparent;color:var(--ink-2);cursor:pointer;white-space:nowrap}
+.aud button.on{background:var(--blue);color:#fff}
+.an-bar .aud{margin-left:0}
+.an-range{flex-wrap:wrap}
+.an-custom input,.an-form input,.an-form select,.an-card input{font:inherit;font-size:14px;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--ink);min-width:0}
+.an-cmp{font-size:14px;color:var(--ink-2);display:flex;gap:6px;align-items:center}
+#csv{margin-left:auto}
+.an-status{font-size:13px;color:var(--ink-3);margin-top:12px}
+.an-kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.an-kpis .stat{min-height:118px}
+.an-kpis .stat small{font-size:12.5px;font-weight:600}
+.up{color:var(--pastel-mint-ink)}.down{color:var(--pastel-peach-ink)}.flat{color:var(--ink-3)}
+.an-card{background:var(--card);border:1px solid var(--line);border-radius:var(--r-md);padding:20px;margin-bottom:14px;min-width:0}
+.an-h{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:16px}.an-h h2{margin:0}
+#chart svg{width:100%;height:auto;display:block}
+#chart text{font-size:11px;fill:var(--ink-3);font-family:inherit}
+.an-funnel{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.an-funnel .step{display:block}
+.an-funnel b{font-family:"Inter Tight",sans-serif;font-size:30px;letter-spacing:-.03em;display:block;margin:6px 0}
+.an-funnel small{font-size:12.5px;color:var(--ink-3)}
+.an-funnel .step-dark small{color:rgba(255,255,255,.8)}
+.an-tbl{overflow-x:auto;padding:8px 20px}
+.an table{width:100%;border-collapse:collapse;font-size:13.5px;font-variant-numeric:tabular-nums}
+.an th,.an td{text-align:left;padding:10px 12px 10px 0;border-bottom:1px solid var(--line);white-space:nowrap}
+.an th{font-size:12px;color:var(--ink-3);font-weight:600}
+.an td.n,.an th.n{text-align:right}
+.an tr:last-child td{border-bottom:0}
+.an-2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.an-3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.bars{display:flex;flex-direction:column;gap:8px}
+.bar{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 10px;font-size:13.5px}
+.bar i{grid-column:1/-1;height:8px;border-radius:999px;background:var(--pastel-blue);display:block}
+.bar i span{display:block;height:100%;border-radius:999px;background:var(--blue)}
+.bar em{font-style:normal;color:var(--ink-2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.empty{font-size:13.5px;color:var(--ink-3);padding:10px 0}
+.an-sub{font-size:14px;color:var(--ink-2);margin:-8px 0 14px}
+.an-form{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.an-form label{display:flex;flex-direction:column;gap:4px;font-size:12.5px;color:var(--ink-3)}
+.an-link{display:flex;gap:10px;align-items:center;margin-top:14px;flex-wrap:wrap}
+.an-link code{flex:1;min-width:0;overflow-wrap:anywhere;background:var(--soft);border-radius:10px;padding:10px 12px;font-size:13px}
+.yes{color:var(--pastel-mint-ink);font-weight:600}
+/* login */
+.an-login main{min-height:100vh;display:grid;place-items:center}
+.an-login .an-card{max-width:380px;width:100%;display:flex;flex-direction:column;gap:12px;padding:30px;border-radius:var(--r-lg)}
+.an-login h1{font-size:32px}
+.an-brand{font-size:13px;color:var(--blue-txt)}
+.an-login label{font-size:13px;color:var(--ink-2)}
+.an-login input{font:inherit;padding:11px 12px;border:1px solid var(--line);border-radius:12px}
+.an-login button{cursor:pointer;font:inherit;font-weight:600}
+.an-err{background:var(--pastel-peach);color:var(--pastel-peach-ink);border-radius:10px;padding:10px 12px;font-size:13.5px}
+@media (max-width:900px){.an-kpis,.an-3{grid-template-columns:1fr 1fr}.an-funnel{grid-template-columns:1fr 1fr}.an-2,.an-form{grid-template-columns:1fr}}
+@media (max-width:560px){.an-kpis,.an-3{grid-template-columns:1fr}#csv{margin-left:0}}
+.an-bar>*{max-width:100%}.an-cmp{flex-wrap:wrap}
