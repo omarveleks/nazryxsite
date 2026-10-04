@@ -65,7 +65,7 @@ export function contactCard(h2, subject, lede) {
     <div class="cta-top">
       <div style="max-width:30ch"><h2>${esc(h2)}</h2>${lede ? `<p class="mk-cta-p">${esc(lede)}</p>` : ''}</div>
       <div class="mk-cta-btns">
-        <a class="btn btn-white" data-track="cta:confirm" href="mailto:omar@nazryx.com?subject=${encodeURIComponent(subject)}">Reply to confirm</a>
+        <a class="btn btn-white" data-track="cta:confirm" href="mailto:contact@nazryx.com?subject=${encodeURIComponent(subject)}">Reply to confirm</a>
         <a class="btn btn-white mk-alt" data-track="whatsapp" href="https://wa.me/447466253544" target="_blank" rel="noopener noreferrer">Message us on WhatsApp</a>
         <a class="btn btn-white mk-alt" data-track="calendly" href="${CAL}" target="_blank" rel="noopener noreferrer">Book a call</a>
       </div>
