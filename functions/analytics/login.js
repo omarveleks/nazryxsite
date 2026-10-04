@@ -32,7 +32,7 @@ export async function onRequestPost({ request, env }) {
 
   let given = '';
   try { const f = await request.formData(); given = String(f.get('password') || '').slice(0, 256); } catch {}
-  if (await safeEqual(given, pw, key)) {
+  if (await safeEqual(given.trim(), String(pw).trim(), key)) {
     if (DB) await DB.prepare('DELETE FROM login_attempts WHERE iph=?').bind(iph).run();
     return new Response(null, { status: 303, headers: { Location: '/analytics', 'Set-Cookie': await makeCookie(env) } });
   }
