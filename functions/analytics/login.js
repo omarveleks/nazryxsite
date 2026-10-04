@@ -1,4 +1,4 @@
-import { makeCookie, isAuthed } from '../_lib/auth.js';
+import { makeCookie, isAuthed, sessionKey } from '../_lib/auth.js';
 import { sha256, safeEqual } from '../_lib/util.js';
 
 const MAX = 5, LOCK = 15 * 60 * 1000;
@@ -19,7 +19,8 @@ export async function onRequestGet({ request, env }) {
 }
 
 export async function onRequestPost({ request, env }) {
-  const { ANALYTICS_PASSWORD: pw, ANALYTICS_SESSION_KEY: key, DB } = env;
+  const { ANALYTICS_PASSWORD: pw, DB } = env;
+  const key = await sessionKey(env);
   if (!pw || !key) return form(true);
   const url = new URL(request.url);
   if (request.headers.get('origin') && request.headers.get('origin') !== url.origin) return form(true);

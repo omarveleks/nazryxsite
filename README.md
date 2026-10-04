@@ -26,7 +26,7 @@ First-party only, no third-party trackers, no cookies for visitors.
 Secrets live only in Cloudflare (Pages → Settings → Variables and Secrets, type **Secret**, Production and Preview):
 
 - `ANALYTICS_PASSWORD`: dashboard password.
-- `ANALYTICS_SESSION_KEY`: a random string of 32+ characters that signs the login cookie (e.g. `openssl rand -base64 48`).
+- `ANALYTICS_SESSION_KEY` (optional): extra key for signing the login cookie. If it's not set, one is derived from the password.
 
 To rotate: change the value in Cloudflare, then redeploy (Deployments → ⋯ → Retry deployment). Changing `ANALYTICS_SESSION_KEY` logs everyone out.
 For local testing, put throwaway values in `.dev.vars` (git-ignored) and run `npx wrangler pages dev site`.
