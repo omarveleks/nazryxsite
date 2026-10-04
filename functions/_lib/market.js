@@ -109,13 +109,21 @@ export function renderIndex(markets) {
       <p>Registration, partners, tenders, pricing and physicians, run by one team on the ground. Not a report to act on. A function you don't have to build.</p>
       <div class="hero-cta"><a class="btn btn-blue" href="#pick" data-track="cta:pick">Pick your market</a></div>
     </div>
-    <div class="consol mk-vis" aria-hidden="true">
-      <div class="fan">
-        <div class="fan-col"><span class="pill">Regulator</span><span class="pill">State buyer</span><span class="pill">Distributors</span><span class="pill">Physicians</span></div>
-        <svg class="arrow" width="28" height="16" viewBox="0 0 28 16"><path d="M0 8h24M18 2l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2"/></svg>
-        <div class="winner">One team<span>on the ground, for you</span></div>
+    <div class="locard mk-hub" aria-hidden="true">
+      <div class="locard-top">
+        <div class="locard-chip"><svg viewBox="0 0 837 346"><path d="M171 0 L403 0 L613 210 L613 0 L837 0 L837 198 L689 346 L461 346 L295 179 L131 346 L0 346 L0 174 Z" fill="#fff"/></svg></div>
+        <div class="r"><b>Your market function</b><span>Run by one team</span></div>
       </div>
-      <p class="consol-note">Four counterparts. One function you don't have to build.</p>
+      <div class="mk-hub-grid">
+        <div class="tile t-mkt mk-tall"><small>Regulator</small><b>EAEU</b><p>Route, dossier, filing and authority liaison</p></div>
+        <div class="tile t-score"><small>State buyer</small><b>Every lot</b><p>read and positioned</p></div>
+        <div class="tile t-guide"><small>Partners</small><b>100+</b><p>distributor relationships</p></div>
+        <div class="tile t-risk mk-wide"><small>Physicians</small><b>1,000+</b><p>in our network, by specialty and region</p></div>
+      </div>
+      <div>
+        <div class="locs"><div class="loc"><b>LHE</b><span>Lahore</span></div><div class="loc mk-c"><b>LON</b><span>London</span></div><div class="loc mk-r"><b>ALA</b><span>Almaty</span></div></div>
+        <div class="locline"><i class="mk-d0"></i><i class="mk-d1"></i><i class="mk-d2"></i></div>
+      </div>
     </div>
   </div>
 </div>

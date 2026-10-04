@@ -94,3 +94,19 @@
 .mk-route .flow-step span{margin-left:0;text-align:left}
 .mk-arr{color:rgba(255,255,255,.5);flex:0 0 auto}
 @media (max-width:760px){.mk-route{flex-direction:column;align-items:stretch}.mk-arr{transform:rotate(90deg);align-self:center}}
+/* markets hero: function card */
+.mk-hub{gap:22px}
+.mk-hub-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.mk-hub-grid .tile{padding:16px}
+.mk-hub-grid .tile b{font-size:18px;margin-bottom:4px}
+.mk-hub-grid .tile p{font-size:12.5px}
+.mk-c{text-align:center}.mk-r{text-align:right}
+.mk-d0{left:0}.mk-d1{left:calc(50% - 4px)}.mk-d2{right:0}
+/* bento */
+.mk-hub-grid{grid-template-columns:1.1fr 1fr 1fr;grid-auto-rows:minmax(92px,auto)}
+.mk-hub-grid .tile{display:flex;flex-direction:column}
+.mk-hub-grid .tile small{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);margin-bottom:auto;padding-bottom:10px}
+.mk-hub-grid .tile b{font-size:24px;letter-spacing:-.04em}
+.mk-tall{grid-row:span 2}.mk-tall b{font-size:34px!important}
+.mk-wide{grid-column:span 2}
+@media (max-width:420px){.mk-hub-grid{grid-template-columns:1fr 1fr}.mk-tall{grid-row:auto;grid-column:span 2}.mk-tall b{font-size:28px!important}}
