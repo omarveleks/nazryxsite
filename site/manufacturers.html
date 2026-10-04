@@ -284,6 +284,19 @@ h1{font-size:clamp(40px,5.8vw,68px)}
 .aud a,.nav-mk{padding:0!important;font-size:14px!important;font-weight:600;color:var(--ink-2);background:none!important;border-radius:0;text-decoration:none;white-space:nowrap}
 .aud a.on,.nav-mk.on,.aud a:hover,.nav-mk:hover{color:var(--acc,var(--blue))!important;background:none!important}
 @media(max-width:560px){.aud a,.nav-mk{font-size:13px!important}}
+.kz-map{display:grid;grid-template-columns:auto 1fr;gap:10px 28px;align-items:center;text-decoration:none;margin-bottom:36px;
+  background:var(--card);border:1px solid var(--line);border-radius:var(--r-lg);padding:22px 26px}
+.kz-map:hover{border-color:#333846}
+.kz-count b{display:block;font-family:"Inter Tight",sans-serif;font-size:44px;letter-spacing:-.05em;line-height:1;color:var(--acc)}
+.kz-count b span{color:var(--ink-3);font-size:26px}
+.kz-count small{font-size:12px;color:var(--ink-3)}
+.kz-regions{display:flex;flex-wrap:wrap;gap:8px}
+.kz-regions span{border:1px solid var(--line);background:var(--panel);color:var(--ink-2);border-radius:999px;padding:8px 14px;font-size:13.5px}
+.kz-regions span.on{background:var(--blue);border-color:var(--blue);color:#fff}
+.kz-dots{grid-column:1/-1;display:flex;gap:6px}
+.kz-dots i{flex:1;height:6px;border-radius:999px;background:var(--line)}
+.kz-dots i.on{background:var(--blue)}
+@media (max-width:560px){.kz-map{grid-template-columns:1fr;padding:20px}}
 .kz-buyers{margin-top:16px}
 .proof-body>div{min-width:0}
 .kz-facts{margin-top:16px}
@@ -575,6 +588,16 @@ h1{font-size:clamp(40px,5.8vw,68px)}
 
 <!-- MARKET IN FOCUS: KAZAKHSTAN -->
 <section class="wrap" id="kazakhstan">
+  <a class="kz-map" href="/manufacturers#markets" aria-label="Kazakhstan is one of seven markets we serve. See all markets.">
+    <div class="kz-count"><b>1<span>/7</span></b><small>markets we serve</small></div>
+    <div class="kz-regions">
+      <span>East Africa</span>
+      <span>Sudan and the Horn</span>
+      <span class="on">Central Asia &middot; <b>Kazakhstan</b></span>
+      <span>Selected Asian and MENA</span>
+    </div>
+    <div class="kz-dots" aria-hidden="true"><i></i><i></i><i></i><i class="on"></i><i></i><i></i><i></i></div>
+  </a>
   <div class="head2">
     <div><div class="eyebrow">One of our seven markets &middot; Kazakhstan</div><h2>A closer look at one market: Kazakhstan.</h2></div>
     <p class="lede">Kazakhstan is one of seven markets we serve. We picked it to show the depth we work at in each one. It's a $2.5bn market that buys 85% from abroad, and our Almaty team runs it from first dossier to reorder. <a class="kz-back" href="/manufacturers#markets">See all our markets &rarr;</a></p>
