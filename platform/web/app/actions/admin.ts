@@ -170,3 +170,8 @@ export async function resetPassword(f: FormData) {
   await team((db) => db.query('select admin_reset_password($1, $2)', [str(f, 'user_id', 40), hashPassword(pw)]), '/admin?tab=accounts');
   redirect('/admin?tab=accounts&saved=1');
 }
+
+export async function resetTwoStep(f: FormData) {
+  await team((db) => db.query('select admin_reset_totp($1)', [str(f, 'user_id', 40)]), '/admin?tab=accounts');
+  redirect('/admin?tab=accounts&saved=1');
+}

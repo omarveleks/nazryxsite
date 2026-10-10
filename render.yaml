@@ -27,6 +27,12 @@ services:
         fromDatabase:
           name: nazryx-db
           property: connectionString
+      - key: SUPPORT_EMAIL          # shown on the Help page; defaults to contact@nazryx.com
+        sync: false
+      - key: SUPPORT_WHATSAPP
+        sync: false
+      - key: SENTRY_DSN             # error monitoring; leave empty to keep it off
+        sync: false
       - fromGroup: nazryx-shared
 
   - type: worker
@@ -53,5 +59,7 @@ services:
       - key: TEAM_ALERT_EMAILS
         sync: false
       - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: SENTRY_DSN
         sync: false
       - fromGroup: nazryx-shared

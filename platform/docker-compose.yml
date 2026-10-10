@@ -35,6 +35,7 @@ services:
       SMTP_PASSWORD: ${SMTP_PASSWORD:-}
       EMAIL_FROM: ${EMAIL_FROM:-contact@nazryx.com}
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      SENTRY_DSN: ${SENTRY_DSN:-}
     volumes: &ingest_vols
       - ./data/raw:/data/raw:ro
     depends_on:
@@ -54,6 +55,10 @@ services:
     environment:
       DATABASE_URL: postgresql://nazryx_app:${APP_DB_PASSWORD}@db:5432/nazryx
       INSECURE_COOKIES: ${INSECURE_COOKIES:-0}
+      SENTRY_DSN: ${SENTRY_DSN:-}
+      SUPPORT_EMAIL: ${SUPPORT_EMAIL:-contact@nazryx.com}
+      SUPPORT_WHATSAPP: ${SUPPORT_WHATSAPP:-}
+      TEAM_2FA_REQUIRED: ${TEAM_2FA_REQUIRED:-1}
     ports: ["${WEB_PORT:-3000}:3000"]
     restart: unless-stopped
     depends_on:

@@ -5,7 +5,7 @@ import { requireTeam } from '@/lib/auth';
 import { one, rows, withUser } from '@/lib/db';
 import { STAGES, ago, fmtDate, title } from '@/lib/format';
 import { grantCredits, keepSeparate, matchMolecule, mergeCompanies, postRegulatory, addPrice, editUseCase, queueRecompute,
-  rejectSuggestion, resetPassword, reviewClaim, setPlan } from '@/app/actions/admin';
+  rejectSuggestion, resetPassword, resetTwoStep, reviewClaim, setPlan } from '@/app/actions/admin';
 import { StagePill } from '@/components/ui';
 
 export const metadata = { title: 'Admin' };
@@ -62,8 +62,13 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
     }
     if (tab === 'accounts') {
       out.users = await rows(db, `select u.id, u.email, u.name, u.role, u.plan, u.credits, u.created_at, u.owner_id,
-                                  (select string_agg(p.wanted, ', ') from plan_requests p where p.user_id = u.id and p.status = 'open') as wants
+                                  (select string_agg(p.wanted, ', ') from plan_requests p where p.user_id = u.id and p.status = 'open') as wants,
+                                  auth_totp_enabled(u.id) as two_step
                                   from users u order by (select count(*) from plan_requests p where p.user_id = u.id and p.status = 'open') desc, u.created_at desc limit 200`);
+    }
+    if (tab === 'activity') {
+      out.log = await rows(db, `select a.at, a.action, a.table_name, a.row_id, a.changes, u.email
+                                from audit_log a left join users u on u.id = a.actor order by a.at desc limit 200`);
     }
     if (tab === 'content') {
       out.feed = await rows(db, `select title, created_at from feed_items where kind = 'regulatory' order by created_at desc limit 8`);
@@ -83,6 +88,7 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
     { key: 'requests', label: `Requests (${c.open_requests})`, href: '/admin?tab=requests' },
     { key: 'accounts', label: `Accounts${c.plan_requests ? ` (${c.plan_requests})` : ''}`, href: '/admin?tab=accounts' },
     { key: 'content', label: 'Content', href: '/admin?tab=content' },
+    { key: 'activity', label: 'Activity', href: '/admin?tab=activity' },
   ];
   return (
     <Shell user={u} title="Admin" sub="Nazryx team only. Not visible to customers.">
@@ -100,10 +106,11 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
         <div className="grid g2">
           <section className="card stack">
             <h2>Upload new list</h2>
+            {d.refs.length < 2 && <div className="err" role="alert">Upload the two reference lists below first. The registry upload needs them.</div>}
             <form action="/api/admin/upload" method="post" encType="multipart/form-data" className="stack">
               <div className="drop"><label className="lbl" htmlFor="file">Registration list (.xls export)</label>
-                <input id="file" name="file" type="file" accept=".xls,.xlsx,.html,.htm" required /></div>
-              <button className="btn btn-blue" type="submit">Upload registration list</button>
+                <input id="file" name="file" type="file" accept=".xls,.xlsx,.html,.htm" required disabled={d.refs.length < 2} /></div>
+              <button className="btn btn-blue" type="submit" disabled={d.refs.length < 2}>Upload registration list</button>
             </form>
             <p className="note">After upload: validate, compare with the last list, update the database, recalculate gap scores, merge duplicate distributors. A failed upload never changes live data.</p>
             {c.running > 0 && <span className="pill blue">{c.running} job running or queued</span>}
@@ -242,8 +249,24 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
                       <input className="input" name="password" type="text" minLength={10} required placeholder="Temporary password" aria-label="Temporary password" autoComplete="off" />
                       <button className="btn btn-blue btn-sm">Set and sign them out</button>
                       <span className="note">Send it to them directly; they can change it in Settings.</span></form>
-                  </details></td></tr>))}
+                  </details>
+                  {x.two_step && <form action={resetTwoStep} style={{ display: 'inline-block', marginLeft: 10 }}><input type="hidden" name="user_id" value={x.id} />
+                    <button className="btn-link small" title="For someone who lost their phone">Reset two-step</button></form>}</td></tr>))}
             </tbody></table></div>
+        </section>
+      )}
+      {tab === 'activity' && (
+        <section className="card">
+          <div className="card-h"><h2>Team activity</h2><span className="note">Every change a team account makes, recorded by the database. Latest 200.</span></div>
+          {d.log.length === 0 ? <Empty>No team actions yet.</Empty> : (
+            <div className="tbl-wrap"><table className="tbl"><thead><tr><th>When</th><th>Who</th><th>What</th><th>Details</th></tr></thead>
+              <tbody>{d.log.map((a: any, i: number) => (
+                <tr key={i}><td className="small nowrap">{ago(a.at)}</td><td className="small">{a.email ?? 'system'}</td>
+                  <td className="small">{a.action === 'insert' ? 'Added' : 'Changed'} {a.table_name.replace(/_/g, ' ')} <span className="muted">#{a.row_id}</span></td>
+                  <td className="small" style={{ maxWidth: 420 }}>{a.action === 'update'
+                    ? Object.entries(a.changes ?? {}).map(([k, v]: [string, any]) => Array.isArray(v) ? `${k}: ${JSON.stringify(v[0])} → ${JSON.stringify(v[1])}` : `${k}: ${String(v)}`).join('; ')
+                    : Object.entries(a.changes ?? {}).filter(([k]) => !['id', 'created_at', 'updated_at'].includes(k)).slice(0, 4).map(([k, v]) => `${k}: ${typeof v === 'object' ? JSON.stringify(v) : String(v)}`).join('; ')}</td></tr>))}
+              </tbody></table></div>)}
         </section>
       )}
       {tab === 'content' && (

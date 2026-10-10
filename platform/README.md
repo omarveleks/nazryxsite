@@ -56,6 +56,17 @@ cd ../web && npm run typecheck && npm run build
 ```
 The database URL must point at a throwaway database: the tests drop and recreate it.
 
+Browser smoke test (34 checks: sign-up, claim, enrich, request, quote acceptance, team two-step set-up, admin pages,
+activity log, upload through the worker, phone width) on synthetic data, the same way CI runs it:
+```
+python e2e/make_fixture.py /tmp/nzx && DATA_DIR=/tmp/nzx python ingest/bootstrap.py   # plus the env vars above
+# start the web app and worker, then:
+cd e2e && npm ci && npx playwright install chromium
+BASE=http://localhost:3000 DEMO_PASSWORD=... SEED_TEAM_PASSWORD=... XLS=/tmp/nzx/raw/Registered_Products_test.xls node smoke.mjs
+```
+CI (`.github/workflows/platform.yml`) runs the Python tests against Postgres, the web build, both Docker image
+builds and this smoke test on every push to `platform/`.
+
 | Test file | Covers |
 |---|---|
 | `test_gap.py` | Gap score D × (1 − S) × A: weights, saturation cap, clamping, ranking, confirmed supply |
@@ -103,10 +114,19 @@ on acceptance (`accept_quote()` checks ownership, opens an order, closes the req
 in a separate table that stays team-only even after acceptance. `test_supplier_confidentiality_rls` proves this
 against a real database.
 
-### Accounts
-Passwords are hashed with scrypt; sessions are random tokens stored hashed in Postgres (HttpOnly cookie). After five
-wrong passwords for an email within 15 minutes, sign-in is refused until the window passes. There is no reset email
-yet: a team member sets a temporary password on Admin › Accounts, which also signs that user out everywhere.
+### Accounts and security
+- Passwords are hashed with scrypt; sessions are random tokens stored hashed in Postgres (HttpOnly cookie).
+- After five wrong passwords for an email within 15 minutes, sign-in is refused until the window passes.
+- Two-step sign-in with an authenticator app (Settings › Two-step sign-in). **Required for team accounts**: Admin
+  does not open until it is on (`TEAM_2FA_REQUIRED=0` turns that off for local testing only). A team member can reset
+  it for someone who lost their phone on Admin › Accounts.
+- No reset email yet: a team member sets a temporary password on Admin › Accounts, which signs that user out everywhere.
+- Limits enforced in Postgres: 5 new accounts per network address per hour (200 overall), 60 uploaded files or
+  300 MB per customer per day.
+- Admin › Activity: every change a team account makes (stages, quotes, offers, claims, plans, merges, uploads,
+  password and two-step resets) is recorded by database triggers, not by app code, so it cannot be skipped.
+- Error monitoring (Sentry) in the web app and the worker when `SENTRY_DSN` is set; no personal data is sent.
+- Help and contact page at `/help` (`SUPPORT_EMAIL`, `SUPPORT_WHATSAPP`).
 
 ### Requests
 New request → "Our team will reach out to you for more info" → the request shows its stage (Submitted, Reviewing,
@@ -179,10 +199,22 @@ all in Frankfurt. Uploaded files are stored in Postgres, so the services share n
    - `TEAM_ALERT_EMAILS` and `ANTHROPIC_API_KEY`: optional, can stay empty.
 3. Apply. The first build takes a few minutes. The worker migrates the database and creates the team account.
 4. Open the web service's `https://…onrender.com` address, sign in with the team account, go to **Admin**:
-   - **Reference lists**: upload `tz_nemlit_ocr.txt` and `who_eml_2025.txt` from the handoff.
+   - First, set up two-step sign-in when asked (team accounts need it).
+   - **Reference lists**: upload `tz_nemlit_ocr.txt` and `who_eml_2025.txt` from the handoff. The registry upload
+     stays disabled until both are loaded.
    - **Upload new list**: upload `Registered_Products_….xls`. About 30 seconds later the data is live, and the demo
      accounts `demo-free@nazryx.test` / `demo-paid@nazryx.test` exist.
 5. Optional: add your own domain (e.g. `app.nazryx.com`) under the web service's Settings › Custom Domains.
+
+**Staging.** Render's preview environments give every pull request its own copy (web, worker and an empty
+database) and delete it when the pull request closes. They need a Pro workspace. To turn them on, add this at the top
+of `render.yaml`, then put `[render preview]` in a pull request's title:
+```yaml
+previews:
+  generation: manual
+  expireAfterDays: 7
+```
+Secrets marked `sync: false` are not copied into previews; put them in a manually created environment group.
 
 The default instance sizes are the smallest paid ones (web and worker `0.5c-512mb`, database `0.1c-256mb`); check
 render.com/pricing for current prices. Every push to the chosen branch redeploys.

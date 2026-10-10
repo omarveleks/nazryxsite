@@ -40,3 +40,47 @@ jobs:
         run: docker build -f platform/ingest/Dockerfile platform
       - name: Build web image
         run: docker build platform/web
+  e2e:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env: { POSTGRES_USER: ci, POSTGRES_HOST_AUTH_METHOD: trust, POSTGRES_DB: nazryx }
+        ports: ["5432:5432"]
+        options: --health-cmd "pg_isready -U ci" --health-interval 3s --health-retries 20
+    env:
+      DATABASE_URL_ADMIN: postgresql://ci@localhost:5432/nazryx
+      DATA_DIR: ${{ github.workspace }}/e2e-data
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - uses: actions/setup-node@v4
+        with: { node-version: "22" }
+      - name: Generate throwaway passwords for this run
+        run: |
+          echo "APP_DB_PASSWORD=$(openssl rand -hex 16)" >> "$GITHUB_ENV"
+          echo "SEED_TEAM_PASSWORD=$(openssl rand -hex 12)" >> "$GITHUB_ENV"
+          echo "DEMO_PASSWORD=$(openssl rand -hex 12)" >> "$GITHUB_ENV"
+      - name: Bootstrap the database with synthetic data
+        working-directory: platform
+        run: |
+          pip install -r ingest/requirements.txt
+          python e2e/make_fixture.py "$DATA_DIR"
+          cd ingest && python bootstrap.py
+      - name: Build and start the web app and the worker
+        working-directory: platform
+        run: |
+          cd web && npm ci && npm run build
+          DATABASE_URL="postgresql://nazryx_app:${APP_DB_PASSWORD}@localhost:5432/nazryx" nohup npx next start -p 3000 > ../web.log 2>&1 &
+          cd ../ingest && POLL_SECONDS=2 nohup python worker.py > ../worker.log 2>&1 &
+          for i in $(seq 1 30); do curl -sf http://localhost:3000/signup > /dev/null && break; sleep 2; done
+      - name: Browser smoke test
+        working-directory: platform/e2e
+        run: |
+          npm ci && npx playwright install --with-deps chromium
+          BASE=http://localhost:3000 XLS="$DATA_DIR/raw/Registered_Products_test.xls" node smoke.mjs
+      - name: Logs on failure
+        if: failure()
+        working-directory: platform
+        run: tail -n 80 web.log worker.log

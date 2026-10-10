@@ -16,6 +16,7 @@ export default async function Settings({ searchParams }: { searchParams: Promise
     active: await activeRequestCount(db, u.id),
     seats: await rows(db, 'select email, name from users where owner_id = $1 order by created_at', [u.id]),
     open: await rows(db, "select wanted, created_at from plan_requests where user_id = $1 and status = 'open'", [u.id]),
+    twoStep: Boolean((await rows(db, 'select enabled from user_totp where user_id = $1 and enabled', [u.id])).length),
     claim: (await rows(db, `select k.status, k.licence_name, coalesce(c.display_name, k.company_name) as company, k.review_note
                             from company_claims k left join companies c on c.id = k.company_id where k.user_id = coalesce($2::uuid, $1::uuid)
                             order by k.created_at desc limit 1`, [u.id, u.owner_id]))[0],
@@ -78,6 +79,8 @@ export default async function Settings({ searchParams }: { searchParams: Promise
               {d.claim.review_note ? <span className="note"> · {d.claim.review_note}</span> : null}</p>
           ) : <p className="note">No company claimed yet. <a href="/onboarding">Claim your company</a>.</p>}
           <hr className="divider" />
+          <div className="between"><span>Two-step sign-in: <b>{d.twoStep ? 'on' : 'off'}</b></span>
+            <a className="btn btn-ghost btn-sm" href="/settings/security">{d.twoStep ? 'Manage' : 'Set up'}</a></div>
           <form action={changePassword} className="row">
             <input className="input" name="password" type="password" minLength={10} placeholder="New password" aria-label="New password" style={{ flex: '1 1 200px' }} required />
             <button className="btn btn-ghost btn-sm" type="submit">Change password</button>

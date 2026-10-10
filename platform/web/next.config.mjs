@@ -2,6 +2,7 @@
 const nextConfig = {
   output: 'standalone',
   poweredByHeader: false,
+  serverExternalPackages: ['@sentry/node'],
   experimental: { serverActions: { bodySizeLimit: '25mb' } },
   async headers() {
     return [{

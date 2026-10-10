@@ -27,7 +27,7 @@ export default async function Company({ params, searchParams }: { params: Promis
     const makers = await rows(db, `select mc.id, mc.display_name, initcap(lower(r.manufacturing_country)) as country, count(*)::int as n
                                    from registrations r join companies mc on mc.id = r.manufacturer_id
                                    where r.country = $2 and r.active and r.ltr_id = $1 and r.manufacturer_id <> $1
-                                   group by mc.id, r.manufacturing_country order by n desc limit 40`, [id, COUNTRY]);
+                                   group by mc.id, r.manufacturing_country order by n desc, mc.display_name limit 300`, [id, COUNTRY]);
     const recent = await rows(db, `select r.molecule_id, coalesce(m.inn, r.generic_name) as inn, r.brand, r.reg_year from registrations r
                                    left join molecules m on m.id = r.molecule_id where ${scope}
                                    order by r.reg_year desc nulls last, r.certificate_no desc limit 8`, [id, COUNTRY]);
@@ -60,9 +60,17 @@ export default async function Company({ params, searchParams }: { params: Promis
           <section className="card">
             <div className="card-h"><h2>Manufacturers behind their products</h2></div>
             <div className="stack" style={{ gap: 8 }}>
-              {shownMakers.map((m) => <div key={m.id + m.country} className="between"><span>{title(m.display_name)}</span><span className="small muted">{m.country} · {m.n}</span></div>)}
+              {shownMakers.slice(0, 10).map((m) => <MakerRow key={m.id + m.country} m={m} />)}
               {shownMakers.length === 0 && <span className="note">None on record.</span>}
             </div>
+            {shownMakers.length > 10 && (
+              <details className="more" style={{ marginTop: 10 }}>
+                <summary className="btn-link">View all {shownMakers.length} manufacturers</summary>
+                <div className="stack" style={{ gap: 8, marginTop: 8 }}>
+                  {shownMakers.slice(10).map((m) => <MakerRow key={m.id + m.country} m={m} />)}
+                </div>
+              </details>
+            )}
             {!paid && d.makers!.length > 2 && <div style={{ marginTop: 12 }}><Locked title={`${d.makers!.length - 2} more manufacturers`} /></div>}
           </section>
           <section className="card">
@@ -75,5 +83,14 @@ export default async function Company({ params, searchParams }: { params: Promis
       </div>
       <p className="note">Public registration data only. {COVERAGE_NOTE}</p>
     </Shell>
+  );
+}
+
+function MakerRow({ m }: { m: { display_name: string; country: string; n: number } }) {
+  return (
+    <div className="between" style={{ alignItems: 'baseline' }}>
+      <span>{title(m.display_name)}</span>
+      <span className="small muted nowrap">{m.country} · {m.n}</span>
+    </div>
   );
 }

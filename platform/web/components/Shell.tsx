@@ -23,6 +23,7 @@ export default function Shell({ user, title, sub, crumb, actions, children }: {
           {user.plan !== 'paid' && user.role !== 'team' && <Link className="btn-link hide-m" href="/settings#plan">Upgrade</Link>}
         </div>
         <div className="side-foot">
+          <Link href="/help">Help and contact</Link>
           <span>{user.email}</span>
           <form action={signOut}><button className="btn-link" type="submit">Sign out</button></form>
         </div>

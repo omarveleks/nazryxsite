@@ -1,5 +1,5 @@
 import textwrap
-from build import parse_nemlit, parse_who, cert_year
+from build import parse_nemlit, parse_who, cert_year, fix_mojibake
 
 OCR = textwrap.dedent("""\
     Some introduction
@@ -56,3 +56,11 @@ def test_cert_year():
     assert cert_year("TAN 00,050 G01A GLE") is None     # old numbering, no year
     assert cert_year("TAN 07, 0123") is None
     assert cert_year(None) is None
+
+
+def test_fix_mojibake():
+    assert fix_mojibake("Merck SantÃ© S.A.S") == "Merck Santé S.A.S"
+    assert fix_mojibake("Laboratoires ThÃ©a") == "Laboratoires Théa"
+    assert fix_mojibake("Plain Name Ltd") == "Plain Name Ltd"
+    assert fix_mojibake("Santé already fine") == "Santé already fine"
+    assert fix_mojibake(None) is None

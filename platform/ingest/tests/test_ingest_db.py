@@ -343,3 +343,73 @@ def test_reference_lists_from_database(env):
         assert open(local).read() == NEMLIT
         assert storage.reference_file(cur, "global_list", None) is None   # not uploaded, no fallback
         c.rollback()
+
+
+def test_team_actions_are_logged_customer_actions_are_not(env):
+    with psycopg.connect(URL) as c:
+        cust = c.execute("insert into users (email, password_hash) values ('audit1@example.com', 'x') returning id").fetchone()[0]
+        team = c.execute("insert into users (email, password_hash, role) values ('audit-team@example.com', 'x', 'team') returning id").fetchone()[0]
+        c.commit()
+    with app_conn(env) as a:
+        as_user(a, cust)
+        rid = a.execute("insert into requests (user_id, quantity) values (%s, '5') returning id", (cust,)).fetchone()[0]
+        a.commit()
+        as_user(a, team)
+        a.execute("update requests set stage = 'Reviewing' where id = %s", (rid,))
+        a.execute("select admin_reset_password(%s, 'h2')", (cust,))
+        a.commit()
+        as_user(a, team)
+        rows = a.execute("select table_name, changes from audit_log where row_id in (%s, %s) order by id", (str(rid), str(cust))).fetchall()
+        assert ("requests", {"stage": ["Submitted", "Reviewing"]}) in rows
+        assert any(t == "users" and ch.get("password") == "reset" and "password_hash" not in ch for t, ch in rows)
+        assert not any(t == "requests" and "quantity" in ch for t, ch in rows)    # the customer's insert is not logged
+        a.rollback()
+        as_user(a, cust)   # customers cannot read the log
+        assert a.execute("select count(*) from audit_log").fetchone()[0] == 0
+
+
+def test_signup_rate_and_upload_limits(env):
+    with app_conn(env) as a:
+        as_user(a, None)
+        allowed = [a.execute("select rate_allow('signup', '10.0.0.9', 5, interval '1 hour')").fetchone()[0] for _ in range(6)]
+        assert allowed == [True] * 5 + [False]
+        assert a.execute("select rate_allow('signup', '10.0.0.10', 5, interval '1 hour')").fetchone()[0] is True
+        a.commit()
+    with psycopg.connect(URL) as c:
+        u = c.execute("insert into users (email, password_hash) values ('uploads@example.com', 'x') returning id").fetchone()[0]
+        c.commit()
+    with app_conn(env) as a:
+        as_user(a, u)
+        for i in range(60):
+            a.execute("insert into stored_files (name, size, data, uploaded_by) values ('f', 1, 'x', %s)", (u,))
+        with pytest.raises(psycopg.errors.RaiseException, match="60 files a day"):
+            a.execute("insert into stored_files (name, size, data, uploaded_by) values ('f', 1, 'x', %s)", (u,))
+        a.rollback()
+
+
+def test_two_step_challenge(env):
+    with psycopg.connect(URL) as c:
+        u = c.execute("insert into users (email, password_hash) values ('2step@example.com', 'x') returning id").fetchone()[0]
+        c.commit()
+    with app_conn(env) as a:
+        as_user(a, u)
+        a.execute("insert into user_totp (user_id, secret) values (%s, 'JBSWY3DPEHPK3PXP')", (u,))
+        a.commit()
+        as_user(a, None)
+        assert a.execute("select auth_totp_enabled(%s)", (u,)).fetchone()[0] is False      # not confirmed yet
+        a.commit()
+        as_user(a, u)
+        a.execute("update user_totp set enabled = true where user_id = %s", (u,))
+        a.commit()
+        as_user(a, None)
+        assert a.execute("select auth_totp_enabled(%s)", (u,)).fetchone()[0] is True
+        a.execute("select auth_create_challenge('tok', %s)", (u,))
+        assert a.execute("select secret from auth_challenge('tok')").fetchone()[0] == "JBSWY3DPEHPK3PXP"
+        for _ in range(5):
+            a.execute("select auth_challenge_failed('tok')")
+        assert a.execute("select count(*) from auth_challenge('tok')").fetchone()[0] == 0      # 5 wrong codes: dead
+        with pytest.raises(psycopg.errors.InsufficientPrivilege):
+            a.execute("select * from login_challenges")
+        a.rollback()
+        as_user(a, None)   # nobody else reads someone's secret
+        assert a.execute("select count(*) from user_totp").fetchone()[0] == 0

@@ -37,8 +37,17 @@ def tick():
     return bool(row)
 
 
+def init_monitoring():
+    """Error monitoring (Sentry), off unless SENTRY_DSN is set. Logged errors (failed jobs, crashed ticks) are sent."""
+    if os.environ.get("SENTRY_DSN"):
+        import sentry_sdk
+        sentry_sdk.init(dsn=os.environ["SENTRY_DSN"], environment=os.environ.get("SENTRY_ENVIRONMENT", "production"),
+                        send_default_pii=False, traces_sample_rate=0)
+
+
 def main():
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(name)s %(message)s")
+    init_monitoring()
     if os.environ.get("RUN_BOOTSTRAP") == "1":   # hosts without a separate init step (see render.yaml)
         import bootstrap
         bootstrap.run()

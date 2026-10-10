@@ -6,6 +6,7 @@ import { createHash, randomBytes } from 'node:crypto';
 import { pool, withUser, one } from './db';
 
 export const SESSION_COOKIE = 'nzx_session';
+export const CHALLENGE_COOKIE = 'nzx_2step';
 const SESSION_DAYS = 30;
 
 export type User = {
@@ -15,7 +16,7 @@ export type User = {
   company_name: string | null; claim_status: string | null;
 };
 
-const sha = (s: string) => createHash('sha256').update(s).digest('hex');
+export const sha = (s: string) => createHash('sha256').update(s).digest('hex');
 
 export async function createSession(userId: string) {
   const token = randomBytes(32).toString('base64url');
@@ -23,6 +24,16 @@ export async function createSession(userId: string) {
   await pool.query('select auth_create_session($1, $2, $3)', [sha(token), userId, expires]);
   (await cookies()).set(SESSION_COOKIE, token, {
     httpOnly: true, sameSite: 'lax', path: '/', expires,
+    secure: process.env.NODE_ENV === 'production' && process.env.INSECURE_COOKIES !== '1',
+  });
+}
+
+/** After a correct password on an account with two-step sign-in: a 10-minute challenge, not a session. */
+export async function createChallenge(userId: string) {
+  const token = randomBytes(32).toString('base64url');
+  await pool.query('select auth_create_challenge($1, $2)', [sha(token), userId]);
+  (await cookies()).set(CHALLENGE_COOKIE, token, {
+    httpOnly: true, sameSite: 'lax', path: '/', maxAge: 600,
     secure: process.env.NODE_ENV === 'production' && process.env.INSECURE_COOKIES !== '1',
   });
 }
@@ -58,9 +69,17 @@ export async function requireUser(opts: { allowOnboarding?: boolean } = {}): Pro
   return u;
 }
 
-/** Team-only pages answer 404 to everyone else, so customers cannot tell they exist. */
+export const teamTwoStepRequired = () => process.env.TEAM_2FA_REQUIRED !== '0';
+
+export async function twoStepEnabled(userId: string): Promise<boolean> {
+  return withUser(userId, async (db) => Boolean((await one(db, 'select enabled from user_totp where user_id = $1', [userId]))?.enabled));
+}
+
+/** Team-only pages answer 404 to everyone else, so customers cannot tell they exist.
+ *  Team accounts must have two-step sign-in on before they get in. */
 export async function requireTeam(): Promise<User> {
   const u = await getUser();
   if (!u || u.role !== 'team') notFound();
+  if (teamTwoStepRequired() && !(await twoStepEnabled(u.id))) redirect('/settings/security?required=1');
   return u;
 }

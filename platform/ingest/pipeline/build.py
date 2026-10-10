@@ -145,11 +145,24 @@ def cert_year(c):
     return 2000 + yy if yy <= 60 else 1900 + yy
 
 
+def fix_mojibake(v):
+    """UTF-8 text that was read as Latin-1 somewhere upstream ('SantÃ©' -> 'Santé'). Left alone if it doesn't fit."""
+    if not isinstance(v, str) or not re.search("[ÃÂâ][\x80-\xbf\u0152-\u2122]", v):
+        return v
+    try:
+        return v.encode("cp1252").decode("utf-8")
+    except (UnicodeEncodeError, UnicodeDecodeError):
+        try:
+            return v.encode("latin-1").decode("utf-8")
+        except (UnicodeEncodeError, UnicodeDecodeError):
+            return v
+
+
 def clean_registry(reg):
     reg = reg.copy()
     for c in reg.columns:
-        if reg[c].dtype == object:
-            reg[c] = reg[c].map(lambda v: re.sub(r"\s+", " ", v).strip() if isinstance(v, str) else v)
+        if reg[c].dtype == object or str(reg[c].dtype).startswith("str"):
+            reg[c] = reg[c].map(lambda v: re.sub(r"\s+", " ", fix_mojibake(v)).strip() if isinstance(v, str) else v)
     reg["certificate_no"] = reg["Certificate Number"].str.replace(r"\s+", " ", regex=True).str.strip()
     reg["active"] = ~reg["Registration Status"].isin(INACTIVE)
     vet_text = reg["Generic Name"].fillna("") + " " + reg["Active Pharmaceutical Ingredients"].fillna("")
