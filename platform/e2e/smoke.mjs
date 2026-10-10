@@ -52,7 +52,11 @@ for (const path of ['/market', '/market/whitespace', '/competitors', '/competito
   const r = await c.goto(B + path); check(r.status() === 200, `customer page ${path}`);
 }
 await c.goto(B + '/home');
-check((await c.content()).includes('Waiting on you'), 'home leads with what to do');
+const homeHtml = await c.content();
+check(['Market intelligence', 'Quick sourcing', 'Portfolio analysis'].every((t) => homeHtml.includes(t)), 'home shows the three services');
+await c.fill('#list', 'Amoxicillin 500mg capsules\nCiprofloxacin\nNot A Real Medicine');
+await Promise.all([c.waitForURL(/added=/), c.click('text=Analyse my portfolio')]);
+check(Number(new URL(c.url()).searchParams.get('added')) >= 2 && (await c.content()).includes('Full analysis'), 'paste a product list to build the portfolio');
 await c.goto(B + '/requests/new'); await c.fill('#molecule', 'Amoxicillin');   // quantity is optional
 await Promise.all([c.waitForURL(/sent=/), c.click('text=Send request')]);
 const reqId = new URL(c.url()).searchParams.get('sent');

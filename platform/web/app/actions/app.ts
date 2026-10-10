@@ -51,6 +51,46 @@ export async function toggleWatch(f: FormData) {
   redirect(to);
 }
 
+// Same idea as the pipeline's molecule key: lower case, no strengths, forms or pharmacopoeia marks, sorted tokens.
+const FORM_WORDS = new Set(['tablet', 'tablets', 'tab', 'tabs', 'capsule', 'capsules', 'cap', 'caps', 'injection', 'inj', 'syrup',
+  'suspension', 'cream', 'ointment', 'gel', 'drops', 'eye', 'ear', 'oral', 'solution', 'powder', 'for', 'infusion', 'bp', 'usp', 'ip',
+  'and', 'with', 'film', 'coated', 'dispersible', 'sr', 'er', 'mr', 'forte', 'plus', 'sachet', 'sachets', 'lotion', 'vial', 'ampoule']);
+function moleculeKeyish(name: string) {
+  const t = name.toLowerCase().replace(/\(.*?\)|\[.*?\]/g, ' ')
+    .replace(/\b[\d.,]+\s*(mg|mcg|µg|g|ml|iu|%|units?)\b/g, ' ').replace(/[^a-z\- ]/g, ' ')
+    .split(/\s+/).filter((w) => w.length > 1 && !FORM_WORDS.has(w));
+  return [...new Set(t)].sort().join(' ');
+}
+
+/** Paste a product list (one per line, or comma separated): each name is matched to a molecule and added. */
+export async function addPortfolioList(f: FormData) {
+  const u = await requireUser();
+  const to = ret(f, '/home');
+  const names = str(f, 'list', 20000).split(/[\n;]+|,(?![^(]*\))/).map((x) => x.trim()).filter(Boolean).slice(0, 300);
+  if (!names.length) back(to, { error: 'Paste at least one product name.' });
+  let added = 0;
+  const missed: string[] = [];
+  try {
+    await withUser(u.id, async (db) => {
+      for (const n of names) {
+        const m = await one(db, `select id from molecules where lower(inn) = lower($1)
+                                 union all select molecule_id from molecule_aliases where alias = $2
+                                 union all (select molecule_id from molecule_aliases where alias like $2 || ' %' order by length(alias) limit 1)
+                                 limit 1`, [n, moleculeKeyish(n)]);
+        if (!m) { missed.push(n); continue; }
+        const r = await db.query('insert into portfolio_items (user_id, molecule_id, source) values ($1, $2, $3) on conflict do nothing',
+          [u.id, m.id ?? m.molecule_id, 'list']);
+        added += r.rowCount ?? 0;
+      }
+    });
+  } catch (e) {
+    back(to, { error: dbMessage(e) });
+  }
+  const q = new URLSearchParams({ added: String(added) });
+  if (missed.length) q.set('missed', missed.slice(0, 15).join(' | '));
+  redirect(`${to}${to.includes('?') ? '&' : '?'}${q}`);
+}
+
 /** Hide a molecule from "Picked for you". */
 export async function hideMolecule(f: FormData) {
   const u = await requireUser();
