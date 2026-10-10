@@ -41,6 +41,34 @@ export async function setStage(f: FormData) {
   redirect(to);
 }
 
+const VERDICTS: Record<string, string> = { go: 'Go', maybe: 'Worth a look', no: 'Skip' };
+
+/** The evaluation we do inside a sourcing request. Saving it moves a new request to "Reviewing" and tells the customer. */
+export async function saveEvaluation(f: FormData) {
+  const id = int(f, 'request_id')!, verdict = str(f, 'verdict', 10), summary = str(f, 'summary', 1200);
+  const to = `/admin/requests/${id}`;
+  if (!VERDICTS[verdict]) back(to, { error: 'Pick a verdict.' });
+  if (!summary) back(to, { error: 'Write why, in two or three lines.' });
+  await team(async (db, uid) => {
+    const had = await one(db, 'select 1 as x from request_evaluations where request_id = $1', [id]);
+    await db.query(`insert into request_evaluations (request_id, verdict, summary, supply, price_range, route, evaluated_by, evaluated_at)
+                    values ($1, $2, $3, $4, $5, $6, $7, now())
+                    on conflict (request_id) do update set verdict = excluded.verdict, summary = excluded.summary, supply = excluded.supply,
+                      price_range = excluded.price_range, route = excluded.route, evaluated_by = excluded.evaluated_by, evaluated_at = now()`,
+      [id, verdict, summary, str(f, 'supply', 300) || null, str(f, 'price_range', 200) || null, str(f, 'route', 300) || null, uid]);
+    const r = await one(db, 'select stage from requests where id = $1', [id]);
+    if (r?.stage === 'Submitted') {
+      await db.query("update requests set stage = 'Reviewing', updated_at = now() where id = $1", [id]);
+      await db.query("insert into request_stage_history (request_id, stage, changed_by) values ($1, 'Reviewing', $2)", [id, uid]);
+    } else {
+      await db.query('update requests set updated_at = now() where id = $1', [id]);
+    }
+    await notifyCustomer(db, id, had ? 'Evaluation updated' : 'Evaluation ready',
+      `Our evaluation of request #${id}: ${VERDICTS[verdict]}. ${summary}`);
+  }, to);
+  redirect(`${to}?saved=1`);
+}
+
 export async function addOfferAndQuote(f: FormData) {
   const id = int(f, 'request_id')!;
   const to = `/admin/requests/${id}`;

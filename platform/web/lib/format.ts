@@ -14,18 +14,16 @@ export const LEVELS: Record<string, string> = {
   D: 'Regional hospitals and up', S: 'Specialist and national hospitals',
 };
 export const levelLabel = (l?: string | null) => (l && LEVELS[l]) || 'Level not stated';
+export const LEVEL_SHORT: Record<string, string> = {
+  A: 'All facilities', B: 'Health centres up', C: 'District hospitals up', D: 'Regional hospitals up', S: 'Specialist only',
+};
 
-export function demandLabel(d: number | string | null | undefined): 'High' | 'Medium' | 'Low' | '—' {
-  if (d === null || d === undefined) return '—';
-  const n = Number(d);
-  return n >= 0.8 ? 'High' : n >= 0.6 ? 'Medium' : n > 0 ? 'Low' : '—';
+/** "Registered by 4 companies · 11 products" */
+export function registeredLine(companies?: number | null, products?: number | null) {
+  const c = Number(companies ?? 0), p = Number(products ?? 0);
+  if (c === 0) return 'Nobody registered';
+  return `Registered by ${c} ${c === 1 ? 'company' : 'companies'} · ${p} ${p === 1 ? 'product' : 'products'}`;
 }
-
-export function saturationLabel(avg: number): 'High' | 'Medium' | 'Low' {
-  return avg >= 0.6 ? 'High' : avg >= 0.3 ? 'Medium' : 'Low';
-}
-
-export const score = (s: number | string | null | undefined) => (s === null || s === undefined ? '—' : String(Math.round(Number(s))));
 
 export function fitLabel(sameCategoryInPortfolio: number): 'Strong' | 'Good' | 'Weak' {
   return sameCategoryInPortfolio >= 3 ? 'Strong' : sameCategoryInPortfolio >= 1 ? 'Good' : 'Weak';

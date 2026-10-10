@@ -11,8 +11,10 @@ export const metadata = { title: 'Help' };
 const QA: [string, ReactNode][] = [
   ['Where does the data come from?', <>Public registration data for medicines in Tanzania, updated every two days, and the {OFFICIAL_LIST()}.
     Company and competitor figures show <b>registered coverage, not sales</b>.</>],
-  ['What is the gap score?', <>A score out of 100 for how open a molecule is: high demand (on the official list, used widely),
-    and few registered competitors. 100 means it is on both essential lists, used at every level of care, and nobody has registered it.</>],
+  ['How do you pick molecules for me?', <>From the classes in your portfolio, we show a few official-list molecules that few or no companies
+    have registered in Tanzania. Hide the ones you do not want. You see how many companies registered each one, never a made-up score.</>],
+  ['What happens when I source a molecule?', <>We evaluate it for you first: who already sells it, whether supply is there, an indicative
+    price and the registration route, with a clear go or skip. If it is worth it, we find suppliers and send you anonymous quotes.</>],
   ['How do enrich credits work?', <>The free plan has {FREE.credits} credits a month. Opening a molecule&apos;s full page costs one credit,
     once; opening it again is free. Credits reset at the start of each month. The paid plan has no credit limit.</>],
   ['What do I get on the paid plan?', <>Price bands, supplier availability, the full ranked list of gaps, more countries as they launch,

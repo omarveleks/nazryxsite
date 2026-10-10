@@ -39,7 +39,7 @@ export default async function NewRequest({ searchParams }: { searchParams: Promi
   }
   const full = u.plan !== 'paid' && d.active >= FREE.requests;
   return (
-    <Shell user={u} title="New request" sub="Tell us what you need sourced" crumb={<><Link href="/requests">Requests</Link> / New request</>}>
+    <Shell user={u} title="Source a molecule" sub="We evaluate it for you first, then find suppliers" crumb={<><Link href="/requests">Requests</Link> / New request</>}>
       {sp.error && <div className="err" role="alert">{sp.error}</div>}
       <div className="split">
         <section className="card">
@@ -53,7 +53,7 @@ export default async function NewRequest({ searchParams }: { searchParams: Promi
                   <input className="input" id="molecule" name="molecule" list="mols" required placeholder="Start typing a molecule" autoComplete="off" />
                   <datalist id="mols">{d.names.map((n) => <option key={n.inn} value={n.inn} />)}</datalist></>)}
               </div>
-              <div className="field"><label htmlFor="quantity">Quantity</label><input className="input" id="quantity" name="quantity" required placeholder="e.g. 50,000" /></div>
+              <div className="field"><label htmlFor="quantity">Quantity, if you know it</label><input className="input" id="quantity" name="quantity" placeholder="e.g. 50,000" /></div>
               <div className="field"><label htmlFor="unit">Unit</label>
                 <select className="input" id="unit" name="unit"><option>packs</option><option>tablets</option><option>vials</option><option>bottles</option><option>kg</option></select></div>
               <div className="field"><label htmlFor="target_price">Target price</label><input className="input" id="target_price" name="target_price" placeholder="e.g. USD 1.20 per pack" /></div>
@@ -68,8 +68,8 @@ export default async function NewRequest({ searchParams }: { searchParams: Promi
         <section className="card">
           <h2 style={{ marginBottom: 8 }}>What happens next</h2>
           <ol className="steps">
-            <li><em>01</em><span>We review the request and reach out for details.</span></li>
-            <li><em>02</em><span>We find suppliers.</span></li>
+            <li><em>01</em><span>We evaluate it for you: competitors, supply, price range and registration route. You get a clear go or skip.</span></li>
+            <li><em>02</em><span>If it is worth it, we find suppliers.</span></li>
             <li><em>03</em><span>You compare anonymous quotes.</span></li>
             <li><em>04</em><span>You accept one and the supplier is revealed.</span></li>
           </ol>

@@ -1,10 +1,10 @@
 import Link from 'next/link';
 import Shell from '@/components/Shell';
-import { Bar, Empty, Flash, Locked, Score, Tabs } from '@/components/ui';
+import { Bar, Empty, Flash, Locked, Tabs } from '@/components/ui';
 import { addCustomerSupplier, deleteCustomerSupplier, togglePortfolio } from '@/app/actions/app';
 import { requireUser } from '@/lib/auth';
 import { rows, withUser } from '@/lib/db';
-import { COVERAGE_NOTE, OFFICIAL_LIST, levelLabel, score, title } from '@/lib/format';
+import { COVERAGE_NOTE, OFFICIAL_LIST, levelLabel, title } from '@/lib/format';
 import { COUNTRY } from '@/lib/queries';
 
 export const metadata = { title: 'My portfolio' };
@@ -73,13 +73,13 @@ export default async function Portfolio({ searchParams }: { searchParams: Promis
       <Flash sp={sp} />
       {tab === 'coverage' && (<>
         <div className="grid g3">
-          <div className="card tight stack" style={{ gap: 6 }}><span className="lbl">Portfolio score</span><Score value={myScore} />
+          <div className="card tight stack" style={{ gap: 6 }}><span className="lbl">Official-list coverage</span><span className="score"><b className="num">{myScore}%</b></span>
             <span className="note">Share of official-list molecules you carry in your classes</span></div>
           <div className="card tight stack" style={{ gap: 6 }}><span className="lbl">Molecules listed</span>
             <span className="score"><b className="num">{d.items.length}</b></span></div>
           <div className="card tight stack" style={{ gap: 6 }}><span className="lbl">vs country average</span>
             <span className="score sm"><b>{d.items.length === 0 ? '—' : myScore >= avgScore ? 'Above' : 'Below'}</b></span>
-            <span className="note num">Distributor average {avgScore}/100</span></div>
+            <span className="note num">Distributor average {avgScore}%</span></div>
         </div>
         <div className="split">
           <section className="card">
@@ -152,8 +152,8 @@ export default async function Portfolio({ searchParams }: { searchParams: Promis
         <section className="card stack">
           <div className="card-h"><h2>You against Tanzanian distributors</h2><span className="pill">{COVERAGE_NOTE}</span></div>
           <div className="grid g2">
-            <div className="stack" style={{ gap: 4 }}><span className="lbl">Your score</span><Score value={myScore} /></div>
-            <div className="stack" style={{ gap: 4 }}><span className="lbl">Distributor average</span><Score value={avgScore} /></div>
+            <div className="stack" style={{ gap: 4 }}><span className="lbl">Your coverage</span><span className="score"><b className="num">{myScore}%</b></span></div>
+            <div className="stack" style={{ gap: 4 }}><span className="lbl">Distributor average</span><span className="score"><b className="num">{avgScore}%</b></span></div>
           </div>
           {paid ? (<>
             <div className="legend"><span><i style={{ background: 'var(--blue)' }} />You</span><span><i style={{ background: 'var(--pastel-peach-ink)' }} />Average distributor</span></div>

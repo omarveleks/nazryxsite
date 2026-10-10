@@ -52,10 +52,30 @@ def _level(tok):
     return {"SS": "S", "CC": "C"}.get(tok.upper(), tok.upper()) if tok else ""
 
 
+NEMLIT_TABLE_HEADER = "section\tmolecule\tforms\tlevel\tnote"
+
+
+def parse_nemlit_table(text):
+    """The list as a table, one row per line of the printed table: section number, medicine, dosage forms,
+    facility level, restriction note. Extracted cell by cell from the 2026 PDF (see README), so the level column
+    is read directly instead of guessed from OCR line ends."""
+    rows = []
+    for i, ln in enumerate(text.splitlines()[1:], start=2):
+        parts = (ln.split("\t") + [""] * 5)[:5]
+        sec, name, forms, level, note = (p.strip() for p in parts)
+        if not name or not sec.isdigit() or int(sec) not in C.SECTIONS:
+            continue
+        rows.append({"molecule": name, "category": C.SECTIONS[int(sec)], "level": _level(level) if level else "",
+                     "forms": forms, "note_text": note, "line": i})
+    return rows
+
+
 def parse_nemlit(path):
-    """Parse the OCR text of the national essential medicines list.
+    """Parse the national essential medicines list: the extracted table (preferred) or the older OCR text.
     Returns one row per molecule key: molecule, category, level, key, line."""
     text = open(path, errors="ignore").read().replace("’", "'")
+    if text.startswith(NEMLIT_TABLE_HEADER):
+        return _finish_nemlit(parse_nemlit_table(text))
     lines = text.splitlines()
     start = next((i for i, l in enumerate(lines) if "Essential Medicines List 2026 Edition" in l), 0)
     rows, cat, last_section = [], "", 0
@@ -82,6 +102,10 @@ def parse_nemlit(path):
         # continuation line that carries the level of the molecule above it
         if lv and rows and not rows[-1]["level"] and rows[-1]["line"] >= i - 3:
             rows[-1]["level"] = _level(lv.group(1))
+    return _finish_nemlit(rows)
+
+
+def _finish_nemlit(rows):
     d = pd.DataFrame(rows)
     d = C.apply_nemlit_corrections(d)
     d["key"] = d.molecule.map(molecule_key)

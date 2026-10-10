@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import type { ReactNode } from 'react';
-import { GLOBAL_LIST, OFFICIAL_SHORT, STAGES, score as fmtScore } from '@/lib/format';
+import { GLOBAL_LIST, LEVEL_SHORT, OFFICIAL_SHORT, STAGES } from '@/lib/format';
 
 export function Locked({ title, children, cta = 'Upgrade' }: { title: string; children?: ReactNode; cta?: string }) {
   return (
@@ -13,18 +13,41 @@ export function Locked({ title, children, cta = 'Upgrade' }: { title: string; ch
   );
 }
 
-export function StatusPills({ official, global }: { official?: boolean; global?: boolean }) {
+export type BadgeFacts = {
+  on_national_list?: boolean | null; on_who_eml?: boolean | null; facility_level?: string | null;
+  registrants?: number | null; registrations?: number | null; in_combinations?: number | null;
+  channel_flag?: string | null; local_made?: number | null;
+  in_portfolio?: boolean | null; watched?: boolean | null; request_stage?: string | null; supply?: boolean | null;
+};
+
+/** Every fact about a molecule worth a glance, as pills. `full` adds facility level and local manufacturing. */
+export function Badges({ m, full }: { m: BadgeFacts; full?: boolean }) {
+  const regs = Number(m.registrants ?? 0);
+  const comboOnly = Number(m.registrations ?? 0) === 0 && Number(m.in_combinations ?? 0) > 0;
   return (
     <span className="row" style={{ gap: 6 }}>
-      {official && <span className="pill blue">{OFFICIAL_SHORT}</span>}
-      {global && <span className="pill mint">{GLOBAL_LIST}</span>}
-      {!official && !global && <span className="pill">Not listed</span>}
+      {m.in_portfolio && <span className="pill solid">In your portfolio</span>}
+      {m.request_stage && <span className="pill solid">Requested · {m.request_stage}</span>}
+      {m.on_national_list && <span className="pill blue">{OFFICIAL_SHORT}</span>}
+      {m.on_who_eml && <span className="pill mint">{GLOBAL_LIST}</span>}
+      {!m.on_national_list && !m.on_who_eml && <span className="pill">Not listed</span>}
+      {full && m.on_national_list && m.facility_level && LEVEL_SHORT[m.facility_level] && <span className="pill">{LEVEL_SHORT[m.facility_level]}</span>}
+      {comboOnly ? <span className="pill peach">Only in combinations</span>
+        : regs === 0 ? <span className="pill peach">Nobody registered</span>
+        : regs <= 3 ? <span className="pill peach">Few competitors</span>
+        : regs >= 8 ? <span className="pill">Crowded</span> : null}
+      {m.channel_flag === 'programme' && <span className="pill lav">Programme channel</span>}
+      {full && Number(m.local_made ?? 0) > 0 && <span className="pill">Made locally</span>}
+      {m.supply && <span className="pill mint">Supply confirmed</span>}
+      {m.watched && <span className="pill">Watching</span>}
     </span>
   );
 }
 
-export function Score({ value, size }: { value: number | string | null; size?: 'sm' }) {
-  return <div className={`score ${size ?? ''}`}><b className="num">{fmtScore(value)}</b><span>/100</span></div>;
+/** The one action on a molecule: ask Nazryx to source it. We evaluate it inside the request. */
+export function SourceLink({ id, stage }: { id: number; stage?: string | null }) {
+  if (stage) return <Link className="btn btn-ghost btn-sm" href="/requests">Open request</Link>;
+  return <Link className="btn btn-blue btn-sm" href={`/requests/new?molecule=${id}`}>Source</Link>;
 }
 
 export function StagePill({ stage }: { stage: string }) {

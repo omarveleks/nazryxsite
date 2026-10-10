@@ -7,6 +7,9 @@ import { requireUser } from '@/lib/auth';
 import { one, rows, withUser } from '@/lib/db';
 import { fmtDate } from '@/lib/format';
 
+const VERDICT: Record<string, { label: string; cls: string }> = {
+  go: { label: 'Go', cls: 'mint' }, maybe: { label: 'Worth a look', cls: 'blue' }, no: { label: 'Skip', cls: 'peach' },
+};
 const PVT: Record<string, string> = { below: 'Below your target price', at: 'At your target price', above: 'Above your target price' };
 
 export default async function RequestDetail({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ error?: string; accepted?: string }> }) {
@@ -26,6 +29,7 @@ export default async function RequestDetail({ params, searchParams }: { params: 
       files: await rows(db, 'select id, file_name, kind, created_at from request_files where request_id = $1 order by created_at', [id]),
       messages: await rows(db, 'select from_team, body, created_at from request_messages where request_id = $1 order by created_at', [id]),
       order: await one(db, 'select id, status, updated_at from orders where request_id = $1', [id]),
+      evaluation: await one(db, 'select verdict, summary, supply, price_range, route, evaluated_at from request_evaluations where request_id = $1', [id]),
     };
   });
   if (!d) notFound();
@@ -39,6 +43,23 @@ export default async function RequestDetail({ params, searchParams }: { params: 
       <Stages current={r.stage} />
       <div className="split">
         <div className="stack">
+          <section className="card">
+            <div className="card-h"><h2>Our evaluation</h2>
+              {d.evaluation && <span className={`pill ${VERDICT[d.evaluation.verdict].cls}`}>{VERDICT[d.evaluation.verdict].label}</span>}</div>
+            {!d.evaluation ? (
+              <Empty>We are evaluating this for you: who already sells it, whether supply is there, a price range and the registration route. Usually within two working days.</Empty>
+            ) : (
+              <div className="stack" style={{ gap: 10 }}>
+                <p style={{ whiteSpace: 'pre-wrap' }}>{d.evaluation.summary}</p>
+                <table className="tbl"><tbody>
+                  {d.evaluation.supply && <tr><td>Supply</td><td>{d.evaluation.supply}</td></tr>}
+                  {d.evaluation.price_range && <tr><td>Indicative price</td><td>{d.evaluation.price_range}</td></tr>}
+                  {d.evaluation.route && <tr><td>Registration route</td><td>{d.evaluation.route}</td></tr>}
+                </tbody></table>
+                <span className="note">Evaluated {fmtDate(d.evaluation.evaluated_at)}. {d.evaluation.verdict === 'no' ? 'Reply below if you still want us to look for suppliers.' : 'Next: we find suppliers and post anonymous quotes below.'}</span>
+              </div>
+            )}
+          </section>
           <section className="card">
             <div className="card-h"><h2>Quotes</h2>{d.order && <span className="pill blue">Order {d.order.id}: {d.order.status}</span>}</div>
             {d.quotes.length === 0 && <Empty>No quotes yet. We will post them here when suppliers are found.</Empty>}

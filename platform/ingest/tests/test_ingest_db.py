@@ -437,3 +437,35 @@ def test_two_step_challenge(env):
         a.rollback()
         as_user(a, None)   # nobody else reads someone's secret
         assert a.execute("select count(*) from user_totp").fetchone()[0] == 0
+
+
+def test_evaluations_hidden_picks_and_moves(env):
+    with psycopg.connect(URL) as c:
+        cust = c.execute("insert into users (email, password_hash) values ('ev1@example.com', 'x') returning id").fetchone()[0]
+        other = c.execute("insert into users (email, password_hash) values ('ev2@example.com', 'x') returning id").fetchone()[0]
+        team = c.execute("insert into users (email, password_hash, role) values ('evt@example.com', 'x', 'team') returning id").fetchone()[0]
+        mol = c.execute("select id from molecules where inn = 'Doxycycline'").fetchone()[0]
+        req = c.execute("insert into requests (user_id, molecule_id) values (%s, %s) returning id", (cust, mol)).fetchone()[0]
+        c.execute("insert into portfolio_items (user_id, molecule_id) values (%s, %s)", (cust, mol))
+        c.commit()
+    with app_conn(env) as a:
+        as_user(a, cust)   # a customer cannot write an evaluation, even on their own request
+        with pytest.raises(psycopg.errors.InsufficientPrivilege):
+            a.execute("insert into request_evaluations (request_id, verdict, summary) values (%s, 'go', 'x')", (req,))
+        a.rollback()
+        as_user(a, team)
+        a.execute("insert into request_evaluations (request_id, verdict, summary, price_range) values (%s, 'go', 'Worth it', 'USD 1')", (req,))
+        a.commit()
+        as_user(a, cust)
+        assert a.execute("select verdict, price_range from request_evaluations").fetchall() == [("go", "USD 1")]
+        a.execute("insert into hidden_molecules (user_id, molecule_id) values (%s, %s)", (cust, mol))
+        # the earlier diffed upload added Doxycycline products: they show as moves on this customer's portfolio
+        moves = a.execute("select change, molecule from my_market_moves(3650)").fetchall()
+        assert moves and all(m == "Doxycycline" for _, m in moves)
+        a.commit()
+        as_user(a, other)
+        assert a.execute("select count(*) from request_evaluations").fetchone()[0] == 0
+        assert a.execute("select count(*) from hidden_molecules").fetchone()[0] == 0
+        assert a.execute("select count(*) from my_market_moves(3650)").fetchone()[0] == 0   # no portfolio, no moves
+        a.rollback()
+    assert q("select count(*) from audit_log where table_name = 'request_evaluations'")[0][0] == 1

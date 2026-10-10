@@ -161,6 +161,14 @@ to 100 (migration 009). Molecules the list says to prepare locally (medical oxyg
 in coverage but are left out of whitespace ranking. Programme-channel classes (vaccines, ARVs, TB, malaria, blood,
 hormones and contraceptives, cancer, NTDs) are flagged "check before pitching".
 
+## Essential list from the 2026 PDF
+
+`ingest/tools/nemlit_pdf_to_table.py` reads the scanned PDF table cell by cell (ruled lines give rows and columns;
+level letters are matched by shape) and writes a tab-separated `.txt` the pipeline reads directly. Against the old
+OCR text: 672 molecules instead of 585, 2 with no level instead of 180 (both blank in the PDF itself), 329 matched to
+the global list instead of 292. Needs poppler, tesseract and opencv; run it once per edition, then upload the `.txt`
+in Admin as the essential list. The old OCR text still parses.
+
 ## Pipeline fixes (before trusting the scores)
 
 | | Handoff pipeline | Now |

@@ -46,12 +46,17 @@ check(true, 'sign up and claim a company');
 await c.goto(B + '/search?q=doxy');
 await Promise.all([c.waitForURL(/molecule\/\d+/), c.locator('text=Enrich, 1 credit').first().click()]);
 check((await c.locator('.plan-box').innerText()).includes('19'), 'enrich spends one credit');
+const molPage = await c.content();
+check(!/Gap score|Demand strength/.test(molPage) && molPage.includes('Registered in Tanzania'), 'molecule page shows registrations, no score');
 for (const path of ['/market', '/market/whitespace', '/competitors', '/competitors?tab=compare', '/portfolio', '/portfolio?tab=benchmark', '/requests', '/settings', '/settings/security', '/help']) {
   const r = await c.goto(B + path); check(r.status() === 200, `customer page ${path}`);
 }
-await c.goto(B + '/requests/new'); await c.fill('#molecule', 'Amoxicillin'); await c.fill('#quantity', '1000');
+await c.goto(B + '/home');
+check((await c.content()).includes('Waiting on you'), 'home leads with what to do');
+await c.goto(B + '/requests/new'); await c.fill('#molecule', 'Amoxicillin');   // quantity is optional
 await Promise.all([c.waitForURL(/sent=/), c.click('text=Send request')]);
-check(true, 'send a sourcing request');
+const reqId = new URL(c.url()).searchParams.get('sent');
+check(Boolean(reqId), 'send a sourcing request');
 check((await c.goto(B + '/admin')).status() === 404, 'admin is hidden from customers');
 
 // 2. the demo customer accepts an anonymous quote and the supplier is revealed
@@ -79,6 +84,13 @@ await t.goto(B + '/admin?tab=claims');
 await Promise.all([t.waitForLoadState('networkidle'), t.locator(`tr:has-text("${email}") button:has-text("Approve")`).click()]);
 await t.goto(B + '/admin?tab=activity');
 check((await t.content()).includes('company claims'), 'claim approval is in the activity log');
+await t.goto(B + `/admin/requests/${reqId}`);
+await t.selectOption('#verdict', 'go'); await t.fill('#summary', 'Few competitors and supply is ready.');
+await t.fill('#price_range', 'USD 1.00-1.20 per pack');
+await Promise.all([t.waitForURL(/saved=1/), t.click('text=Send evaluation to the customer')]);
+await c.goto(B + `/requests/${reqId}`);
+const evalPage = await c.content();
+check(evalPage.includes('Few competitors and supply is ready.') && evalPage.includes('USD 1.00-1.20'), 'customer sees the evaluation in the request');
 const t2 = await page();
 await signin(t2, process.env.SEED_TEAM_EMAIL || 'team@nazryx.test', process.env.SEED_TEAM_PASSWORD, secret);
 check(t2.url().includes('/home'), 'team signs in with a two-step code');
@@ -93,7 +105,7 @@ if (XLS) {
 // 4. phone width: no sideways scrolling
 const m = await page(375);
 await signin(m, 'demo-free@nazryx.test', process.env.DEMO_PASSWORD);
-for (const path of ['/home', '/search?q=amox', '/market', '/requests', '/portfolio', '/help']) {
+for (const path of ['/home', '/search?q=amox', '/market', '/market/whitespace', '/requests', '/portfolio', '/help']) {
   await m.goto(B + path);
   const w = await m.evaluate(() => document.documentElement.scrollWidth);
   check(w <= 380, `no sideways scroll at 375px on ${path}`);

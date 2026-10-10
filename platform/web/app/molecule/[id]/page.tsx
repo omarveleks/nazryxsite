@@ -2,11 +2,11 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import Shell from '@/components/Shell';
 import EnrichButton from '@/components/EnrichButton';
-import { Flash, Locked, Score, StatusPills, Tabs, Empty } from '@/components/ui';
+import { Badges, Flash, Locked, Tabs, Empty } from '@/components/ui';
 import { togglePortfolio, toggleWatch } from '@/app/actions/app';
 import { requireUser } from '@/lib/auth';
 import { one, rows, withUser } from '@/lib/db';
-import { GLOBAL_LIST, OFFICIAL_LIST, channelLabel, demandLabel, levelLabel, score, title, COVERAGE_NOTE } from '@/lib/format';
+import { GLOBAL_LIST, channelLabel, levelLabel, registeredLine, title, COVERAGE_NOTE } from '@/lib/format';
 import { COUNTRY } from '@/lib/queries';
 
 export default async function Molecule({ params, searchParams }: {
@@ -21,13 +21,17 @@ export default async function Molecule({ params, searchParams }: {
   const tab = sp.tab ?? 'overview';
   const d = await withUser(u.id, async (db) => {
     const m = await one(db, `
-      select m.id, m.inn, m.category, m.use_case, m.canonical_key, cm.*, g.score, g.demand, g.saturation,
+      select m.id, m.inn, m.category, m.use_case, m.canonical_key, cm.*,
              exists (select 1 from enrichments e where e.molecule_id = m.id and e.user_id = $2) as enriched,
+             (select json_build_object('id', r.id, 'stage', r.stage, 'verdict', e.verdict) from requests r
+                left join request_evaluations e on e.request_id = r.id
+                where r.molecule_id = m.id and r.user_id = $2 order by (r.stage = 'Closed'), r.updated_at desc limit 1) as request,
              exists (select 1 from portfolio_items p where p.molecule_id = m.id and p.user_id = $2) as in_portfolio,
              exists (select 1 from watches w where w.molecule_id = m.id and w.user_id = $2) as watched
       from molecules m left join country_molecules cm on cm.molecule_id = m.id and cm.country = $3
-      left join visible_gap_scores g on g.molecule_id = m.id and g.country = $3 where m.id = $1`, [id, u.id, COUNTRY]);
+      where m.id = $1`, [id, u.id, COUNTRY]);
     if (!m) return null;
+    m.supply = paid ? (await one(db, 'select molecule_supply_confirmed($1) as s', [id]))?.s : null;
     const open = m.enriched || paid;
     if (!open) return { m, open };
     const competitors = await rows(db, `
@@ -36,10 +40,9 @@ export default async function Molecule({ params, searchParams }: {
       from registrations r join companies c on c.id = r.ltr_id
       where r.molecule_id = $1 and r.country = $2 and r.active group by c.id order by products desc, since nulls last`, [id, COUNTRY]);
     const alternatives = m.category ? await rows(db, `
-      select m2.id, m2.inn, g.score, cm.registrants from molecules m2
+      select m2.id, m2.inn, cm.registrants, cm.registrations from molecules m2
       join country_molecules cm on cm.molecule_id = m2.id and cm.country = $3
-      left join visible_gap_scores g on g.molecule_id = m2.id and g.country = $3
-      where m2.category = $1 and m2.id <> $2 order by g.score desc nulls last limit 8`, [m.category, id, COUNTRY]) : [];
+      where m2.category = $1 and m2.id <> $2 order by cm.on_national_list desc, cm.registrants, m2.inn limit 8`, [m.category, id, COUNTRY]) : [];
     const combos = await rows(db, `
       select m2.id, m2.inn, cm.registrations from molecules m2
       join country_molecules cm on cm.molecule_id = m2.id and cm.country = $3 and cm.registrations > 0
@@ -49,8 +52,7 @@ export default async function Molecule({ params, searchParams }: {
                                   and dosage_form is not null order by 1 limit 12`, [id]);
     const prices = paid ? await rows(db, `select price_low, price_high, currency, unit, observed_at from market_prices
                                           where molecule_id = $1 and country = $2 order by observed_at desc limit 6`, [id, COUNTRY]) : [];
-    const supply = paid ? (await one(db, 'select molecule_supply_confirmed($1) as s', [id]))?.s : null;
-    return { m, open, competitors, alternatives, combos, forms, prices, supply };
+    return { m, open, competitors, alternatives, combos, forms, prices, supply: m.supply };
   });
   if (!d) notFound();
   const { m } = d;
@@ -69,36 +71,43 @@ export default async function Molecule({ params, searchParams }: {
         <button className="btn btn-ghost btn-sm" type="submit">{m.in_portfolio ? 'In your portfolio ✓' : 'Add to portfolio'}</button></form>
       <form action={toggleWatch}><input type="hidden" name="molecule_id" value={id} /><input type="hidden" name="return" value={back} />
         <button className="btn btn-ghost btn-sm" type="submit">{m.watched ? 'Watching ✓' : 'Watch'}</button></form>
-      <Link className="btn btn-blue btn-sm" href={`/requests/new?molecule=${id}`}>Request sourcing</Link>
     </>
   );
   return (
     <Shell user={u} title={m.inn} crumb={<><Link href="/search">Search</Link> / {m.inn}</>}
       sub={`${[m.category, m.forms].filter(Boolean).join(' · ') || 'Molecule'} · Tanzania`} actions={actions}>
       <Flash sp={sp} />
-      <div className="grid g4">
-        <div className="card tight stack" style={{ gap: 8 }}>
-          <span className="lbl">Gap score</span><Score value={m.score} />
-          <div className="meter"><i style={{ width: `${Math.round(Number(m.score ?? 0))}%` }} /></div>
-        </div>
-        <div className="card tight stack" style={{ gap: 8 }}>
-          <span className="lbl">Registered competitors</span><span className="score"><b className="num">{m.registrants ?? 0}</b></span>
-          <span className="note">{m.registrations ?? 0} registered products</span>
-        </div>
-        <div className="card tight stack" style={{ gap: 8 }}>
-          <span className="lbl">Statuses</span><StatusPills official={m.on_national_list} global={m.on_who_eml} />
-        </div>
-        <div className="card tight stack" style={{ gap: 8 }}>
-          <span className="lbl">Demand strength</span><span className="score sm"><b>{demandLabel(m.demand)}</b></span>
-          <span className="note">{m.on_national_list ? levelLabel(m.facility_level) : 'Not on the official list'}</span>
-        </div>
+      <div className="split">
+        <section className="card stack" style={{ alignItems: 'flex-start' }}>
+          <Badges m={{ ...m, in_portfolio: m.in_portfolio, watched: m.watched, request_stage: m.request && m.request.stage !== 'Closed' ? m.request.stage : null }} full />
+          {m.request && m.request.stage !== 'Closed' ? (<>
+            <h2>Your request is at &quot;{m.request.stage}&quot;</h2>
+            <p className="muted">{m.request.verdict ? `Our evaluation: ${({ go: 'Go', maybe: 'Worth a look', no: 'Skip' } as Record<string, string>)[m.request.verdict]}. Open the request for the details.`
+              : 'We are evaluating it for you: who already sells it, supply, a price range and the registration route.'}</p>
+            <Link className="btn btn-blue" href={`/requests/${m.request.id}`}>Open your request</Link>
+          </>) : (<>
+            <h2>Want to bring {m.inn} in?</h2>
+            <p className="muted">Send a sourcing request. We evaluate it for you first (who already sells it, supply, a price range and the
+              registration route), then find suppliers and send anonymous quotes.</p>
+            <Link className="btn btn-blue" href={`/requests/new?molecule=${id}`}>Source {m.inn}</Link>
+          </>)}
+        </section>
+        <section className="card stack" style={{ gap: 10 }}>
+          <span className="lbl">Registered in Tanzania</span>
+          <span className="score"><b className="num">{m.registrants ?? 0}</b><span>{Number(m.registrants) === 1 ? 'company' : 'companies'}</span></span>
+          <span className="note">{registeredLine(m.registrants, m.registrations)}</span>
+          <table className="tbl"><tbody>
+            <tr><td>Official list</td><td className="r">{m.on_national_list ? levelLabel(m.facility_level) : 'No'}</td></tr>
+            <tr><td>{GLOBAL_LIST}</td><td className="r">{m.on_who_eml ? 'Yes' : 'No'}</td></tr>
+          </tbody></table>
+        </section>
       </div>
 
       {!d.open ? (
         <section className="card stack" style={{ alignItems: 'flex-start' }}>
           <h2>Enrich to open the full page</h2>
           <p className="muted">Competitors by name, use case, alternatives and statuses. Costs 1 credit, once. You have {u.credits} left this month.</p>
-          <EnrichButton id={id} enriched={false} free />
+          <EnrichButton id={id} enriched={false} free primary />
         </section>
       ) : (
         <>
@@ -112,15 +121,6 @@ export default async function Molecule({ params, searchParams }: {
                   {channelLabel(m.channel_flag) && <p className="note" style={{ marginTop: 10 }}>{channelLabel(m.channel_flag)}</p>}
                   {m.note && <p className="note" style={{ marginTop: 10 }}>{m.note}. Not counted as a sourcing gap.</p>}
                   {d.forms && d.forms.length > 0 && <p className="note" style={{ marginTop: 10 }}>Registered as: {d.forms.map((f) => [f.dosage_form, f.strength].filter(Boolean).join(' ')).join('; ')}</p>}
-                </section>
-                <section className="card">
-                  <h2 style={{ marginBottom: 6 }}>Existing statuses</h2>
-                  <table className="tbl"><tbody>
-                    <tr><td>{OFFICIAL_LIST()}</td><td className="r"><b>{m.on_national_list ? 'Yes' : 'No'}</b></td></tr>
-                    <tr><td>{GLOBAL_LIST}</td><td className="r"><b>{m.on_who_eml ? 'Yes' : 'No'}</b></td></tr>
-                    <tr><td>Facility level</td><td className="r">{m.on_national_list ? levelLabel(m.facility_level) : 'n/a'}</td></tr>
-                    <tr><td>Registered only inside combinations</td><td className="r num">{m.registrations === 0 && m.in_combinations > 0 ? `${m.in_combinations} products` : 'No'}</td></tr>
-                  </tbody></table>
                 </section>
               </div>
               <section className="card">
@@ -154,7 +154,7 @@ export default async function Molecule({ params, searchParams }: {
                 {d.alternatives!.length === 0 && <Empty>No class on record for this molecule.</Empty>}
                 <div className="stack" style={{ gap: 10 }}>{d.alternatives!.map((a) => (
                   <Link key={a.id} href={`/molecule/${a.id}`} className="between"><span>{a.inn}</span>
-                    <span className="small muted num">gap {score(a.score)} · {a.registrants} competitors</span></Link>))}</div>
+                    <span className="small muted num">{registeredLine(a.registrants, a.registrations)}</span></Link>))}</div>
               </section>
               <section className="card">
                 <div className="card-h"><h2>In combinations</h2></div>
@@ -178,11 +178,11 @@ export default async function Molecule({ params, searchParams }: {
               <h2>{d.supply ? 'Confirmed supply exists' : 'No confirmed supply yet'}</h2>
               <p className="muted">{d.supply ? 'Nazryx holds at least one confirmed supplier offer. Names are released through a request, when you accept a quote.'
                 : 'Send a request and our team will look for suppliers.'}</p>
-              <Link className="btn btn-blue btn-sm" href={`/requests/new?molecule=${id}`}>Request sourcing</Link>
+              <Link className="btn btn-blue btn-sm" href={`/requests/new?molecule=${id}`}>Source it</Link>
             </section>))}
         </>
       )}
-      <p className="note">Gap score = demand × (1 − saturation), out of 100. {COVERAGE_NOTE}</p>
+      <p className="note">{COVERAGE_NOTE}</p>
     </Shell>
   );
 }

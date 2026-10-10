@@ -51,6 +51,19 @@ export async function toggleWatch(f: FormData) {
   redirect(to);
 }
 
+/** Hide a molecule from "Picked for you". */
+export async function hideMolecule(f: FormData) {
+  const u = await requireUser();
+  const id = int(f, 'molecule_id');
+  const to = ret(f, '/home');
+  try {
+    await withUser(u.id, (db) => db.query('insert into hidden_molecules (user_id, molecule_id) values ($1, $2) on conflict do nothing', [u.id, id]));
+  } catch (e) {
+    back(to, { error: dbMessage(e) });
+  }
+  redirect(to);
+}
+
 export async function toggleFollow(f: FormData) {
   const u = await requireUser();
   const id = int(f, 'company_id');
@@ -74,7 +87,6 @@ export async function createRequest(f: FormData) {
   const quantity = str(f, 'quantity', 60), unit = str(f, 'unit', 40), target = str(f, 'target_price', 60);
   const deliver = str(f, 'deliver_by', 10), notes = str(f, 'notes', 4000);
   if (!moleculeId && !moleculeText) back('/requests/new', { error: 'Tell us which molecule you need.' });
-  if (!quantity) back('/requests/new', { error: 'Add a quantity.' });
   let files: { path: string; name: string; kind: string }[] = [];
   try {
     for (const entry of f.getAll('attachments')) {
@@ -96,14 +108,14 @@ export async function createRequest(f: FormData) {
       }
       const r = await one(db, `insert into requests (user_id, molecule_id, molecule_text, quantity, unit, target_price, deliver_by, notes)
                                values ($1, $2, $3, $4, $5, $6, $7, $8) returning id`,
-        [u.id, moleculeId, moleculeId ? null : moleculeText, quantity, unit || null, target || null, deliver || null, notes || null]);
+        [u.id, moleculeId, moleculeId ? null : moleculeText, quantity || null, quantity ? unit || null : null, target || null, deliver || null, notes || null]);
       await db.query("insert into request_stage_history (request_id, stage, changed_by) values ($1, 'Submitted', $2)", [r!.id, u.id]);
       for (const fl of files) {
         await db.query('insert into request_files (request_id, path, file_name, kind, uploaded_by) values ($1, $2, $3, $4, $5)',
           [r!.id, fl.path, fl.name, fl.kind, u.id]);
       }
       await db.query(`insert into notifications (user_id, channel, subject, body) values (null, 'email', 'New sourcing request', $1)`,
-        [`Request #${r!.id} from ${u.email}: ${moleculeText || 'molecule ' + moleculeId}, quantity ${quantity}.`]);
+        [`Request #${r!.id} from ${u.email}: ${moleculeText || 'molecule ' + moleculeId}, quantity ${quantity || 'not given'}. Evaluate it first.`]);
       return r!.id as number;
     });
   } catch (e) {

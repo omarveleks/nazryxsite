@@ -112,7 +112,7 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
                 <input id="file" name="file" type="file" accept=".xls,.xlsx,.html,.htm" required disabled={d.refs.length < 2} /></div>
               <button className="btn btn-blue" type="submit" disabled={d.refs.length < 2}>Upload registration list</button>
             </form>
-            <p className="note">After upload: validate, compare with the last list, update the database, recalculate gap scores, merge duplicate distributors. A failed upload never changes live data.</p>
+            <p className="note">After upload: validate, compare with the last list, update the database, recalculate rankings, merge duplicate distributors. A failed upload never changes live data.</p>
             {c.running > 0 && <span className="pill blue">{c.running} job running or queued</span>}
             <form action={queueRecompute}><button className="btn btn-ghost btn-sm" type="submit">Recompute now (apply review decisions and new supplier offers)</button></form>
           </section>
@@ -122,7 +122,7 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
               <tr><td>New registrations</td><td className="r num">{diff.new_registrations ?? 0}</td></tr>
               <tr><td>Removed or cancelled</td><td className="r num">{diff.removed_or_cancelled ?? 0}</td></tr>
               <tr><td>New distributors</td><td className="r num">{diff.new_distributors ?? 0}</td></tr>
-              <tr><td>Gap scores that moved</td><td className="r num">{diff.gap_scores_moved ?? 0}</td></tr>
+              <tr><td>Molecules whose ranking moved</td><td className="r num">{diff.gap_scores_moved ?? 0}</td></tr>
               <tr><td>Duplicate spellings merged</td><td className="r num">{diff.duplicate_spellings_merged ?? 0}</td></tr>
             </tbody></table>
             <h3>Review queue</h3>

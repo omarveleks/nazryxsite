@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import Shell from '@/components/Shell';
 import { Empty, Flash, Stages } from '@/components/ui';
-import { addOfferAndQuote, setOrderStatus, setStage } from '@/app/actions/admin';
+import { addOfferAndQuote, saveEvaluation, setOrderStatus, setStage } from '@/app/actions/admin';
 import { postMessage } from '@/app/actions/app';
 import { requireTeam } from '@/lib/auth';
 import { one, rows, withUser } from '@/lib/db';
@@ -25,6 +25,10 @@ export default async function AdminRequest({ params, searchParams }: { params: P
       files: await rows(db, 'select id, file_name, kind from request_files where request_id = $1', [id]),
       messages: await rows(db, 'select from_team, body, created_at from request_messages where request_id = $1 order by created_at', [id]),
       order: await one(db, 'select * from orders where request_id = $1', [id]),
+      evaluation: await one(db, 'select * from request_evaluations where request_id = $1', [id]),
+      facts: r.molecule_id ? await one(db, `select cm.registrants, cm.registrations, cm.on_national_list, cm.on_who_eml, cm.facility_level,
+                                             cm.channel_flag, molecule_supply_confirmed($1) as supply
+                                             from country_molecules cm where cm.molecule_id = $1 and cm.country = 'TZ'`, [r.molecule_id]) : null,
       history: await rows(db, 'select stage, created_at from request_stage_history where request_id = $1 order by created_at', [id]),
     };
   });
@@ -48,6 +52,29 @@ export default async function AdminRequest({ params, searchParams }: { params: P
               <input className="input" name="closed_reason" placeholder="Reason if closing" aria-label="Reason if closing" style={{ flex: '1 1 160px' }} />
               <button className="btn btn-blue btn-sm" type="submit">Update stage</button></form>
             <p className="note">History: {d.history.map((h) => `${h.stage} (${fmtDate(h.created_at)})`).join(' → ')}</p>
+          </section>
+          <section className="card stack">
+            <div className="card-h"><h2>Evaluation</h2>{d.evaluation && <span className="note">Saved {fmtDate(d.evaluation.evaluated_at)}</span>}</div>
+            {d.facts && <p className="note">Registered by {d.facts.registrants} companies, {d.facts.registrations} products
+              {d.facts.on_national_list ? ` · official list, level ${d.facts.facility_level || 'not stated'}` : ' · not on the official list'}
+              {d.facts.on_who_eml ? ' · global essential list' : ''}{d.facts.channel_flag === 'programme' ? ' · programme channel' : ''}
+              {d.facts.supply ? ' · we hold confirmed supply' : ''}</p>}
+            <form action={saveEvaluation} className="form-grid">
+              <input type="hidden" name="request_id" value={id} />
+              <div className="field full"><label htmlFor="verdict">Verdict</label>
+                <select className="input" id="verdict" name="verdict" defaultValue={d.evaluation?.verdict ?? ''} required>
+                  <option value="" disabled>Pick one</option><option value="go">Go</option><option value="maybe">Worth a look</option><option value="no">Skip</option></select></div>
+              <div className="field full"><label htmlFor="summary">Why (two or three lines, shown to the customer)</label>
+                <textarea className="input" id="summary" name="summary" defaultValue={d.evaluation?.summary ?? ''} required /></div>
+              <div className="field full"><label htmlFor="supply">Supply</label>
+                <input className="input" id="supply" name="supply" defaultValue={d.evaluation?.supply ?? ''} placeholder="e.g. Two GMP suppliers, 6-8 weeks" /></div>
+              <div className="field"><label htmlFor="price_range">Indicative price</label>
+                <input className="input" id="price_range" name="price_range" defaultValue={d.evaluation?.price_range ?? ''} placeholder="e.g. USD 0.80-1.10 per pack" /></div>
+              <div className="field"><label htmlFor="route">Registration route</label>
+                <input className="input" id="route" name="route" defaultValue={d.evaluation?.route ?? ''} placeholder="e.g. Full dossier, about 12 months" /></div>
+              <button className="btn btn-blue btn-sm full" type="submit">{d.evaluation ? 'Update evaluation' : 'Send evaluation to the customer'}</button>
+              <p className="note full">Never name suppliers here. The customer sees this on their request page and gets an email and WhatsApp.</p>
+            </form>
           </section>
           <section className="card stack">
             <h2>Quotes</h2>

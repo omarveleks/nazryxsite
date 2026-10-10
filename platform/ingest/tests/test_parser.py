@@ -73,3 +73,17 @@ def test_vet_filter_keeps_human_products_with_lookalike_words():
     assert VET_TERMS.search("Salmonella Gallinarum 9R strain")
     assert not VET_TERMS.search("Luliconazole Cream, caprylic Capric Triglyceride")   # excipient, human cream
     assert not VET_TERMS.search("Gallic acid")
+
+
+def test_nemlit_table_format(tmp_path):
+    p = tmp_path / "nemlit.txt"
+    p.write_text("section\tmolecule\tforms\tlevel\tnote\n"
+                 "1\tLidocaine\tInjection 1%\tA\t\n"
+                 "1\tLidocaine\tPatches 5%\tD\t\n"
+                 "6\tAzithromycin\tTablet 250mg\tB\tLevel A for STI only\n"
+                 "34\tTocilizumab\tInjection\t\t\n")
+    d = parse_nemlit(str(p)).set_index("molecule")
+    assert d.loc["Lidocaine", "level"] == "A"          # one medicine, several rows: widest level wins
+    assert d.loc["Azithromycin", "level"] == "B"
+    assert d.loc["Tocilizumab", "level"] == ""
+    assert len(d) == 3

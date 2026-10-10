@@ -11,7 +11,8 @@ export default async function Requests() {
   const u = await requireUser();
   const d = await withUser(u.id, async (db) => ({
     reqs: await rows(db, `select r.id, r.stage, r.quantity, r.unit, r.created_at, r.updated_at, coalesce(m.inn, r.molecule_text) as molecule,
-                          (select count(*)::int from quotes q where q.request_id = r.id) as quotes
+                          (select count(*)::int from quotes q where q.request_id = r.id) as quotes,
+                          (select e.verdict from request_evaluations e where e.request_id = r.id) as verdict
                           from requests r left join molecules m on m.id = r.molecule_id where r.user_id = $1 order by r.updated_at desc`, [u.id]),
     orders: await rows(db, `select o.id, o.status, o.updated_at, coalesce(m.inn, r.molecule_text) as molecule, r.id as request_id
                             from orders o join requests r on r.id = o.request_id left join molecules m on m.id = r.molecule_id
@@ -21,7 +22,7 @@ export default async function Requests() {
   const full = u.plan !== 'paid' && active >= FREE.requests;
   return (
     <Shell user={u} title="Requests" sub="Sourcing requests you have sent"
-      actions={full ? <span className="pill alert">{FREE.requests} of {FREE.requests} active</span> : <Link className="btn btn-blue btn-sm" href="/requests/new">New request</Link>}>
+      actions={full ? <span className="pill alert">{FREE.requests} of {FREE.requests} active</span> : <Link className="btn btn-blue btn-sm" href="/requests/new">Source a molecule</Link>}>
       {u.plan !== 'paid' && <p className="note">{active} of {FREE.requests} active (free plan). Closed requests do not count.</p>}
       <div className="board">
         {STAGES.map((s) => {
@@ -32,7 +33,9 @@ export default async function Requests() {
               {list.map((r) => (
                 <Link key={r.id} href={`/requests/${r.id}`} className="rcard">
                   <span className="nm" style={{ fontSize: 14 }}>{r.molecule}</span>
-                  <span className="sub2">{[r.quantity, r.unit].filter(Boolean).join(' ')} · {fmtDate(r.created_at)}</span>
+                  <span className="sub2">{[[r.quantity, r.unit].filter(Boolean).join(' '), fmtDate(r.created_at)].filter(Boolean).join(' · ')}</span>
+                  {r.verdict && s !== 'Quote ready' && <span className={`pill ${r.verdict === 'go' ? 'mint' : r.verdict === 'no' ? 'peach' : 'blue'}`} style={{ alignSelf: 'flex-start' }}>
+                    Evaluated: {r.verdict === 'go' ? 'Go' : r.verdict === 'no' ? 'Skip' : 'Worth a look'}</span>}
                   {s === 'Quote ready' && <span className="pill solid" style={{ alignSelf: 'flex-start' }}>{r.quotes} quotes</span>}
                 </Link>))}
             </section>);

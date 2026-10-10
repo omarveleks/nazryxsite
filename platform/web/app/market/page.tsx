@@ -4,7 +4,7 @@ import MarketTabs from '@/components/MarketTabs';
 import YearChart from '@/components/YearChart';
 import { requireUser } from '@/lib/auth';
 import { rows, withUser } from '@/lib/db';
-import { COVERAGE_NOTE, saturationLabel, title } from '@/lib/format';
+import { COVERAGE_NOTE, title } from '@/lib/format';
 import { COUNTRY } from '@/lib/queries';
 
 export const metadata = { title: 'Market' };
@@ -14,11 +14,10 @@ export default async function Market() {
   const d = await withUser(u.id, async (db) => {
     const cats = await rows(db, `
       select m.category, count(*)::int as molecules, sum(cm.registrations)::int as products,
-             avg(g.saturation)::float as sat, count(*) filter (where g.saturation <= 0.25 and cm.rankable)::int as open_gaps,
+             round(avg(cm.registrants), 1)::float as avg_regs, count(*) filter (where cm.registrants <= 2 and cm.rankable)::int as open_gaps,
              (select count(distinct r.ltr_id)::int from registrations r join molecules m2 on m2.id = r.molecule_id
                 where r.country = $1 and r.active and m2.category = m.category) as registrants
       from country_molecules cm join molecules m on m.id = cm.molecule_id
-      left join visible_gap_scores g on g.molecule_id = cm.molecule_id and g.country = cm.country
       where cm.country = $1 and cm.on_national_list and m.category is not null
       group by m.category order by products desc`, [COUNTRY]);
     const top = await rows(db, `select c.id, c.display_name, s.registrations from company_stats s join companies c on c.id = s.company_id
@@ -42,10 +41,10 @@ export default async function Market() {
         <section className="card">
           <div className="card-h"><h2>By class</h2><span className="note">Classes of the official list</span></div>
           <div className="tbl-wrap"><table className="tbl">
-            <thead><tr><th>Class</th><th className="r">Registered products</th><th className="r">Registrants</th><th>Saturation</th><th className="r">Open gaps</th></tr></thead>
+            <thead><tr><th>Class</th><th className="r">Registered products</th><th className="r">Registrants</th><th className="r">Companies per molecule</th><th className="r">Open (2 or fewer)</th></tr></thead>
             <tbody>{d.cats.map((c) => (
               <tr key={c.category}><td>{c.category}</td><td className="r num">{c.products}</td><td className="r num">{c.registrants}</td>
-                <td><span className={`pill ${saturationLabel(c.sat) === 'High' ? '' : saturationLabel(c.sat) === 'Medium' ? 'blue' : 'mint'}`}>{saturationLabel(c.sat)}</span></td>
+                <td className="r num">{c.avg_regs}</td>
                 <td className="r num">{c.open_gaps}</td></tr>))}
             </tbody></table></div>
         </section>

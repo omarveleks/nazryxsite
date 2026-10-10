@@ -1,10 +1,10 @@
 import Link from 'next/link';
 import Shell from '@/components/Shell';
 import EnrichButton from '@/components/EnrichButton';
-import { StatusPills, Empty } from '@/components/ui';
+import { Empty, SourceLink } from '@/components/ui';
+import { MoleculeRow } from '@/components/MoleculeRow';
 import { requireUser } from '@/lib/auth';
 import { rows, withUser } from '@/lib/db';
-import { score } from '@/lib/format';
 import { categories, MOLECULE_LIST_SQL } from '@/lib/queries';
 
 export const metadata = { title: 'Search' };
@@ -29,12 +29,13 @@ export default async function Search({ searchParams }: { searchParams: Promise<{
         order by (case when $1 <> '' and m.inn ilike $1 || '%' then 0 else 1 end), g.score desc nulls last, cm.registrations desc
         limit 40`, [q, cls, status]);
     } else {
-      // "Your top molecules": open molecules in the categories you already work in, ranked by gap score
+      // "Picked for you": a few open molecules in the classes you already carry (never the whole open list)
       list = await rows(db, `${MOLECULE_LIST_SQL}
         where cm.rankable and g.score > 0 and m.category in (
             select distinct m2.category from portfolio_items p join molecules m2 on m2.id = p.molecule_id where p.user_id = $1)
           and m.id not in (select molecule_id from portfolio_items where user_id = $1)
-        order by g.score desc limit 12`, [u.id]);
+          and m.id not in (select molecule_id from hidden_molecules where user_id = $1)
+        order by g.score desc, cm.registrants, m.inn limit $2`, [u.id, free ? 3 : 8]);
     }
     const recent = await rows(db, `select m.id, m.inn from enrichments e join molecules m on m.id = e.molecule_id
                                    where e.user_id = $1 order by e.created_at desc limit 5`, [u.id]);
@@ -42,7 +43,7 @@ export default async function Search({ searchParams }: { searchParams: Promise<{
     return { cats, list, recent, hasPortfolio };
   });
   return (
-    <Shell user={u} title="Search" sub="Find a molecule, then enrich it for the details">
+    <Shell user={u} title="Search" sub="Find a molecule, then ask us to source it">
       {sp.welcome && <div className="ok">Search for molecules and add them to your portfolio from the molecule page.</div>}
       <form method="get" className="card tight row">
         <label className="sr" htmlFor="q">Search</label>
@@ -64,8 +65,8 @@ export default async function Search({ searchParams }: { searchParams: Promise<{
       )}
       <section className="card">
         <div className="card-h">
-          <div><h2>{searching ? 'Results' : 'Your top molecules'}</h2>
-            {!searching && <p className="note">Ranked by gap score in the classes you already carry</p>}</div>
+          <div><h2>{searching ? 'Results' : 'Picked for you'}</h2>
+            {!searching && <p className="note">Open molecules in the classes you already carry. Source one and we evaluate it for you.</p>}</div>
           {free && <span className="note">Enrich costs 1 credit. Credits: <b className="num">{u.credits}</b> left this month.</span>}
         </div>
         {d.list.length === 0 ? (
@@ -75,19 +76,10 @@ export default async function Search({ searchParams }: { searchParams: Promise<{
               {!d.hasPortfolio && <Link className="btn btn-ghost btn-sm" href="/portfolio">Add your portfolio</Link>}
             </div>)
         ) : (
-          <div className="tbl-wrap"><table className="tbl">
-            <thead><tr><th>#</th><th>Molecule</th><th>Gap score</th><th>Competitors</th><th>Status</th><th className="r"></th></tr></thead>
-            <tbody>{d.list.map((m, i) => (
-              <tr key={m.id}>
-                <td className="num muted">{i + 1}</td>
-                <td><span className="nm">{m.inn}</span><div className="sub2">{[m.category, m.forms].filter(Boolean).join(' · ') || 'Registered product'}</div></td>
-                <td className="num"><b>{score(m.score)}</b></td>
-                <td className="num">{m.registrants}</td>
-                <td><StatusPills official={m.on_national_list} global={m.on_who_eml} /></td>
-                <td className="r"><EnrichButton id={m.id} enriched={m.enriched} free={free} /></td>
-              </tr>))}
-            </tbody>
-          </table></div>
+          <div>{d.list.map((m, i) => (
+            <MoleculeRow key={m.id} m={m} first={i === 0}
+              actions={<><EnrichButton id={m.id} enriched={m.enriched} free={free} /><SourceLink id={m.id} stage={m.request_stage} /></>} />))}
+          </div>
         )}
       </section>
     </Shell>
