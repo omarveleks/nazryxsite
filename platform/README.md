@@ -12,6 +12,7 @@ Next.js web app, one Postgres database, Python ingest jobs. This folder is separ
 | `db/migrations/` | Schema (extends the handoff's `db/schema.sql`), row-level security, review-queue and team functions |
 | `data/raw/` | **Not committed.** Registry export, essential-list OCR text, global list text |
 | `docker-compose.yml`, `.env.example` | Local stack |
+| `../render.yaml` | Hosted stack on Render (see "Hosting on Render") |
 
 ## Run it (Docker Compose)
 
@@ -37,13 +38,11 @@ Next.js web app, one Postgres database, Python ingest jobs. This folder is separ
 Postgres 16, Python 3.12+, Node 22.
 ```
 cd ingest && pip install -r requirements.txt
-export DATABASE_URL_ADMIN=postgresql://<owner>:<pw>@localhost:5432/nazryx APP_DB_PASSWORD=<pw> UPLOAD_DIR=$PWD/../uploads
-python migrate.py
-python ingest_job.py --initial ../data/raw/Registered_Products_2026-10-10.xls
-python seed.py
+export DATABASE_URL_ADMIN=postgresql://<owner>:<pw>@localhost:5432/nazryx APP_DB_PASSWORD=<pw> DATA_DIR=$PWD/../data
+python bootstrap.py                                 # migrate, store the reference lists, first load, demo seed
 python worker.py &                                  # upload jobs, reminders, notifications
 cd ../web && npm ci
-DATABASE_URL=postgresql://nazryx_app:<pw>@localhost:5432/nazryx UPLOAD_DIR=$PWD/../uploads npm run dev
+DATABASE_URL=postgresql://nazryx_app:<pw>@localhost:5432/nazryx npm run dev
 ```
 To re-run only the pipeline and inspect its CSVs: `python ingest/pipeline/build.py --registry ... --nemlit ... --who ... --out data/out`.
 
@@ -168,15 +167,37 @@ hormones and contraceptives, cancer, NTDs) are flagged "check before pitching".
   across different numbers; local technical representatives get country Tanzania (the old file gave them the foreign
   registrant's country); near-misses go to a review queue instead of merging silently.
 
-## Deploying
+## Hosting on Render
 
-- Build the two images (`web/Dockerfile`, `ingest/Dockerfile`; build context `platform/`) and run them next to a
-  managed Postgres 16. Run `python bootstrap.py` once (or `migrate.py` on every release), then `worker.py` as a
-  long-running service and the web image behind HTTPS.
-- Secrets (`POSTGRES_PASSWORD`, `APP_DB_PASSWORD`, SMTP, WhatsApp, `ANTHROPIC_API_KEY`) go in the host's secret
-  settings, never in the repo.
-- Uploads (licences, request documents, registry exports) are on a shared volume at `UPLOAD_DIR`; web and worker must
-  see the same path. For multi-instance hosting, move them to object storage.
-- This is a Node + Postgres app; it does not run on Cloudflare Pages like the marketing site.
+`render.yaml` (repository root) describes the hosted setup: a Postgres 16 database, the web app and the worker,
+all in Frankfurt. Uploaded files are stored in Postgres, so the services share no disk.
+
+1. Sign up at render.com and connect your GitHub account.
+2. **New › Blueprint**, pick this repository and the branch that has `render.yaml`. Render asks for:
+   - `SEED_TEAM_EMAIL` and `SEED_TEAM_PASSWORD`: the first Nazryx team login.
+   - `DEMO_PASSWORD`: password for the demo customer accounts (set `SEED_DEMO` to `0` on the worker to skip demo data).
+   - `TEAM_ALERT_EMAILS` and `ANTHROPIC_API_KEY`: optional, can stay empty.
+3. Apply. The first build takes a few minutes. The worker migrates the database and creates the team account.
+4. Open the web service's `https://…onrender.com` address, sign in with the team account, go to **Admin**:
+   - **Reference lists**: upload `tz_nemlit_ocr.txt` and `who_eml_2025.txt` from the handoff.
+   - **Upload new list**: upload `Registered_Products_….xls`. About 30 seconds later the data is live, and the demo
+     accounts `demo-free@nazryx.test` / `demo-paid@nazryx.test` exist.
+5. Optional: add your own domain (e.g. `app.nazryx.com`) under the web service's Settings › Custom Domains.
+
+The default instance sizes are the smallest paid ones (web and worker `0.5c-512mb`, database `0.1c-256mb`); check
+render.com/pricing for current prices. Every push to the chosen branch redeploys.
+
+If the database user is not allowed to create roles, the worker log says so; run the printed
+`CREATE ROLE nazryx_app ...` once in Render's database shell with the `APP_DB_PASSWORD` value from the
+`nazryx-shared` environment group, then restart the worker.
+
+## Deploying elsewhere
+
+- Any host that runs Docker images next to Postgres 16 works (Railway, Fly.io, a VM). Run the ingest image once with
+  `python bootstrap.py` (or set `RUN_BOOTSTRAP=1` on the worker), keep `worker.py` running, and serve the web image
+  behind HTTPS.
+- The web app needs `DATABASE_URL` for the `nazryx_app` role, or `DATABASE_URL_BASE` (any URL for the database;
+  only its host and name are used) plus `APP_DB_PASSWORD`. The worker needs `DATABASE_URL_ADMIN` (owner role).
+- Secrets (database passwords, SMTP, WhatsApp, `ANTHROPIC_API_KEY`) go in the host's secret settings, never in the repo.
 - Email: set `EMAIL_PROVIDER=smtp` and the `SMTP_*` variables. WhatsApp: implement `send_whatsapp` in
   `ingest/notify.py` against the WhatsApp Business API.

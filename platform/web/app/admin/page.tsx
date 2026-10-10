@@ -33,6 +33,7 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
       out.history = await rows(db, `select r.id, r.kind, r.uploaded_at, r.finished_at, r.file_name, r.rows, r.status, r.error, u.email
                                     from registry_uploads r left join users u on u.id = r.uploaded_by order by r.id desc limit 15`);
       out.reminders = await rows(db, 'select sent_at from reminders_log order by sent_at desc limit 3');
+      out.refs = await rows(db, 'select kind, name, uploaded_at from reference_files');
     }
     if (tab === 'review') {
       out.sugg = await rows(db, `select s.molecule_id, m.inn, m.category, t.id as to_id, t.inn as to_inn, s.confidence, s.reason
@@ -122,6 +123,22 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
             <Link className="btn btn-ghost btn-sm" href="/admin?tab=review" style={{ alignSelf: 'flex-start' }}>Open queue</Link>
           </section>
         </div>
+        <section className="card stack">
+          <div className="card-h"><h2>Reference lists</h2>
+            <span className="note">Used by every update. Replace them when a new edition comes out.</span></div>
+          <table className="tbl"><tbody>
+            {[['national_list', 'Essential medicines list (OCR text)'], ['global_list', 'Global essential list (text)']].map(([k, label]) => {
+              const r = d.refs.find((x: any) => x.kind === k);
+              return <tr key={k}><td>{label}</td><td className="small">{r ? r.name : 'Missing'}</td>
+                <td className="r">{r ? <span className="pill mint">Loaded {fmtDate(r.uploaded_at)}</span> : <span className="pill alert">Upload before the first list</span>}</td></tr>;
+            })}
+          </tbody></table>
+          <form action="/api/admin/reference" method="post" encType="multipart/form-data" className="form-grid">
+            <div className="field"><label htmlFor="national_list">Essential medicines list (.txt)</label><input id="national_list" name="national_list" type="file" accept=".txt" /></div>
+            <div className="field"><label htmlFor="global_list">Global essential list (.txt)</label><input id="global_list" name="global_list" type="file" accept=".txt" /></div>
+            <div className="full"><button className="btn btn-ghost btn-sm" type="submit">Save reference lists</button></div>
+          </form>
+        </section>
         <section className="card">
           <div className="card-h"><h2>Upload history</h2></div>
           <div className="tbl-wrap"><table className="tbl">

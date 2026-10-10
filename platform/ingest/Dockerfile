@@ -6,6 +6,5 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY ingest/ /app/ingest/
 COPY db/ /app/db/
 RUN useradd --create-home --uid 1001 nazryx
-RUN mkdir -p /data/uploads && chown -R nazryx /data/uploads
 USER nazryx
 CMD ["python", "worker.py"]

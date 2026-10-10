@@ -78,10 +78,10 @@ export async function createRequest(f: FormData) {
   let files: { path: string; name: string; kind: string }[] = [];
   try {
     for (const entry of f.getAll('attachments')) {
-      const s = await saveUpload(entry, 'requests');
+      const s = await saveUpload(entry, u.id);
       if (s) files.push({ ...s, kind: 'attachment' });
     }
-    const bulk = await saveUpload(f.get('requirement_list'), 'requests');
+    const bulk = await saveUpload(f.get('requirement_list'), u.id);
     if (bulk) files.push({ ...bulk, kind: 'requirement_list' });
   } catch (e) {
     back('/requests/new', { error: (e as Error).message });
@@ -138,7 +138,7 @@ export async function addRequestFile(f: FormData) {
   const to = ret(f, `/requests/${id}`);
   let saved;
   try {
-    saved = await saveUpload(f.get('file'), 'requests');
+    saved = await saveUpload(f.get('file'), u.id);
   } catch (e) {
     back(to, { error: (e as Error).message });
   }

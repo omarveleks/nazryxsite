@@ -12,7 +12,7 @@ export async function POST(req: Request) {
   const to = (q: string) => new Response(null, { status: 303, headers: { Location: `/admin?${q}` } });
   let saved;
   try {
-    saved = await saveUpload((await req.formData()).get('file'), 'registry', ALLOWED);
+    saved = await saveUpload((await req.formData()).get('file'), u.id, ALLOWED);
   } catch (e) {
     return to(`error=${encodeURIComponent((e as Error).message)}`);
   }

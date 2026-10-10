@@ -2,9 +2,21 @@ import { Pool, type PoolClient, type QueryResultRow } from 'pg';
 
 // The app connects as the restricted role `nazryx_app`. Row-level security in Postgres decides what each
 // signed-in user can read; every query runs inside withUser(), which sets app.user_id for the transaction.
+/** DATABASE_URL (the nazryx_app role), or, on hosts that only hand out the owner's connection string
+ *  (e.g. Render), DATABASE_URL_BASE + APP_DB_PASSWORD: only the host and database name are taken from it. */
+function connectionString(): string | undefined {
+  if (process.env.DATABASE_URL) return process.env.DATABASE_URL;
+  const base = process.env.DATABASE_URL_BASE, pw = process.env.APP_DB_PASSWORD;
+  if (!base || !pw) return undefined;
+  const u = new URL(base);
+  u.username = 'nazryx_app';
+  u.password = encodeURIComponent(pw);
+  return u.toString();
+}
+
 const g = globalThis as unknown as { __nzxPool?: Pool };
 export const pool: Pool =
-  g.__nzxPool ?? (g.__nzxPool = new Pool({ connectionString: process.env.DATABASE_URL, max: 10 }));
+  g.__nzxPool ?? (g.__nzxPool = new Pool({ connectionString: connectionString(), max: 10 }));
 
 export type Db = PoolClient;
 

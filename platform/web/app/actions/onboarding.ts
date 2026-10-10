@@ -15,8 +15,8 @@ export async function completeOnboarding(f: FormData) {
   if (source === 'registry' && !companyId) back('/onboarding', { error: 'The registered list needs a company from the list.' });
   let licence, catalogue;
   try {
-    licence = await saveUpload(f.get('licence'), 'claims');
-    catalogue = await saveUpload(f.get('catalogue'), 'catalogues');
+    licence = await saveUpload(f.get('licence'), u.id);
+    catalogue = await saveUpload(f.get('catalogue'), u.id);
   } catch (e) {
     back('/onboarding', { error: (e as Error).message });
   }

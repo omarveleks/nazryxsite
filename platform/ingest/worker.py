@@ -20,6 +20,9 @@ def tick():
     if row:
         try:
             ingest_job.run(row[0])
+            if os.environ.get("SEED_DEMO") == "1":
+                import seed
+                seed.seed()          # once the first registry is loaded (idempotent)
             if os.environ.get("ANTHROPIC_API_KEY") and os.environ.get("CLAUDE_MATCHING", "1") != "0":
                 import claude_match
                 claude_match.run()   # suggestions only; the team approves them on the admin page
@@ -36,6 +39,9 @@ def tick():
 
 def main():
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(name)s %(message)s")
+    if os.environ.get("RUN_BOOTSTRAP") == "1":   # hosts without a separate init step (see render.yaml)
+        import bootstrap
+        bootstrap.run()
     with connect() as conn:  # jobs left 'running' by a crash never committed, so live data is unchanged
         n = conn.execute("""update registry_uploads set status = 'failed', finished_at = now(),
                             error = 'Interrupted (worker restarted). Nothing was changed; upload again.'

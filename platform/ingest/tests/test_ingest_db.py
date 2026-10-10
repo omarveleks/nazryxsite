@@ -70,7 +70,7 @@ def env(tmp_path_factory):
     (tmp / "nemlit.txt").write_text(NEMLIT)
     (tmp / "who.txt").write_text(WHO)
     os.environ.update(DATABASE_URL_ADMIN=URL, NEMLIT_FILE=str(tmp / "nemlit.txt"), WHO_FILE=str(tmp / "who.txt"),
-                      UPLOAD_DIR=str(tmp / "uploads"), APP_DB_PASSWORD="test-only-" + uuid.uuid4().hex[:8])
+                      APP_DB_PASSWORD="test-only-" + uuid.uuid4().hex[:8])
     import migrate
     import ingest_job
     importlib.reload(ingest_job)
@@ -307,3 +307,39 @@ def test_free_plan_score_hides_confirmed_supply(env):
         a.rollback()
         as_user(a, paid)
         assert a.execute("select score from visible_gap_scores where molecule_id = %s", (mol,)).fetchone()[0] == full
+
+
+def test_stored_files_follow_request_access(env):
+    with psycopg.connect(URL) as c:
+        owner = c.execute("insert into users (email, password_hash) values ('files1@example.com', 'x') returning id").fetchone()[0]
+        other = c.execute("insert into users (email, password_hash) values ('files2@example.com', 'x') returning id").fetchone()[0]
+        req = c.execute("insert into requests (user_id, quantity) values (%s, '1') returning id", (owner,)).fetchone()[0]
+        c.commit()
+    with app_conn(env) as a:
+        as_user(a, owner)
+        fid = a.execute("insert into stored_files (name, size, data, uploaded_by) values ('spec.pdf', 3, 'abc', %s) returning id",
+                        (owner,)).fetchone()[0]
+        a.execute("insert into request_files (request_id, path, file_name, uploaded_by) values (%s, %s, 'spec.pdf', %s)",
+                  (req, f"db:{fid}", owner))
+        a.commit()
+        as_user(a, owner)
+        assert bytes(a.execute("select data from stored_files where id = %s", (fid,)).fetchone()[0]) == b"abc"
+        a.rollback()
+        as_user(a, other)   # another customer cannot read it, even knowing the id
+        assert a.execute("select count(*) from stored_files where id = %s", (fid,)).fetchone()[0] == 0
+        with pytest.raises(psycopg.errors.InsufficientPrivilege):   # nor upload in someone else's name
+            a.execute("insert into stored_files (name, size, data, uploaded_by) values ('x', 1, 'x', %s)", (owner,))
+        a.rollback()
+
+
+def test_reference_lists_from_database(env):
+    import storage
+    tmp = env["tmp"]
+    (tmp / "nemlit2.txt").write_text(NEMLIT)
+    with psycopg.connect(URL) as c:
+        cur = c.cursor()
+        storage.set_reference(cur, "national_list", str(tmp / "nemlit2.txt"))
+        local = storage.reference_file(cur, "national_list", None, str(tmp))
+        assert open(local).read() == NEMLIT
+        assert storage.reference_file(cur, "global_list", None) is None   # not uploaded, no fallback
+        c.rollback()

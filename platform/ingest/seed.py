@@ -33,11 +33,13 @@ def password(var):
     return (pw or secrets.token_urlsafe(12)), generated
 
 
-def upsert_user(cur, email, name, pw, **cols):
+def upsert_user(cur, email, name, pw, generated=False, **cols):
+    """Create the account, or update it. A generated password never overwrites an existing one."""
     row = cur.execute("select id from users where email = %s", (email,)).fetchone()
     if row:
         uid = row[0]
-        cur.execute("update users set password_hash = %s where id = %s", (hash_password(pw), uid))
+        if not generated:
+            cur.execute("update users set password_hash = %s where id = %s", (hash_password(pw), uid))
     else:
         uid = cur.execute("insert into users (email, name, password_hash, onboarded) values (%s, %s, %s, true) returning id",
                           (email, name, hash_password(pw))).fetchone()[0]
@@ -59,10 +61,13 @@ def seed():
             raise SystemExit("Load the registry first: python ingest_job.py --initial <export.xls>")
         team_pw, g1 = password("SEED_TEAM_PASSWORD")
         demo_pw, g2 = password("DEMO_PASSWORD")
-        team = upsert_user(cur, os.environ.get("SEED_TEAM_EMAIL", "team@nazryx.test"), "Nazryx team", team_pw, role="team", plan="paid")
-        free = upsert_user(cur, os.environ.get("DEMO_FREE_EMAIL", "demo-free@nazryx.test"), "Demo Distributor", demo_pw,
+        new_team = not cur.execute("select 1 from users where email = %s", (os.environ.get("SEED_TEAM_EMAIL", "team@nazryx.test"),)).fetchone()
+        new_demo = not cur.execute("select 1 from users where email = %s", (os.environ.get("DEMO_FREE_EMAIL", "demo-free@nazryx.test"),)).fetchone()
+        team = upsert_user(cur, os.environ.get("SEED_TEAM_EMAIL", "team@nazryx.test"), "Nazryx team", team_pw, g1, role="team", plan="paid")
+        free = upsert_user(cur, os.environ.get("DEMO_FREE_EMAIL", "demo-free@nazryx.test"), "Demo Distributor", demo_pw, g2,
                            credits=17, whatsapp="+255 700 000 000", notify_whatsapp=True)
-        paid = upsert_user(cur, os.environ.get("DEMO_PAID_EMAIL", "demo-paid@nazryx.test"), "Demo Paid Distributor", demo_pw, plan="paid")
+        paid = upsert_user(cur, os.environ.get("DEMO_PAID_EMAIL", "demo-paid@nazryx.test"), "Demo Paid Distributor", demo_pw, g2, plan="paid")
+        g1, g2 = g1 and new_team, g2 and new_demo   # only print passwords that were actually set now
 
         already = cur.execute("select count(*) from requests where user_id = %s", (free,)).fetchone()[0]
         if already:
@@ -151,6 +156,21 @@ def seed():
     print(f"  team:      {os.environ.get('SEED_TEAM_EMAIL', 'team@nazryx.test')}" + (f"  password: {team_pw}" if g1 else "  password: from SEED_TEAM_PASSWORD"))
     for e in (os.environ.get("DEMO_FREE_EMAIL", "demo-free@nazryx.test"), os.environ.get("DEMO_PAID_EMAIL", "demo-paid@nazryx.test")):
         print(f"  customer:  {e}" + (f"  password: {demo_pw}" if g2 else "  password: from DEMO_PASSWORD"))
+
+
+def ensure_team():
+    """Make sure the team account exists (used before any data is loaded)."""
+    email = os.environ.get("SEED_TEAM_EMAIL", "team@nazryx.test")
+    pw, generated = password("SEED_TEAM_PASSWORD")
+    with connect() as conn:
+        cur = conn.cursor()
+        is_new = not cur.execute("select 1 from users where email = %s", (email,)).fetchone()
+        upsert_user(cur, email, "Nazryx team", pw, generated, role="team", plan="paid")
+        conn.commit()
+    if generated and is_new:
+        print(f"team account: {email}  password: {pw}")
+    elif is_new or not generated:
+        print(f"team account: {email}  password: from SEED_TEAM_PASSWORD")
 
 
 if __name__ == "__main__":

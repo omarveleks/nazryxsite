@@ -1,0 +1,57 @@
+# Render Blueprint for the Nazryx Intelligence Platform (platform/).
+# The marketing site (site/) stays on Cloudflare Pages; this file does not touch it.
+# Create it in Render: New > Blueprint > pick this repository and branch. See platform/README.md, "Hosting on Render".
+
+databases:
+  - name: nazryx-db
+    databaseName: nazryx
+    region: frankfurt
+    postgresMajorVersion: "16"
+
+envVarGroups:
+  - name: nazryx-shared
+    envVars:
+      - key: APP_DB_PASSWORD        # password of the restricted app role; generated once by Render
+        generateValue: true
+
+services:
+  - type: web
+    name: nazryx-web
+    runtime: docker
+    region: frankfurt
+    dockerfilePath: ./platform/web/Dockerfile
+    dockerContext: ./platform/web
+    healthCheckPath: /signup
+    envVars:
+      - key: DATABASE_URL_BASE      # only host and database name are used; the app signs in as nazryx_app
+        fromDatabase:
+          name: nazryx-db
+          property: connectionString
+      - fromGroup: nazryx-shared
+
+  - type: worker
+    name: nazryx-worker
+    runtime: docker
+    region: frankfurt
+    dockerfilePath: ./platform/ingest/Dockerfile
+    dockerContext: ./platform
+    envVars:
+      - key: DATABASE_URL_ADMIN
+        fromDatabase:
+          name: nazryx-db
+          property: connectionString
+      - key: RUN_BOOTSTRAP          # migrate and create the team account on every start
+        value: "1"
+      - key: SEED_DEMO              # add the demo accounts and demo requests after the first upload; "0" to skip
+        value: "1"
+      - key: SEED_TEAM_EMAIL
+        sync: false
+      - key: SEED_TEAM_PASSWORD
+        sync: false
+      - key: DEMO_PASSWORD
+        sync: false
+      - key: TEAM_ALERT_EMAILS
+        sync: false
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - fromGroup: nazryx-shared

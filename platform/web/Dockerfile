@@ -17,7 +17,6 @@ RUN addgroup -g 1001 nazryx && adduser -D -u 1001 -G nazryx nazryx
 COPY --from=build /app/.next/standalone ./
 COPY --from=build /app/.next/static ./.next/static
 COPY --from=build /app/public ./public
-RUN mkdir -p /data/uploads && chown -R nazryx /data/uploads
 USER nazryx
 EXPOSE 3000
 CMD ["node", "server.js"]

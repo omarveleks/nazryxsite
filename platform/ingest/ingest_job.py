@@ -23,10 +23,10 @@ from db import connect  # noqa: E402
 from build import build  # noqa: E402
 from loader import apply_out  # noqa: E402
 from notify import notify_team  # noqa: E402
+import storage  # noqa: E402
 
 log = logging.getLogger("ingest")
 DATA_DIR = os.environ.get("DATA_DIR", os.path.join(HERE, "..", "data"))
-UPLOAD_DIR = os.environ.get("UPLOAD_DIR", os.path.join(HERE, "..", "uploads"))
 NEMLIT = os.environ.get("NEMLIT_FILE", os.path.join(DATA_DIR, "raw", "tz_nemlit_ocr.txt"))
 WHO = os.environ.get("WHO_FILE", os.path.join(DATA_DIR, "raw", "who_eml_2025.txt"))
 MIN_RATIO = 0.6   # a new export with fewer than 60% of the last one's active products is rejected
@@ -62,10 +62,15 @@ def run(job_id):
                 if not row:
                     raise ValueError("No applied upload to recompute from")
                 path = row[0]
-            if not path or not os.path.exists(path):
+            local = storage.materialize(cur, path, out)
+            if not local:
                 raise ValueError(f"Uploaded file not found: {name}")
+            nemlit = storage.reference_file(cur, "national_list", NEMLIT, out)
+            who = storage.reference_file(cur, "global_list", WHO, out)
+            if not nemlit or not who:
+                raise ValueError("Upload the essential medicines list and the global list text files on the admin page first.")
             aliases, separate, matches = team_decisions(cur)
-            summary = build(path, NEMLIT, WHO, out, company_aliases=aliases, keep_separate=separate, manual_matches=matches)
+            summary = build(local, nemlit, who, out, company_aliases=aliases, keep_separate=separate, manual_matches=matches)
             prev = cur.execute("""select (summary->>'human_active')::int from registry_uploads where status = 'applied'
                                   and country = %s order by finished_at desc limit 1""", (country,)).fetchone()
             if prev and prev[0] and summary["human_active"] < MIN_RATIO * prev[0]:
@@ -94,14 +99,12 @@ def run(job_id):
 
 
 def create_job(file_path, kind="upload", uploaded_by=None, country="TZ"):
-    os.makedirs(os.path.join(UPLOAD_DIR, "registry"), exist_ok=True)
-    with connect() as conn:  # the insert is committed only after the copy succeeds
-        jid = conn.execute("""insert into registry_uploads (country, kind, uploaded_by, file_name, status)
-                              values (%s, %s, %s, %s, 'queued') returning id""",
-                           (country, kind, uploaded_by, os.path.basename(file_path))).fetchone()[0]
-        dest = os.path.join(UPLOAD_DIR, "registry", f"{jid}-{os.path.basename(file_path)}")
-        shutil.copyfile(file_path, dest)   # raises before commit, so no orphan job row is left behind
-        conn.execute("update registry_uploads set file_path = %s where id = %s", (dest, jid))
+    """Store the export in the database and queue a job (one transaction: no orphan rows on failure)."""
+    with connect() as conn:
+        stored = storage.store(conn.cursor(), file_path, uploaded_by=uploaded_by)
+        jid = conn.execute("""insert into registry_uploads (country, kind, uploaded_by, file_name, file_path, status)
+                              values (%s, %s, %s, %s, %s, 'queued') returning id""",
+                           (country, kind, uploaded_by, os.path.basename(file_path), stored)).fetchone()[0]
         conn.commit()
     return jid
 

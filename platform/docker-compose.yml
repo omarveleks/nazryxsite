@@ -22,7 +22,6 @@ services:
       DATABASE_URL_ADMIN: postgresql://nazryx:${POSTGRES_PASSWORD}@db:5432/nazryx
       APP_DB_PASSWORD: ${APP_DB_PASSWORD:?set APP_DB_PASSWORD in .env}
       DATA_DIR: /data
-      UPLOAD_DIR: /data/uploads
       SEED_DEMO: ${SEED_DEMO:-1}
       SEED_TEAM_EMAIL: ${SEED_TEAM_EMAIL:-team@nazryx.test}
       SEED_TEAM_PASSWORD: ${SEED_TEAM_PASSWORD:-}
@@ -38,7 +37,6 @@ services:
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
     volumes: &ingest_vols
       - ./data/raw:/data/raw:ro
-      - uploads:/data/uploads
     depends_on:
       db: { condition: service_healthy }
 
@@ -55,9 +53,7 @@ services:
     build: { context: ./web }
     environment:
       DATABASE_URL: postgresql://nazryx_app:${APP_DB_PASSWORD}@db:5432/nazryx
-      UPLOAD_DIR: /data/uploads
       INSECURE_COOKIES: ${INSECURE_COOKIES:-0}
-    volumes: [uploads:/data/uploads]
     ports: ["${WEB_PORT:-3000}:3000"]
     restart: unless-stopped
     depends_on:
@@ -65,4 +61,3 @@ services:
 
 volumes:
   pgdata:
-  uploads:
