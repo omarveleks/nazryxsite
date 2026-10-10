@@ -18,10 +18,16 @@ export async function signUp(f: FormData) {
 
 export async function signIn(f: FormData) {
   const email = str(f, 'email', 200).toLowerCase(), pw = String(f.get('password') ?? '');
+  const throttled = (await pool.query('select auth_throttled($1) as t', [email])).rows[0].t;
+  if (throttled) back('/signup', { mode: 'signin', error: 'Too many attempts. Try again in 15 minutes, or ask us to reset your password.' });
   const r = await pool.query('select id, password_hash from auth_find_user($1)', [email]);
   const u = r.rows[0];
   // same message either way, so the form does not reveal which emails have accounts
-  if (!u || !verifyPassword(pw, u.password_hash)) back('/signup', { mode: 'signin', error: 'Email or password is wrong.' });
+  if (!u || !verifyPassword(pw, u.password_hash)) {
+    await pool.query('select auth_record_failure($1)', [email]);
+    back('/signup', { mode: 'signin', error: 'Email or password is wrong.' });
+  }
+  await pool.query('select auth_clear_failures($1)', [email]);
   await createSession(u.id);
   redirect('/home');
 }

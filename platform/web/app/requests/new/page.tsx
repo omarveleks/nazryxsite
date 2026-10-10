@@ -19,7 +19,7 @@ export default async function NewRequest({ searchParams }: { searchParams: Promi
     if (sp.missing) {
       const cats = sp.missing.split('|').slice(0, 3);
       const miss = await rows(db, `select m.category, string_agg(m.inn, ', ' order by g.score desc nulls last) as list
-          from country_molecules cm join molecules m on m.id = cm.molecule_id left join gap_scores g on g.molecule_id = m.id and g.country = cm.country
+          from country_molecules cm join molecules m on m.id = cm.molecule_id left join visible_gap_scores g on g.molecule_id = m.id and g.country = cm.country
           where cm.country = 'TZ' and cm.on_national_list and cm.rankable and m.category = any($1)
             and m.id not in (select molecule_id from portfolio_items where user_id = $2) group by m.category`, [cats, u.id]);
       notes = miss.map((r) => `Missing in ${r.category}: ${r.list}`).join('\n');

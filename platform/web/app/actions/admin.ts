@@ -4,6 +4,7 @@ import { requireTeam } from '@/lib/auth';
 import { dbMessage, one, withUser } from '@/lib/db';
 import { back, int, str } from '@/lib/forms';
 import { STAGES, ORDER_STATUSES } from '@/lib/format';
+import { hashPassword } from '@/lib/password';
 
 // Every action re-checks the team role here AND in the database (RLS policies / definer functions).
 
@@ -161,4 +162,11 @@ export async function keepSeparate(f: FormData) {
 export async function queueRecompute() {
   await team((db) => db.query('select team_queue_recompute()'), '/admin');
   redirect('/admin?queued=1');
+}
+
+export async function resetPassword(f: FormData) {
+  const pw = String(f.get('password') ?? '');
+  if (pw.length < 10) back('/admin?tab=accounts', { error: 'Temporary password: at least 10 characters.' });
+  await team((db) => db.query('select admin_reset_password($1, $2)', [str(f, 'user_id', 40), hashPassword(pw)]), '/admin?tab=accounts');
+  redirect('/admin?tab=accounts&saved=1');
 }

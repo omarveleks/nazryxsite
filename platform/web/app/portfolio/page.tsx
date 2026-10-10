@@ -22,13 +22,13 @@ export default async function Portfolio({ searchParams }: { searchParams: Promis
   const d = await withUser(u.id, async (db) => {
     const items = await rows(db, `select m.id, m.inn, m.category, p.source, cm.on_national_list, g.score from portfolio_items p
                                   join molecules m on m.id = p.molecule_id left join country_molecules cm on cm.molecule_id = m.id and cm.country = $2
-                                  left join gap_scores g on g.molecule_id = m.id and g.country = $2 where p.user_id = $1 order by m.inn`, [u.id, COUNTRY]);
+                                  left join visible_gap_scores g on g.molecule_id = m.id and g.country = $2 where p.user_id = $1 order by m.inn`, [u.id, COUNTRY]);
     const coverage = await rows(db, `with ${ESS},
         mine as (select ess.category, count(*)::int as covered from portfolio_items p join ess on ess.molecule_id = p.molecule_id
                  where p.user_id = $1 group by 1)
         select tot.category, tot.n, coalesce(mine.covered, 0) as covered,
                (select string_agg(m.inn, ', ' order by g.score desc nulls last) from ess e join molecules m on m.id = e.molecule_id
-                 left join gap_scores g on g.molecule_id = e.molecule_id and g.country = '${COUNTRY}'
+                 left join visible_gap_scores g on g.molecule_id = e.molecule_id and g.country = '${COUNTRY}'
                  where e.category = tot.category and e.molecule_id not in (select molecule_id from portfolio_items where user_id = $1)) as missing
         from tot left join mine on mine.category = tot.category
         order by (mine.covered is null), tot.category`, [u.id]);
@@ -40,7 +40,7 @@ export default async function Portfolio({ searchParams }: { searchParams: Promis
         from cc join tot using (category) group by cc.category, tot.n order by cc.category`);
     const unreachable = paid ? await rows(db, `
         select m.id, m.inn, cm.facility_level, cm.channel_flag, g.score from country_molecules cm join molecules m on m.id = cm.molecule_id
-        left join gap_scores g on g.molecule_id = m.id and g.country = cm.country
+        left join visible_gap_scores g on g.molecule_id = m.id and g.country = cm.country
         where cm.country = $2 and cm.on_national_list and cm.rankable and (cm.facility_level in ('C', 'D', 'S') or cm.channel_flag = 'programme')
           and m.category in (select m2.category from portfolio_items p join molecules m2 on m2.id = p.molecule_id where p.user_id = $1)
           and m.id not in (select molecule_id from portfolio_items where user_id = $1)

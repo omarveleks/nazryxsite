@@ -12,7 +12,7 @@ import pandas as pd
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "pipeline"))
 
 from companies import same_company  # noqa: E402
-from gap import score_molecule  # noqa: E402
+from gap import A_DEFAULT, gap_score, score_molecule  # noqa: E402
 
 COUNTRY = "TZ"
 
@@ -226,11 +226,13 @@ def recompute_gaps(cur, country, upload_id=None):
         if sc["D"] <= 0:
             continue
         keep.append(mid)
-        cur.execute("""insert into gap_scores (country, molecule_id, demand, saturation, actionability, score, computed_at, upload_id)
-                       values (%s, %s, %s, %s, %s, %s, now(), %s)
+        base = gap_score(sc["D"], sc["S"], A_DEFAULT)   # what free accounts see (no supply signal)
+        cur.execute("""insert into gap_scores (country, molecule_id, demand, saturation, actionability, score, base_score, computed_at, upload_id)
+                       values (%s, %s, %s, %s, %s, %s, %s, now(), %s)
                        on conflict (country, molecule_id) do update set demand = excluded.demand, saturation = excluded.saturation,
-                       actionability = excluded.actionability, score = excluded.score, computed_at = now(), upload_id = excluded.upload_id""",
-                    (country, mid, sc["D"], sc["S"], sc["A"], sc["gap_score"], upload_id))
+                       actionability = excluded.actionability, score = excluded.score, base_score = excluded.base_score,
+                       computed_at = now(), upload_id = excluded.upload_id""",
+                    (country, mid, sc["D"], sc["S"], sc["A"], sc["gap_score"], base, upload_id))
         if old is None or abs(float(old) - sc["gap_score"]) >= 0.05:
             cur.execute("insert into gap_score_history (country, molecule_id, previous_score, score, upload_id) values (%s, %s, %s, %s, %s)",
                         (country, mid, old, sc["gap_score"], upload_id))

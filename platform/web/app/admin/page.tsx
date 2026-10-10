@@ -5,7 +5,7 @@ import { requireTeam } from '@/lib/auth';
 import { one, rows, withUser } from '@/lib/db';
 import { STAGES, ago, fmtDate, title } from '@/lib/format';
 import { grantCredits, keepSeparate, matchMolecule, mergeCompanies, postRegulatory, addPrice, editUseCase, queueRecompute,
-  rejectSuggestion, reviewClaim, setPlan } from '@/app/actions/admin';
+  rejectSuggestion, resetPassword, reviewClaim, setPlan } from '@/app/actions/admin';
 import { StagePill } from '@/components/ui';
 
 export const metadata = { title: 'Admin' };
@@ -218,7 +218,14 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
                   <form action={setPlan}><input type="hidden" name="user_id" value={x.id} /><input type="hidden" name="plan" value={x.plan === 'paid' ? 'free' : 'paid'} />
                     <button className="btn btn-ghost btn-sm">{x.plan === 'paid' ? 'Set free' : 'Set paid'}</button></form>
                   <form action={grantCredits}><input type="hidden" name="user_id" value={x.id} /><input type="hidden" name="credits" value="20" />
-                    <button className="btn btn-ghost btn-sm">+20 credits</button></form></div>)}</td></tr>))}
+                    <button className="btn btn-ghost btn-sm">+20 credits</button></form></div>)}
+                  <details className="dd" style={{ display: 'inline-block', marginTop: 6 }}>
+                    <summary className="btn-link small">Reset password</summary>
+                    <form action={resetPassword} className="menu" style={{ gap: 8, textAlign: 'left' }}><input type="hidden" name="user_id" value={x.id} />
+                      <input className="input" name="password" type="text" minLength={10} required placeholder="Temporary password" aria-label="Temporary password" autoComplete="off" />
+                      <button className="btn btn-blue btn-sm">Set and sign them out</button>
+                      <span className="note">Send it to them directly; they can change it in Settings.</span></form>
+                  </details></td></tr>))}
             </tbody></table></div>
         </section>
       )}

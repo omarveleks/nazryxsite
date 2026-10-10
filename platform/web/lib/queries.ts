@@ -23,4 +23,4 @@ export const MOLECULE_LIST_SQL = `
          exists (select 1 from enrichments e where e.molecule_id = m.id and e.user_id = app_uid()) as enriched
   from molecules m
   join country_molecules cm on cm.molecule_id = m.id and cm.country = '${COUNTRY}'
-  left join gap_scores g on g.molecule_id = m.id and g.country = cm.country`;
+  left join visible_gap_scores g on g.molecule_id = m.id and g.country = cm.country`;

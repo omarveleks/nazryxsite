@@ -22,7 +22,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ w
     const counts = await one(db, `select
         (select count(*)::int from registrations where country = $1 and active and reg_year >= extract(year from now())::int) as new_regs,
         (select count(*)::int from requests where user_id = $2 and updated_at > now() - interval '7 days') as req_updates,
-        (select count(*)::int from gap_scores g join country_molecules cm on cm.molecule_id = g.molecule_id and cm.country = g.country
+        (select count(*)::int from visible_gap_scores g join country_molecules cm on cm.molecule_id = g.molecule_id and cm.country = g.country
            where g.country = $1 and cm.rankable and cm.registrants = 0 and cm.on_national_list) as open_gaps,
         (select count(*)::int from portfolio_items where user_id = $2) as portfolio`, [COUNTRY, u.id]);
     const watch = await rows(db, `select 'm' as t, m.id, m.inn as name from watches w join molecules m on m.id = w.molecule_id where w.user_id = $1

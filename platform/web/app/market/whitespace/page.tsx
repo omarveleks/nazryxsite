@@ -22,14 +22,14 @@ export default async function Whitespace({ searchParams }: { searchParams: Promi
                     where p.user_id = $1 group by m.category)
       select m.id, m.inn, m.category, cm.registrants, cm.channel_flag, g.score, g.demand, coalesce(mine.n, 0) as same_cat,
              exists (select 1 from enrichments e where e.molecule_id = m.id and e.user_id = $1) as enriched
-      from gap_scores g join molecules m on m.id = g.molecule_id
+      from visible_gap_scores g join molecules m on m.id = g.molecule_id
       join country_molecules cm on cm.molecule_id = g.molecule_id and cm.country = g.country
       left join mine on mine.category = m.category
       where g.country = $2 and cm.rankable and cm.on_national_list and g.score > 0
         and m.id not in (select molecule_id from portfolio_items where user_id = $1)
         and ($3 = '' or m.inn ilike '%' || $3 || '%') and ($4 = '' or m.category = $4) and (not $5 or mine.n > 0)
       order by g.score desc, g.demand desc, m.inn limit $6`, [u.id, COUNTRY, q, cls, fitOnly, free ? FREE.whitespace : 200]);
-    const total = (await rows(db, `select count(*)::int as n from gap_scores g join country_molecules cm on cm.molecule_id = g.molecule_id
+    const total = (await rows(db, `select count(*)::int as n from visible_gap_scores g join country_molecules cm on cm.molecule_id = g.molecule_id
                                    and cm.country = g.country where g.country = $1 and cm.rankable and cm.on_national_list and g.score > 0`, [COUNTRY]))[0].n;
     return { cats, list, total };
   });

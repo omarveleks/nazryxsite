@@ -62,7 +62,7 @@ The database URL must point at a throwaway database: the tests drop and recreate
 | `test_gap.py` | Gap score D × (1 − S) × A: weights, saturation cap, clamping, ranking, confirmed supply |
 | `test_companies.py` | Distributor merging: legal-suffix and punctuation variants, typos, short names, numbered sites, team aliases and keep-separate pairs, order independence |
 | `test_norm.py`, `test_parser.py` | Molecule keys (salts, synonyms, OCR typos), essential-list parsing (OCR levels, continuation lines), global-list parsing, certificate years |
-| `test_ingest_db.py` | Ingest diff (new, removed, cancelled, new distributors, moved scores, history, feed), rollback of a partial or broken upload, RLS supplier confidentiality, free-plan limits enforced in the database, the 48-hour reminder |
+| `test_ingest_db.py` | Ingest diff (new, removed, cancelled, new distributors, moved scores, history, feed), rollback of a partial or broken upload, RLS supplier confidentiality, free-plan limits enforced in the database, the 48-hour reminder, sign-in throttling, team password reset, free-plan score view |
 | `test_claude_match.py` | Claude suggestion parsing (only offered candidates are accepted) |
 
 ## How it works
@@ -89,6 +89,9 @@ New request, Settings, Admin (team only). No tenders, no registration tracking p
 | Active requests | 5 | unlimited |
 | Team seats | 1 | add teammates |
 
+Free accounts see gap scores without the confirmed-supply boost (supplier availability is a paid feature); the app
+reads scores through the `visible_gap_scores` view, which applies this in the database.
+
 Credits, request, follow and watch limits are enforced **in Postgres** (definer function and triggers), not only in
 the UI. Billing is manual for now: "Upgrade" files a request; the team sets the plan on Admin › Accounts.
 
@@ -100,6 +103,11 @@ certificates and a "below / at / above your target price" note; the price and th
 on acceptance (`accept_quote()` checks ownership, opens an order, closes the request). Internal supplier notes live
 in a separate table that stays team-only even after acceptance. `test_supplier_confidentiality_rls` proves this
 against a real database.
+
+### Accounts
+Passwords are hashed with scrypt; sessions are random tokens stored hashed in Postgres (HttpOnly cookie). After five
+wrong passwords for an email within 15 minutes, sign-in is refused until the window passes. There is no reset email
+yet: a team member sets a temporary password on Admin › Accounts, which also signs that user out everywhere.
 
 ### Requests
 New request → "Our team will reach out to you for more info" → the request shows its stage (Submitted, Reviewing,

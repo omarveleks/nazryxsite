@@ -26,7 +26,7 @@ export default async function Molecule({ params, searchParams }: {
              exists (select 1 from portfolio_items p where p.molecule_id = m.id and p.user_id = $2) as in_portfolio,
              exists (select 1 from watches w where w.molecule_id = m.id and w.user_id = $2) as watched
       from molecules m left join country_molecules cm on cm.molecule_id = m.id and cm.country = $3
-      left join gap_scores g on g.molecule_id = m.id and g.country = $3 where m.id = $1`, [id, u.id, COUNTRY]);
+      left join visible_gap_scores g on g.molecule_id = m.id and g.country = $3 where m.id = $1`, [id, u.id, COUNTRY]);
     if (!m) return null;
     const open = m.enriched || paid;
     if (!open) return { m, open };
@@ -38,7 +38,7 @@ export default async function Molecule({ params, searchParams }: {
     const alternatives = m.category ? await rows(db, `
       select m2.id, m2.inn, g.score, cm.registrants from molecules m2
       join country_molecules cm on cm.molecule_id = m2.id and cm.country = $3
-      left join gap_scores g on g.molecule_id = m2.id and g.country = $3
+      left join visible_gap_scores g on g.molecule_id = m2.id and g.country = $3
       where m2.category = $1 and m2.id <> $2 order by g.score desc nulls last limit 8`, [m.category, id, COUNTRY]) : [];
     const combos = await rows(db, `
       select m2.id, m2.inn, cm.registrations from molecules m2

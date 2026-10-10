@@ -32,3 +32,11 @@ jobs:
       - run: npm ci
       - run: npm run typecheck
       - run: npm run build
+  images:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build ingest image
+        run: docker build -f platform/ingest/Dockerfile platform
+      - name: Build web image
+        run: docker build platform/web

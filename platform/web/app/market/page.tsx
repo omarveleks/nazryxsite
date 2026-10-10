@@ -18,7 +18,7 @@ export default async function Market() {
              (select count(distinct r.ltr_id)::int from registrations r join molecules m2 on m2.id = r.molecule_id
                 where r.country = $1 and r.active and m2.category = m.category) as registrants
       from country_molecules cm join molecules m on m.id = cm.molecule_id
-      left join gap_scores g on g.molecule_id = cm.molecule_id and g.country = cm.country
+      left join visible_gap_scores g on g.molecule_id = cm.molecule_id and g.country = cm.country
       where cm.country = $1 and cm.on_national_list and m.category is not null
       group by m.category order by products desc`, [COUNTRY]);
     const top = await rows(db, `select c.id, c.display_name, s.registrations from company_stats s join companies c on c.id = s.company_id

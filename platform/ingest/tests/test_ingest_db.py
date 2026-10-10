@@ -255,3 +255,55 @@ def test_48_hour_reminder(env):
         assert cur.execute("select count(*) from notifications where user_id is null").fetchone()[0] == before + 2
         assert reminder.check_and_remind(cur) is False            # not again within the same 48-hour window
         c.rollback()
+
+
+def test_signin_throttle_and_team_password_reset(env):
+    with app_conn(env) as a:
+        as_user(a, None)
+        for _ in range(4):
+            a.execute("select auth_record_failure('slow@example.com')")
+        assert a.execute("select auth_throttled('Slow@Example.com')").fetchone()[0] is False
+        a.execute("select auth_record_failure('slow@example.com')")
+        assert a.execute("select auth_throttled('slow@example.com')").fetchone()[0] is True
+        assert a.execute("select auth_throttled('other@example.com')").fetchone()[0] is False
+        a.execute("select auth_clear_failures('slow@example.com')")
+        assert a.execute("select auth_throttled('slow@example.com')").fetchone()[0] is False
+        with pytest.raises(psycopg.errors.InsufficientPrivilege):
+            a.execute("select * from login_failures")
+        a.rollback()
+    with psycopg.connect(URL) as c:
+        cust = c.execute("insert into users (email, password_hash) values ('reset@example.com', 'old') returning id").fetchone()[0]
+        team = c.execute("select id from users where role = 'team' limit 1").fetchone()[0]
+        c.execute("insert into sessions (token_hash, user_id, expires_at) values ('h1', %s, now() + interval '1 day')", (cust,))
+        c.commit()
+    with app_conn(env) as a:
+        as_user(a, cust)   # a customer cannot reset anyone's password
+        with pytest.raises(psycopg.errors.RaiseException):
+            a.execute("select admin_reset_password(%s, 'x')", (cust,))
+        a.rollback()
+        as_user(a, team)
+        a.execute("select admin_reset_password(%s, 'newhash')", (cust,))
+        a.commit()
+    assert q("select password_hash from users where id = %s", cust)[0][0] == "newhash"
+    assert q("select count(*) from sessions where user_id = %s", cust)[0][0] == 0
+
+
+def test_free_plan_score_hides_confirmed_supply(env):
+    import loader
+    with psycopg.connect(URL) as c:   # the RLS test added a confirmed Doxycycline offer
+        loader.recompute_gaps(c.cursor(), "TZ")
+        mol = c.execute("select id from molecules where inn = 'Doxycycline'").fetchone()[0]
+        free = c.execute("insert into users (email, password_hash) values ('free2@example.com', 'x') returning id").fetchone()[0]
+        paid = c.execute("insert into users (email, password_hash, plan) values ('paid2@example.com', 'x', 'paid') returning id").fetchone()[0]
+        full, base = c.execute("select score, base_score from gap_scores where molecule_id = %s", (mol,)).fetchone()
+        c.commit()
+    assert float(full) > float(base)
+    with app_conn(env) as a:
+        as_user(a, free)
+        s, act = a.execute("select score, actionability from visible_gap_scores where molecule_id = %s", (mol,)).fetchone()
+        assert s == base and float(act) == 0.3
+        with pytest.raises(psycopg.errors.InsufficientPrivilege):
+            a.execute("select score from gap_scores")
+        a.rollback()
+        as_user(a, paid)
+        assert a.execute("select score from visible_gap_scores where molecule_id = %s", (mol,)).fetchone()[0] == full
