@@ -84,7 +84,7 @@ SYNONYMS = {
     "vitamin b1": "thiamine", "vitamin b6": "pyridoxine", "glyceryl trinitrate": "nitroglycerin",
     "ors": "oral rehydration", "oral rehydration": "oral rehydration", "isoprenaline": "isoprenaline",
     "hyoscine butylbromide": "hyoscine butylbromide", "metformin": "metformin", "tetanus vaccine": "tetanus toxoid",
-    "phenoxymethyl penicillin": "phenoxymethylpenicillin", "ethinyloestradiol": "ethinylestradiol",
+    "phenoxymethyl penicillin": "phenoxymethylpenicillin", "mesalamine": "mesalazine", "ethinyloestradiol": "ethinylestradiol",
     "ethinyl estradiol": "ethinylestradiol", "acid tartrate": "tartrate", "riboflavine": "riboflavin",
     "clavulanate": "clavulanic acid", "co-amoxiclav": "amoxicillin clavulanic acid", "supplements": "supplement",
     "ethylene diamine tetra-acetic acid": "edta", "ethylenediamine tetra-acetic acid": "edta",

@@ -9,6 +9,7 @@ Static site on Cloudflare Pages, with Pages Functions for the Markets pages and 
 | `content/markets/` | One file per country. Add `content/markets/<slug>.js` and list it in `content/markets/index.js` |
 | `migrations/` | D1 schema (`wrangler d1 migrations apply nazryx-analytics --remote`) |
 | `wrangler.toml` | D1 binding `DB` → `nazryx-analytics` |
+| `platform/` | Nazryx Intelligence Platform (Next.js + Postgres + Python ingest). Not part of the Pages site. See `platform/README.md` |
 
 ## Analytics: what is stored
 

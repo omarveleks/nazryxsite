@@ -1,0 +1,34 @@
+name: platform
+on:
+  push:
+    paths: ["platform/**", ".github/workflows/platform.yml"]
+  pull_request:
+    paths: ["platform/**", ".github/workflows/platform.yml"]
+jobs:
+  ingest:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env: { POSTGRES_USER: ci, POSTGRES_HOST_AUTH_METHOD: trust, POSTGRES_DB: postgres }
+        ports: ["5432:5432"]
+        options: --health-cmd "pg_isready -U ci" --health-interval 3s --health-retries 20
+    defaults: { run: { working-directory: platform/ingest } }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install -r requirements.txt
+      - run: python -m pytest -q
+        env:
+          TEST_DATABASE_URL_ADMIN: postgresql://ci@localhost:5432/nazryx_test
+  web:
+    runs-on: ubuntu-latest
+    defaults: { run: { working-directory: platform/web } }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: "22" }
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run build

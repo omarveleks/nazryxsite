@@ -95,12 +95,12 @@ def run(job_id):
 
 def create_job(file_path, kind="upload", uploaded_by=None, country="TZ"):
     os.makedirs(os.path.join(UPLOAD_DIR, "registry"), exist_ok=True)
-    with connect() as conn:
+    with connect() as conn:  # the insert is committed only after the copy succeeds
         jid = conn.execute("""insert into registry_uploads (country, kind, uploaded_by, file_name, status)
                               values (%s, %s, %s, %s, 'queued') returning id""",
                            (country, kind, uploaded_by, os.path.basename(file_path))).fetchone()[0]
         dest = os.path.join(UPLOAD_DIR, "registry", f"{jid}-{os.path.basename(file_path)}")
-        shutil.copyfile(file_path, dest)
+        shutil.copyfile(file_path, dest)   # raises before commit, so no orphan job row is left behind
         conn.execute("update registry_uploads set file_path = %s where id = %s", (dest, jid))
         conn.commit()
     return jid

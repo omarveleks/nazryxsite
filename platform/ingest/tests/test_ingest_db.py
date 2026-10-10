@@ -236,3 +236,22 @@ def test_free_plan_limits_in_database(env):
         as_user(a, u)   # customers cannot change their own plan or credits
         with pytest.raises(psycopg.errors.InsufficientPrivilege):
             a.execute("update users set plan = 'paid' where id = %s", (u,))
+
+
+def test_48_hour_reminder(env):
+    import reminder
+    with psycopg.connect(URL) as c:
+        cur = c.cursor()
+        cur.execute("update registry_uploads set finished_at = now() - interval '20 hours' where status = 'applied'")
+        assert reminder.status(cur)["overdue"] is False
+        assert reminder.check_and_remind(cur) is False
+        cur.execute("update registry_uploads set finished_at = now() - interval '50 hours' where status = 'applied'")
+        st = reminder.status(cur)
+        assert st["overdue"] and 49 < st["hours_since"] < 51
+        before = cur.execute("select count(*) from notifications where user_id is null").fetchone()[0]
+        assert reminder.check_and_remind(cur) is True             # email + WhatsApp to the team (stubbed)
+        chans = cur.execute("select channel from notifications where user_id is null order by id desc limit 2").fetchall()
+        assert {c[0] for c in chans} == {"email", "whatsapp"}
+        assert cur.execute("select count(*) from notifications where user_id is null").fetchone()[0] == before + 2
+        assert reminder.check_and_remind(cur) is False            # not again within the same 48-hour window
+        c.rollback()

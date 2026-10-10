@@ -35,6 +35,10 @@ REQUIRED_COLUMNS = ["Certificate Number", "Brand Name", "Classification", "Gener
                     "Registration Status"]
 INACTIVE = {"Cancelled/Withdrawn", "Suspended", "Revoked"}
 EXCLUDED_CLASSES = re.compile(r"veterinar", re.I)
+# Animal-health products filed under "Biologicals including Vaccines" (or misfiled elsewhere)
+VET_TERMS = re.compile(r"newcastle|bursal|gumboro|marek|avian|poultry|fowl|turkey|galli|ruminant|canine|feline|bovine|"
+                       r"porcine|ovine|caprine|capri|distemper|erysipelothrix|fluralaner|coryza|lumpy skin|"
+                       r"foot.and.mouth|parvovirus|mycoplasma|for (?:cattle|dogs|cats|poultry|animals)", re.I)
 
 DOSE = (r"(Tablets?|Injection|Injectable|Intrathecal|Capsules?|Syrup|Suspension|Powder|Oral|Cream|Ointment|Solution|"
         r"Eye|Ear|Gel|Inhal\w*|Suppositor\w*|Pessar\w*|Lotion|Drops|Infusion|Rectal|Granules|Nasal|Sachet|Patch\w*|"
@@ -133,7 +137,8 @@ def validate_registry(reg):
 
 
 def cert_year(c):
-    m = re.match(r"^\s*(?:TAN|TZ)\s*(\d{2})\b", str(c or ""))
+    # dated formats only: "TAN 23 HM 0101", "TZ 19 H 300". Old "TAN 00,050 G01A ..." numbers carry no year.
+    m = re.match(r"^\s*(?:TAN|TZ)\s+(\d{2})\s+[A-Z]", str(c or ""))
     if not m:
         return None
     yy = int(m.group(1))
@@ -147,7 +152,8 @@ def clean_registry(reg):
             reg[c] = reg[c].map(lambda v: re.sub(r"\s+", " ", v).strip() if isinstance(v, str) else v)
     reg["certificate_no"] = reg["Certificate Number"].str.replace(r"\s+", " ", regex=True).str.strip()
     reg["active"] = ~reg["Registration Status"].isin(INACTIVE)
-    reg["human"] = ~reg.Classification.fillna("").str.contains(EXCLUDED_CLASSES)
+    vet_text = reg["Generic Name"].fillna("") + " " + reg["Active Pharmaceutical Ingredients"].fillna("")
+    reg["human"] = ~reg.Classification.fillna("").str.contains(EXCLUDED_CLASSES) & ~vet_text.str.contains(VET_TERMS)
     reg["key"] = reg["Generic Name"].map(molecule_key)
     reg["form"] = reg["Dosage Form"].map(form_of)
     reg["reg_year"] = reg.certificate_no.map(cert_year)

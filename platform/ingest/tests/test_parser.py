@@ -53,5 +53,6 @@ def test_parse_who_reads_names_on_their_own_line(tmp_path):
 def test_cert_year():
     assert cert_year("TAN 23 HM 0101") == 2023
     assert cert_year("TZ 19 H 0300") == 2019
-    assert cert_year("TAN 07, 0123") == 2007
+    assert cert_year("TAN 00,050 G01A GLE") is None     # old numbering, no year
+    assert cert_year("TAN 07, 0123") is None
     assert cert_year(None) is None

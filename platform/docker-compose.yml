@@ -1,0 +1,68 @@
+# Local stack: Postgres, one-shot init (migrate + first load + demo seed), ingest worker, web app.
+#   cp .env.example .env   # then fill in the values
+#   docker compose up --build
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: nazryx
+      POSTGRES_DB: nazryx
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+    volumes: [pgdata:/var/lib/postgresql/data]
+    ports: ["127.0.0.1:5432:5432"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U nazryx -d nazryx"]
+      interval: 3s
+      retries: 20
+
+  init:
+    build: { context: ., dockerfile: ingest/Dockerfile }
+    command: ["python", "bootstrap.py"]
+    environment: &ingest_env
+      DATABASE_URL_ADMIN: postgresql://nazryx:${POSTGRES_PASSWORD}@db:5432/nazryx
+      APP_DB_PASSWORD: ${APP_DB_PASSWORD:?set APP_DB_PASSWORD in .env}
+      DATA_DIR: /data
+      UPLOAD_DIR: /data/uploads
+      SEED_DEMO: ${SEED_DEMO:-1}
+      SEED_TEAM_EMAIL: ${SEED_TEAM_EMAIL:-team@nazryx.test}
+      SEED_TEAM_PASSWORD: ${SEED_TEAM_PASSWORD:-}
+      DEMO_PASSWORD: ${DEMO_PASSWORD:-}
+      TEAM_ALERT_EMAILS: ${TEAM_ALERT_EMAILS:-}
+      TEAM_ALERT_WHATSAPP: ${TEAM_ALERT_WHATSAPP:-}
+      EMAIL_PROVIDER: ${EMAIL_PROVIDER:-stub}
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      EMAIL_FROM: ${EMAIL_FROM:-contact@nazryx.com}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+    volumes: &ingest_vols
+      - ./data/raw:/data/raw:ro
+      - uploads:/data/uploads
+    depends_on:
+      db: { condition: service_healthy }
+
+  worker:
+    build: { context: ., dockerfile: ingest/Dockerfile }
+    command: ["python", "worker.py"]
+    environment: *ingest_env
+    volumes: *ingest_vols
+    restart: unless-stopped
+    depends_on:
+      init: { condition: service_completed_successfully }
+
+  web:
+    build: { context: ./web }
+    environment:
+      DATABASE_URL: postgresql://nazryx_app:${APP_DB_PASSWORD}@db:5432/nazryx
+      UPLOAD_DIR: /data/uploads
+      INSECURE_COOKIES: ${INSECURE_COOKIES:-0}
+    volumes: [uploads:/data/uploads]
+    ports: ["${WEB_PORT:-3000}:3000"]
+    restart: unless-stopped
+    depends_on:
+      init: { condition: service_completed_successfully }
+
+volumes:
+  pgdata:
+  uploads:

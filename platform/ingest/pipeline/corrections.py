@@ -108,6 +108,9 @@ MANUAL_MATCHES = {
     "Calamine": "Calamine + Zinc Oxide",                       # Calamine Lotion BP contains zinc oxide
     "Magnesium trisilicate": "Magnesium Trisilicate + Aluminium Hydroxide",  # listed as the compound tablet
     "Hepatitis B Vaccine": "Hepatitis B virus",                # vaccines are registered by antigen name
+    "L-Ornithine L-Aspartate": "LOrnithine LAspartate IH",     # registry drops the hyphens
+    "Euphorbia prostrata extract": "Euphorbia prostrata",
+    "Pneumococcal polysaccharide vaccine": "Pneumococcal polysaccharide Serotype",
 }
 
 # Essential-list molecules that are not sourcing gaps: medical gases made locally and preparations the list

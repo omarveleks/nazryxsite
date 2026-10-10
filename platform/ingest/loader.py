@@ -5,12 +5,14 @@ Everything runs on the caller's connection inside ONE transaction. The caller co
 any exception, so a failed upload never changes live data.
 """
 import os
-import re
+import sys
 
 import pandas as pd
 
-from companies import same_company
-from gap import score_molecule
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "pipeline"))
+
+from companies import same_company  # noqa: E402
+from gap import score_molecule  # noqa: E402
 
 COUNTRY = "TZ"
 
@@ -267,7 +269,10 @@ def load_review_queues(cur, data, upload_id, country):
         from rapidfuzz import fuzz, process
         keys = list(regm.key)
         for r in unmatched.itertuples(index=False):
-            best = process.extractOne(r.key, keys, scorer=fuzz.token_set_ratio)
+            mine = set(r.key.split())
+            # same ingredients spelled differently, not a combination that merely contains this molecule
+            options = [k for k in keys if not (mine < set(k.split()))]
+            best = process.extractOne(r.key, options, scorer=fuzz.token_sort_ratio)
             if not best or best[1] < 80:
                 continue
             src = cur.execute("select molecule_id from molecule_aliases where alias = %s", (r.key,)).fetchone()
@@ -285,6 +290,17 @@ def feed_for_new_registrations(cur, upload_id, country, limit=300):
                '/molecule/' || r.molecule_id, r.molecule_id, r.ltr_id
         from registrations r left join molecules m on m.id = r.molecule_id left join companies c on c.id = r.ltr_id
         where r.first_upload_id = %s and r.active order by r.id limit %s""", (country, upload_id, limit))
+    # paid plans: an alert for every new registration by a followed company or of a watched molecule
+    cur.execute("""
+        insert into notifications (user_id, channel, subject, body)
+        select distinct u.id, 'email', 'New registration',
+               coalesce(c.display_name, 'A company') || ' registered ' || coalesce(m.inn, r.generic_name) || ' (' || coalesce(r.brand, '') || ')'
+        from registrations r
+        left join molecules m on m.id = r.molecule_id left join companies c on c.id = r.ltr_id
+        join users u on (exists (select 1 from follows f where f.user_id = u.id and f.company_id = r.ltr_id)
+                         or exists (select 1 from watches w where w.user_id = u.id and w.molecule_id = r.molecule_id))
+        left join users o on o.id = u.owner_id
+        where r.first_upload_id = %s and r.active and coalesce(o.plan, u.plan) = 'paid'""", (upload_id,))
 
 
 def apply_out(conn, out, upload_id, country=COUNTRY, initial=False):

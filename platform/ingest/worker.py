@@ -20,6 +20,9 @@ def tick():
     if row:
         try:
             ingest_job.run(row[0])
+            if os.environ.get("ANTHROPIC_API_KEY") and os.environ.get("CLAUDE_MATCHING", "1") != "0":
+                import claude_match
+                claude_match.run()   # suggestions only; the team approves them on the admin page
         except Exception:
             pass  # recorded on the job row; keep the worker alive
     with connect() as conn:
@@ -33,6 +36,13 @@ def tick():
 
 def main():
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(name)s %(message)s")
+    with connect() as conn:  # jobs left 'running' by a crash never committed, so live data is unchanged
+        n = conn.execute("""update registry_uploads set status = 'failed', finished_at = now(),
+                            error = 'Interrupted (worker restarted). Nothing was changed; upload again.'
+                            where status = 'running'""").rowcount
+        conn.commit()
+        if n:
+            log.warning("marked %s interrupted job(s) as failed", n)
     listen = connect(autocommit=True)
     listen.execute("listen ingest")
     log.info("worker started, polling every %ss", POLL)
