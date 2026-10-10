@@ -16,7 +16,6 @@ import os
 import secrets
 
 from db import connect
-from loader import recompute_gaps
 
 COUNTRY = "TZ"
 
@@ -149,8 +148,7 @@ def seed():
             cur.execute("""insert into feed_items (kind, title, body) values
                            ('regulatory', 'Demo: regulatory notes from the Nazryx team appear here', 'Short updates that matter for registrations and imports.')""")
             cur.execute("insert into plan_requests (user_id, wanted, note) values (%s, 'paid', 'Demo upgrade request')", (free,))
-            moved = recompute_gaps(cur, COUNTRY)   # confirmed offers lift actionability for those molecules
-            print(f"demo activity seeded; gap scores recomputed ({moved} moved)")
+            print("demo activity seeded")
         conn.commit()
     print("\nDemo accounts (sign in at /signup?mode=signin):")
     print(f"  team:      {os.environ.get('SEED_TEAM_EMAIL', 'team@nazryx.test')}" + (f"  password: {team_pw}" if g1 else "  password: from SEED_TEAM_PASSWORD"))

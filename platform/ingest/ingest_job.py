@@ -76,7 +76,9 @@ def run(job_id):
             if prev and prev[0] and summary["human_active"] < MIN_RATIO * prev[0]:
                 raise ValueError(f"Only {summary['human_active']} active products against {prev[0]} last time. "
                                  "This looks like a partial export, so nothing was changed.")
-            diff = apply_out(conn, out, job_id, country, initial=(kind == "initial"))
+            # the first load into an empty registry is the baseline, however it was sent: no "new" feed or alerts
+            empty = cur.execute("select not exists (select 1 from registrations where country = %s)", (country,)).fetchone()[0]
+            diff = apply_out(conn, out, job_id, country, initial=(kind == "initial" or empty))
             cur.execute("""update registry_uploads set status = 'applied', finished_at = now(), rows = %s,
                            diff = %s, summary = %s where id = %s""",
                         (summary["registry_rows"], json.dumps(diff), json.dumps(summary), job_id))

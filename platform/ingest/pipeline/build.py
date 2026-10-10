@@ -25,7 +25,7 @@ import re
 import pandas as pd
 from rapidfuzz import fuzz, process
 
-from norm import molecule_key, molecule_parts, form_of
+from norm import molecule_key, molecule_parts, form_of, display_name, spelling_variants
 from gap import score_molecule, best_level, SATURATION_CAP
 from companies import cluster_names, possible_duplicates
 import corrections as C
@@ -36,8 +36,8 @@ REQUIRED_COLUMNS = ["Certificate Number", "Brand Name", "Classification", "Gener
 INACTIVE = {"Cancelled/Withdrawn", "Suspended", "Revoked"}
 EXCLUDED_CLASSES = re.compile(r"veterinar", re.I)
 # Animal-health products filed under "Biologicals including Vaccines" (or misfiled elsewhere)
-VET_TERMS = re.compile(r"newcastle|bursal|gumboro|marek|avian|poultry|fowl|turkey|galli|ruminant|canine|feline|bovine|"
-                       r"porcine|ovine|caprine|capri|distemper|erysipelothrix|fluralaner|coryza|lumpy skin|"
+VET_TERMS = re.compile(r"newcastle|bursal|gumboro|marek|avian|poultry|fowl|turkey|galli(?:narum|septicum)|ruminant|canine|feline|bovine|"
+                       r"porcine|ovine|caprine|capri(?:colum|pneumoniae|pox)|distemper|erysipelothrix|fluralaner|coryza|lumpy skin|"
                        r"foot.and.mouth|parvovirus|mycoplasma|for (?:cattle|dogs|cats|poultry|animals)", re.I)
 
 DOSE = (r"(Tablets?|Injection|Injectable|Intrathecal|Capsules?|Syrup|Suspension|Powder|Oral|Cream|Ointment|Solution|"
@@ -196,6 +196,10 @@ def build(registry, nemlit, who, out, cap=SATURATION_CAP, company_aliases=None, 
     os.makedirs(out, exist_ok=True)
     reg = clean_registry(load_registry(registry))
     validate_registry(reg)
+    em = parse_nemlit(nemlit)
+    who_set = parse_who(who)
+    variants = spelling_variants(reg[reg.human].key.value_counts().to_dict(), known=set(em.key) | who_set)
+    reg["key"] = reg.key.replace(variants)
     fp_cols = ["certificate_no", "Brand Name", "Generic Name", "Dosage Form", "Product Strength",
                "Active Pharmaceutical Ingredients", "Registrant", "LTR", "Manufacturer"]
     reg["fingerprint"] = reg[fp_cols].map(lambda v: "" if pd.isna(v) else str(v)).agg("|".join, axis=1).map(
@@ -213,9 +217,6 @@ def build(registry, nemlit, who, out, cap=SATURATION_CAP, company_aliases=None, 
     h["ltr_cluster"] = h.LTR.map(name_to_cluster).fillna(h.registrant_cluster)
     h["manufacturer_cluster"] = h.Manufacturer.map(name_to_cluster)
 
-    em = parse_nemlit(nemlit)
-    who_set = parse_who(who)
-
     # ---- molecule-level registry stats ----
     def agg(g):
         return pd.Series({
@@ -224,7 +225,7 @@ def build(registry, nemlit, who, out, cap=SATURATION_CAP, company_aliases=None, 
             "india_pk_bd_share": round(g["Manufacturing Country"].isin(["INDIA", "PAKISTAN", "BANGLADESH"]).mean(), 2),
             "local_made": int((g["Manufacturing Country"] == "TANZANIA").sum()),
             "forms": ", ".join(sorted(g.form.unique())),
-            "display": g["Generic Name"].value_counts().index[0]})
+            "display": g["Generic Name"].map(display_name).value_counts().index[0]})
     stats = h.groupby("key").apply(agg, include_groups=False).reset_index()
 
     # ---- essential list -> registry and WHO ----
@@ -247,7 +248,7 @@ def build(registry, nemlit, who, out, cap=SATURATION_CAP, company_aliases=None, 
     for c in ["registrations", "registrants", "ltrs", "manufacturers", "local_made"]:
         g[c] = g[c].fillna(0).astype(int)
     sc = g.apply(lambda r: score_molecule(True, bool(r.in_who), r.level, r.registrants, cap=cap), axis=1)
-    g["D"] = sc.map(lambda x: x["D"]); g["S"] = sc.map(lambda x: x["S"]); g["A"] = sc.map(lambda x: x["A"])
+    g["D"] = sc.map(lambda x: x["D"]); g["S"] = sc.map(lambda x: x["S"])
     g["gap_score"] = sc.map(lambda x: x["gap_score"])
     donor = r"vaccine|immunolog|antiretro|anti-tuberc|tubercul|malaria|blood|sera|hormones|contracept|antineoplastic|neglected tropical"
     is_donor = g.category.str.lower().str.contains(donor, na=False) | g.molecule.str.lower().str.contains(
@@ -320,7 +321,8 @@ def build(registry, nemlit, who, out, cap=SATURATION_CAP, company_aliases=None, 
                "nemlit_unregistered": int(g.unregistered_essential.sum()), "companies": len(comp),
                "distributor_clusters": len(dist), "ltr_clusters": int(comp.acts_as_ltr.sum()),
                "who_matches": int(em.in_who.sum()), "nemlit_level_blank": int((em.level == "").sum()),
-               "possible_duplicate_companies": len(dups), "who_list_names": len(who_set)}
+               "possible_duplicate_companies": len(dups), "who_list_names": len(who_set),
+               "spelling_variants_merged": len(variants)}
     json.dump(summary, open(f"{out}/summary.json", "w"), indent=1)
     print(json.dumps(summary))
     return summary

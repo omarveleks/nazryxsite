@@ -12,7 +12,7 @@ import pandas as pd
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "pipeline"))
 
 from companies import same_company  # noqa: E402
-from gap import A_DEFAULT, gap_score, score_molecule  # noqa: E402
+from gap import score_molecule  # noqa: E402
 
 COUNTRY = "TZ"
 
@@ -65,7 +65,7 @@ def upsert_molecules(cur, data):
 
     key_to_id = {}
     for r in data["regm"].itertuples(index=False):
-        key_to_id[r.key] = mol_id(r.key, _nice(r.display))
+        key_to_id[r.key] = mol_id(r.key, _nice(r.display), prefer_name=True)   # names improve as the cleaning does
     ess = {}
     for r in data["gap"].itertuples(index=False):
         target = _s(r.reg_key) or r.key
@@ -213,26 +213,22 @@ def load_registrations(cur, data, key_to_id, cluster_to_id, upload_id, country, 
 
 # ------------------------------------------------------------------ gap scores
 def recompute_gaps(cur, country, upload_id=None):
-    """Recompute D, S, A and the gap score for every molecule with a demand signal. Returns how many moved >= 1 point."""
+    """Recompute D, S and the gap score for every molecule with a demand signal. Returns how many moved >= 1 point."""
     rows = cur.execute("""
-        select cm.molecule_id, cm.on_national_list, cm.on_who_eml, cm.facility_level, cm.registrants,
-               exists (select 1 from supplier_offers o where o.molecule_id = cm.molecule_id and o.confirmed),
-               g.score
+        select cm.molecule_id, cm.on_national_list, cm.on_who_eml, cm.facility_level, cm.registrants, g.score
         from country_molecules cm left join gap_scores g on g.country = cm.country and g.molecule_id = cm.molecule_id
         where cm.country = %s""", (country,)).fetchall()
     moved, keep = 0, []
-    for mid, nat, who, lvl, regs, supply, old in rows:
-        sc = score_molecule(nat, who, lvl or "", regs, has_confirmed_supply=supply)
+    for mid, nat, who, lvl, regs, old in rows:
+        sc = score_molecule(nat, who, lvl or "", regs)
         if sc["D"] <= 0:
             continue
         keep.append(mid)
-        base = gap_score(sc["D"], sc["S"], A_DEFAULT)   # what free accounts see (no supply signal)
-        cur.execute("""insert into gap_scores (country, molecule_id, demand, saturation, actionability, score, base_score, computed_at, upload_id)
-                       values (%s, %s, %s, %s, %s, %s, %s, now(), %s)
+        cur.execute("""insert into gap_scores (country, molecule_id, demand, saturation, score, computed_at, upload_id)
+                       values (%s, %s, %s, %s, %s, now(), %s)
                        on conflict (country, molecule_id) do update set demand = excluded.demand, saturation = excluded.saturation,
-                       actionability = excluded.actionability, score = excluded.score, base_score = excluded.base_score,
-                       computed_at = now(), upload_id = excluded.upload_id""",
-                    (country, mid, sc["D"], sc["S"], sc["A"], sc["gap_score"], base, upload_id))
+                       score = excluded.score, computed_at = now(), upload_id = excluded.upload_id""",
+                    (country, mid, sc["D"], sc["S"], sc["gap_score"], upload_id))
         if old is None or abs(float(old) - sc["gap_score"]) >= 0.05:
             cur.execute("insert into gap_score_history (country, molecule_id, previous_score, score, upload_id) values (%s, %s, %s, %s, %s)",
                         (country, mid, old, sc["gap_score"], upload_id))

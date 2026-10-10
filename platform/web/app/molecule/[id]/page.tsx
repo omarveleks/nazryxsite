@@ -21,7 +21,7 @@ export default async function Molecule({ params, searchParams }: {
   const tab = sp.tab ?? 'overview';
   const d = await withUser(u.id, async (db) => {
     const m = await one(db, `
-      select m.id, m.inn, m.category, m.use_case, m.canonical_key, cm.*, g.score, g.demand, g.saturation, g.actionability,
+      select m.id, m.inn, m.category, m.use_case, m.canonical_key, cm.*, g.score, g.demand, g.saturation,
              exists (select 1 from enrichments e where e.molecule_id = m.id and e.user_id = $2) as enriched,
              exists (select 1 from portfolio_items p where p.molecule_id = m.id and p.user_id = $2) as in_portfolio,
              exists (select 1 from watches w where w.molecule_id = m.id and w.user_id = $2) as watched
@@ -182,7 +182,7 @@ export default async function Molecule({ params, searchParams }: {
             </section>))}
         </>
       )}
-      <p className="note">Gap score = demand × (1 − saturation) × actionability, out of 100. {COVERAGE_NOTE}</p>
+      <p className="note">Gap score = demand × (1 − saturation), out of 100. {COVERAGE_NOTE}</p>
     </Shell>
   );
 }

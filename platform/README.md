@@ -69,7 +69,7 @@ builds and this smoke test on every push to `platform/`.
 
 | Test file | Covers |
 |---|---|
-| `test_gap.py` | Gap score D × (1 − S) × A: weights, saturation cap, clamping, ranking, confirmed supply |
+| `test_gap.py` | Gap score D × (1 − S): weights, saturation cap, clamping, full 0–100 range |
 | `test_companies.py` | Distributor merging: legal-suffix and punctuation variants, typos, short names, numbered sites, team aliases and keep-separate pairs, order independence |
 | `test_norm.py`, `test_parser.py` | Molecule keys (salts, synonyms, OCR typos), essential-list parsing (OCR levels, continuation lines), global-list parsing, certificate years |
 | `test_ingest_db.py` | Ingest diff (new, removed, cancelled, new distributors, moved scores, history, feed), rollback of a partial or broken upload, RLS supplier confidentiality, free-plan limits enforced in the database, the 48-hour reminder, sign-in throttling, team password reset, free-plan score view |
@@ -99,8 +99,8 @@ New request, Settings, Admin (team only). No tenders, no registration tracking p
 | Active requests | 5 | unlimited |
 | Team seats | 1 | add teammates |
 
-Free accounts see gap scores without the confirmed-supply boost (supplier availability is a paid feature); the app
-reads scores through the `visible_gap_scores` view, which applies this in the database.
+Every plan sees the same gap score. Whether Nazryx holds confirmed supply is a separate, paid signal on the molecule
+page (`molecule_supply_confirmed`); the app reads scores through the `visible_gap_scores` view.
 
 Credits, request, follow and watch limits are enforced **in Postgres** (definer function and triggers), not only in
 the UI. Billing is manual for now: "Upgrade" files a request; the team sets the plan on Admin › Accounts.
@@ -153,9 +153,11 @@ If `ANTHROPIC_API_KEY` is set, the worker also asks Claude (`ingest/claude_match
 unmatched essential molecules. Suggestions only: the team accepts or rejects each one.
 
 ### Gap score
-`100 × D × (1 − S) × A` (weights are first guesses, from the handoff): D = 0.5 if on the national list
-+ 0.3 × facility-level weight + 0.2 if on the global list; S = registrants / 8, capped; A = 0.3 until Nazryx holds a
-confirmed supplier offer, then 1.0. Molecules the list says to prepare locally (medical oxygen, coal tar, ...) stay
+`100 × D × (1 − S)` (weights are first guesses, from the handoff): D = 0.5 if on the national list
++ 0.3 × facility-level weight + 0.2 if on the global list; S = registrants / 8, capped. So 100 = on both lists, used at
+every level, nobody registered; 0 = eight or more registrants or no demand signal. The handoff's actionability factor
+(× 0.3 until Nazryx held a confirmed offer) was dropped: it kept every score under 30 and one offer jumped a molecule
+to 100 (migration 009). Molecules the list says to prepare locally (medical oxygen, coal tar, ...) stay
 in coverage but are left out of whitespace ranking. Programme-channel classes (vaccines, ARVs, TB, malaria, blood,
 hormones and contraceptives, cancer, NTDs) are flagged "check before pitching".
 

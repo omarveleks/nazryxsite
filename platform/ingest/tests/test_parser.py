@@ -64,3 +64,12 @@ def test_fix_mojibake():
     assert fix_mojibake("Plain Name Ltd") == "Plain Name Ltd"
     assert fix_mojibake("Santé already fine") == "Santé already fine"
     assert fix_mojibake(None) is None
+
+
+def test_vet_filter_keeps_human_products_with_lookalike_words():
+    from build import VET_TERMS
+    assert VET_TERMS.search("Newcastle Disease Vaccine, Live")
+    assert VET_TERMS.search("Mycoplasma capricolum subspecies capripneumoniae")
+    assert VET_TERMS.search("Salmonella Gallinarum 9R strain")
+    assert not VET_TERMS.search("Luliconazole Cream, caprylic Capric Triglyceride")   # excipient, human cream
+    assert not VET_TERMS.search("Gallic acid")

@@ -133,6 +133,98 @@ def molecule_key(name):
     return " ".join(toks)
 
 
+PHARMACOPOEIA = r"\b(bp|usp|ip|ph\.?\s?eur|eur|ep|jp|nf)\b\.?"
+WORD_CASE = {"hcl": "HCl", "hci": "HCl", "hbr": "HBr", "edta": "EDTA", "ors": "ORS", "dha": "DHA", "epa": "EPA"}
+SMALL_WORDS = {"of", "for", "in", "with", "de"}
+NOT_INGREDIENTS = {"inert", "placebo", "inert tablets", "placebo tablets"}
+
+
+def _title(part, all_caps):
+    """'DICLOFENAC SODIUM' -> 'Diclofenac Sodium', 'l-ornithine' -> 'L-Ornithine', 'Oil of Anise' stays.
+    Words already mixed or upper case inside normal text ('B12', 'HCI') are left alone."""
+    words = []
+    for i, w in enumerate(part.split()):
+        low = w.lower()
+        if low in WORD_CASE:
+            words.append(WORD_CASE[low])
+        elif i and low in SMALL_WORDS:
+            words.append(low)
+        elif w.islower() or (all_caps and w.isupper()):
+            words.append("-".join(x[:1].upper() + x[1:].lower() for x in w.split("-")))
+        else:
+            words.append(w)
+    return " ".join(words)
+
+
+def display_name(name):
+    """Readable ingredient name for a registry molecule: no strengths, pharmacopoeia marks or trailing form words,
+    one ' + ' between ingredients. 'Diclofenac Sodium BP 50mg/Paracetamol BP 325mg tablets' ->
+    'Diclofenac Sodium + Paracetamol'."""
+    if not isinstance(name, str) or not name.strip():
+        return ""
+    s = name.replace("’", "'")
+    s = re.sub(r"\((?:[+-]|\+/-|±)\)-?", "-", s)             # S(-)-Amlodipine -> S-Amlodipine
+    s = re.sub(r"\(.*?\)|\[.*?\]", " ", s)
+    s = re.sub(rf"\b[\d.,]+\s*(?:{UNIT[1:-1]}|gm|gms)\b\.?", " ", s, flags=re.I)
+    s = re.sub(r"\b\d+\s*/\s*\d+\b", " ", s)
+    s = re.sub(PHARMACOPOEIA, " ", s, flags=re.I)
+    all_caps = not re.search(r"[a-z]", s)
+    out = []
+    for p in re.split(r"\s*(?:\+|&|/|,|;|\bwith\b|\band\b)\s*", s, flags=re.I):
+        words = re.sub(r"\s+", " ", p).strip(" -.").split()
+        while len(words) > 1 and words[-1].lower().strip(".") in FORM_WORDS:
+            words.pop()
+        p = " ".join(words)
+        if len(p) < 2 or not re.search(r"[A-Za-z]", p) or p.lower() in NOT_INGREDIENTS or p.lower() in FORM_WORDS:
+            continue
+        p = _title(p, all_caps)
+        if p.lower() not in (o.lower() for o in out):
+            out.append(p)
+    return " + ".join(out) or name.strip()
+
+
+def spelling_variants(counts, known=(), min_len=7):
+    """Registry keys that differ from another key by one letter in one ingredient ('cetrizine' / 'cetirizine',
+    'artemther lumefantrine' / 'artemether lumefantrine') are the same medicine misspelt. Returns
+    {variant key: key to use}: a spelling found on the essential lists (known) wins, else the most-registered. Tokens that start with a hyphen
+    ('-amlodipine', from 'S-amlodipine') are a different product and never merge."""
+    from rapidfuzz.distance import Levenshtein
+    keys = sorted(k for k in counts if k)
+    parent = {k: k for k in keys}
+
+    def find(k):
+        while parent[k] != k:
+            parent[k] = parent[parent[k]]
+            k = parent[k]
+        return k
+
+    by_len = {}
+    for k in keys:
+        by_len.setdefault(len(k.split()), []).append(k)
+    for group in by_len.values():
+        for i, a in enumerate(group):
+            ta = a.split()
+            for b in group[i + 1:]:
+                tb = b.split()
+                diff = [(x, y) for x, y in zip(ta, tb) if x != y]
+                if len(diff) != 1:
+                    continue
+                x, y = diff[0]
+                if min(len(x), len(y)) < min_len or x.startswith("-") or y.startswith("-"):
+                    continue
+                if Levenshtein.distance(x, y) <= 1:
+                    parent[find(a)] = find(b)
+    groups = {}
+    for k in keys:
+        groups.setdefault(find(k), []).append(k)
+    out = {}
+    for members in groups.values():
+        if len(members) > 1:
+            best = max(members, key=lambda k: (k in known, counts[k], -len(k), [-ord(c) for c in k]))
+            out.update({k: best for k in members if k != best})
+    return out
+
+
 FORMS = [
     ("injection", r"inject|infusion|vial|ampoul|for reconstitution|powder for (solution|inj)"),
     ("tablet", r"tablet|tab\b|caplet|lozenge|dispersible|chewable"),

@@ -94,7 +94,7 @@ def test_initial_load_then_diffed_upload(env):
     assert alpha == 1
     # essential molecules with no registrations score highest; Digoxin is level C and unregistered
     top = q("select m.inn, g.score from gap_scores g join molecules m on m.id = g.molecule_id order by g.score desc, m.inn")
-    assert top[0] == ("Doxycycline", 30) and ("Digoxin", 28.2) in [(n, float(s)) for n, s in top]
+    assert top[0] == ("Doxycycline", 100) and ("Digoxin", 94) in [(n, float(s)) for n, s in top]
     before_scores = dict(q("select m.inn, g.score from gap_scores g join molecules m on m.id = g.molecule_id"))
 
     # second upload: 2 new doxycycline products (one from a new distributor), one product cancelled, one removed
@@ -288,25 +288,49 @@ def test_signin_throttle_and_team_password_reset(env):
     assert q("select count(*) from sessions where user_id = %s", cust)[0][0] == 0
 
 
-def test_free_plan_score_hides_confirmed_supply(env):
+def test_confirmed_supply_does_not_change_the_score(env):
     import loader
     with psycopg.connect(URL) as c:   # the RLS test added a confirmed Doxycycline offer
-        loader.recompute_gaps(c.cursor(), "TZ")
         mol = c.execute("select id from molecules where inn = 'Doxycycline'").fetchone()[0]
+        before = c.execute("select score from gap_scores where molecule_id = %s", (mol,)).fetchone()[0]
+        loader.recompute_gaps(c.cursor(), "TZ")
+        after = c.execute("select score from gap_scores where molecule_id = %s", (mol,)).fetchone()[0]
         free = c.execute("insert into users (email, password_hash) values ('free2@example.com', 'x') returning id").fetchone()[0]
         paid = c.execute("insert into users (email, password_hash, plan) values ('paid2@example.com', 'x', 'paid') returning id").fetchone()[0]
-        full, base = c.execute("select score, base_score from gap_scores where molecule_id = %s", (mol,)).fetchone()
         c.commit()
-    assert float(full) > float(base)
+    assert before == after
     with app_conn(env) as a:
-        as_user(a, free)
-        s, act = a.execute("select score, actionability from visible_gap_scores where molecule_id = %s", (mol,)).fetchone()
-        assert s == base and float(act) == 0.3
+        seen = []
+        for uid in (free, paid):
+            as_user(a, uid)
+            seen.append(a.execute("select score from visible_gap_scores where molecule_id = %s", (mol,)).fetchone()[0])
+        assert seen == [after, after]
         with pytest.raises(psycopg.errors.InsufficientPrivilege):
             a.execute("select score from gap_scores")
         a.rollback()
-        as_user(a, paid)
-        assert a.execute("select score from visible_gap_scores where molecule_id = %s", (mol,)).fetchone()[0] == full
+
+
+def test_first_upload_into_empty_registry_is_the_baseline(env):
+    """A first load sent as a normal upload must not announce every product in the market as new."""
+    tmp, job = env["tmp"], env["job"]
+    url = psycopg.conninfo.make_conninfo(URL, dbname="nazryx_test_first")
+    with psycopg.connect(psycopg.conninfo.make_conninfo(URL, dbname="postgres"), autocommit=True) as c:
+        c.execute("drop database if exists nazryx_test_first with (force)")
+        c.execute("create database nazryx_test_first")
+    import migrate
+    os.environ["DATABASE_URL_ADMIN"] = url
+    try:
+        migrate.migrate()
+        diff = job.run(job.create_job(write_registry(tmp / "first.xls", registry_rows()), "upload"))
+        with psycopg.connect(url) as c:
+            assert c.execute("select count(*) from registrations where active").fetchone()[0] == 130
+            assert c.execute("select count(*) from feed_items where kind = 'registration'").fetchone()[0] == 0
+            assert c.execute("select count(*) from registration_history").fetchone()[0] == 0
+        assert diff["new_distributors"] == 0
+    finally:
+        os.environ["DATABASE_URL_ADMIN"] = URL
+        with psycopg.connect(psycopg.conninfo.make_conninfo(URL, dbname="postgres"), autocommit=True) as c:
+            c.execute("drop database if exists nazryx_test_first with (force)")
 
 
 def test_stored_files_follow_request_access(env):

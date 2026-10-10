@@ -1,5 +1,5 @@
 import pytest
-from gap import demand, saturation, actionability, gap_score, score_molecule, best_level
+from gap import demand, saturation, gap_score, score_molecule, best_level
 
 
 def test_demand_weights():
@@ -27,34 +27,24 @@ def test_saturation_capped():
         saturation(1, cap=0)
 
 
-def test_actionability():
-    assert actionability(False) == 0.3
-    assert actionability(True) == 1.0
-
-
 def test_gap_score_formula():
-    assert gap_score(1.0, 0.0, 1.0) == 100.0
-    assert gap_score(1.0, 0.0, 0.3) == 30.0
-    assert gap_score(0.8, 0.5, 0.3) == 12.0
-    assert gap_score(1.0, 1.0, 1.0) == 0.0          # saturated market: no gap
-    assert gap_score(1.5, -1, 2) == 100.0           # inputs clamped
+    assert gap_score(1.0, 0.0) == 100.0     # wide demand, nobody registered
+    assert gap_score(0.8, 0.5) == 40.0
+    assert gap_score(1.0, 1.0) == 0.0       # saturated market: no gap
+    assert gap_score(1.5, -1) == 100.0      # inputs clamped
 
 
-def test_score_molecule_ranks_open_essential_first():
+def test_score_uses_the_full_0_to_100_range():
     open_essential = score_molecule(True, True, "A", registrants=0)
     crowded = score_molecule(True, True, "A", registrants=12)
     specialist = score_molecule(True, False, "S", registrants=0)
     not_listed = score_molecule(False, False, "", registrants=0)
-    assert open_essential["gap_score"] == 30.0
+    assert open_essential["gap_score"] == 100.0
     assert crowded["gap_score"] == 0.0
-    assert open_essential["gap_score"] > specialist["gap_score"] > not_listed["gap_score"] == 0.0
-
-
-def test_confirmed_supply_lifts_score():
-    before = score_molecule(True, True, "A", registrants=2)
-    after = score_molecule(True, True, "A", registrants=2, has_confirmed_supply=True)
-    assert before["A"] == 0.3 and after["A"] == 1.0
-    assert after["gap_score"] == pytest.approx(before["gap_score"] / 0.3, abs=0.1)
+    assert specialist["gap_score"] == 62.0
+    assert not_listed["gap_score"] == 0.0
+    assert open_essential["gap_score"] > specialist["gap_score"] > not_listed["gap_score"]
+    assert set(open_essential) == {"D", "S", "gap_score"}   # no actionability factor
 
 
 def test_best_level_prefers_widest_use():

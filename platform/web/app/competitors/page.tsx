@@ -94,7 +94,7 @@ export default async function Competitors({ searchParams }: {
                 <tr key={c.id}>
                   <td><Link href={`/company/${c.id}`}><span className="nm">{title(c.display_name)}</span></Link>
                     <div className="sub2">{c.is_ltr ? 'Tanzania' : title(c.country)}</div></td>
-                  <td>{[c.is_ltr && 'Distributor', c.is_manufacturer && 'Manufacturer'].filter(Boolean).join(', ')}</td>
+                  <td>{[c.is_ltr && 'Distributor', c.is_manufacturer && 'Manufacturer'].filter(Boolean).join(', ') || 'Registrant'}</td>
                   <td className="r num">{c.registrations}</td>
                   <td className="r num">{c.overlap === null ? '—' : `${c.overlap}%`}</td>
                   <td className="r"><FollowButton id={c.id} following={d.follows.includes(c.id)} back={back} /></td>
