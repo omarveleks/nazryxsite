@@ -161,6 +161,15 @@ to 100 (migration 009). Molecules the list says to prepare locally (medical oxyg
 in coverage but are left out of whitespace ranking. Programme-channel classes (vaccines, ARVs, TB, malaria, blood,
 hormones and contraceptives, cancer, NTDs) are flagged "check before pitching".
 
+## Requests follow the pharmaceutical route
+
+Product request → regulatory check → regulatory analysis → pricing and logistics (anonymous quotes) → registration →
+shipment, with Closed as the exit at any point (migration 011). The team writes its assessment on the request in Admin
+(verdict, why, regulatory check, regulatory analysis, supply, indicative price); saving it starts the regulatory check.
+Accepting a quote moves the product to registration. The free-plan cap counts only the first four stages. Customers can
+collect molecules in a sourcing list and request them together. Suggested selling prices (Admin > Content) show on the
+molecule page for paid plans.
+
 ## Essential list from the 2026 PDF
 
 `ingest/tools/nemlit_pdf_to_table.py` reads the scanned PDF table cell by cell (ruled lines give rows and columns;

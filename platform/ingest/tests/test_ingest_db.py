@@ -189,7 +189,7 @@ def test_supplier_confidentiality_rls(env):
         assert a.execute("select price from supplier_offers").fetchall()[0][0] == 1.25
         assert a.execute("select supplier_name, price from accepted_supplier").fetchall() == [("Secret Supplier", 1.25)]
         assert a.execute("select count(*) from supplier_notes").fetchone()[0] == 0
-        assert a.execute("select stage from requests where id = %s", (req,)).fetchone()[0] == "Closed"
+        assert a.execute("select stage from requests where id = %s", (req,)).fetchone()[0] == "Registration"   # accepted: on to registration
         a.commit()
 
         as_user(a, other)
@@ -379,12 +379,12 @@ def test_team_actions_are_logged_customer_actions_are_not(env):
         rid = a.execute("insert into requests (user_id, quantity) values (%s, '5') returning id", (cust,)).fetchone()[0]
         a.commit()
         as_user(a, team)
-        a.execute("update requests set stage = 'Reviewing' where id = %s", (rid,))
+        a.execute("update requests set stage = 'Regulatory check' where id = %s", (rid,))
         a.execute("select admin_reset_password(%s, 'h2')", (cust,))
         a.commit()
         as_user(a, team)
         rows = a.execute("select table_name, changes from audit_log where row_id in (%s, %s) order by id", (str(rid), str(cust))).fetchall()
-        assert ("requests", {"stage": ["Submitted", "Reviewing"]}) in rows
+        assert ("requests", {"stage": ["Product request", "Regulatory check"]}) in rows
         assert any(t == "users" and ch.get("password") == "reset" and "password_hash" not in ch for t, ch in rows)
         assert not any(t == "requests" and "quantity" in ch for t, ch in rows)    # the customer's insert is not logged
         a.rollback()
@@ -469,3 +469,27 @@ def test_evaluations_hidden_picks_and_moves(env):
         assert a.execute("select count(*) from my_market_moves(3650)").fetchone()[0] == 0   # no portfolio, no moves
         a.rollback()
     assert q("select count(*) from audit_log where table_name = 'request_evaluations'")[0][0] == 1
+
+
+def test_sourcing_list_and_free_cap_counts_only_early_stages(env):
+    with psycopg.connect(URL) as c:
+        cust = c.execute("insert into users (email, password_hash) values ('list1@example.com', 'x') returning id").fetchone()[0]
+        other = c.execute("insert into users (email, password_hash) values ('list2@example.com', 'x') returning id").fetchone()[0]
+        mol = c.execute("select id from molecules where inn = 'Doxycycline'").fetchone()[0]
+        for stage in ("Registration", "Shipment", "Closed"):   # products past pricing do not count toward the free cap
+            c.execute("insert into requests (user_id, molecule_id, stage) values (%s, %s, %s)", (cust, mol, stage))
+        c.commit()
+    with app_conn(env) as a:
+        as_user(a, cust)
+        a.execute("insert into sourcing_list (user_id, molecule_id) values (%s, %s)", (cust, mol))
+        with pytest.raises(psycopg.errors.InsufficientPrivilege):   # a customer's list is their own
+            a.execute("insert into sourcing_list (user_id, molecule_id) values (%s, %s)", (other, mol))
+        a.rollback()
+        as_user(a, cust)
+        for _ in range(5):
+            a.execute("insert into requests (user_id, molecule_id) values (%s, %s)", (cust, mol))
+        with pytest.raises(psycopg.errors.RaiseException):          # the sixth early-stage request is over the free cap
+            a.execute("insert into requests (user_id, molecule_id) values (%s, %s)", (cust, mol))
+        a.rollback()
+        as_user(a, other)
+        assert a.execute("select count(*) from sourcing_list").fetchone()[0] == 0

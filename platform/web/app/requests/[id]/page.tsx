@@ -1,3 +1,4 @@
+import type React from 'react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import Shell from '@/components/Shell';
@@ -5,7 +6,7 @@ import { Empty, Stages } from '@/components/ui';
 import { acceptQuote, addRequestFile, postMessage } from '@/app/actions/app';
 import { requireUser } from '@/lib/auth';
 import { one, rows, withUser } from '@/lib/db';
-import { fmtDate } from '@/lib/format';
+import { PIPELINE, STAGE_INFO, fmtDate } from '@/lib/format';
 
 const VERDICT: Record<string, { label: string; cls: string }> = {
   go: { label: 'Go', cls: 'mint' }, maybe: { label: 'Worth a look', cls: 'blue' }, no: { label: 'Skip', cls: 'peach' },
@@ -29,39 +30,60 @@ export default async function RequestDetail({ params, searchParams }: { params: 
       files: await rows(db, 'select id, file_name, kind, created_at from request_files where request_id = $1 order by created_at', [id]),
       messages: await rows(db, 'select from_team, body, created_at from request_messages where request_id = $1 order by created_at', [id]),
       order: await one(db, 'select id, status, updated_at from orders where request_id = $1', [id]),
-      evaluation: await one(db, 'select verdict, summary, supply, price_range, route, evaluated_at from request_evaluations where request_id = $1', [id]),
+      evaluation: await one(db, `select verdict, summary, regulatory_check, supply, price_range, route, evaluated_at
+                                  from request_evaluations where request_id = $1`, [id]),
     };
   });
   if (!d) notFound();
   const { r } = d;
   const canAccept = r.stage !== 'Closed' && !d.quotes.some((q) => q.accepted);
+  const at = PIPELINE.indexOf(r.stage);
+  const state = (s: string) => r.stage === 'Closed' ? '' : PIPELINE.indexOf(s as any) < at ? 'Done' : s === r.stage ? 'Now' : 'Next';
+  const Step = ({ n, s, children }: { n: number; s: string; children: React.ReactNode }) => (
+    <section className="card">
+      <div className="card-h"><h2>{n}. {s}</h2>{state(s) && <span className={`pill ${state(s) === 'Now' ? 'solid' : state(s) === 'Done' ? 'mint' : ''}`}>{state(s)}</span>}</div>
+      <p className="note" style={{ marginBottom: 10 }}>{STAGE_INFO[s]}</p>
+      {children}
+    </section>);
+  const ev = d.evaluation;
   return (
     <Shell user={u} title={`Request: ${r.molecule}`} crumb={<><Link href="/requests">Requests</Link> / {r.molecule}</>}
       sub={[r.quantity && `Quantity ${r.quantity}${r.unit ? ' ' + r.unit : ''}`, r.target_price && `target price ${r.target_price}`, r.deliver_by && `by ${fmtDate(r.deliver_by)}`].filter(Boolean).join(', ')}>
       {sp.error && <div className="err" role="alert">{sp.error}</div>}
       {sp.accepted && <div className="ok" role="status">Quote accepted. The supplier is revealed below and an order is open. Our team will confirm it with you.</div>}
       <Stages current={r.stage} />
+      {r.stage === 'Closed' && <div className="note">Closed{r.closed_reason ? `: ${r.closed_reason}` : ''}.</div>}
       <div className="split">
         <div className="stack">
+          <Step n={1} s="Product request">
+            <table className="tbl"><tbody>
+              <tr><td>Molecule</td><td>{r.molecule}</td></tr>
+              <tr><td>Quantity</td><td>{r.quantity ? `${r.quantity}${r.unit ? ' ' + r.unit : ''}` : 'Not given'}</td></tr>
+              {r.target_price && <tr><td>Target price</td><td>{r.target_price}</td></tr>}
+              {r.deliver_by && <tr><td>Needed by</td><td>{fmtDate(r.deliver_by)}</td></tr>}
+              {r.notes && <tr><td>Notes</td><td style={{ whiteSpace: 'pre-wrap' }}>{r.notes}</td></tr>}
+            </tbody></table>
+          </Step>
+          {ev && (
+            <section className="card">
+              <div className="card-h"><h2>Our assessment</h2><span className={`pill ${VERDICT[ev.verdict].cls}`}>{VERDICT[ev.verdict].label}</span></div>
+              <p style={{ whiteSpace: 'pre-wrap' }}>{ev.summary}</p>
+              <span className="note">Updated {fmtDate(ev.evaluated_at)}.{ev.verdict === 'no' ? ' Reply below if you still want us to go ahead.' : ''}</span>
+            </section>)}
+          <Step n={2} s="Regulatory check">
+            {ev?.regulatory_check ? <p style={{ whiteSpace: 'pre-wrap' }}>{ev.regulatory_check}</p>
+              : <Empty>We check who already holds a registration, its status and any restriction. Usually within two working days.</Empty>}
+          </Step>
+          <Step n={3} s="Regulatory analysis">
+            {ev?.route ? <p style={{ whiteSpace: 'pre-wrap' }}>{ev.route}</p> : <Empty>The registration route, requirements and timeline appear here.</Empty>}
+          </Step>
           <section className="card">
-            <div className="card-h"><h2>Our evaluation</h2>
-              {d.evaluation && <span className={`pill ${VERDICT[d.evaluation.verdict].cls}`}>{VERDICT[d.evaluation.verdict].label}</span>}</div>
-            {!d.evaluation ? (
-              <Empty>We are evaluating this for you: who already sells it, whether supply is there, a price range and the registration route. Usually within two working days.</Empty>
-            ) : (
-              <div className="stack" style={{ gap: 10 }}>
-                <p style={{ whiteSpace: 'pre-wrap' }}>{d.evaluation.summary}</p>
-                <table className="tbl"><tbody>
-                  {d.evaluation.supply && <tr><td>Supply</td><td>{d.evaluation.supply}</td></tr>}
-                  {d.evaluation.price_range && <tr><td>Indicative price</td><td>{d.evaluation.price_range}</td></tr>}
-                  {d.evaluation.route && <tr><td>Registration route</td><td>{d.evaluation.route}</td></tr>}
-                </tbody></table>
-                <span className="note">Evaluated {fmtDate(d.evaluation.evaluated_at)}. {d.evaluation.verdict === 'no' ? 'Reply below if you still want us to look for suppliers.' : 'Next: we find suppliers and post anonymous quotes below.'}</span>
-              </div>
-            )}
-          </section>
-          <section className="card">
-            <div className="card-h"><h2>Quotes</h2>{d.order && <span className="pill blue">Order {d.order.id}: {d.order.status}</span>}</div>
+            <div className="card-h"><h2>4. Pricing and logistics</h2>{state('Pricing and logistics') && <span className={`pill ${state('Pricing and logistics') === 'Now' ? 'solid' : state('Pricing and logistics') === 'Done' ? 'mint' : ''}`}>{state('Pricing and logistics')}</span>}</div>
+            <p className="note" style={{ marginBottom: 10 }}>{STAGE_INFO['Pricing and logistics']}</p>
+            {(ev?.price_range || ev?.supply) && <table className="tbl" style={{ marginBottom: 12 }}><tbody>
+              {ev?.price_range && <tr><td>Indicative price</td><td>{ev.price_range}</td></tr>}
+              {ev?.supply && <tr><td>Supply and lead time</td><td>{ev.supply}</td></tr>}
+            </tbody></table>}
             {d.quotes.length === 0 && <Empty>No quotes yet. We will post them here when suppliers are found.</Empty>}
             <div className="stack" style={{ gap: 12 }}>{d.quotes.map((q) => (
               <div key={q.id} className="card tight" style={{ borderColor: q.accepted ? 'var(--blue)' : undefined }}>
@@ -81,8 +103,18 @@ export default async function RequestDetail({ params, searchParams }: { params: 
                       <button className="btn btn-blue btn-sm" type="submit">Accept</button></form>)}
                 </div>
               </div>))}</div>
-            <p className="note" style={{ marginTop: 12 }}>Quotes are anonymous. Accepting a quote reveals the supplier and its price, and opens an order.</p>
+            <p className="note" style={{ marginTop: 12 }}>Quotes are anonymous. Accepting one reveals the supplier and its price, and moves the product to registration.</p>
           </section>
+          <Step n={5} s="Registration">
+            {['Registration', 'Shipment'].includes(r.stage) ? <p>We prepare the dossier with your chosen supplier and follow it through to approval. Updates arrive in the messages here.</p>
+              : <Empty>Starts once you accept a quote.</Empty>}
+          </Step>
+          <Step n={6} s="Shipment">
+            {d.order ? <p>Shipment #{d.order.id}: <span className="pill blue">{d.order.status}</span> <span className="sub2">updated {fmtDate(d.order.updated_at)}</span></p>
+              : <Empty>Starts once the product is registered.</Empty>}
+          </Step>
+        </div>
+        <div className="stack">
           <section className="card">
             <div className="card-h"><h2>Messages with Nazryx</h2></div>
             <div className="stack" style={{ gap: 8 }}>
@@ -97,7 +129,6 @@ export default async function RequestDetail({ params, searchParams }: { params: 
               <button className="btn btn-blue btn-sm" type="submit">Send</button>
             </form>
           </section>
-        </div>
         <section className="card">
           <div className="card-h"><h2>Attachments</h2></div>
           <div className="stack" style={{ gap: 8 }}>
@@ -112,6 +143,7 @@ export default async function RequestDetail({ params, searchParams }: { params: 
           </form>
           <p className="note" style={{ marginTop: 12 }}>Documents live only inside requests.</p>
         </section>
+        </div>
       </div>
     </Shell>
   );

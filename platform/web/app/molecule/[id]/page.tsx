@@ -3,10 +3,10 @@ import { notFound } from 'next/navigation';
 import Shell from '@/components/Shell';
 import EnrichButton from '@/components/EnrichButton';
 import { Badges, Flash, Locked, Tabs, Empty } from '@/components/ui';
-import { togglePortfolio, toggleWatch } from '@/app/actions/app';
+import { toggleList, togglePortfolio, toggleWatch } from '@/app/actions/app';
 import { requireUser } from '@/lib/auth';
 import { one, rows, withUser } from '@/lib/db';
-import { GLOBAL_LIST, channelLabel, levelLabel, registeredLine, title, COVERAGE_NOTE } from '@/lib/format';
+import { GLOBAL_LIST, channelLabel, fmtDate, levelLabel, registeredLine, title, COVERAGE_NOTE } from '@/lib/format';
 import { COUNTRY } from '@/lib/queries';
 
 export default async function Molecule({ params, searchParams }: {
@@ -27,11 +27,14 @@ export default async function Molecule({ params, searchParams }: {
                 left join request_evaluations e on e.request_id = r.id
                 where r.molecule_id = m.id and r.user_id = $2 order by (r.stage = 'Closed'), r.updated_at desc limit 1) as request,
              exists (select 1 from portfolio_items p where p.molecule_id = m.id and p.user_id = $2) as in_portfolio,
-             exists (select 1 from watches w where w.molecule_id = m.id and w.user_id = $2) as watched
+             exists (select 1 from watches w where w.molecule_id = m.id and w.user_id = $2) as watched,
+             exists (select 1 from sourcing_list l where l.molecule_id = m.id and l.user_id = $2) as in_list
       from molecules m left join country_molecules cm on cm.molecule_id = m.id and cm.country = $3
       where m.id = $1`, [id, u.id, COUNTRY]);
     if (!m) return null;
     m.supply = paid ? (await one(db, 'select molecule_supply_confirmed($1) as s', [id]))?.s : null;
+    m.suggested = paid ? await one(db, `select price_low, price_high, currency, unit, note, observed_at from market_prices
+                                         where molecule_id = $1 and country = $2 and kind = 'suggested' order by observed_at desc limit 1`, [id, COUNTRY]) : null;
     const open = m.enriched || paid;
     if (!open) return { m, open };
     const competitors = await rows(db, `
@@ -51,7 +54,7 @@ export default async function Molecule({ params, searchParams }: {
     const forms = await rows(db, `select distinct dosage_form, strength from registrations where molecule_id = $1 and active
                                   and dosage_form is not null order by 1 limit 12`, [id]);
     const prices = paid ? await rows(db, `select price_low, price_high, currency, unit, observed_at from market_prices
-                                          where molecule_id = $1 and country = $2 order by observed_at desc limit 6`, [id, COUNTRY]) : [];
+                                          where molecule_id = $1 and country = $2 and kind = 'observed' order by observed_at desc limit 6`, [id, COUNTRY]) : [];
     return { m, open, competitors, alternatives, combos, forms, prices, supply: m.supply };
   });
   if (!d) notFound();
@@ -82,14 +85,18 @@ export default async function Molecule({ params, searchParams }: {
           <Badges m={{ ...m, in_portfolio: m.in_portfolio, watched: m.watched, request_stage: m.request && m.request.stage !== 'Closed' ? m.request.stage : null }} full />
           {m.request && m.request.stage !== 'Closed' ? (<>
             <h2>Your request is at &quot;{m.request.stage}&quot;</h2>
-            <p className="muted">{m.request.verdict ? `Our evaluation: ${({ go: 'Go', maybe: 'Worth a look', no: 'Skip' } as Record<string, string>)[m.request.verdict]}. Open the request for the details.`
-              : 'We are evaluating it for you: who already sells it, supply, a price range and the registration route.'}</p>
+            <p className="muted">{m.request.verdict ? `Our assessment: ${({ go: 'Go', maybe: 'Worth a look', no: 'Skip' } as Record<string, string>)[m.request.verdict]}. Open the request for the details.`
+              : 'We are running the regulatory check: who holds a registration, its status and any restriction.'}</p>
             <Link className="btn btn-blue" href={`/requests/${m.request.id}`}>Open your request</Link>
           </>) : (<>
             <h2>Want to bring {m.inn} in?</h2>
-            <p className="muted">Send a sourcing request. We evaluate it for you first (who already sells it, supply, a price range and the
-              registration route), then find suppliers and send anonymous quotes.</p>
-            <Link className="btn btn-blue" href={`/requests/new?molecule=${id}`}>Source {m.inn}</Link>
+            <p className="muted">Send a product request. We run the regulatory check and analysis, then pricing and logistics with
+              anonymous quotes, through to registration and shipment.</p>
+            <div className="row">
+              <Link className="btn btn-blue" href={`/requests/new?molecule=${id}`}>Source {m.inn}</Link>
+              <form action={toggleList}><input type="hidden" name="molecule_id" value={id} /><input type="hidden" name="return" value={`/molecule/${id}`} />
+                <button className="btn btn-ghost" type="submit">{m.in_list ? 'In your sourcing list ✓' : 'Add to sourcing list'}</button></form>
+            </div>
           </>)}
         </section>
         <section className="card stack" style={{ gap: 10 }}>
@@ -97,9 +104,18 @@ export default async function Molecule({ params, searchParams }: {
           <span className="score"><b className="num">{m.registrants ?? 0}</b><span>{Number(m.registrants) === 1 ? 'company' : 'companies'}</span></span>
           <span className="note">{registeredLine(m.registrants, m.registrations)}</span>
           <table className="tbl"><tbody>
-            <tr><td>Official list</td><td className="r">{m.on_national_list ? levelLabel(m.facility_level) : 'No'}</td></tr>
+            <tr><td>Official TMDA list</td><td className="r">{m.on_national_list ? (m.facility_level ? `Level ${m.facility_level}: ${levelLabel(m.facility_level)}` : 'Yes') : 'No'}</td></tr>
             <tr><td>{GLOBAL_LIST}</td><td className="r">{m.on_who_eml ? 'Yes' : 'No'}</td></tr>
           </tbody></table>
+          <div style={{ borderTop: '1px solid var(--line)', paddingTop: 12 }}>
+            <span className="lbl">Suggested pricing</span>
+            {!paid ? <Locked title="Suggested selling price">The price band we suggest for Tanzania, from our market work.</Locked>
+              : m.suggested ? (<>
+                <div className="score sm" style={{ marginTop: 6 }}><b className="num">{m.suggested.currency} {Number(m.suggested.price_low).toFixed(2)}–{Number(m.suggested.price_high).toFixed(2)}</b>
+                  <span>per {m.suggested.unit}</span></div>
+                <span className="note">{[m.suggested.note, `updated ${fmtDate(m.suggested.observed_at)}`].filter(Boolean).join(' · ')}</span></>)
+              : <p className="note" style={{ marginTop: 6 }}>No suggested price yet. Source it and we price it in step 4.</p>}
+          </div>
         </section>
       </div>
 
@@ -164,9 +180,9 @@ export default async function Molecule({ params, searchParams }: {
               </section>
             </div>
           )}
-          {tab === 'price' && (free ? <Locked title="Price band and price history">Market price bands for Tanzania, updated by our team.</Locked> : (
+          {tab === 'price' && (free ? <Locked title="Market prices and suggested pricing">Observed market price bands for Tanzania and the price we suggest, updated by our team.</Locked> : (
             <section className="card">
-              <h2 style={{ marginBottom: 10 }}>Price band</h2>
+              <h2 style={{ marginBottom: 10 }}>Observed market prices</h2>
               {d.prices!.length === 0 ? <Empty>No market price data for this molecule yet. Send a request and we will quote.</Empty> : (
                 <table className="tbl"><thead><tr><th>Observed</th><th>Band</th><th>Unit</th></tr></thead><tbody>
                   {d.prices!.map((p, i) => <tr key={i}><td>{String(p.observed_at).slice(0, 10)}</td>

@@ -13,7 +13,7 @@ export type User = {
   id: string; email: string; name: string; role: 'customer' | 'team'; plan: 'free' | 'paid';
   country: string; company_id: number | null; credits: number; onboarded: boolean; owner_id: string | null;
   language: string; whatsapp: string | null; notify_email: boolean; notify_whatsapp: boolean;
-  company_name: string | null; claim_status: string | null;
+  company_name: string | null; claim_status: string | null; list_count: number;
 };
 
 export const sha = (s: string) => createHash('sha256').update(s).digest('hex');
@@ -54,7 +54,8 @@ export const getUser = cache(async (): Promise<User | null> => {
   return withUser(id, (db) => one<User>(db, `
     select u.id, u.email, u.name, u.role, app_plan() as plan, u.country, u.company_id, u.credits, u.onboarded,
            u.owner_id, u.language, u.whatsapp, u.notify_email, u.notify_whatsapp,
-           coalesce(c.display_name, cl.company_name) as company_name, cl.status as claim_status
+           coalesce(c.display_name, cl.company_name) as company_name, cl.status as claim_status,
+           (select count(*)::int from sourcing_list l where l.user_id = u.id) as list_count
     from users u
     left join companies c on c.id = u.company_id
     left join lateral (select * from company_claims k where k.user_id = coalesce(u.owner_id, u.id)

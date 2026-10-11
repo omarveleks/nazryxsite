@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import Shell from '@/components/Shell';
-import EnrichButton from '@/components/EnrichButton';
-import { Empty, SourceLink } from '@/components/ui';
+import { Empty, Flash, SourceLink } from '@/components/ui';
+import { LEVEL_FILTERS } from '@/lib/format';
 import { MoleculeRow } from '@/components/MoleculeRow';
 import { requireUser } from '@/lib/auth';
 import { rows, withUser } from '@/lib/db';
@@ -9,11 +9,13 @@ import { categories, MOLECULE_LIST_SQL } from '@/lib/queries';
 
 export const metadata = { title: 'Search' };
 
-export default async function Search({ searchParams }: { searchParams: Promise<{ q?: string; class?: string; status?: string; welcome?: string }> }) {
+export default async function Search({ searchParams }: { searchParams: Promise<{ q?: string; class?: string; status?: string; level?: string; welcome?: string; error?: string }> }) {
   const sp = await searchParams;
   const u = await requireUser();
   const q = (sp.q ?? '').trim().slice(0, 80), cls = sp.class ?? '', status = sp.status ?? '';
-  const searching = Boolean(q || cls || status);
+  const level = 'ABCDS'.includes(sp.level ?? '-') && sp.level ? sp.level : '';
+  const searching = Boolean(q || cls || status || level);
+  const back = `/search?${new URLSearchParams({ q, class: cls, status, level })}`;
   const free = u.plan !== 'paid' && u.role !== 'team';
   const d = await withUser(u.id, async (db) => {
     const cats = await categories(db);
@@ -26,8 +28,9 @@ export default async function Search({ searchParams }: { searchParams: Promise<{
           and ($2 = '' or m.category = $2)
           and ($3 = '' or ($3 = 'official' and cm.on_national_list) or ($3 = 'global' and cm.on_who_eml)
                or ($3 = 'unregistered' and cm.registrations = 0))
+          and ($4 = '' or (cm.on_national_list and cm.facility_level = $4))
         order by (case when $1 <> '' and m.inn ilike $1 || '%' then 0 else 1 end), g.score desc nulls last, cm.registrations desc
-        limit 40`, [q, cls, status]);
+        limit 40`, [q, cls, status, level]);
     } else {
       // "Picked for you": a few open molecules in the classes you already carry (never the whole open list)
       list = await rows(db, `${MOLECULE_LIST_SQL}
@@ -54,20 +57,25 @@ export default async function Search({ searchParams }: { searchParams: Promise<{
         </select>
         <select className="input" name="status" defaultValue={status} aria-label="Status" style={{ flex: '0 1 200px' }}>
           <option value="">Any status</option>
-          <option value="official">On the official list</option>
-          <option value="global">On the global essential list</option>
+          <option value="official">On the official TMDA list</option>
+          <option value="global">On the WHO essential list</option>
           <option value="unregistered">Not registered yet</option>
+        </select>
+        <select className="input" name="level" defaultValue={level} aria-label="EML level" style={{ flex: '0 1 220px' }}>
+          <option value="">Any EML level</option>
+          {LEVEL_FILTERS.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
         </select>
         <button className="btn btn-blue" type="submit">Search</button>
       </form>
+      <Flash sp={sp} />
       {d.recent.length > 0 && (
         <div className="row small muted">Recent: {d.recent.map((r, i) => <span key={r.id}><Link href={`/molecule/${r.id}`}>{r.inn}</Link>{i < d.recent.length - 1 ? ',' : ''}</span>)}</div>
       )}
       <section className="card">
         <div className="card-h">
           <div><h2>{searching ? 'Results' : 'Picked for you'}</h2>
-            {!searching && <p className="note">Open molecules in the classes you already carry. Source one and we evaluate it for you.</p>}</div>
-          {free && <span className="note">Enrich costs 1 credit. Credits: <b className="num">{u.credits}</b> left this month.</span>}
+            {!searching && <p className="note">Open molecules in the classes you already carry. Add them to your sourcing list, or source one now.</p>}</div>
+          {free && <span className="note">Opening a molecule's full page costs 1 credit. <b className="num">{u.credits}</b> left this month.</span>}
         </div>
         {d.list.length === 0 ? (
           searching ? <Empty>No molecules match. Try a shorter name or another class.</Empty> : (
@@ -78,7 +86,7 @@ export default async function Search({ searchParams }: { searchParams: Promise<{
         ) : (
           <div>{d.list.map((m, i) => (
             <MoleculeRow key={m.id} m={m} first={i === 0}
-              actions={<><EnrichButton id={m.id} enriched={m.enriched} free={free} /><SourceLink id={m.id} stage={m.request_stage} /></>} />))}
+              actions={<SourceLink id={m.id} stage={m.request_stage} inList={m.in_list} back={searching ? back : '/search'} />} />))}
           </div>
         )}
       </section>

@@ -1,11 +1,22 @@
-// Customer-facing labels. Source names are never shown: the national list is "the Nazryx Official Medicines List",
-// the global list is "the global essential list", registry data is "registration data".
-export const OFFICIAL_LIST = (country = 'Tanzania') => `Nazryx Official Medicines List - ${country}`;
-export const OFFICIAL_SHORT = 'Official list';
-export const GLOBAL_LIST = 'Global essential list';
-export const COVERAGE_NOTE = 'Registered coverage, not sales. Based on public registration data.';
+// Customer-facing labels. Each list is named after its publisher (owner's decision).
+export const OFFICIAL_LIST = (country = 'Tanzania') => `Official TMDA essential medicines list - ${country}`;
+export const OFFICIAL_SHORT = 'Official TMDA list';
+export const GLOBAL_LIST = 'WHO essential list';
+export const COVERAGE_NOTE = 'Registered coverage, not sales. Based on TMDA registration data.';
 
-export const STAGES = ['Submitted', 'Reviewing', 'Suppliers found', 'Quote ready', 'Closed'] as const;
+// The pharmaceutical route a sourcing request follows. Closed is the exit at any point.
+export const STAGES = ['Product request', 'Regulatory check', 'Regulatory analysis', 'Pricing and logistics', 'Registration', 'Shipment', 'Closed'] as const;
+export const PIPELINE = STAGES.filter((s) => s !== 'Closed');
+export const STAGE_INFO: Record<string, string> = {
+  'Product request': 'What you need: molecule, form, strength, volume.',
+  'Regulatory check': 'Who already holds a registration, its status, and any restriction on the product.',
+  'Regulatory analysis': 'The route to register it: dossier type, requirements and timeline.',
+  'Pricing and logistics': 'Suppliers, anonymous quotes, landed price, lead time and freight.',
+  'Registration': 'Dossier submitted and followed through to approval.',
+  'Shipment': 'Production, import permit, shipping and delivery.',
+};
+/** Still being worked up: counts toward the free-plan cap. */
+export const EARLY_STAGES = ['Product request', 'Regulatory check', 'Regulatory analysis', 'Pricing and logistics'];
 export type Stage = (typeof STAGES)[number];
 export const ORDER_STATUSES = ['Confirming', 'In production', 'In transit', 'Delivered', 'Cancelled'] as const;
 
@@ -23,10 +34,6 @@ export function registeredLine(companies?: number | null, products?: number | nu
   const c = Number(companies ?? 0), p = Number(products ?? 0);
   if (c === 0) return 'Nobody registered';
   return `Registered by ${c} ${c === 1 ? 'company' : 'companies'} · ${p} ${p === 1 ? 'product' : 'products'}`;
-}
-
-export function fitLabel(sameCategoryInPortfolio: number): 'Strong' | 'Good' | 'Weak' {
-  return sameCategoryInPortfolio >= 3 ? 'Strong' : sameCategoryInPortfolio >= 1 ? 'Good' : 'Weak';
 }
 
 export function fmtDate(d: string | Date | null | undefined) {
@@ -49,3 +56,5 @@ export const channelLabel = (c?: string | null) =>
   c === 'programme' ? 'Programme channel: mostly bought through public and donor programmes. Check before pitching.' : null;
 
 export const FREE = { requests: 5, follows: 3, watches: 5, whitespace: 3, credits: 20 };
+export const LEVEL_FILTERS = [['A', 'Level A, dispensaries'], ['B', 'Level B, health centres'], ['C', 'Level C, district hospitals'],
+  ['D', 'Level D, regional hospitals'], ['S', 'Level S, specialist']] as const;

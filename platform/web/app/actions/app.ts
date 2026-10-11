@@ -2,7 +2,7 @@
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { requireUser } from '@/lib/auth';
-import { dbMessage, one, withUser } from '@/lib/db';
+import { dbMessage, one, rows, withUser } from '@/lib/db';
 import { back, int, isEmail, str } from '@/lib/forms';
 import { hashPassword } from '@/lib/password';
 import { saveUpload } from '@/lib/uploads';
@@ -91,6 +91,57 @@ export async function addPortfolioList(f: FormData) {
   redirect(`${to}${to.includes('?') ? '&' : '?'}${q}`);
 }
 
+/** Add a molecule to the sourcing list, or take it off. */
+export async function toggleList(f: FormData) {
+  const u = await requireUser();
+  const id = int(f, 'molecule_id');
+  const to = ret(f, '/requests/list');
+  try {
+    await withUser(u.id, async (db) => {
+      const r = await db.query('delete from sourcing_list where user_id = $1 and molecule_id = $2', [u.id, id]);
+      if (!r.rowCount) {
+        const n = Number((await one(db, 'select count(*)::int as n from sourcing_list where user_id = $1', [u.id]))?.n ?? 0);
+        if (n >= 50) throw new Error('Your sourcing list holds up to 50 molecules. Send it first.');
+        await db.query('insert into sourcing_list (user_id, molecule_id) values ($1, $2)', [u.id, id]);
+      }
+    });
+  } catch (e) {
+    back(to, { error: e instanceof Error && e.message.startsWith('Your sourcing') ? e.message : dbMessage(e) });
+  }
+  revalidatePath('/', 'layout');
+  redirect(to);
+}
+
+/** Send the whole sourcing list: one request per molecule, sharing the notes and dates, in one transaction. */
+export async function sendList(f: FormData) {
+  const u = await requireUser();
+  const notes = str(f, 'notes', 4000), target = str(f, 'target_price', 60), deliver = str(f, 'deliver_by', 10);
+  let sent = 0;
+  try {
+    sent = await withUser(u.id, async (db) => {
+      const items = await rows(db, `select l.molecule_id, m.inn from sourcing_list l join molecules m on m.id = l.molecule_id
+                                    where l.user_id = $1 order by l.added_at`, [u.id]);
+      if (!items.length) throw new Error('Your sourcing list is empty.');
+      for (const it of items) {
+        const qty = str(f, `qty_${it.molecule_id}`, 60);
+        const r = await one(db, `insert into requests (user_id, molecule_id, quantity, unit, target_price, deliver_by, notes)
+                                 values ($1, $2, $3, $4, $5, $6, $7) returning id`,
+          [u.id, it.molecule_id, qty || null, qty ? 'packs' : null, target || null, deliver || null,
+           [notes, `Sent as part of a list of ${items.length}.`].filter(Boolean).join('\n')]);
+        await db.query("insert into request_stage_history (request_id, stage, changed_by) values ($1, 'Product request', $2)", [r!.id, u.id]);
+      }
+      await db.query('delete from sourcing_list where user_id = $1', [u.id]);
+      await db.query(`insert into notifications (user_id, channel, subject, body) values (null, 'email', 'New sourcing list', $1)`,
+        [`${u.email} sent ${items.length} molecules: ${items.map((i) => i.inn).join(', ')}.`]);
+      return items.length;
+    });
+  } catch (e) {
+    back('/requests/list', { error: e instanceof Error && e.message.startsWith('Your sourcing') ? e.message : dbMessage(e) });
+  }
+  revalidatePath('/', 'layout');
+  redirect(`/requests?sent=${sent}`);
+}
+
 /** Hide a molecule from "Picked for you". */
 export async function hideMolecule(f: FormData) {
   const u = await requireUser();
@@ -149,13 +200,13 @@ export async function createRequest(f: FormData) {
       const r = await one(db, `insert into requests (user_id, molecule_id, molecule_text, quantity, unit, target_price, deliver_by, notes)
                                values ($1, $2, $3, $4, $5, $6, $7, $8) returning id`,
         [u.id, moleculeId, moleculeId ? null : moleculeText, quantity || null, quantity ? unit || null : null, target || null, deliver || null, notes || null]);
-      await db.query("insert into request_stage_history (request_id, stage, changed_by) values ($1, 'Submitted', $2)", [r!.id, u.id]);
+      await db.query("insert into request_stage_history (request_id, stage, changed_by) values ($1, 'Product request', $2)", [r!.id, u.id]);
       for (const fl of files) {
         await db.query('insert into request_files (request_id, path, file_name, kind, uploaded_by) values ($1, $2, $3, $4, $5)',
           [r!.id, fl.path, fl.name, fl.kind, u.id]);
       }
       await db.query(`insert into notifications (user_id, channel, subject, body) values (null, 'email', 'New sourcing request', $1)`,
-        [`Request #${r!.id} from ${u.email}: ${moleculeText || 'molecule ' + moleculeId}, quantity ${quantity || 'not given'}. Evaluate it first.`]);
+        [`Request #${r!.id} from ${u.email}: ${moleculeText || 'molecule ' + moleculeId}, quantity ${quantity || 'not given'}. Start the regulatory check.`]);
       return r!.id as number;
     });
   } catch (e) {

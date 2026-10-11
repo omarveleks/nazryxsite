@@ -11,10 +11,15 @@ export const metadata = { title: 'Help' };
 const QA: [string, ReactNode][] = [
   ['Where does the data come from?', <>Public registration data for medicines in Tanzania, updated every two days, and the {OFFICIAL_LIST()}.
     Company and competitor figures show <b>registered coverage, not sales</b>.</>],
-  ['How do you pick molecules for me?', <>From the classes in your portfolio, we show a few official-list molecules that few or no companies
+  ['How do you pick molecules for me?', <>From the classes in your portfolio, we show a few official TMDA list molecules that few or no companies
     have registered in Tanzania. Hide the ones you do not want. You see how many companies registered each one, never a made-up score.</>],
-  ['What happens when I source a molecule?', <>We evaluate it for you first: who already sells it, whether supply is there, an indicative
-    price and the registration route, with a clear go or skip. If it is worth it, we find suppliers and send you anonymous quotes.</>],
+  ['What happens when I source a molecule?', <>It follows the normal route for a medicine: product request, regulatory check (who holds a
+    registration, its status, restrictions), regulatory analysis (the route and timeline to register it), pricing and logistics (anonymous
+    quotes, landed price, lead time), then registration and shipment. You see each step on the request.</>],
+  ['What is the sourcing list?', <>Add molecules from Search, Open molecules or a molecule page with &quot;+ List&quot;, then request them
+    all at once. Each becomes its own request.</>],
+  ['What is the EML level?', <>Where the official TMDA list allows a medicine to be stocked: A dispensaries and up, B health centres,
+    C district hospitals, D regional hospitals, S specialist hospitals.</>],
   ['How do enrich credits work?', <>The free plan has {FREE.credits} credits a month. Opening a molecule&apos;s full page costs one credit,
     once; opening it again is free. Credits reset at the start of each month. The paid plan has no credit limit.</>],
   ['What do I get on the paid plan?', <>Price bands, supplier availability, the full ranked list of gaps, more countries as they launch,

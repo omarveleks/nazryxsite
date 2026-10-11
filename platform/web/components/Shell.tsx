@@ -37,6 +37,8 @@ export default function Shell({ user, title, sub, crumb, actions, children }: {
           </div>
           <div className="top-right">
             {actions}
+            {user.role !== 'team' && <Link className={`btn btn-sm ${user.list_count ? 'btn-blue' : 'btn-ghost'}`} href="/requests/list">
+              Sourcing list{user.list_count ? ` · ${user.list_count}` : ''}</Link>}
             <CountryPicker user={user} />
             <Link className="avatar" href="/settings" title="Settings">{initials || 'You'}</Link>
           </div>

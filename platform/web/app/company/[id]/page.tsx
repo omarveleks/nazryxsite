@@ -21,7 +21,7 @@ export default async function Company({ params, searchParams }: { params: Promis
     if (!c) return null;
     if (c.merged_into) return { redirectTo: c.merged_into };
     const scope = `r.country = $2 and r.active and (r.ltr_id = $1 or r.registrant_id = $1 or r.manufacturer_id = $1)`;
-    const byCat = await rows(db, `select coalesce(m.category, 'Not on the official list') as category, count(distinct r.molecule_id)::int as n
+    const byCat = await rows(db, `select coalesce(m.category, 'Not on the official TMDA list') as category, count(distinct r.molecule_id)::int as n
                                   from registrations r left join molecules m on m.id = r.molecule_id where ${scope}
                                   group by 1 order by n desc limit 12`, [id, COUNTRY]);
     const makers = await rows(db, `select mc.id, mc.display_name, initcap(lower(r.manufacturing_country)) as country, count(*)::int as n

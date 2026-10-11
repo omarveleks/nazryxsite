@@ -165,7 +165,7 @@ textarea.input { min-height: 96px; resize: vertical; }
 .steps a { text-decoration: none; }
 .steps a:hover { color: var(--blue-txt); }
 .steps em { font-style: normal; font-size: 12px; font-weight: 700; color: var(--blue-txt); padding-top: 2px; font-variant-numeric: tabular-nums; }
-.stages { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; }
+.stages { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 6px; }
 .stage { padding: 10px 10px; border-radius: 12px; background: var(--track); color: var(--ink-3); font-size: 12.5px; font-weight: 600; text-align: center; }
 .stage.done { background: var(--pastel-blue); color: var(--pastel-blue-ink); }
 .stage.now { background: var(--blue); color: #fff; }
@@ -173,7 +173,7 @@ textarea.input { min-height: 96px; resize: vertical; }
 .feed-item { display: grid; grid-template-columns: 104px minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 13px 0;
   border-top: 1px solid var(--line); text-decoration: none; font-size: 14.5px; }
 .feed-item:first-child { border-top: 0; }
-.board { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; align-items: start; }
+.board { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 12px; align-items: start; }
 .col { background: #EFEDE7; border-radius: var(--r-md); padding: 10px; display: flex; flex-direction: column; gap: 8px; min-height: 120px; }
 .col h3 { font-size: 13.5px; padding: 4px 4px 2px; display: flex; justify-content: space-between; }
 .rcard { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 12px; text-decoration: none; display: flex; flex-direction: column; gap: 4px; }
@@ -225,7 +225,7 @@ textarea.input { min-height: 96px; resize: vertical; }
 @media (max-width: 600px) {
   .g4 { grid-template-columns: 1fr 1fr; }
   .board { grid-template-columns: 1fr; }
-  .stages { grid-template-columns: repeat(5, minmax(56px, 1fr)); overflow-x: auto; }
+  .stages { grid-template-columns: repeat(6, minmax(50px, 1fr)); overflow-x: auto; }
   .stage { font-size: 11px; padding: 8px 4px; }
   .form-grid { grid-template-columns: 1fr; }
   .card { padding: 16px; border-radius: var(--r-md); }

@@ -2,7 +2,7 @@ import Link from 'next/link';
 import Shell from '@/components/Shell';
 import { requireUser } from '@/lib/auth';
 import { one, rows, withUser } from '@/lib/db';
-import { FREE } from '@/lib/format';
+import { FREE, PIPELINE, STAGE_INFO } from '@/lib/format';
 import { activeRequestCount } from '@/lib/queries';
 import { createRequest } from '@/app/actions/app';
 
@@ -30,7 +30,7 @@ export default async function NewRequest({ searchParams }: { searchParams: Promi
     return (
       <Shell user={u} title="Request sent" crumb={<><Link href="/requests">Requests</Link> / New request</>}>
         <section className="card stack" style={{ alignItems: 'flex-start' }}>
-          <div className="ok" role="status">Request sent. Our team will reach out to you for more info. It is now in your requests with its stage shown.</div>
+          <div className="ok" role="status">Request sent. We start with the regulatory check and post our findings on the request.</div>
           <div className="row"><Link className="btn btn-blue" href={`/requests/${Number(sp.sent)}`}>Open the request</Link>
             <Link className="btn btn-ghost" href="/requests">View my requests</Link></div>
         </section>
@@ -39,7 +39,7 @@ export default async function NewRequest({ searchParams }: { searchParams: Promi
   }
   const full = u.plan !== 'paid' && d.active >= FREE.requests;
   return (
-    <Shell user={u} title="Source a molecule" sub="We evaluate it for you first, then find suppliers" crumb={<><Link href="/requests">Requests</Link> / New request</>}>
+    <Shell user={u} title="Source a molecule" sub="From product request to registration and shipment" crumb={<><Link href="/requests">Requests</Link> / New request</>}>
       {sp.error && <div className="err" role="alert">{sp.error}</div>}
       <div className="split">
         <section className="card">
@@ -67,12 +67,9 @@ export default async function NewRequest({ searchParams }: { searchParams: Promi
         </section>
         <section className="card">
           <h2 style={{ marginBottom: 8 }}>What happens next</h2>
-          <ol className="steps">
-            <li><em>01</em><span>We evaluate it for you: competitors, supply, price range and registration route. You get a clear go or skip.</span></li>
-            <li><em>02</em><span>If it is worth it, we find suppliers.</span></li>
-            <li><em>03</em><span>You compare anonymous quotes.</span></li>
-            <li><em>04</em><span>You accept one and the supplier is revealed.</span></li>
-          </ol>
+          <ol className="steps">{PIPELINE.map((st, i) => (
+            <li key={st}><em>{String(i + 1).padStart(2, '0')}</em><span><b>{st}.</b> {STAGE_INFO[st]}</span></li>))}</ol>
+          <p className="note" style={{ marginTop: 10 }}>Several molecules? Collect them in your <Link href="/requests/list">sourcing list</Link> and send them together.</p>
           {u.plan !== 'paid' && <p className="note" style={{ marginTop: 10 }}>{d.active} of {FREE.requests} active requests on the free plan.</p>}
         </section>
       </div>

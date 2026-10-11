@@ -287,9 +287,13 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
               <input className="input full" name="molecule" placeholder="Molecule name (exact)" aria-label="Molecule" required />
               <input className="input" name="low" placeholder="Low" aria-label="Low" required /><input className="input" name="high" placeholder="High" aria-label="High" required />
               <input className="input" name="currency" defaultValue="USD" aria-label="Currency" /><input className="input" name="unit" defaultValue="pack" aria-label="Unit" />
-              <button className="btn btn-blue btn-sm full" type="submit">Add price point</button>
+              <select className="input" name="kind" aria-label="Price type" defaultValue="observed">
+                <option value="observed">Observed market price</option><option value="suggested">Suggested selling price</option></select>
+              <input className="input" name="note" placeholder="Note, e.g. wholesale, per 100s" aria-label="Note" />
+              <button className="btn btn-blue btn-sm full" type="submit">Add price</button>
             </form>
-            <p className="note">Market prices only (public or customer-reported). Never enter supplier prices here.</p>
+            <p className="note">Observed market prices, or the price we suggest customers sell at (shown on the molecule page, paid plans).
+              Never enter supplier prices here.</p>
             <h2>Molecule use case</h2>
             <form action={editUseCase} className="stack">
               <input className="input" name="molecule" placeholder="Molecule name (exact)" aria-label="Molecule" required />

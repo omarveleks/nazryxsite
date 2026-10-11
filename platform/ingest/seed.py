@@ -111,19 +111,31 @@ def seed():
                                      values (%s, %s, %s, %s, 'packs', 'USD 1.10 per pack', current_date + 60, %s, %s,
                                              now() - make_interval(days => %s), now() - make_interval(days => %s))
                                      returning id""", (free, m, None if m else molecule, qty, notes, stage, days_ago, max(0, days_ago - 2))).fetchone()[0]
-                for s in ("Submitted", "Reviewing", "Suppliers found", "Quote ready", "Closed"):
+                for s in ("Product request", "Regulatory check", "Regulatory analysis", "Pricing and logistics", "Registration", "Shipment"):
                     cur.execute("insert into request_stage_history (request_id, stage, changed_by) values (%s, %s, %s)", (rid, s, team))
                     if s == stage:
                         break
                 return rid, m
 
-            request("Ceftriaxone", "Submitted", "20,000", "1 g vials, GMP certificate needed.", 1)
-            r2, _ = request("Metformin", "Reviewing", "100,000", "500 mg tablets, blister packs.", 4)
+            request("Ceftriaxone", "Product request", "20,000", "1 g vials, GMP certificate needed.", 1)
+            r2, _ = request("Metformin", "Regulatory check", "100,000", "500 mg tablets, blister packs.", 4)
+            cur.execute("""insert into request_evaluations (request_id, verdict, summary, regulatory_check, evaluated_by)
+                           values (%s, 'maybe', 'Widely registered, so price decides. Worth it with a strong supplier.',
+                                   'Several companies hold active registrations. No restriction on the product.', %s)""", (r2, team))
             cur.execute("insert into request_messages (request_id, from_team, author_id, body) values (%s, true, %s, %s)",
                         (r2, team, "Thanks. Which pack size do you register under, 10x10 or 3x10?"))
             cur.execute("insert into request_messages (request_id, from_team, author_id, body) values (%s, false, %s, '10x10, please.')", (r2, free))
-            request("Amlodipine", "Suppliers found", "60,000", "5 mg and 10 mg.", 7)
-            r4, m4 = request("Doxycycline", "Quote ready", "50,000", "100 mg capsules.", 9)
+            r3, _ = request("Amlodipine", "Regulatory analysis", "60,000", "5 mg and 10 mg.", 7)
+            cur.execute("""insert into request_evaluations (request_id, verdict, summary, regulatory_check, route, evaluated_by)
+                           values (%s, 'go', 'Few competitors and steady demand at every level of care.',
+                                   'Three active registrations, none restricted.', 'Abridged dossier with a reference product. About 9 to 12 months.', %s)""",
+                        (r3, team))
+            r4, m4 = request("Doxycycline", "Pricing and logistics", "50,000", "100 mg capsules.", 9)
+            cur.execute("""insert into request_evaluations (request_id, verdict, summary, regulatory_check, route, supply, price_range, evaluated_by)
+                           values (%s, 'go', 'Open molecule on the official list; supply is ready.', 'Nobody holds an active registration.',
+                                   'Full dossier, about 12 months.', 'Three GMP suppliers, 4 to 8 weeks.', 'USD 0.95-1.30 per pack', %s)""", (r4, team))
+            cur.execute("""insert into market_prices (country, molecule_id, price_low, price_high, currency, unit, kind, note)
+                           values ('TZ', %s, 1.60, 2.10, 'USD', 'pack', 'suggested', 'Wholesale, pack of 100')""", (m4,))
             for i, (sid, price, moq, lt, certs, pvt) in enumerate(((sups[0], 0.95, "20,000 packs", 6, "GMP, WHO PQ", "below"),
                                                                    (sups[1], 1.05, "50,000 packs", 8, "GMP", "at"),
                                                                    (sups[2], 1.30, "10,000 packs", 4, "GMP", "above"))):
@@ -136,14 +148,13 @@ def seed():
             cur.execute("""insert into feed_items (kind, title, link, user_id) values ('request', 'Quote ready on your Doxycycline request', %s, %s)""",
                         (f"/requests/{r4}", free))
             # a finished request: accepted quote and an order in transit
-            r5, m5 = request("Ivermectin", "Quote ready", "30,000", "3 mg tablets.", 30)
+            r5, m5 = request("Ivermectin", "Shipment", "30,000", "3 mg tablets.", 30)
             oid = cur.execute("""insert into supplier_offers (supplier_id, molecule_id, price, unit, moq, lead_time_weeks, certs)
                                  values (%s, %s, 0.42, 'pack', '10,000 packs', 5, 'GMP') returning id""", (sups[0], m5)).fetchone()[0]
             qid = cur.execute("""insert into quotes (request_id, supplier_offer_id, label, moq, lead_time_weeks, certs, price_vs_target, accepted, accepted_at)
                                  values (%s, %s, 'Supplier A', '10,000 packs', 5, 'GMP', 'below', true, now() - interval '20 days') returning id""",
                               (r5, oid)).fetchone()[0]
-            cur.execute("update requests set stage = 'Closed', closed_reason = 'Quote accepted' where id = %s", (r5,))
-            cur.execute("insert into request_stage_history (request_id, stage, changed_by) values (%s, 'Closed', %s)", (r5, free))
+
             cur.execute("insert into orders (request_id, quote_id, status) values (%s, %s, 'In transit')", (r5, qid))
             cur.execute("""insert into feed_items (kind, title, body) values
                            ('regulatory', 'Demo: regulatory notes from the Nazryx team appear here', 'Short updates that matter for registrations and imports.')""")

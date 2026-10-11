@@ -42,12 +42,12 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ w
     const todo = await rows(db, `
       select 'quotes' as kind, r.id, coalesce(m.inn, r.molecule_text) as molecule, count(q.id)::int as n, null as extra, r.updated_at as at
         from requests r join quotes q on q.request_id = r.id left join molecules m on m.id = r.molecule_id
-        where r.user_id = $1 and r.stage = 'Quote ready' and not exists (select 1 from quotes a where a.request_id = r.id and a.accepted)
+        where r.user_id = $1 and r.stage = 'Pricing and logistics' and not exists (select 1 from quotes a where a.request_id = r.id and a.accepted)
         group by r.id, m.inn
       union all
       select 'evaluation', r.id, coalesce(m.inn, r.molecule_text), 0, e.verdict, e.evaluated_at
         from requests r join request_evaluations e on e.request_id = r.id left join molecules m on m.id = r.molecule_id
-        where r.user_id = $1 and r.stage in ('Submitted', 'Reviewing') and e.evaluated_at > now() - interval '30 days'
+        where r.user_id = $1 and r.stage in ('Product request', 'Regulatory check', 'Regulatory analysis') and e.evaluated_at > now() - interval '30 days'
       union all
       select 'message', r.id, coalesce(m.inn, r.molecule_text), 0, null, x.created_at
         from requests r left join molecules m on m.id = r.molecule_id
@@ -87,7 +87,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ w
   const quotes = d.todo.filter((t) => t.kind === 'quotes').reduce((a, t) => a + t.n, 0);
   const steps = [
     { done: d.mine, label: 'Add your portfolio', why: 'Narrows open molecules to your classes and unlocks your coverage.', href: '#portfolio' },
-    { done: Number(d.me?.requests_ever) > 0, label: 'Source your first molecule', why: 'We evaluate it for you, then send anonymous quotes.', href: '#sourcing' },
+    { done: Number(d.me?.requests_ever) > 0, label: 'Source your first molecule', why: 'We run the regulatory check for you, then quotes.', href: '#sourcing' },
     { done: Number(d.me?.tracking) > 0, label: 'Watch a molecule or follow a competitor', why: 'Get told when someone registers or drops it.', href: '/competitors' },
     { done: u.claim_status === 'approved' || u.claim_status === 'pending', label: 'Claim your company', why: 'Loads your registered products as your portfolio.', href: '/onboarding' },
   ];
@@ -95,7 +95,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ w
   const support = SUPPORT_WHATSAPP ? `https://wa.me/${SUPPORT_WHATSAPP.replace(/[^\d]/g, '')}` : `mailto:${SUPPORT_EMAIL}`;
   const todoLine = (t: any) => {
     if (t.kind === 'quotes') return { text: `${t.n} ${t.n === 1 ? 'quote' : 'quotes'} for ${t.molecule}`, href: `/requests/${t.id}`, cta: 'Review' };
-    if (t.kind === 'evaluation') return { text: `Evaluation back for ${t.molecule}: ${VERDICT[t.extra] ?? ''}`, href: `/requests/${t.id}`, cta: 'Open' };
+    if (t.kind === 'evaluation') return { text: `Assessment back for ${t.molecule}: ${VERDICT[t.extra] ?? ''}`, href: `/requests/${t.id}`, cta: 'Open' };
     return { text: `Nazryx asked you about ${t.molecule}`, href: `/requests/${t.id}`, cta: 'Reply' };
   };
   const year = new Date().getFullYear();
@@ -110,7 +110,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ w
       <div className="grid g4">
         <Link className="tile t-peach" href="/market/whitespace"><span className="k">Open molecules {d.mine ? 'in your classes' : 'in Tanzania'}</span>
           <span className="v num">{d.openCount}</span></Link>
-        <Link className="tile t-blue" href={d.mine ? '/portfolio' : '#portfolio'}><span className="k">Your official-list coverage</span>
+        <Link className="tile t-blue" href={d.mine ? '/portfolio' : '#portfolio'}><span className="k">Your TMDA list coverage</span>
           <span className="v num">{covPct === null ? 'Add portfolio' : `${covPct}%`}</span></Link>
         <Link className="tile t-mint" href="/requests"><span className="k">Active requests{quotes ? ` · ${quotes} quotes to review` : ''}</span>
           <span className="v num">{d.active}</span></Link>
@@ -144,15 +144,15 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ w
 
           <section className="card" id="intelligence">
             <div className="card-h"><div><h2>Market intelligence</h2>
-              <p className="note">{d.mine ? 'Official-list molecules in your classes that few or no companies have registered.'
-                : `Official-list molecules few or no companies have registered. ${d.counts?.nobody} have no registration at all.`}</p></div>
+              <p className="note">{d.mine ? 'Official TMDA list molecules in your classes that few or no companies have registered.'
+                : `Official TMDA list molecules few or no companies have registered. ${d.counts?.nobody} have no registration at all.`}</p></div>
               <Link className="btn-link" href="/market/whitespace">All open molecules</Link></div>
             {d.picks.length === 0 ? <Empty>No open molecules left {d.mine ? 'in your classes' : ''}. Search for others.</Empty> : (
               <div>{d.picks.map((m, i) => (
                 <MoleculeRow key={m.id} m={m} first={i === 0} actions={<>
                   <form action={hideMolecule}><input type="hidden" name="molecule_id" value={m.id} /><input type="hidden" name="return" value="/home" />
                     <button className="btn btn-ghost btn-sm" type="submit" aria-label={`Hide ${m.inn}`}>Hide</button></form>
-                  <SourceLink id={m.id} stage={m.request_stage} /></>} />))}</div>)}
+                  <SourceLink id={m.id} stage={m.request_stage} inList={m.in_list} back="/home" /></>} />))}</div>)}
             {free && d.openCount > d.picks.length && (
               <div className="locked" style={{ marginTop: 12 }}>
                 <span className="pill lav">Paid</span>
@@ -172,7 +172,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ w
           </section>
 
           <section className="card" id="sourcing">
-            <div className="card-h"><div><h2>Quick sourcing</h2><p className="note">Name a molecule. We evaluate it first (competitors, supply, price, registration route), then send anonymous quotes.</p></div>
+            <div className="card-h"><div><h2>Quick sourcing</h2><p className="note">Name a molecule. We run the regulatory check and analysis, then pricing and logistics with anonymous quotes.</p></div>
               <Link className="btn-link" href="/requests">All requests</Link></div>
             {!free || d.active < FREE.requests ? (
               <form action={createRequest} className="row">
@@ -187,13 +187,13 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ w
             {d.open.length > 0 && (
               <div className="stack" style={{ gap: 8, marginTop: 14 }}>{d.open.map((r) => (
                 <Link key={r.id} href={`/requests/${r.id}`} className="between"><span>{r.molecule}</span><StagePill stage={r.stage} /></Link>))}</div>)}
-            <p className="note" style={{ marginTop: 10 }}>Need many at once? <Link href="/requests/new">Upload a requirement list</Link>.
+            <p className="note" style={{ marginTop: 10 }}>Many at once? Collect them in your <Link href="/requests/list">sourcing list</Link>, or <Link href="/requests/new">upload a requirement list</Link>.
               {free ? ` ${d.active} of ${FREE.requests} active on the free plan.` : ''}</p>
           </section>
 
           <section className="card" id="portfolio">
             <div className="card-h"><div><h2>Portfolio analysis</h2>
-              <p className="note">Your coverage of the official list in the classes you carry, and the gaps worth filling.</p></div>
+              <p className="note">Your coverage of the official TMDA list in the classes you carry, and the gaps worth filling.</p></div>
               {d.mine && <Link className="btn-link" href="/portfolio">Full analysis</Link>}</div>
             {!d.mine ? (
               <form action={addPortfolioList} className="stack" style={{ gap: 10 }}>
@@ -229,7 +229,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ w
             <div className="stack" style={{ gap: 8 }}>
               <div className="between"><span>New registrations in {year}</span><b className="num">{d.counts?.new_regs}</b></div>
               <div className="between"><span>Molecules on the market</span><b className="num">{d.counts?.molecules}</b></div>
-              <div className="between"><span>Official-list molecules nobody registered</span><b className="num">{d.counts?.nobody}</b></div>
+              <div className="between"><span>Official TMDA list molecules nobody registered</span><b className="num">{d.counts?.nobody}</b></div>
             </div>
           </section>
           <section className="card">

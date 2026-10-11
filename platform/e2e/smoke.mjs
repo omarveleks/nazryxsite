@@ -44,7 +44,9 @@ await c.setInputFiles('#licence', { name: 'licence.pdf', mimeType: 'application/
 await Promise.all([c.waitForURL(/home/), c.click('text=Continue')]);
 check(true, 'sign up and claim a company');
 await c.goto(B + '/search?q=doxy');
-await Promise.all([c.waitForURL(/molecule\/\d+/), c.locator('text=Enrich, 1 credit').first().click()]);
+await Promise.all([c.waitForURL(/molecule\/\d+/), c.locator('a .nm').first().click()]);
+await c.locator('button:has-text("Enrich, 1 credit")').first().click();
+await c.locator('.tabs').waitFor();
 check((await c.locator('.plan-box').innerText()).includes('19'), 'enrich spends one credit');
 const molPage = await c.content();
 check(!/Gap score|Demand strength/.test(molPage) && molPage.includes('Registered in Tanzania'), 'molecule page shows registrations, no score');
@@ -61,12 +63,18 @@ await c.goto(B + '/requests/new'); await c.fill('#molecule', 'Amoxicillin');   /
 await Promise.all([c.waitForURL(/sent=/), c.click('text=Send request')]);
 const reqId = new URL(c.url()).searchParams.get('sent');
 check(Boolean(reqId), 'send a sourcing request');
+await c.goto(B + '/search?q=cipro');
+await c.locator('button:has-text("+ List")').first().click();
+await c.locator('a:has-text("Sourcing list · 1")').waitFor();
+await c.goto(B + '/requests/list');
+await Promise.all([c.waitForURL(/sent=1/), c.locator('button:has-text("Request 1 molecule")').click()]);
+check((await c.content()).includes('Product request'), 'sourcing list sends its molecules as requests');
 check((await c.goto(B + '/admin')).status() === 404, 'admin is hidden from customers');
 
 // 2. the demo customer accepts an anonymous quote and the supplier is revealed
 const d = await page();
 await signin(d, 'demo-free@nazryx.test', process.env.DEMO_PASSWORD);
-await d.goto(B + '/requests'); await d.click('.col:has-text("Quote ready") .rcard'); await d.waitForURL(/requests\/\d+/);
+await d.goto(B + '/requests'); await d.click('.col:has-text("Pricing and logistics") .rcard'); await d.waitForURL(/requests\/\d+/);
 check(!(await d.content()).includes('Demo Supplier'), 'supplier hidden before accepting');
 await Promise.all([d.waitForURL(/accepted=1/), d.locator('button:has-text("Accept")').first().click()]);
 check((await d.content()).includes('Demo Supplier'), 'supplier revealed after accepting');
@@ -91,10 +99,12 @@ check((await t.content()).includes('company claims'), 'claim approval is in the 
 await t.goto(B + `/admin/requests/${reqId}`);
 await t.selectOption('#verdict', 'go'); await t.fill('#summary', 'Few competitors and supply is ready.');
 await t.fill('#price_range', 'USD 1.00-1.20 per pack');
-await Promise.all([t.waitForURL(/saved=1/), t.click('text=Send evaluation to the customer')]);
+await t.fill('#regulatory_check', 'Nobody holds an active registration.');
+await Promise.all([t.waitForURL(/saved=1/), t.click('text=Send assessment to the customer')]);
 await c.goto(B + `/requests/${reqId}`);
 const evalPage = await c.content();
-check(evalPage.includes('Few competitors and supply is ready.') && evalPage.includes('USD 1.00-1.20'), 'customer sees the evaluation in the request');
+check(evalPage.includes('Few competitors and supply is ready.') && evalPage.includes('USD 1.00-1.20') && evalPage.includes('Nobody holds an active registration.'),
+  'customer sees the assessment, step by step, in the request');
 const t2 = await page();
 await signin(t2, process.env.SEED_TEAM_EMAIL || 'team@nazryx.test', process.env.SEED_TEAM_PASSWORD, secret);
 check(t2.url().includes('/home'), 'team signs in with a two-step code');

@@ -54,10 +54,10 @@ export default async function AdminRequest({ params, searchParams }: { params: P
             <p className="note">History: {d.history.map((h) => `${h.stage} (${fmtDate(h.created_at)})`).join(' → ')}</p>
           </section>
           <section className="card stack">
-            <div className="card-h"><h2>Evaluation</h2>{d.evaluation && <span className="note">Saved {fmtDate(d.evaluation.evaluated_at)}</span>}</div>
+            <div className="card-h"><h2>Assessment</h2>{d.evaluation && <span className="note">Saved {fmtDate(d.evaluation.evaluated_at)}</span>}</div>
             {d.facts && <p className="note">Registered by {d.facts.registrants} companies, {d.facts.registrations} products
-              {d.facts.on_national_list ? ` · official list, level ${d.facts.facility_level || 'not stated'}` : ' · not on the official list'}
-              {d.facts.on_who_eml ? ' · global essential list' : ''}{d.facts.channel_flag === 'programme' ? ' · programme channel' : ''}
+              {d.facts.on_national_list ? ` · official TMDA list, level ${d.facts.facility_level || 'not stated'}` : ' · not on the official TMDA list'}
+              {d.facts.on_who_eml ? ' · WHO essential list' : ''}{d.facts.channel_flag === 'programme' ? ' · programme channel' : ''}
               {d.facts.supply ? ' · we hold confirmed supply' : ''}</p>}
             <form action={saveEvaluation} className="form-grid">
               <input type="hidden" name="request_id" value={id} />
@@ -66,13 +66,15 @@ export default async function AdminRequest({ params, searchParams }: { params: P
                   <option value="" disabled>Pick one</option><option value="go">Go</option><option value="maybe">Worth a look</option><option value="no">Skip</option></select></div>
               <div className="field full"><label htmlFor="summary">Why (two or three lines, shown to the customer)</label>
                 <textarea className="input" id="summary" name="summary" defaultValue={d.evaluation?.summary ?? ''} required /></div>
-              <div className="field full"><label htmlFor="supply">Supply</label>
+              <div className="field full"><label htmlFor="regulatory_check">2. Regulatory check: who holds a registration, status, restrictions</label>
+                <textarea className="input" id="regulatory_check" name="regulatory_check" defaultValue={d.evaluation?.regulatory_check ?? ''} /></div>
+              <div className="field full"><label htmlFor="route">3. Regulatory analysis: route, requirements, timeline</label>
+                <textarea className="input" id="route" name="route" defaultValue={d.evaluation?.route ?? ''} placeholder="e.g. Full dossier (CTD), about 12 months" /></div>
+              <div className="field full"><label htmlFor="supply">4. Supply and lead time</label>
                 <input className="input" id="supply" name="supply" defaultValue={d.evaluation?.supply ?? ''} placeholder="e.g. Two GMP suppliers, 6-8 weeks" /></div>
-              <div className="field"><label htmlFor="price_range">Indicative price</label>
+              <div className="field full"><label htmlFor="price_range">4. Indicative price</label>
                 <input className="input" id="price_range" name="price_range" defaultValue={d.evaluation?.price_range ?? ''} placeholder="e.g. USD 0.80-1.10 per pack" /></div>
-              <div className="field"><label htmlFor="route">Registration route</label>
-                <input className="input" id="route" name="route" defaultValue={d.evaluation?.route ?? ''} placeholder="e.g. Full dossier, about 12 months" /></div>
-              <button className="btn btn-blue btn-sm full" type="submit">{d.evaluation ? 'Update evaluation' : 'Send evaluation to the customer'}</button>
+              <button className="btn btn-blue btn-sm full" type="submit">{d.evaluation ? 'Update assessment' : 'Send assessment to the customer'}</button>
               <p className="note full">Never name suppliers here. The customer sees this on their request page and gets an email and WhatsApp.</p>
             </form>
           </section>

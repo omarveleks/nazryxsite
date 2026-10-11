@@ -39,7 +39,7 @@ export default async function Market() {
       </div>
       <div className="split">
         <section className="card">
-          <div className="card-h"><h2>By class</h2><span className="note">Classes of the official list</span></div>
+          <div className="card-h"><h2>By class</h2><span className="note">Classes of the official TMDA list</span></div>
           <div className="tbl-wrap"><table className="tbl">
             <thead><tr><th>Class</th><th className="r">Registered products</th><th className="r">Registrants</th><th className="r">Companies per molecule</th><th className="r">Open (2 or fewer)</th></tr></thead>
             <tbody>{d.cats.map((c) => (

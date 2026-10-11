@@ -43,7 +43,8 @@ export async function setStage(f: FormData) {
 
 const VERDICTS: Record<string, string> = { go: 'Go', maybe: 'Worth a look', no: 'Skip' };
 
-/** The evaluation we do inside a sourcing request. Saving it moves a new request to "Reviewing" and tells the customer. */
+/** Our assessment inside a request (regulatory check, regulatory analysis, pricing). Saving it moves a new request to
+ *  "Regulatory check" and tells the customer. */
 export async function saveEvaluation(f: FormData) {
   const id = int(f, 'request_id')!, verdict = str(f, 'verdict', 10), summary = str(f, 'summary', 1200);
   const to = `/admin/requests/${id}`;
@@ -51,20 +52,22 @@ export async function saveEvaluation(f: FormData) {
   if (!summary) back(to, { error: 'Write why, in two or three lines.' });
   await team(async (db, uid) => {
     const had = await one(db, 'select 1 as x from request_evaluations where request_id = $1', [id]);
-    await db.query(`insert into request_evaluations (request_id, verdict, summary, supply, price_range, route, evaluated_by, evaluated_at)
-                    values ($1, $2, $3, $4, $5, $6, $7, now())
-                    on conflict (request_id) do update set verdict = excluded.verdict, summary = excluded.summary, supply = excluded.supply,
-                      price_range = excluded.price_range, route = excluded.route, evaluated_by = excluded.evaluated_by, evaluated_at = now()`,
-      [id, verdict, summary, str(f, 'supply', 300) || null, str(f, 'price_range', 200) || null, str(f, 'route', 300) || null, uid]);
+    await db.query(`insert into request_evaluations (request_id, verdict, summary, regulatory_check, supply, price_range, route, evaluated_by, evaluated_at)
+                    values ($1, $2, $3, $4, $5, $6, $7, $8, now())
+                    on conflict (request_id) do update set verdict = excluded.verdict, summary = excluded.summary,
+                      regulatory_check = excluded.regulatory_check, supply = excluded.supply, price_range = excluded.price_range,
+                      route = excluded.route, evaluated_by = excluded.evaluated_by, evaluated_at = now()`,
+      [id, verdict, summary, str(f, 'regulatory_check', 1200) || null, str(f, 'supply', 300) || null, str(f, 'price_range', 200) || null,
+       str(f, 'route', 600) || null, uid]);
     const r = await one(db, 'select stage from requests where id = $1', [id]);
-    if (r?.stage === 'Submitted') {
-      await db.query("update requests set stage = 'Reviewing', updated_at = now() where id = $1", [id]);
-      await db.query("insert into request_stage_history (request_id, stage, changed_by) values ($1, 'Reviewing', $2)", [id, uid]);
+    if (r?.stage === 'Product request') {   // the assessment starts the regulatory check
+      await db.query("update requests set stage = 'Regulatory check', updated_at = now() where id = $1", [id]);
+      await db.query("insert into request_stage_history (request_id, stage, changed_by) values ($1, 'Regulatory check', $2)", [id, uid]);
     } else {
       await db.query('update requests set updated_at = now() where id = $1', [id]);
     }
-    await notifyCustomer(db, id, had ? 'Evaluation updated' : 'Evaluation ready',
-      `Our evaluation of request #${id}: ${VERDICTS[verdict]}. ${summary}`);
+    await notifyCustomer(db, id, had ? 'Assessment updated' : 'Assessment ready',
+      `Our assessment of request #${id}: ${VERDICTS[verdict]}. ${summary}`);
   }, to);
   redirect(`${to}?saved=1`);
 }
@@ -144,8 +147,10 @@ export async function addPrice(f: FormData) {
     if (!m) back('/admin?tab=content', { error: 'Molecule not found. Use the exact name.' });
     const lo = Number(str(f, 'low', 20)), hi = Number(str(f, 'high', 20));
     if (!(lo > 0 && hi >= lo)) back('/admin?tab=content', { error: 'Low and high must be positive, high ≥ low.' });
-    await db.query(`insert into market_prices (country, molecule_id, price_low, price_high, currency, unit, created_by)
-                    values ('TZ', $1, $2, $3, $4, $5, $6)`, [m!.id, lo, hi, str(f, 'currency', 3) || 'USD', str(f, 'unit', 40) || 'pack', uid]);
+    const kind = str(f, 'kind', 12) === 'suggested' ? 'suggested' : 'observed';
+    await db.query(`insert into market_prices (country, molecule_id, price_low, price_high, currency, unit, created_by, kind, note)
+                    values ('TZ', $1, $2, $3, $4, $5, $6, $7, $8)`,
+      [m!.id, lo, hi, str(f, 'currency', 3) || 'USD', str(f, 'unit', 40) || 'pack', uid, kind, str(f, 'note', 300) || null]);
   }, '/admin?tab=content');
   redirect('/admin?tab=content&saved=1');
 }
