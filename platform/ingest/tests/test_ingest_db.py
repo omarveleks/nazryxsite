@@ -662,3 +662,34 @@ def test_manufacturer_onboarding_answers(env):
             a.execute("update manufacturer_profiles set status = 'approved' where user_id = %s", (maker,))
         a.rollback()
     assert q("select chosen_plan, step from manufacturer_profiles where user_id = %s", maker)[0] == ("entry", 6)
+
+
+def test_plan_tier_partner_search_and_catalog(env):
+    with psycopg.connect(URL) as c:
+        maker = c.execute("insert into users (email, password_hash, account_type, onboarded) values ('mk7@example.com', 'x', 'manufacturer', true) returning id").fetchone()[0]
+        team = c.execute("insert into users (email, password_hash, role) values ('mk7t@example.com', 'x', 'team') returning id").fetchone()[0]
+        c.commit()
+    with app_conn(env) as a:
+        as_user(a, maker)
+        a.execute("insert into manufacturer_profiles (user_id, company_name) values (%s, 'Maker Seven')", (maker,))
+        mol = a.execute("""select molecule_id from registrations where active and country = 'TZ' group by 1 order by count(*) desc limit 1""").fetchone()[0]
+        a.execute("insert into mfr_products (user_id, name, molecule_id) values (%s, 'Top molecule', %s)", (maker, mol))
+        a.commit()
+        as_user(a, maker)
+        assert a.execute("select mfr_tier()").fetchone()[0] == 0
+        rows = a.execute("select code, open_to, carries_mine, total, mine from partner_search('TZ')").fetchall()
+        assert 0 < len(rows) <= 5 and rows[0][3] >= len(rows)                     # no plan: five rows, total still known
+        assert all(r[1] + r[2] == r[4] == 1 for r in rows)                          # open to + carries = my molecules
+        with pytest.raises(psycopg.errors.RaiseException):                          # cannot give itself a plan
+            a.execute("update manufacturer_profiles set active_plan = 'entry' where user_id = %s", (maker,))
+        a.rollback()
+        assert a.execute("select count(*) from medicine_catalog").fetchone()[0] >= 0  # readable by everyone signed in
+        a.rollback()
+        as_user(a, team)
+        a.execute("update manufacturer_profiles set active_plan = 'data', active_since = now() where user_id = %s", (maker,))
+        a.commit()
+        as_user(a, maker)
+        assert a.execute("select mfr_tier()").fetchone()[0] == 1
+        full = a.execute("select total from partner_search('TZ')").fetchall()
+        assert len(full) == min(full[0][0], 200)                                     # with a plan: every distributor
+        a.rollback()

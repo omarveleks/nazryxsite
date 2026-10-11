@@ -6,7 +6,7 @@ import { back, int, str } from '@/lib/forms';
 import { ACCOUNT_DOC_KINDS, ENGAGEMENT_DOC_ITEMS, SUPPLIER_DOC_KINDS, TEAM_REQUEST_KINDS, requestDocLabel } from '@/lib/docs';
 import { DOSSIER_ITEMS, SHIPMENT_DOCS } from '@/lib/format';
 import { saveUpload } from '@/lib/uploads';
-import { PLAN_ORDER } from '@/lib/mfr';
+import { MFR_PLANS, PLAN_ORDER, type PlanKey } from '@/lib/mfr';
 
 // Team document uploads everywhere: requests, engagements, customer accounts and suppliers. Every action re-checks
 // the team role here and in the database (RLS). Internal files are never visible to customers.
@@ -178,4 +178,26 @@ export async function savePlanPrices(f: FormData) {
     back('/admin?tab=content', { error: dbMessage(e) });
   }
   redirect('/admin?tab=content&saved=1');
+}
+
+// ---------------------------------------------------------------- manufacturer plans
+/** Turn on (or change, or end) the plan a manufacturer has agreed and paid for. Unlocks the matching screens. */
+export async function setMfrPlan(f: FormData) {
+  const u = await requireTeam();
+  const uid = str(f, 'user_id', 40), plan = str(f, 'plan', 10);
+  const to = safe(str(f, 'return', 200), `/admin/accounts/${uid}`);
+  if (plan && !(PLAN_ORDER as string[]).includes(plan)) back(to, { error: 'Unknown plan.' });
+  try {
+    await withUser(u.id, async (db) => {
+      await db.query(`update manufacturer_profiles set active_plan = $2, active_since = case when $2::text is null then null else now() end
+                      where user_id = $1`, [uid, plan || null]);
+      if (plan) {
+        await db.query("update plan_requests set status = 'done' where user_id = $1 and status = 'open' and wanted like 'mfr:%'", [uid]);
+        await tellUser(db, uid, 'Your plan is active', `${MFR_PLANS[plan as PlanKey].name} is now active. Everything it includes is unlocked.`, '/m/plan');
+      }
+    });
+  } catch (e) {
+    back(to, { error: dbMessage(e) });
+  }
+  redirect(`${to}${to.includes('?') ? '&' : '?'}saved=1`);
 }

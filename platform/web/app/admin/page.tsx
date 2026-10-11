@@ -282,7 +282,9 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
             <tr key={m.user_id}><td><Link href={`/admin/accounts/${m.user_id}`}><b>{m.company_name}</b></Link>
               <div className="sub2">{m.email} · {m.hq_country || 'country not given'} · {m.products} products
                 {m.completed_at ? '' : ` · onboarding step ${Math.min(m.step, 6)} of 6`}
-                {m.chosen_plan ? ` · chose ${MFR_PLANS[m.chosen_plan as keyof typeof MFR_PLANS]?.name}` : m.suggested_plan ? ` · suggested ${MFR_PLANS[m.suggested_plan as keyof typeof MFR_PLANS]?.name}` : ''}</div>
+                {m.active_plan ? ` · active: ${MFR_PLANS[m.active_plan as keyof typeof MFR_PLANS]?.name}`
+                  : m.chosen_plan ? ` · asked for ${MFR_PLANS[m.chosen_plan as keyof typeof MFR_PLANS]?.name}, not active yet`
+                  : m.suggested_plan ? ` · suggested ${MFR_PLANS[m.suggested_plan as keyof typeof MFR_PLANS]?.name}` : ''}</div>
               <div className="sub2">{(m.certifications ?? []).join(', ') || 'No certifications listed'} · targets {(m.target_countries ?? []).map(countryName).join(', ') || 'none'}</div></td>
               <td className="r">{m.status === 'pending' ? (
                 <form action={reviewManufacturer} className="row" style={{ justifyContent: 'flex-end' }}><input type="hidden" name="user_id" value={m.user_id} />

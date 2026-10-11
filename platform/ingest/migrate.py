@@ -43,8 +43,27 @@ def migrate():
         conn.execute("""insert into countries (code, name, enabled) values
             ('TZ', 'Tanzania', true), ('KE', 'Kenya', false), ('UG', 'Uganda', false), ('KZ', 'Kazakhstan', false)
             on conflict (code) do nothing""")
+        load_medicines(conn)
         conn.commit()
     print("migrations up to date")
+
+
+def load_medicines(conn):
+    """Fill the worldwide medicine list once (ingest/data/medicines.csv: Wikidata, CC0)."""
+    if not conn.execute("select to_regclass('medicine_catalog')").fetchone()[0]:
+        return
+    if conn.execute("select exists (select 1 from medicine_catalog)").fetchone()[0]:
+        return
+    path = os.path.join(HERE, "data", "medicines.csv")
+    if not os.path.exists(path):
+        return
+    import csv
+    with open(path, newline="") as f:
+        rows = [(r["name"], r["atc"] or None) for r in csv.DictReader(f)]
+    with conn.cursor().copy("copy medicine_catalog (name, atc) from stdin") as cp:
+        for r in rows:
+            cp.write_row(r)
+    print(f"loaded {len(rows)} medicines")
 
 
 if __name__ == "__main__":

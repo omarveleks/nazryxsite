@@ -68,6 +68,9 @@ def seed_manufacturer(cur, maker, team):
                    approach = 'partner', goals = '{launch,grow}', services = '{launch,distributor,register,pricing}',
                    launch_scope = 'data_first', step = 7, suggested_plan = 'access', completed_at = coalesce(completed_at, now())
                    where user_id = %s and completed_at is null""", (maker,))
+    # the demo manufacturer has Complete Market Access switched on, so the walkthrough shows unlocked and locked parts
+    cur.execute("""update manufacturer_profiles set active_plan = 'access', active_since = now(), chosen_plan = coalesce(chosen_plan, 'access')
+                   where user_id = %s and active_plan is null""", (maker,))
     if not cur.execute("select 1 from account_documents where user_id = %s", (maker,)).fetchone():
         fid = cur.execute("""insert into stored_files (name, size, data, uploaded_by) values ('demo-agreement.txt', %s, %s, %s) returning id""",
                           (len(DEMO_DOC), DEMO_DOC, team)).fetchone()[0]

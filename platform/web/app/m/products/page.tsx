@@ -1,49 +1,127 @@
 import Link from 'next/link';
 import Shell from '@/components/Shell';
-import { Badges, Empty, Flash } from '@/components/ui';
+import MarketPicker, { AgencyMarket, dataMarkets, hasData, pickMarket, targetMarkets } from '@/components/MarketPicker';
+import MedicineSearch from '@/components/MedicineSearch';
+import { Bar, Empty, Flash, LockIcon, PlanLock } from '@/components/ui';
 import { addMfrProducts } from '@/app/actions/mfr';
 import { requireUser } from '@/lib/auth';
-import { rows, withUser } from '@/lib/db';
-import { registeredLine } from '@/lib/format';
-import { MFR_PRODUCTS_SQL } from '@/lib/mfr';
+import { one, rows, withUser } from '@/lib/db';
+import { canUse, countryName, productClass } from '@/lib/mfr';
 
 export const metadata = { title: 'My products' };
 
-export default async function MfrProducts({ searchParams }: { searchParams: Promise<{ added?: string; matched?: string; error?: string }> }) {
+type Fact = { molecule_id: number; country: string; registrants: number; registrations: number; on_national_list: boolean; facility_level: string | null;
+  rankable: boolean; score: number | null };
+const competition = (f?: Fact) => !f || (!f.registrations && !f.on_national_list) ? 'absent'
+  : f.registrants === 0 ? 'open' : f.registrants <= 3 ? 'few' : f.registrants < 8 ? 'some' : 'crowded';
+const COMP: Record<string, [string, string]> = {
+  open: ['Nobody registered', 'peach'], few: ['1 to 3 competitors', 'mint'], some: ['4 to 7 competitors', 'blue'], crowded: ['8 or more competitors', ''],
+  absent: ['Not on this market yet', ''],
+};
+
+// The manufacturer's catalogue against its markets: a portfolio dashboard on top, then every product.
+export default async function MfrProducts({ searchParams }: { searchParams: Promise<{ added?: string; matched?: string; error?: string; market?: string }> }) {
   const sp = await searchParams;
   const u = await requireUser({ manufacturer: true });
-  const products = await withUser(u.id, (db) => rows(db, `${MFR_PRODUCTS_SQL} where p.user_id = $1
-      order by (p.molecule_id is null), (cm.on_national_list and cm.rankable) desc nulls last, g.score desc nulls last, p.name`, [u.id]));
-  const unmatched = products.filter((p) => !p.molecule_id).length;
+  const analysis = canUse(u.mfr_tier, 'portfolio');
+  const d = await withUser(u.id, async (db) => {
+    const prof = await one(db, 'select target_countries from manufacturer_profiles where user_id = $1', [u.id]);
+    const targets = targetMarkets(prof?.target_countries);
+    const products = await rows(db, `select p.id, p.name, p.strength, p.dosage_form, p.molecule_id, p.atc, m.inn, m.category
+        from mfr_products p left join molecules m on m.id = p.molecule_id where p.user_id = $1 order by coalesce(m.inn, p.name)`, [u.id]);
+    const ids = products.map((p) => p.molecule_id).filter(Boolean);
+    const facts = ids.length ? await rows(db, `select cm.molecule_id, cm.country, cm.registrants, cm.registrations, cm.on_national_list, cm.facility_level,
+        coalesce(cm.rankable, false) as rankable, g.score from country_molecules cm
+        left join visible_gap_scores g on g.molecule_id = cm.molecule_id and g.country = cm.country
+        where cm.molecule_id = any($1) and cm.country = any($2)`, [ids, dataMarkets(targets)]) as Fact[] : [];
+    return { targets, products, facts };
+  });
+  const market = pickMarket(sp.market, d.targets);
+  const fact = (mol: number | null, c: string) => d.facts.find((f) => f.molecule_id === mol && f.country === c);
+  const live = dataMarkets(d.targets);
+  const focus = market === 'all' ? live[0] : market;      // the market the dashboard reads (all: the first with data)
+
+  const list = d.products.map((p) => ({ ...p, cls: productClass(p), f: focus ? fact(p.molecule_id, focus) : undefined }))
+    .sort((a, b) => (b.f?.score ?? -1) - (a.f?.score ?? -1) || String(a.inn ?? a.name).localeCompare(String(b.inn ?? b.name)));
+  const n = list.length, matched = list.filter((p) => p.molecule_id).length;
+  const by = (k: string) => list.filter((p) => competition(p.f) === k).length;
+  const onMarket = list.filter((p) => p.f && p.f.registrants > 0);
+  const avg = onMarket.length ? (onMarket.reduce((s, p) => s + p.f!.registrants, 0) / onMarket.length).toFixed(1) : '—';
+  const classes = Object.entries(list.reduce<Record<string, typeof list>>((acc, p) => { const c = p.cls ?? 'Not classified'; (acc[c] ??= []).push(p); return acc; }, {}))
+    .map(([cls, ps]) => {
+      const on = ps.filter((p) => p.f && p.f.registrants > 0);
+      return { cls, n: ps.length, open: ps.filter((p) => competition(p.f) === 'open').length,
+        avg: on.length ? (on.reduce((s, p) => s + p.f!.registrants, 0) / on.length).toFixed(1) : '—' };
+    }).sort((a, b) => b.n - a.n);
+  const top = classes.find((c) => c.cls !== 'Not classified');
+  const visible = (i: number) => analysis || i < 3;
+
   return (
-    <Shell user={u} title="My products" sub="Your catalogue, matched to the Tanzania market">
+    <Shell user={u} title="My products" sub={market === 'all' ? 'Your catalogue across your markets' : `Your catalogue against ${countryName(market)}`}
+      actions={<a className="btn btn-blue btn-sm" href="#add">Add a product</a>}>
       <Flash sp={sp} />
-      {sp.added && <div className="ok" role="status">Added {sp.added} products; {sp.matched} matched to a molecule on the market.
-        {Number(sp.added) > Number(sp.matched) ? ' The rest we could not match by name; our team can match them for you.' : ''}</div>}
-      <div className="split">
-        <section className="card">
-          <div className="card-h"><h2>{products.length} products</h2>{unmatched > 0 && <span className="note">{unmatched} not matched yet</span>}</div>
-          {products.length === 0 ? <Empty>No products yet. Paste your list on the right.</Empty> : (
-            <div>{products.map((p, i) => (
-              <div key={p.id} className="between" style={{ alignItems: 'flex-start', flexWrap: 'wrap', padding: '12px 0', borderTop: i ? '1px solid var(--line)' : undefined }}>
-                <div style={{ minWidth: 0, flex: '1 1 280px' }}>
-                  <Link href={`/m/products/${p.id}`}><span className="nm">{p.inn ?? p.name}</span></Link>
-                  <div className="sub2">{[p.inn ? p.name : null, p.molecule_id ? (p.registrants != null ? registeredLine(p.registrants, p.registrations) : 'Not on the Tanzania market') : 'Not matched to a molecule'].filter(Boolean).join(' · ')}</div>
-                  {p.molecule_id && p.registrants != null && <div style={{ marginTop: 6 }}><Badges m={p} /></div>}
-                </div>
-                <Link className="btn btn-ghost btn-sm" href={`/m/products/${p.id}`}>Open</Link>
-              </div>))}</div>)}
-        </section>
-        <section className="card stack">
-          <h2>Add products</h2>
-          <form action={addMfrProducts} className="stack">
+      {sp.added && <div className="ok" role="status">Added {sp.added} products; {sp.matched} matched to a molecule we track.
+        {Number(sp.added) > Number(sp.matched) ? ' Our team matches the rest.' : ''}</div>}
+      <MarketPicker targets={d.targets} current={market} path="/m/products" />
+
+      {market !== 'all' && !hasData(market) ? <AgencyMarket code={market} /> : n > 0 && (<>
+        <div className="grid g4">
+          <div className="tile t-white"><span className="k">Products</span><span className="v num">{n}</span><span className="small">{matched} matched to a molecule</span></div>
+          <div className="tile t-peach"><span className="k">Nobody registered{focus && market === 'all' ? ` in ${countryName(focus)}` : ''}</span><span className="v num">{by('open')}</span>
+            <span className="small">Open to you</span></div>
+          {analysis ? (<>
+            <div className="tile t-blue"><span className="k">Average competitors</span><span className="v num">{avg}</span><span className="small">per product already on the market</span></div>
+            <div className="tile t-mint"><span className="k">Top class</span><span className="v" style={{ fontSize: 20, lineHeight: 1.2 }}>{top?.cls ?? '—'}</span>
+              <span className="small">{top ? `${top.n} of your products` : ''}</span></div>
+          </>) : <div style={{ gridColumn: 'span 2' }}><PlanLock need="data" title="Your portfolio analysis">Competition and depth for every product, your strongest classes, and where you are open.</PlanLock></div>}
+        </div>
+        {analysis && (
+          <div className="grid g2">
+            <section className="card">
+              <div className="card-h"><h2>Competition across your portfolio</h2>{focus && <span className="note">{countryName(focus)}</span>}</div>
+              {['open', 'few', 'some', 'crowded', 'absent'].map((k) => <Bar key={k} label={COMP[k][0]} value={by(k)} max={n} right={by(k)} />)}
+            </section>
+            <section className="card">
+              <div className="card-h"><h2>By therapeutic class</h2></div>
+              <div className="tbl-wrap"><table className="tbl"><thead><tr><th>Class</th><th className="r">Yours</th><th className="r">Avg competitors</th><th className="r">Open</th></tr></thead>
+                <tbody>{classes.slice(0, 8).map((c) => <tr key={c.cls}><td>{c.cls}</td><td className="r num">{c.n}</td><td className="r num">{c.avg}</td><td className="r num">{c.open}</td></tr>)}</tbody></table></div>
+            </section>
+          </div>)}
+      </>)}
+
+      <section className="card">
+        <div className="card-h"><h2>All products</h2><span className="note">{analysis ? 'Clearest openings first' : 'Your top 3 shown in full'}</span></div>
+        {n === 0 ? <Empty>No products yet. Search for your first one below.</Empty> : (
+          <div className="tbl-wrap"><table className="tbl">
+            <thead><tr><th>Product</th><th className="hide-m">Class</th>
+              {market === 'all' ? d.targets.map((c) => <th key={c} className="r">{countryName(c)}</th>) : <th className="r">Competition</th>}</tr></thead>
+            <tbody>{list.map((p, i) => (
+              <tr key={p.id}>
+                <td><Link href={`/m/products/${p.id}${market !== 'all' ? `?market=${market}` : ''}`}><b>{p.inn ?? p.name}</b></Link>
+                  <div className="sub2">{[p.inn ? p.name : null, p.molecule_id ? null : 'Not matched yet'].filter(Boolean).join(' · ')}</div></td>
+                <td className="small hide-m">{p.cls ?? '—'}</td>
+                {(market === 'all' ? d.targets : [market]).map((c) => {
+                  const f = fact(p.molecule_id, c);
+                  return <td key={c} className="r">{!hasData(c) ? <span className="note">Agency</span>
+                    : !visible(i) ? <span className="note row" style={{ justifyContent: 'flex-end', gap: 4 }}><LockIcon /> Locked</span>
+                    : <span className={`pill ${COMP[competition(f)][1]}`}>{competition(f) === 'some' || competition(f) === 'crowded' ? `${f!.registrants} competitors` : COMP[competition(f)][0]}</span>}</td>;
+                })}
+              </tr>))}</tbody></table></div>)}
+      </section>
+
+      <section className="card stack" id="add">
+        <h2>Add a product</h2>
+        <p className="note">Search thousands of medicines: everything registered or listed in our markets, plus the worldwide list of medicines with a WHO drug class. Not there? Add it as written.</p>
+        <div style={{ maxWidth: 560 }}><MedicineSearch /></div>
+        <details>
+          <summary className="btn-link">Add many at once</summary>
+          <form action={addMfrProducts} className="stack" style={{ marginTop: 10, maxWidth: 560 }}>
             <label className="lbl" htmlFor="list">Paste your product list, one product per line</label>
-            <textarea className="input" id="list" name="list" rows={10} required placeholder={'Amoxicillin 500mg capsules\nCeftriaxone 1g injection\nMetformin 500mg tablets'} />
-            <button className="btn btn-blue" type="submit">Add and match</button>
+            <textarea className="input" id="list" name="list" rows={8} required placeholder={'Amoxicillin 500 mg capsules\nCeftriaxone 1 g injection\nMetformin 500 mg tablets'} />
+            <button className="btn btn-ghost btn-sm" type="submit" style={{ alignSelf: 'flex-start' }}>Add and match</button>
           </form>
-          <p className="note">Up to 500 lines at a time. Name, strength and form on each line work best. Our team matches anything we cannot.</p>
-        </section>
-      </div>
+        </details>
+      </section>
     </Shell>
   );
 }

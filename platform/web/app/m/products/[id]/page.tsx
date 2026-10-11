@@ -1,77 +1,117 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import Shell from '@/components/Shell';
-import { Badges, Empty, Flash, Locked } from '@/components/ui';
-import { deleteMfrProduct, requestService, updateProductChecks } from '@/app/actions/mfr';
+import MarketPicker, { AgencyMarket, hasData, pickMarket, targetMarkets } from '@/components/MarketPicker';
+import { Badges, Empty, Flash, LockIcon, PlanLock } from '@/components/ui';
+import { deleteMfrProduct, updateProductChecks } from '@/app/actions/mfr';
 import { requireUser } from '@/lib/auth';
 import { one, rows, withUser } from '@/lib/db';
 import { BE_STATUS, beSuggestion, levelLabel, registeredLine } from '@/lib/format';
-import { AGENCY_KINDS, MFR_COUNTRIES, MFR_PRODUCTS_SQL, SERVICES, reasons } from '@/lib/mfr';
+import { AGENCY_KINDS, MFR_PLANS, NEEDS_PLAN, SERVICES, canUse, countryName, mfrProductsSql, productClass, reasons } from '@/lib/mfr';
 
 export const metadata = { title: 'Product' };
 
-export default async function MfrProduct({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ saved?: string; error?: string }> }) {
+// One product against one market (or all of them): why it fits, the route, the price, the distributors who could take it.
+export default async function MfrProduct({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ saved?: string; error?: string; market?: string; added?: string }> }) {
   const id = Number((await params).id);
   const sp = await searchParams;
   if (!Number.isInteger(id)) notFound();
   const u = await requireUser({ manufacturer: true });
-  const paid = u.plan === 'paid' || u.role === 'team';
+  const t = u.mfr_tier;
   const d = await withUser(u.id, async (db) => {
-    const p = await one(db, `${MFR_PRODUCTS_SQL} where p.id = $1 and p.user_id = $2`, [id, u.id]);
+    const prof = await one(db, 'select target_countries from manufacturer_profiles where user_id = $1', [u.id]);
+    const targets = targetMarkets(prof?.target_countries);
+    // a product page opens on a market with data; the general view is one click away
+    const market = sp.market ? pickMarket(sp.market, targets) : targets.find(hasData) ?? targets[0];
+    const focus = market === 'all' ? targets.find(hasData) ?? 'TZ' : market;
+    const p = await one(db, `${mfrProductsSql(focus)} where p.id = $1 and p.user_id = $2`, [id, u.id]);
     if (!p) return null;
-    if (!p.molecule_id) return { p };
-    const origin = await rows(db, `select initcap(lower(coalesce(manufacturing_country, 'unknown'))) as country, count(*)::int as n
-        from registrations where molecule_id = $1 and active group by 1 order by n desc limit 5`, [p.molecule_id]);
-    const lapsed = Number((await one(db, `select count(*)::int as n from registrations where molecule_id = $1 and not active`, [p.molecule_id]))?.n ?? 0);
+    const base = { p, targets, market };
+    if (!p.molecule_id) return base;
+    const across = market === 'all' ? await rows(db, `select country, registrants, registrations, on_national_list, facility_level from country_molecules
+        where molecule_id = $1 and country = any($2)`, [p.molecule_id, targets]) : [];
+    if (market === 'all' || !hasData(market)) return { ...base, across };
+    const origin = canUse(t, 'market') ? await rows(db, `select initcap(lower(coalesce(manufacturing_country, 'not stated'))) as country, count(*)::int as n
+        from registrations where molecule_id = $1 and country = $2 and active group by 1 order by n desc limit 5`, [p.molecule_id, market]) : null;
+    const lapsed = canUse(t, 'market') ? Number((await one(db, `select count(*)::int as n from registrations where molecule_id = $1 and country = $2 and not active`,
+      [p.molecule_id, market]))?.n ?? 0) : null;
     const routeKey = (await one(db, 'select route_key from molecule_routes where molecule_id = $1', [p.molecule_id]))?.route_key
       ?? (p.who_pq || p.sra_approved ? 'abridged' : 'full');
-    const route = await one(db, 'select label, description, months_low, months_high from registration_routes where key = $1', [routeKey]);
-    const price = paid ? await one(db, `select price_low, price_high, currency, unit, note from market_prices where molecule_id = $1 and kind = 'suggested'
+    const route = canUse(t, 'pathway') ? await one(db, 'select label, description, months_low, months_high from registration_routes where key = $1', [routeKey]) : null;
+    const price = canUse(t, 'pricing') ? await one(db, `select price_low, price_high, currency, unit, note from market_prices where molecule_id = $1 and kind = 'suggested'
         order by observed_at desc limit 1`, [p.molecule_id]) : null;
-    // distributor names stay hidden on the manufacturer side: introductions go through Nazryx (partner finder)
-    return { p, origin, lapsed, route, price };
+    // distributors strong in the class who do not carry this molecule yet (codes only; names stay with Nazryx)
+    const open = canUse(t, 'matching') && p.category ? (await rows(db, 'select carries from partner_search($1, $2, $3)', [market, p.category, p.molecule_id]))
+      .filter((x) => !x.carries).length : null;
+    return { ...base, origin, lapsed, route, price, open };
   });
   if (!d) notFound();
-  const { p } = d;
+  const { p, market } = d;
   const be = p.be_study ? null : beSuggestion(p.forms ?? p.dosage_form);
-  const ret = `/m/products/${id}`;
+  const cls = productClass(p);
   return (
     <Shell user={u} title={p.inn ?? p.name} crumb={<><Link href="/m/products">My products</Link> / {p.inn ?? p.name}</>}
-      sub={[p.inn ? p.name : null, p.category].filter(Boolean).join(' · ') || 'Product'}>
+      sub={[p.inn ? p.name : null, cls].filter(Boolean).join(' · ') || 'Product'}
+      actions={<Link className="btn btn-blue btn-sm" href={`/m/services?product=${id}`}>Get help with this product</Link>}>
       <Flash sp={sp} />
+      {sp.added && <div className="ok" role="status">Added. {p.molecule_id ? 'Here is how it fits your markets.' : 'We could not match it to a molecule we track yet; our team will.'}</div>}
+      <MarketPicker targets={d.targets} current={market} path={`/m/products/${id}`} />
       <div className="split">
         <div className="stack">
           {!p.molecule_id ? (
             <section className="card stack"><h2>Not matched yet</h2>
-              <p className="muted">We could not match &quot;{p.name}&quot; to a molecule on the market by name. Our team will match it; meanwhile you can still ask for any service below.</p></section>
-          ) : (<>
+              <p className="muted">We could not match &ldquo;{p.name}&rdquo; to a molecule on our markets by name. Our team will match it; you can still ask for any service.</p></section>
+          ) : market === 'all' ? (
+            <section className="card">
+              <div className="card-h"><h2>Across your markets</h2></div>
+              <table className="tbl"><tbody>{d.targets.map((c) => {
+                const f = 'across' in d ? d.across?.find((x) => x.country === c) : null;
+                return (<tr key={c}><td><Link href={`/m/products/${id}?market=${c}`}>{countryName(c)}</Link></td>
+                  <td className="r">{!hasData(c) ? <span className="note">Agency coverage</span>
+                    : f ? <>{registeredLine(f.registrants, f.registrations)}{f.on_national_list ? ` · essential list${f.facility_level ? `, level ${f.facility_level}` : ''}` : ''}</>
+                    : 'Not on this market yet'}</td></tr>);
+              })}</tbody></table>
+            </section>
+          ) : !hasData(market) ? <AgencyMarket code={market} /> : (<>
             <section className="card stack">
-              <div className="card-h"><h2>Why Tanzania</h2>{p.registrants != null && <Badges m={p} />}</div>
-              {p.registrants == null ? <Empty>Not on the Tanzania market or the official lists yet.</Empty> : (
+              <div className="card-h"><h2>Why {countryName(market)}</h2>{p.registrants != null && <Badges m={p} />}</div>
+              {p.registrants == null ? <Empty>Not registered in {countryName(market)} and not on its official lists yet.</Empty> : (
                 <table className="tbl"><tbody>
-                  <tr><td>Official TMDA list</td><td className="r">{p.on_national_list ? (p.facility_level ? `Level ${p.facility_level}: ${levelLabel(p.facility_level)}` : 'Yes') : 'No'}</td></tr>
+                  <tr><td>Official list</td><td className="r">{p.on_national_list ? (p.facility_level ? `Level ${p.facility_level}: ${levelLabel(p.facility_level)}` : 'Yes') : 'No'}</td></tr>
                   <tr><td>WHO essential list</td><td className="r">{p.on_who_eml ? 'Yes' : 'No'}</td></tr>
                   <tr><td>Competition</td><td className="r">{registeredLine(p.registrants, p.registrations)}</td></tr>
-                  <tr><td>Registered products made in</td><td className="r">{d.origin!.length ? d.origin!.map((o) => `${o.country} ${o.n}`).join(', ') : 'Nowhere yet'}</td></tr>
-                  <tr><td>Made locally</td><td className="r">{Number(p.local_made) > 0 ? `Yes, ${p.local_made} products` : 'No'}</td></tr>
-                  <tr><td>Registrations lapsed or cancelled</td><td className="r">{d.lapsed}</td></tr>
-                  {p.channel_flag === 'programme' && <tr><td>Channel</td><td className="r">Mostly bought through public and donor programmes</td></tr>}
+                  {'origin' in d && d.origin ? (<>
+                    <tr><td>Registered products made in</td><td className="r">{d.origin.length ? d.origin.map((o) => `${o.country} ${o.n}`).join(', ') : 'Nowhere yet'}</td></tr>
+                    <tr><td>Made locally</td><td className="r">{Number(p.local_made) > 0 ? `Yes, ${p.local_made} products` : 'No'}</td></tr>
+                    <tr><td>Registrations lapsed or cancelled</td><td className="r">{d.lapsed}</td></tr>
+                  </>) : <tr><td colSpan={2}><PlanLock compact need="data" title="Where competitors make it, local makers, lapsed registrations" /></td></tr>}
                 </tbody></table>)}
               {p.registrants != null && <p className="note">In short: {reasons(p).join(', ')}.</p>}
             </section>
             <section className="card stack">
-              <h2>Route and timeline</h2>
-              {d.route && <p><b>{d.route.label}</b>{d.route.months_low != null ? `: about ${d.route.months_low}–${d.route.months_high ?? d.route.months_low} months` : ''}. <span className="muted">{d.route.description}</span></p>}
-              <p className="muted">Bioequivalence: {p.be_study ? 'you have a study' : be ? BE_STATUS[be].toLowerCase() : 'we confirm in the dossier review'}.</p>
-              <span className="lbl">Suggested selling price in Tanzania</span>
-              {!paid ? <Locked title="Suggested price">The price band we suggest for this product in Tanzania.</Locked>
-                : d.price ? <p><b>{d.price.currency} {Number(d.price.price_low).toFixed(2)}–{Number(d.price.price_high).toFixed(2)}</b> per {d.price.unit}{d.price.note ? ` · ${d.price.note}` : ''}</p>
-                : <p className="note">Not set yet. Order a price check and we answer within 24 hours.</p>}
+              <h2>Distributors who could take it on</h2>
+              {'open' in d && d.open != null ? (<>
+                <p><b className="num">{d.open}</b> distributors are strong in {p.category ?? 'this class'} and do not carry {p.inn} yet.</p>
+                <Link className="btn btn-ghost btn-sm" href={`/m/partners?market=${market}&class=${encodeURIComponent(p.category ?? '')}&molecule=${p.molecule_id}&gap=1`}
+                  style={{ alignSelf: 'flex-start' }}>See them</Link></>)
+                : <PlanLock need="access" title="Distributor matching for this product">Which distributors are strong in this class and do not carry it yet, ready for an introduction.</PlanLock>}
+            </section>
+            <section className="card stack">
+              <h2>Pathway to approval</h2>
+              {'route' in d && d.route ? <p><b>{d.route.label}</b>{d.route.months_low != null ? `: about ${d.route.months_low}–${d.route.months_high ?? d.route.months_low} months` : ''}. <span className="muted">{d.route.description}</span></p>
+                : <PlanLock need="access" title="Route and timeline">The registration route for this product, what it needs and how long it takes.</PlanLock>}
+              <p className="muted">{p.be_study ? 'You have a bioequivalence study.' : be ? `${BE_STATUS[be]}.` : 'Whether a bioequivalence study is needed: we confirm it when we check your dossier.'}</p>
+            </section>
+            <section className="card stack">
+              <h2>Suggested selling price</h2>
+              {!canUse(u.mfr_tier, 'pricing') ? <PlanLock need="access" title="Pricing analysis">The price band we suggest for this product in {countryName(market)}, from real registered and competitor prices.</PlanLock>
+                : 'price' in d && d.price ? <p><b>{d.price.currency} {Number(d.price.price_low).toFixed(2)}–{Number(d.price.price_high).toFixed(2)}</b> per {d.price.unit}{d.price.note ? ` · ${d.price.note}` : ''}</p>
+                : <p className="note">Our team is setting it. Ask for a price check and we answer within 24 hours.</p>}
             </section>
           </>)}
           <section className="card stack">
             <h2>Your dossier for this product</h2>
-            <p className="note">Tell us what you have. It sets the likely route; our team checks the documents in a dossier review.</p>
+            <p className="note">Tell us what you have. It sets the likely route; we check the documents themselves before filing.</p>
             <form action={updateProductChecks} className="stack" style={{ gap: 8 }}>
               <input type="hidden" name="product_id" value={id} />
               {[['who_pq', 'WHO prequalified'], ['sra_approved', 'Approved by a stringent regulator (EU, US, UK, Japan ...)'], ['ctd_ready', 'Dossier in CTD format'],
@@ -82,26 +122,20 @@ export default async function MfrProduct({ params, searchParams }: { params: Pro
           </section>
         </div>
         <div className="stack">
-          {AGENCY_KINDS.map((k) => (
-            <section key={k} className="card stack" style={{ gap: 8 }}>
-              <h2>{SERVICES[k].label}</h2>
-              <p className="note">{SERVICES[k].what}</p>
-              <form action={requestService} className="row">
-                <input type="hidden" name="kind" value={k} /><input type="hidden" name="product_id" value={id} /><input type="hidden" name="return" value={ret} />
-                <select className="input" name="country" aria-label="Country" defaultValue="TZ" style={{ flex: '1 1 140px' }}>
-                  {MFR_COUNTRIES.map((c) => <option key={c.code} value={c.code}>{c.name}</option>)}</select>
-                <button className="btn btn-blue btn-sm" type="submit">Request</button>
-              </form>
-            </section>))}
-          <section className="card stack" style={{ gap: 8 }}>
-            <h2>More</h2>
-            <div className="row">
-              <Link className="btn btn-ghost btn-sm" href={`/m/services?product=${id}#report`}>24-hour report</Link>
-              {p.category && <Link className="btn btn-ghost btn-sm" href={`/m/partners?class=${encodeURIComponent(p.category)}&molecule=${p.molecule_id ?? ''}`}>Find partners</Link>}
-            </div>
-            <form action={deleteMfrProduct}><input type="hidden" name="product_id" value={id} />
-              <button className="btn-link small" type="submit">Remove this product</button></form>
+          <section className="card stack">
+            <h2>What we can do for it</h2>
+            {[...AGENCY_KINDS, 'report'].map((k) => {
+              const ok = canUse(u.mfr_tier, k);
+              return (
+                <Link key={k} href={ok ? `/m/services/${k}?product=${id}` : `/m/plan?want=${NEEDS_PLAN[k]}`} className="between"
+                  style={{ padding: '8px 0', textDecoration: 'none', alignItems: 'flex-start', gap: 10 }}>
+                  <span>{SERVICES[k].label}{!ok && <span className="sub2" style={{ display: 'block' }}>In {MFR_PLANS[NEEDS_PLAN[k]].name}</span>}</span>
+                  {ok ? <span className="small" style={{ whiteSpace: 'nowrap' }}>Open →</span> : <span className="pill lav"><LockIcon /> Locked</span>}
+                </Link>);
+            })}
           </section>
+          <form action={deleteMfrProduct}><input type="hidden" name="product_id" value={id} />
+            <button className="btn-link small" type="submit">Remove this product</button></form>
         </div>
       </div>
     </Shell>

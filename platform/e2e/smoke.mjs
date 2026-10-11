@@ -197,30 +197,63 @@ check((await k.locator('main').innerText()).includes('Requested'), 'manufacturer
 await k.goto(B + '/m');
 check((await k.locator('main').innerText()).includes('Register these first'), 'manufacturer lands on its own home');
 await k.goto(B + '/home'); check(k.url().endsWith('/m'), 'manufacturers are kept out of the distributor area');
+// without an active plan: the free screens work, the rest is locked with a way to unlock it
 await k.goto(B + '/m/services');
 const svc = await k.locator('main').innerText();
-check(svc.includes('Recommended for you') && svc.includes('Market entry') && svc.includes('Because you want us to take your products into the market'),
-  'services offers what the manufacturer needs first');
+check(svc.includes('Picked for you') && svc.includes('Market entry') && !svc.includes('Send to our team'), 'services is a menu; forms open per service');
+check(await k.locator('a.card:has(h2:text-is("Market entry")) .pill:has-text("Complete Market Entry")').count() === 1, 'services outside the plan are locked');
+await k.goto(B + '/m/partners');
+const free = await k.locator('main').innerText();
+check(/Distributor [0-9A-F]{8}/.test(free) && !free.includes('Reaches EML') && (await k.locator('a.pill:has-text("Request introduction")').count()) > 0
+  && (await k.locator('.nm').count()) <= 5, 'partners opens on every distributor, five free, introductions locked');
 await k.goto(B + '/m/products');
-await k.locator('a .nm', { hasText: 'Doxycycline' }).first().click(); await k.waitForURL(/\/m\/products\/\d+/);
+const prodFree = await k.locator('main').innerText();
+check(prodFree.includes('Nobody registered') && prodFree.includes('Your portfolio analysis'), 'products dashboard with the analysis locked');
+await k.fill('#med-q', 'amlodip');
+await k.locator('#med-hits button', { hasText: /amlodipine/i }).first().click();
+await k.fill('input[name=strength]', '5 mg'); await k.selectOption('select[name=form]', 'Tablets');
+await Promise.all([k.waitForURL(/\/m\/products\/\d+\?added=1/), k.click('button:has-text("Add to my products")')]);
+check((await k.locator('main').innerText()).includes('Added.'), 'add a product from the medicine search');
+await k.goto(B + '/m/products');
+await k.locator('a b', { hasText: 'Doxycycline' }).first().click(); await k.waitForURL(/\/m\/products\/\d+/);
 const kp = await k.locator('main').innerText();
-check(kp.includes('Why Tanzania') && kp.includes('Route and timeline'), 'product opportunity page');
-await Promise.all([k.waitForURL(/\/m\/engagements\/\d+\?new=1/), k.locator('form:has(input[name=kind][value=market_entry]) button').click()]);
-const engId = k.url().match(/engagements\/(\d+)/)[1];
-await k.selectOption('select[name=item]', 'gmp');
-await k.setInputFiles('input[name=file]', { name: 'gmp.pdf', mimeType: 'application/pdf', buffer: Buffer.from('%PDF-1.4 gmp') });
-await Promise.all([k.waitForURL(/uploaded=1/), k.click('button:has-text("Upload")')]);
-check((await k.locator('main').innerText()).includes('gmp.pdf'), 'manufacturer uploads to the dossier room');
+check(kp.includes('Why Tanzania') && kp.includes('Route and timeline') && kp.includes('Unlock with Complete Market Access'), 'product page with paid parts locked');
+await k.goto(B + '/m/plan?want=access');
+check((await k.locator('main').innerText()).includes('To unlock that') && (await k.locator('main').innerText()).includes('Compare the plans'), 'upgrade flow names the plan that unlocks it');
+
+// the team approves the company and switches the plan on; everything opens
 await t.goto(B + '/admin?tab=manufacturers');
 await Promise.all([t.waitForURL(/saved=1/), t.locator(`tr:has-text("${kmail}") button:has-text("Approve")`).click()]);
 await t.locator('a:has-text("Smoke Generics")').first().click(); await t.waitForURL(/admin\/accounts\//);
 const acct = await t.locator('main').innerText();
 check(acct.includes('Anti-infectives') && acct.includes('chose Complete Market Entry') && acct.includes('catalogue.csv'), 'team sees every onboarding answer');
+await t.selectOption('#plan select[name=plan]', 'entry');
+await Promise.all([t.waitForURL(/saved=1/), t.click('#plan button:has-text("Save")')]);
+const acctUrl = t.url().split('?')[0];
+await t.goto(acctUrl);
 await t.selectOption('#documents select[name=kind]', 'agreement'); await t.fill('#documents input[name=title]', 'Smoke services agreement');
 await t.setInputFiles('#documents input[name=file]', { name: 'agreement.pdf', mimeType: 'application/pdf', buffer: Buffer.from('%PDF-1.4 a') });
 await Promise.all([t.waitForURL(/saved=1/), t.click('#documents button:has-text("Upload")')]);
 await k.goto(B + '/settings');
 check((await k.locator('main').innerText()).includes('Smoke services agreement'), 'customer finds account documents in Settings');
+await k.goto(B + '/m/products');
+check((await k.locator('main').innerText()).includes('By therapeutic class'), 'active plan unlocks the portfolio analysis');
+await k.goto(B + '/m/market?market=TZ');
+check((await k.locator('main').innerText()).includes('Where registered products are made'), 'market page for the manufacturer');
+await k.goto(B + '/m/market?market=KE');
+check((await k.locator('main').innerText()).includes('our team covers it directly'), 'markets without data say so and offer a report');
+await k.goto(B + '/m/partners?class=' + encodeURIComponent('Anti-infective Medicines'));
+const kpart = await k.locator('main').innerText();
+check(/Distributor [0-9A-F]{8}/.test(kpart) && /Open to \d+ of your \d+ molecules/.test(kpart) && !kpart.includes('Alpha Pharma'), 'partners show codes and how open each is to you');
+await Promise.all([k.waitForURL(/\/m\/engagements\/\d+\?new=1/), k.locator('button:has-text("Request introduction")').first().click()]);
+check(true, 'manufacturer requests an introduction');
+await k.goto(B + '/m/services/market_entry');
+await Promise.all([k.waitForURL(/\/m\/engagements\/\d+\?new=1/), k.click('button:has-text("Send to our team")')]);
+const engId = k.url().match(/engagements\/(\d+)/)[1];
+await k.selectOption('select[name=item]', 'gmp');
+await k.setInputFiles('input[name=file]', { name: 'gmp.pdf', mimeType: 'application/pdf', buffer: Buffer.from('%PDF-1.4 gmp') });
+await Promise.all([k.waitForURL(/uploaded=1/), k.click('button:has-text("Upload")')]);
+check((await k.locator('main').innerText()).includes('gmp.pdf'), 'manufacturer uploads to the dossier room');
 await t.goto(B + `/admin/engagements/${engId}`);
 await t.selectOption('select[name=stage]', 'Market assessment');
 await Promise.all([t.waitForURL(/saved=1/), t.click('button:has-text("Update")')]);
@@ -230,11 +263,6 @@ await Promise.all([t.waitForURL(/saved=1/), t.locator('form:has(select[name=revi
 await k.goto(B + `/m/engagements/${engId}`);
 const ke = await k.locator('main').innerText();
 check(ke.includes('Accepted') && ke.includes('1 of 1 accepted'), 'team review shows in the dossier room');
-await k.goto(B + '/m/partners?class=' + encodeURIComponent('Anti-infective Medicines'));
-const kpart = await k.locator('main').innerText();
-check(/Distributor [0-9A-F]{8}/.test(kpart) && !kpart.includes('Alpha Pharma'), 'partner finder shows codes, not names');
-await Promise.all([k.waitForURL(/\/m\/engagements\/\d+\?new=1/), k.locator('button:has-text("Request introduction")').first().click()]);
-check(true, 'manufacturer requests an introduction');
 await c.goto(B + '/m'); check(c.url().includes('/home'), 'distributors are kept out of the manufacturer area');
 
 // 4. phone width: no sideways scrolling

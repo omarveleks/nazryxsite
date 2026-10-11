@@ -78,14 +78,18 @@ export function reasons(p: {
   return out;
 }
 
-/** The manufacturer's products with Tanzania market facts. `g.score` orders "register these first"; it is never shown. */
-export const MFR_PRODUCTS_SQL = `
+/** The manufacturer's products with one market's facts. `g.score` orders "register these first"; it is never shown. */
+export function mfrProductsSql(country: string) {
+  const c = MFR_COUNTRIES.some((x) => x.code === country) ? country : 'TZ';   // whitelisted: safe to inline
+  return `
   select p.*, m.inn, m.category, cm.registrants, cm.registrations, cm.on_national_list, cm.on_who_eml, cm.facility_level,
          cm.local_made, cm.forms, cm.channel_flag, cm.in_combinations, coalesce(cm.rankable, false) as rankable, g.score
   from mfr_products p
   left join molecules m on m.id = p.molecule_id
-  left join country_molecules cm on cm.molecule_id = p.molecule_id and cm.country = 'TZ'
-  left join visible_gap_scores g on g.molecule_id = p.molecule_id and g.country = 'TZ'`;
+  left join country_molecules cm on cm.molecule_id = p.molecule_id and cm.country = '${c}'
+  left join visible_gap_scores g on g.molecule_id = p.molecule_id and g.country = '${c}'`;
+}
+export const MFR_PRODUCTS_SQL = mfrProductsSql('TZ');
 
 // ---------------------------------------------------------------- onboarding questions
 export const MFR_STEPS = ['Company', 'Manufacturing', 'Markets', 'Catalogue', 'Goals', 'Your plan'] as const;
@@ -189,3 +193,34 @@ export function recommendServices(p: {
   else if (needs.has('launch') || !out.length) add('report', 'you want to choose what to launch, and where', 'country');
   return out;
 }
+
+// ---------------------------------------------------------------- what each plan unlocks
+export const TIER: Record<string, number> = { data: 1, access: 2, entry: 3 };
+export const tierOf = (plan?: string | null) => TIER[plan ?? ''] ?? 0;
+/** The lowest plan that includes a feature or service. 24-hour reports are open to everyone. */
+export const NEEDS_PLAN: Record<string, PlanKey> = {
+  market: 'data', portfolio: 'data', distributors: 'data',
+  matching: 'access', pricing: 'access', pathway: 'access', dossier_review: 'access',
+  partner_intro: 'entry', market_entry: 'entry', local_rep: 'entry', eac_rollout: 'entry', post_registration: 'entry', forecast: 'entry',
+};
+export const canUse = (tier: number, feature: string) => !NEEDS_PLAN[feature] || tier >= TIER[NEEDS_PLAN[feature]];
+
+/** WHO ATC main groups, to name a class for products we cannot match to a tracked molecule. */
+export const ATC_GROUPS: Record<string, string> = {
+  A: 'Alimentary tract and metabolism', B: 'Blood and blood-forming organs', C: 'Cardiovascular system', D: 'Dermatologicals',
+  G: 'Genito-urinary system and sex hormones', H: 'Systemic hormonal preparations', J: 'Anti-infectives for systemic use',
+  L: 'Antineoplastic and immunomodulating agents', M: 'Musculo-skeletal system', N: 'Nervous system', P: 'Antiparasitic products',
+  R: 'Respiratory system', S: 'Sensory organs', V: 'Various',
+};
+export const productClass = (p: { category?: string | null; atc?: string | null }) => p.category ?? (p.atc ? ATC_GROUPS[p.atc[0]] : null) ?? null;
+
+/** What each service needs from the manufacturer, shown before they ask for it. */
+export const SERVICE_NEEDS: Record<string, string[]> = {
+  market_entry: ['Your product list with strengths and forms', 'Your GMP and certification pack', 'One person we can ask questions of'],
+  dossier_review: ['The dossier, or its index to start', 'GMP certificate and CPP', 'Stability data for climatic zone IVb, if you have it'],
+  local_rep: ['Your company documents', 'The products to register', 'A signed letter of authorisation (we send the template)'],
+  eac_rollout: ['A CTD dossier for the product', 'GMP certificate and CPP', 'Which East African countries you want'],
+  post_registration: ['Your registration certificates', 'Renewal dates if you know them', 'Planned changes to the product or site'],
+  partner_intro: ['The distributor profile you picked', 'The products you want them to carry', 'Your price range and terms'],
+  report: ['The market and, if you have one, the product', 'Anything specific you want answered'],
+};

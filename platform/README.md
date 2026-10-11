@@ -176,6 +176,22 @@ confirming → production → import permit → shipped → arrived → sampling
 checklist and ETA. My portfolio → Supply and shipments brings all of it together per product. Suggested selling prices (Admin > Content) show on the
 molecule page for paid plans.
 
+## Manufacturer workspace: plans that unlock, markets, products, partners (migration 017)
+
+- **Active plan**: the team switches a plan on in Admin > Accounts > the manufacturer (after it is agreed and invoiced).
+  `mfr_tier()` in the database and `canUse()` in `lib/mfr.ts` decide what opens: Basic Market Data (market data, distributor
+  lists, portfolio analysis), Complete Market Access (+ distributor matching, pricing, regulatory check, pathway), Complete
+  Market Entry (+ every done-for-you service). Anything not included shows a lock that leads to `/m/plan?want=<plan>`;
+  actions refuse locked services server-side too.
+- **Markets**: manufacturers with several target markets switch between them or see all side by side (`MarketPicker`).
+  Markets without loaded data say so and offer a report. `/m/market` is the manufacturer's market page.
+- **My products**: a portfolio dashboard (competition spread, average competitors, top class, by class) above every product.
+  Products are added from a search over the molecules we track plus a worldwide list of 4,260 medicines with WHO ATC codes
+  (`ingest/data/medicines.csv`, from Wikidata, CC0; loaded once by `migrate.py`).
+- **Partners** opens on every distributor in the market, filterable by class, molecule, size and local manufacturing, with
+  "open to X of your molecules". Without a plan, five profiles show; names always stay behind codes (`partner_search`).
+- **Services** is a menu; each service has its own page with how it runs, what we need, and the form.
+
 ## Sign-up choice, manufacturer onboarding, documents (migration 015)
 
 - **Sign up and sign in** start with two big choices: distributor or manufacturer. The choice sets the account type at sign-up;

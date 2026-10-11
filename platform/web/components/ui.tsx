@@ -14,6 +14,26 @@ export function Locked({ title, children, cta = 'Upgrade' }: { title: string; ch
   );
 }
 
+export const LockIcon = () => (
+  <svg width="11" height="12" viewBox="0 0 11 12" aria-hidden="true" style={{ flex: 'none' }}>
+    <rect x="1" y="5" width="9" height="6.5" rx="1.5" fill="currentColor" />
+    <path d="M3 5V3.6a2.5 2.5 0 0 1 5 0V5" fill="none" stroke="currentColor" strokeWidth="1.4" />
+  </svg>);
+
+/** A feature the manufacturer's plan does not include: what it is, which plan unlocks it, and the way there. */
+export function PlanLock({ need, title, children, compact }: { need: 'data' | 'access' | 'entry'; title: string; children?: ReactNode; compact?: boolean }) {
+  const name = { data: 'Basic Market Data', access: 'Complete Market Access', entry: 'Complete Market Entry' }[need];
+  if (compact) return <Link className="pill lav" href={`/m/plan?want=${need}`} title={`Included in ${name}. Click to see how to unlock it.`}><LockIcon /> {title}</Link>;
+  return (
+    <div className="locked">
+      <span className="pill lav"><LockIcon /> {name}</span>
+      <b>{title}</b>
+      {children && <span className="note">{children}</span>}
+      <Link className="btn btn-blue btn-sm" href={`/m/plan?want=${need}`}>Unlock with {name}</Link>
+    </div>
+  );
+}
+
 export type BadgeFacts = {
   on_national_list?: boolean | null; on_who_eml?: boolean | null; facility_level?: string | null;
   registrants?: number | null; registrations?: number | null; in_combinations?: number | null;

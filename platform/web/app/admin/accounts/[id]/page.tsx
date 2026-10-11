@@ -2,12 +2,12 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import Shell from '@/components/Shell';
 import { Empty, Flash, StagePill } from '@/components/ui';
-import { deleteAccountDoc, uploadAccountDoc } from '@/app/actions/docs';
+import { deleteAccountDoc, setMfrPlan, uploadAccountDoc } from '@/app/actions/docs';
 import { requireTeam } from '@/lib/auth';
 import { one, rows, withUser } from '@/lib/db';
 import { ACCOUNT_DOC_KINDS } from '@/lib/docs';
 import { fmtDate } from '@/lib/format';
-import { APPROACHES, GOALS, LAUNCH_SCOPES, MFR_PLANS, NEEDS, SERVICES, TIMELINES, countryName, suggestPlan } from '@/lib/mfr';
+import { APPROACHES, GOALS, LAUNCH_SCOPES, MFR_PLANS, NEEDS, PLAN_ORDER, SERVICES, TIMELINES, countryName, suggestPlan } from '@/lib/mfr';
 
 export const metadata = { title: 'Account' };
 
@@ -95,6 +95,18 @@ export default async function AdminAccount({ params, searchParams }: { params: P
           </section>
         </div>
         <div className="stack">
+          {p && (
+            <section className="card stack" id="plan">
+              <h2>Active plan</h2>
+              <p className="note">Turn a plan on once it is agreed and invoiced. It unlocks the matching screens and services at once.</p>
+              <form action={setMfrPlan} className="row">
+                <input type="hidden" name="user_id" value={id} />
+                <select className="input" name="plan" defaultValue={p.active_plan ?? ''} aria-label="Active plan" style={{ flex: '1 1 200px' }}>
+                  <option value="">No plan</option>{PLAN_ORDER.map((k) => <option key={k} value={k}>{MFR_PLANS[k].name}</option>)}</select>
+                <button className="btn btn-blue btn-sm" type="submit">Save</button>
+              </form>
+              {p.active_since && <span className="note">Active since {fmtDate(p.active_since)}.</span>}
+            </section>)}
           <section className="card stack" id="documents">
             <h2>Account documents</h2>
             {d.docs.length === 0 && <Empty>None yet.</Empty>}

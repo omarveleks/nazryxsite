@@ -14,7 +14,7 @@ export default async function MfrHome({ searchParams }: { searchParams: Promise<
   const u = await requireUser({ manufacturer: true });
   const paid = u.plan === 'paid' || u.role === 'team';
   const d = await withUser(u.id, async (db) => {
-    const profile = await one(db, 'select company_name, status, target_countries, suggested_plan, chosen_plan from manufacturer_profiles where user_id = $1', [u.id]);
+    const profile = await one(db, 'select company_name, status, target_countries, suggested_plan, chosen_plan, active_plan from manufacturer_profiles where user_id = $1', [u.id]);
     const counts = await one(db, `select count(*)::int as products, count(p.molecule_id)::int as matched,
         count(*) filter (where cm.registrants = 0 and cm.on_national_list)::int as open,
         count(*) filter (where cm.registrants between 1 and 3)::int as few
@@ -30,7 +30,7 @@ export default async function MfrHome({ searchParams }: { searchParams: Promise<
   const targets: string[] = d.profile?.target_countries?.length ? d.profile.target_countries : ['TZ'];
   return (
     <Shell user={u} title={`Welcome${d.profile?.company_name ? `, ${d.profile.company_name}` : ''}`} sub="Take your products into new markets"
-      actions={<Link className="btn btn-blue btn-sm" href="/m/services">Start market entry</Link>}>
+      actions={<><Link className="btn btn-ghost btn-sm" href="/m/products#add">Add a product</Link><Link className="btn btn-blue btn-sm" href="/m/services">Get help</Link></>}>
       <Flash sp={sp} />
       {d.profile?.status === 'pending' && <div className="note">Our team is reviewing your company. You can add products and explore now; partner introductions open once you are approved.</div>}
       {sp.welcome && <div className="ok">{d.counts?.products ? `Welcome. Your ${d.counts.products} products are matched to the market below.`
@@ -56,7 +56,7 @@ export default async function MfrHome({ searchParams }: { searchParams: Promise<
                 <div key={p.id} className="between" style={{ alignItems: 'flex-start', flexWrap: 'wrap', padding: '14px 0', borderTop: i ? '1px solid var(--line)' : undefined }}>
                   <div style={{ minWidth: 0, flex: '1 1 300px' }}>
                     <Link href={`/m/products/${p.id}`}><span className="nm">{p.inn ?? p.name}</span></Link>
-                    <div className="sub2">{reasons(p).join(' · ')}</div>
+                    <div className="sub2">{(() => { const r = reasons(p).join(' · '); return r.charAt(0).toUpperCase() + r.slice(1); })()}</div>
                     <div style={{ marginTop: 6 }}><Badges m={p} /></div>
                   </div>
                   <Link className="btn btn-blue btn-sm" href={`/m/products/${p.id}`}>Open</Link>
@@ -77,10 +77,12 @@ export default async function MfrHome({ searchParams }: { searchParams: Promise<
 
         <div className="stack">
           <section className="card">
-            <div className="card-h"><h2>Your plan</h2><Link className="btn-link" href="/m/plan">{d.profile?.chosen_plan ? 'Change' : 'See plans'}</Link></div>
-            {d.profile?.chosen_plan ? (
+            <div className="card-h"><h2>Your plan</h2><Link className="btn-link" href="/m/plan">{d.profile?.active_plan ? 'See plans' : d.profile?.chosen_plan ? 'Change' : 'See plans'}</Link></div>
+            {d.profile?.active_plan ? (
+              <p><b>{MFR_PLANS[d.profile.active_plan as keyof typeof MFR_PLANS]?.name}</b> <span className="pill solid">Active</span></p>
+            ) : d.profile?.chosen_plan ? (
               <p><b>{MFR_PLANS[d.profile.chosen_plan as keyof typeof MFR_PLANS]?.name}</b> <span className="pill blue">Requested</span><br />
-                <span className="note">Our team confirms scope and price with you, usually within one working day.</span></p>
+                <span className="note">Our team confirms scope and price within one working day, then switches it on.</span></p>
             ) : (<>
               <p>Suggested for you: <b>{MFR_PLANS[(d.profile?.suggested_plan ?? 'data') as keyof typeof MFR_PLANS]?.name}</b></p>
               <Link className="btn btn-blue btn-sm" href="/m/plan" style={{ marginTop: 10 }}>See why</Link>
@@ -104,7 +106,7 @@ export default async function MfrHome({ searchParams }: { searchParams: Promise<
             <div className="card-h"><h2>Need a fast answer?</h2></div>
             <p className="muted">A written report from our team within 24 hours, or a quick question to our experts.</p>
             <div className="row" style={{ marginTop: 12 }}>
-              <Link className="btn btn-blue btn-sm" href="/m/services#report">Order a report</Link>
+              <Link className="btn btn-blue btn-sm" href="/m/services/report">Order a report</Link>
               <Link className="btn btn-ghost btn-sm" href="/expert">Ask the expert</Link>
             </div>
           </section>

@@ -18,9 +18,10 @@ export default function Shell({ user, title, sub, crumb, actions, children }: {
         <NavLinks team={user.role === 'team'} manufacturer={user.account_type === 'manufacturer'} />
         {user.account_type === 'manufacturer' && user.role !== 'team' ? (
           <div className="plan-box">
-            <b>{MFR_PLANS[user.mfr_plan as keyof typeof MFR_PLANS]?.name ?? 'No plan yet'}</b>
-            <span className="hide-m">{user.mfr_plan_chosen ? 'Requested' : user.mfr_plan ? 'Suggested for you' : 'Pick the one that fits'}</span>
-            <Link className="btn-link hide-m" href="/m/plan">{user.mfr_plan_chosen ? 'Your plan' : 'See plans'}</Link>
+            <b>{user.mfr_active ? MFR_PLANS[user.mfr_active as keyof typeof MFR_PLANS]?.name : 'No plan yet'}</b>
+            <span className="hide-m">{user.mfr_active ? 'Active' : user.mfr_plan_chosen
+              ? `${MFR_PLANS[user.mfr_plan as keyof typeof MFR_PLANS]?.name} requested` : 'Some screens are locked'}</span>
+            <Link className="btn-link hide-m" href="/m/plan">{user.mfr_active ? 'Your plan' : 'See plans'}</Link>
           </div>
         ) : (
         <div className="plan-box">

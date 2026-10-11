@@ -6,7 +6,7 @@ import { dbMessage, one, withUser } from '@/lib/db';
 import { back, int, str } from '@/lib/forms';
 import { findMolecule } from '@/lib/match';
 import { AGENCY_KINDS, APPROACHES, GOALS, LAUNCH_SCOPES, CERTIFICATIONS, COMPANY_SIZES, CONTACT_ROLES, DOSAGE_FORMS, MFR_COUNTRIES, MFR_PLANS, NEEDS, REPORT_TYPES,
-  SERVICES, THERAPEUTIC_AREAS, TIMELINES, countryName, suggestPlan, type PlanKey } from '@/lib/mfr';
+  SERVICES, THERAPEUTIC_AREAS, TIMELINES, NEEDS_PLAN, canUse, countryName, suggestPlan, type PlanKey } from '@/lib/mfr';
 import { DOSSIER_ITEMS } from '@/lib/format';
 import { saveUpload } from '@/lib/uploads';
 
@@ -132,6 +132,28 @@ export async function choosePlan(f: FormData) {
   redirect(chosen ? '/m/plan?requested=1' : '/m?welcome=1');
 }
 
+/** Add one product picked from the medicine search, with its strength and form. */
+export async function addMfrProduct(f: FormData) {
+  const u = await requireUser({ manufacturer: true });
+  const back_ = safeNext(str(f, 'return', 200), '/m/products');
+  const name = str(f, 'name', 160), strength = str(f, 'strength', 40), form = str(f, 'form', 40);
+  if (!name) back(back_, { error: 'Pick a medicine first.' });
+  let id = 0;
+  try {
+    id = await withUser(u.id, async (db) => {
+      const full = [name, strength, form].filter(Boolean).join(' ');
+      const mol = await findMolecule(db, name);
+      const atc = str(f, 'atc', 10) || (await one(db, 'select atc from medicine_catalog where lower(name) = lower($1)', [name]))?.atc || null;
+      const r = await one(db, `insert into mfr_products (user_id, name, molecule_id, strength, dosage_form, atc) values ($1, $2, $3, $4, $5, $6) returning id`,
+        [u.id, full.slice(0, 200), mol, strength || null, form || null, atc]);
+      return r!.id as number;
+    });
+  } catch (e) {
+    back(back_, { error: dbMessage(e) });
+  }
+  redirect(`/m/products/${id}?added=1`);
+}
+
 /** Add products by pasting a list; each is matched to a molecule where possible. */
 export async function addMfrProducts(f: FormData) {
   const u = await requireUser({ manufacturer: true });
@@ -169,6 +191,7 @@ export async function requestService(f: FormData) {
   const kind = str(f, 'kind', 30), country = str(f, 'country', 2), product = int(f, 'product_id');
   const ret = safeNext(str(f, 'return', 200), '/m/services');
   if (!(AGENCY_KINDS as readonly string[]).includes(kind)) back(ret, { error: 'Pick a service.' });
+  if (!canUse(u.mfr_tier, kind)) redirect(`/m/plan?want=${NEEDS_PLAN[kind]}`);
   if (country && !codes.includes(country)) back(ret, { error: 'Pick a country.' });
   let id = 0;
   try {
@@ -188,8 +211,8 @@ export async function requestService(f: FormData) {
 export async function orderReport(f: FormData) {
   const u = await requireUser({ manufacturer: true });
   const type = str(f, 'report_type', 30), country = str(f, 'country', 2) || 'TZ', product = int(f, 'product_id');
-  if (!REPORT_TYPES.some(([k]) => k === type)) back('/m/services', { error: 'Pick a report.' });
-  if (!codes.includes(country)) back('/m/services', { error: 'Pick a country.' });
+  if (!REPORT_TYPES.some(([k]) => k === type)) back('/m/services/report', { error: 'Pick a report.' });
+  if (!codes.includes(country)) back('/m/services/report', { error: 'Pick a country.' });
   let id = 0;
   try {
     id = await withUser(u.id, async (db) => {
@@ -200,7 +223,7 @@ export async function orderReport(f: FormData) {
       return r!.id as number;
     });
   } catch (e) {
-    back('/m/services', { error: dbMessage(e) });
+    back('/m/services/report', { error: dbMessage(e) });
   }
   redirect(`/m/engagements/${id}?new=1`);
 }
@@ -210,6 +233,7 @@ export async function requestIntro(f: FormData) {
   const u = await requireUser({ manufacturer: true });
   const code = str(f, 'code', 12).toUpperCase(), product = int(f, 'product_id');
   if (!/^[0-9A-F]{8}$/.test(code)) back('/m/partners', { error: 'Pick a distributor profile.' });
+  if (!canUse(u.mfr_tier, 'partner_intro')) redirect(`/m/plan?want=${NEEDS_PLAN.partner_intro}`);
   let id = 0;
   try {
     id = await withUser(u.id, async (db) => {
