@@ -201,3 +201,7 @@ export const HIGH_DEMAND = 0.8;
 export const LAUNCH_STAGES: [string, string][] = [
   ['selected', 'Chosen'], ['dossier', 'Dossier in preparation'], ['filed', 'Filed'], ['approved', 'Approved'], ['launched', 'Launched'],
 ];
+
+/** The first-time manufacturer sign-up: one question per screen. The rest of the profile is filled in later (Home checklist). */
+export const WIZARD = ['company', 'markets', 'goals', 'help', 'timeline', 'scope', 'products', 'plan'] as const;
+export type WizardStep = (typeof WIZARD)[number];

@@ -180,6 +180,17 @@ confirming → production → import permit → shipped → arrived → sampling
 checklist and ETA. My portfolio → Supply and shipments brings all of it together per product. Suggested selling prices (Admin > Content) show on the
 molecule page for paid plans.
 
+## Manufacturer sign-up and guided tour (migration 021)
+
+- **Sign-up** is one question per screen with a progress bar (`components/MfrWizard.tsx`): company, markets, what they want,
+  where they want help, when to file, how many products, products (or skip), then the suggested plan. Single choices move on
+  with one click. The rest of the profile (certifications, dosage forms, plants ...) stays editable from Settings.
+- **Guided tour** right after sign-up (`lib/tour.ts`, `components/TourBar.tsx`): eight stops, each on the page it explains
+  (add products, portfolio, one product in depth, market, distributors, services, plan, home), with Back, Next and End.
+  It can be taken again from Home.
+- **Get set up** on Home: add products, certifications and dosage forms, the free full read, the launch tracker, a plan;
+  ticked off as they are done and hidden once all are.
+
 ## Payments, invoices, launch tracker, market watch (migration 018)
 
 - **Prices**: Basic Market Data and Complete Market Access are monthly card subscriptions at the price set in Admin > Content

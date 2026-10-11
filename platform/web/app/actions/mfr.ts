@@ -9,9 +9,10 @@ import { dbMessage, one, withUser } from '@/lib/db';
 import { back, int, str } from '@/lib/forms';
 import { findMolecule } from '@/lib/match';
 import { AGENCY_KINDS, APPROACHES, GOALS, LAUNCH_SCOPES, CERTIFICATIONS, COMPANY_SIZES, CONTACT_ROLES, DOSAGE_FORMS, MFR_COUNTRIES, MFR_PLANS, NEEDS,
-  SERVICES, THERAPEUTIC_AREAS, TIMELINES, NEEDS_PLAN, LAUNCH_STAGES, canUse, countryName, suggestPlan, tierOf, type PlanKey } from '@/lib/mfr';
+  SERVICES, THERAPEUTIC_AREAS, TIMELINES, NEEDS_PLAN, LAUNCH_STAGES, WIZARD, type WizardStep, canUse, countryName, suggestPlan, tierOf, type PlanKey } from '@/lib/mfr';
 import { DOSSIER_ITEMS } from '@/lib/format';
 import { saveUpload } from '@/lib/uploads';
+import { TOUR } from '@/lib/tour';
 
 const codes = MFR_COUNTRIES.map((c) => c.code);
 const pick = (f: FormData, k: string, allowed: readonly string[]) => [...new Set(f.getAll(k).map(String))].filter((v) => allowed.includes(v));
@@ -102,6 +103,57 @@ export async function saveMfrStep(f: FormData) {
   back(`${ONB}?step=${step + 1}`, note ? { note } : {});
 }
 
+/** One screen of the first-time sign-up. Saves the answer and moves to the next screen. */
+export async function saveWizard(f: FormData) {
+  const u = await requireUser({ allowOnboarding: true, manufacturer: true });
+  const q = str(f, 'q', 20) as WizardStep;
+  const i = WIZARD.indexOf(q);
+  if (i < 0 || q === 'plan') redirect(ONB);
+  const here = `${ONB}?q=${q}`;
+  let note = '';
+  try {
+    await withUser(u.id, async (db) => {
+      const had = await one(db, 'select 1 as x from manufacturer_profiles where user_id = $1', [u.id]);
+      if (q === 'company') {
+        const company = str(f, 'company_name', 200);
+        if (!company) throw new Error('Enter your company name.');
+        if (had) await db.query('update manufacturer_profiles set company_name = $2, hq_country = $3 where user_id = $1', [u.id, company, str(f, 'hq_country', 80) || null]);
+        else await db.query('insert into manufacturer_profiles (user_id, company_name, hq_country) values ($1, $2, $3)', [u.id, company, str(f, 'hq_country', 80) || null]);
+      } else if (!had) {
+        throw new Error('Start with your company.');
+      } else if (q === 'markets') {
+        const targets = pick(f, 'target_countries', codes);
+        if (!targets.length) throw new Error('Pick at least one market.');
+        await db.query('update manufacturer_profiles set target_countries = $2 where user_id = $1', [u.id, targets]);
+      } else if (q === 'goals') {
+        await db.query('update manufacturer_profiles set goals = $2 where user_id = $1', [u.id, opts(f, 'goals', GOALS)]);
+      } else if (q === 'help') {
+        await db.query('update manufacturer_profiles set services = $2 where user_id = $1', [u.id, opts(f, 'services', NEEDS)]);
+      } else if (q === 'timeline') {
+        await db.query('update manufacturer_profiles set timeline = $2 where user_id = $1', [u.id, oneOf(str(f, 'choice', 20), TIMELINES)]);
+      } else if (q === 'scope') {
+        await db.query('update manufacturer_profiles set launch_scope = $2 where user_id = $1', [u.id, oneOf(str(f, 'choice', 20), LAUNCH_SCOPES)]);
+      } else if (q === 'products') {
+        const r = await insertProducts(db, u.id, str(f, 'list', 20000));
+        if (r.added) note = `${r.added} products added, ${r.matched} matched to the market.`;
+      }
+      await db.query('update manufacturer_profiles set step = greatest(step, $2) where user_id = $1', [u.id, i + 2]);
+    });
+    if (q === 'products') {
+      const saved = await saveUpload(f.get('catalogue'), u.id);
+      if (saved) {
+        await withUser(u.id, (db) => db.query('update manufacturer_profiles set catalogue_path = $2, catalogue_name = $3 where user_id = $1',
+          [u.id, saved.path, saved.name]));
+        note = `${note} ${saved.name} uploaded; our team loads it for you.`.trim();
+      }
+    }
+  } catch (e) {
+    if (isRedirect(e)) throw e;
+    back(here, { error: errText(e) });
+  }
+  back(ONB, { q: WIZARD[i + 1], ...(note ? { note } : {}) });
+}
+
 /** Last onboarding step: take the suggested plan (or another), or explore first. Finishes onboarding either way. */
 export async function choosePlan(f: FormData) {
   const u = await requireUser({ allowOnboarding: true, manufacturer: true });
@@ -117,6 +169,7 @@ export async function choosePlan(f: FormData) {
       await db.query(`update manufacturer_profiles set suggested_plan = $2, chosen_plan = coalesce($3, chosen_plan), completed_at = coalesce(completed_at, now())
                       where user_id = $1`, [u.id, s.plan, chosen]);
       await db.query('update users set onboarded = true where id = $1', [u.id]);
+      if (firstTime) await db.query('update manufacturer_profiles set tour_step = 1 where user_id = $1', [u.id]);
       const markets = (p.target_countries ?? []).map(countryName).join(', ') || 'none';
       if (chosen) {
         await db.query('insert into plan_requests (user_id, wanted, note) values ($1, $2, $3)',
@@ -132,7 +185,7 @@ export async function choosePlan(f: FormData) {
     if (isRedirect(e)) throw e;
     back(from, { error: errText(e) });
   }
-  redirect(chosen ? '/m/plan?requested=1' : '/m?welcome=1');
+  redirect(firstTime ? TOUR[0].path : chosen ? '/m/plan?requested=1' : '/m?welcome=1');
 }
 
 async function origin() {
@@ -143,9 +196,16 @@ async function origin() {
 /** Subscribe to Basic Market Data or Complete Market Access by card. Without card payments set up, it becomes a
  *  plan request our team invoices. Complete Market Entry is always a conversation (choosePlan). */
 export async function startCheckout(f: FormData) {
-  const u = await requireUser({ manufacturer: true });
+  const u = await requireUser({ allowOnboarding: true, manufacturer: true });
   const plan = str(f, 'plan', 10) as PlanKey;
   if (plan !== 'data' && plan !== 'access') return choosePlan(f);
+  if (!u.onboarded) {
+    // paying from the last sign-up screen finishes sign-up; the tour starts when they come back
+    await withUser(u.id, async (db) => {
+      await db.query('update users set onboarded = true where id = $1', [u.id]);
+      await db.query(`update manufacturer_profiles set tour_step = 1, completed_at = coalesce(completed_at, now()), chosen_plan = $2 where user_id = $1`, [u.id, plan]);
+    });
+  }
   if (u.mfr_tier >= tierOf(plan)) redirect('/m/plan');
   if (!stripeReady()) return choosePlan(f);
   const d = await withUser(u.id, async (db) => ({
@@ -357,4 +417,18 @@ export async function chooseSample(f: FormData) {
     back('/m', { error: dbMessage(e) });
   }
   redirect(`/m/products/${id}?sample=1`);
+}
+
+/** Move through the guided tour (step 1..n), or end it (step 0). Lands on the page the step explains. */
+export async function tourGo(f: FormData) {
+  const u = await requireUser({ manufacturer: true });
+  const step = int(f, 'step') ?? 0;
+  const t = step >= 1 && step <= TOUR.length ? TOUR[step - 1] : null;
+  const product = await withUser(u.id, async (db) => {
+    await db.query('update manufacturer_profiles set tour_step = $2 where user_id = $1', [u.id, t ? step : null]);
+    return t?.path.includes('{product}')
+      ? (await one(db, 'select id from mfr_products where user_id = $1 order by (molecule_id is null), created_at limit 1', [u.id]))?.id : null;
+  });
+  if (!t) redirect('/m');
+  redirect(t.path.includes('{product}') ? (product ? t.path.replace('{product}', String(product)) : '/m/products') : t.path);
 }

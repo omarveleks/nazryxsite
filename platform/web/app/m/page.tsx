@@ -3,7 +3,7 @@ import Shell from '@/components/Shell';
 import { hasData, loadLive, targetMarkets } from '@/components/MarketPicker';
 import { DemandIcon, VerifiedIcon } from '@/components/Icons';
 import { Badges, Empty, Flash, PlanLock, StagePill } from '@/components/ui';
-import { chooseSample } from '@/app/actions/mfr';
+import { chooseSample, tourGo } from '@/app/actions/mfr';
 import { requireUser } from '@/lib/auth';
 import { one, rows, withUser } from '@/lib/db';
 import { fmtDate } from '@/lib/format';
@@ -22,7 +22,8 @@ export default async function MfrHome({ searchParams }: { searchParams: Promise<
   const full = canUse(u.mfr_tier, 'portfolio'), watchAll = canUse(u.mfr_tier, 'watch');
   const d = await withUser(u.id, async (db) => {
     await loadLive(db);
-    const profile = await one(db, `select company_name, status, target_countries, suggested_plan, chosen_plan, active_plan, verified_at, sample_product_id
+    const profile = await one(db, `select company_name, status, target_countries, suggested_plan, chosen_plan, active_plan, verified_at, sample_product_id,
+                                   cardinality(certifications) + cardinality(dosage_forms) as profile_bits
                                    from manufacturer_profiles where user_id = $1`, [u.id]);
     const targets = targetMarkets(profile?.target_countries);
     const live = targets.filter(hasData);
@@ -45,6 +46,15 @@ export default async function MfrHome({ searchParams }: { searchParams: Promise<
   });
   const p = d.profile;
   const shownWatch = watchAll ? d.watch.slice(0, 8) : d.watch.slice(0, 2);
+  // getting set up: the few things that make the portal useful, ticked off as they are done
+  const setup: [boolean, string, string][] = [
+    [Number(d.counts?.products) > 0, 'Add your products', '/m/products#add'],
+    [Number(p?.profile_bits) > 0, 'Add your certifications and dosage forms', '/m/onboarding?step=2'],
+    [Boolean(p?.sample_product_id) || u.mfr_tier >= 2, 'Open one product in full, free', '#free-read'],
+    [Number(d.counts?.launches) > 0, 'Put a product on your launch tracker', '/m/products'],
+    [Boolean(p?.chosen_plan || p?.active_plan), 'Pick your plan', '/m/plan'],
+  ];
+  const doneN = setup.filter(([ok]) => ok).length;
   return (
     <Shell user={u} title={<>{p?.company_name ? p.company_name : 'Welcome'}{p?.verified_at && <span className="pill blue" style={{ marginLeft: 12, verticalAlign: 'middle', fontSize: 13, letterSpacing: 'normal', fontFamily: 'Inter, sans-serif', fontWeight: 600 }}><VerifiedIcon /> Verified manufacturer</span>}</>}
       sub={`Your products in ${d.targets.map(countryName).join(', ')}`}
@@ -53,6 +63,15 @@ export default async function MfrHome({ searchParams }: { searchParams: Promise<
       {p?.status === 'pending' && <div className="note">Our team is reviewing your company. Everything is open to explore; introductions start once you are approved.</div>}
       {sp.welcome && <div className="ok">{d.counts?.products ? `Welcome. Your ${d.counts.products} products are matched to your markets below.` : 'Welcome. Add your products and we match them to your markets in seconds.'}</div>}
 
+      {doneN < setup.length && (
+        <section className="card stack" style={{ gap: 10 }}>
+          <div className="between"><h2>Get set up · {doneN} of {setup.length}</h2>
+            <form action={tourGo}><input type="hidden" name="step" value="1" /><button className="btn btn-ghost btn-sm" type="submit">Take the tour</button></form></div>
+          <div className="meter"><i style={{ width: `${(100 * doneN) / setup.length}%` }} /></div>
+          <div className="grid g3" style={{ gap: 8 }}>{setup.map(([ok, label, href]) => ok
+            ? <span key={label} className="small muted">✓ {label}</span>
+            : <Link key={label} href={href} className="small">{label} →</Link>)}</div>
+        </section>)}
       <div className="grid g4">
         <Link className="tile t-white" href="/m/products"><span className="k">Your products</span><span className="v num">{d.counts?.products}</span>
           <span className="small">{d.counts?.matched} matched</span></Link>
@@ -110,7 +129,7 @@ export default async function MfrHome({ searchParams }: { searchParams: Promise<
           </section>
 
           {!p?.sample_product_id && u.mfr_tier < 2 && d.products.length > 0 && (
-            <section className="card stack">
+            <section className="card stack" id="free-read">
               <h2>One product, fully open</h2>
               <p className="muted">Pick one product and see everything we have on it, free: competition, distributors, route and price.</p>
               <form action={chooseSample} className="row">

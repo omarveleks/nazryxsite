@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import TourBar from './TourBar';
 import { MFR_PLANS } from '@/lib/mfr';
 import type { ReactNode } from 'react';
 import type { User } from '@/lib/auth';
@@ -52,6 +53,7 @@ export default function Shell({ user, title, sub, crumb, actions, children }: {
             <Link className="avatar" href="/settings" title="Settings">{initials || 'You'}</Link>
           </div>
         </div>
+        {user.account_type === 'manufacturer' && user.role !== 'team' && user.tour_step ? <TourBar step={user.tour_step} /> : null}
         {children}
       </main>
     </div>

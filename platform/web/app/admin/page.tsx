@@ -290,7 +290,7 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
           <div className="tbl-wrap"><table className="tbl"><tbody>{d.mfrs.map((m: any) => (
             <tr key={m.user_id}><td><Link href={`/admin/accounts/${m.user_id}`}><b>{m.company_name}</b></Link>
               <div className="sub2">{m.email} · {m.hq_country || 'country not given'} · {m.products} products
-                {m.completed_at ? '' : ` · onboarding step ${Math.min(m.step, 6)} of 6`}
+                {m.completed_at ? '' : ` · sign-up screen ${Math.min(m.step, 8)} of 8`}
                 {m.active_plan ? ` · active: ${MFR_PLANS[m.active_plan as keyof typeof MFR_PLANS]?.name}`
                   : m.chosen_plan ? ` · asked for ${MFR_PLANS[m.chosen_plan as keyof typeof MFR_PLANS]?.name}, not active yet`
                   : m.suggested_plan ? ` · suggested ${MFR_PLANS[m.suggested_plan as keyof typeof MFR_PLANS]?.name}` : ''}</div>

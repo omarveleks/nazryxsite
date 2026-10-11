@@ -66,7 +66,7 @@ export default async function AdminAccount({ params, searchParams }: { params: P
                 <tr><td>Products that could launch</td><td>{label(LAUNCH_SCOPES, p.launch_scope)}</td></tr>
                 <tr><td>Plan</td><td>Suggested {s ? MFR_PLANS[s.plan].name : '—'}{p.chosen_plan ? <>, <b>chose {MFR_PLANS[p.chosen_plan as keyof typeof MFR_PLANS]?.name}</b></> : ''}
                   {s?.why.length ? <div className="sub2">Because {s.why.join(', ')}</div> : null}</td></tr>
-                <tr><td>Onboarding</td><td>{p.completed_at ? `Finished ${fmtDate(p.completed_at)}` : `At step ${Math.min(p.step, 6)} of 6`}</td></tr>
+                <tr><td>Onboarding</td><td>{p.completed_at ? `Finished ${fmtDate(p.completed_at)}` : `At sign-up screen ${Math.min(p.step, 8)} of 8`}</td></tr>
               </tbody></table>
             </section>)}
           {p && (
