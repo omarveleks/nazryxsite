@@ -78,15 +78,8 @@ export default async function Onboarding({ searchParams }: { searchParams: Promi
             <span><b>Start from scratch</b><br /><span className="note">Search and add molecules one by one.</span></span></label>
         </section>
 
-        <section className="card stack">
-          <h2>Upload your licence</h2>
-          <p className="note">Your company profile unlocks after Nazryx approves the claim. A work email that matches your company speeds this up.
-            Claims are approved by hand, so one company never sees another company&apos;s portfolio.</p>
-          <div className="drop">
-            <label className="lbl" htmlFor="licence">Business or pharmacy licence (PDF or image)</label>
-            <input id="licence" name="licence" type="file" accept=".pdf,.png,.jpg,.jpeg" required />
-          </div>
-        </section>
+        <p className="note">Your company profile unlocks once Nazryx approves the claim, usually within a working day. A work email that matches
+          your company speeds this up. Claims are approved by hand, so one company never sees another company&apos;s portfolio.</p>
         <div className="row">
           <button className="btn btn-blue" type="submit">Continue</button>
         </div>

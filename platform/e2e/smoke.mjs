@@ -40,7 +40,6 @@ await c.goto(B + '/signup'); await c.fill('#name', 'Smoke Test'); await c.fill('
 await Promise.all([c.waitForURL(/onboarding/), c.click('button[type=submit]')]);
 await c.fill('#q', 'alpha'); await Promise.all([c.waitForURL(/q=alpha/), c.click('form[method=get] button')]);
 await c.locator('input[name=company_id]').first().check();
-await c.setInputFiles('#licence', { name: 'licence.pdf', mimeType: 'application/pdf', buffer: Buffer.from('%PDF-1.4 test') });
 await Promise.all([c.waitForURL(/onboarding\/focus/), c.click('text=Continue')]);
 check(true, 'sign up and claim a company');
 await c.locator('input[name=goals][value=new_molecules]').check();

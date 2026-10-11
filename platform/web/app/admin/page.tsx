@@ -208,14 +208,14 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
       </>)}
       {tab === 'claims' && (
         <section className="card">
-          <div className="card-h"><h2>Company claims</h2><span className="note">Check the licence and the email domain, then approve. Approval pre-fills the portfolio when asked.</span></div>
+          <div className="card-h"><h2>Company claims</h2><span className="note">Check the email domain and the company, then approve. Approval pre-fills the portfolio when asked.</span></div>
           {d.claims.length === 0 ? <Empty>No claims yet.</Empty> : (
             <div className="tbl-wrap"><table className="tbl"><thead><tr><th>Who</th><th>Company</th><th>Evidence</th><th>Portfolio</th><th className="r">Decision</th></tr></thead>
               <tbody>{d.claims.map((k: any) => (
                 <tr key={k.id}><td><b>{k.name || k.email}</b><div className="sub2">{k.email} · {fmtDate(k.created_at)}</div></td>
                   <td>{k.cid ? <Link href={`/company/${k.cid}`}>{title(k.company)}</Link> : <>{k.company} <span className="pill">not in list</span></>}</td>
                   <td><span className={`pill ${k.domain_match ? 'mint' : 'peach'}`}>{k.domain_match ? 'Domain matches' : 'Domain does not match'}</span>
-                    <div className="small"><a href={`/files/licence/${k.id}`}>Licence</a>{k.catalogue_path && <> · <a href={`/files/catalogue/${k.id}`}>Catalogue</a></>}</div></td>
+                    <div className="small">{k.licence_path && <><a href={`/files/licence/${k.id}`}>Licence</a> · </>}{k.catalogue_path && <a href={`/files/catalogue/${k.id}`}>Catalogue</a>}</div></td>
                   <td className="small">{k.portfolio_source}</td>
                   <td className="r">{k.status === 'pending' ? (
                     <form action={reviewClaim} className="stack" style={{ alignItems: 'flex-end', gap: 6 }}><input type="hidden" name="claim_id" value={k.id} />

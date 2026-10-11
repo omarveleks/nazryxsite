@@ -20,7 +20,6 @@ export async function completeOnboarding(f: FormData) {
   } catch (e) {
     back('/onboarding', { error: (e as Error).message });
   }
-  if (!licence) back('/onboarding', { error: 'Upload your licence so we can verify the claim.' });
   if (source === 'catalogue' && !catalogue) back('/onboarding', { error: 'Attach your catalogue, or pick another option.' });
   await withUser(u.id, async (db) => {
     const company = companyId ? await one(db, 'select id, cluster_key, display_name, claimed_by, verified from companies where id = $1', [companyId]) : null;
@@ -30,7 +29,7 @@ export async function completeOnboarding(f: FormData) {
                       licence_name, portfolio_source, catalogue_path, catalogue_name)
                     values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
       [u.id, company?.id ?? null, company ? null : manualName, u.email.split('@')[1], domainMatches(u.email, key),
-       licence!.path, licence!.name, source, catalogue?.path ?? null, catalogue?.name ?? null]);
+       licence?.path ?? null, licence?.name ?? null, source, catalogue?.path ?? null, catalogue?.name ?? null]);
     await db.query(`update users set onboarded = true where id = $1`, [u.id]);
     await db.query(`insert into notifications (user_id, channel, subject, body) values (null, 'email', 'New company claim', $1)`,
       [`${u.email} claims ${company?.display_name ?? manualName}. Review it on the admin page.`]);
