@@ -53,11 +53,26 @@ def mol(cur, name):
     return r[0] if r else None
 
 
+DEMO_DOC = b"Demo document. Test data, not a real document."
+
+
 def seed_manufacturer(cur, maker, team):
     """A fictional manufacturer with a small catalogue and two engagements, to show the manufacturer side."""
     cur.execute("""insert into manufacturer_profiles (user_id, company_name, hq_country, certifications, target_countries, status, reviewed_at)
                    values (%s, 'Demo Generics Manufacturing', 'India', '{WHO GMP,PIC/S}', '{TZ,KE,KZ}', 'approved', now())
                    on conflict (user_id) do nothing""", (maker,))
+    # the onboarding answers (also on demo databases seeded before onboarding asked them)
+    cur.execute("""update manufacturer_profiles set company_size = '250-1,000 people', contact_role = 'Export or business development',
+                   dosage_forms = '{Tablets,Capsules,Oral liquids}', therapeutic_areas = '{Anti-infectives,Cardiovascular,Diabetes}',
+                   plant_countries = 'India', export_markets = 'Nigeria, Ghana, Vietnam', registered_in = '{}', timeline = '6m',
+                   approach = 'partner', services = '{market_data,partner,registration,dossier_review}', products_next_year = 6,
+                   step = 7, suggested_plan = 'regional', completed_at = coalesce(completed_at, now())
+                   where user_id = %s and completed_at is null""", (maker,))
+    if not cur.execute("select 1 from account_documents where user_id = %s", (maker,)).fetchone():
+        fid = cur.execute("""insert into stored_files (name, size, data, uploaded_by) values ('demo-agreement.txt', %s, %s, %s) returning id""",
+                          (len(DEMO_DOC), DEMO_DOC, team)).fetchone()[0]
+        cur.execute("""insert into account_documents (user_id, kind, title, file_path, file_name, uploaded_by)
+                       values (%s, 'agreement', 'Services agreement (demo)', %s, 'demo-agreement.txt', %s)""", (maker, f"db:{fid}", team))
     if cur.execute("select 1 from mfr_products where user_id = %s", (maker,)).fetchone():
         return
     for name, inn, who_pq in (("Doxycycline 100mg capsules", "Doxycycline", True), ("Amoxicillin 500mg capsules", "Amoxicillin", False),
@@ -128,6 +143,11 @@ def seed():
                                   (name, country, "sales@example.com")).fetchone()[0]
                 cur.execute("insert into supplier_notes (supplier_id, notes) values (%s, 'Demo supplier for the walkthrough')", (sid,))
                 sups.append(sid)
+            # a GMP certificate on file that expires soon, to show expiry tracking
+            fid = cur.execute("insert into stored_files (name, size, data, uploaded_by) values ('demo-gmp.txt', %s, %s, %s) returning id",
+                              (len(DEMO_DOC), DEMO_DOC, team)).fetchone()[0]
+            cur.execute("""insert into supplier_documents (supplier_id, kind, product, expires_on, file_path, file_name, uploaded_by)
+                           values (%s, 'gmp', 'Oral solids', current_date + 40, %s, 'demo-gmp.txt', %s)""", (sups[0], f"db:{fid}", team))
 
             def request(molecule, stage, qty, notes, days_ago):
                 m = mol(cur, molecule)

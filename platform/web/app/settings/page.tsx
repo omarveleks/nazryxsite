@@ -4,7 +4,8 @@ import { Flash } from '@/components/ui';
 import { addSeat, changePassword, requestUpgrade, updateSettings } from '@/app/actions/app';
 import { requireUser } from '@/lib/auth';
 import { rows, withUser } from '@/lib/db';
-import { FREE, title } from '@/lib/format';
+import { FREE, fmtDate, title } from '@/lib/format';
+import { ACCOUNT_DOC_KINDS } from '@/lib/docs';
 import { activeRequestCount } from '@/lib/queries';
 
 export const metadata = { title: 'Settings' };
@@ -17,6 +18,7 @@ export default async function Settings({ searchParams }: { searchParams: Promise
     active: await activeRequestCount(db, u.id),
     seats: await rows(db, 'select email, name from users where owner_id = $1 order by created_at', [u.id]),
     open: await rows(db, "select wanted, created_at from plan_requests where user_id = $1 and status = 'open'", [u.id]),
+    docs: await rows(db, 'select id, kind, title, file_name, created_at from account_documents where user_id = $1 order by created_at desc', [u.id]),
     twoStep: Boolean((await rows(db, 'select enabled from user_totp where user_id = $1 and enabled', [u.id])).length),
     claim: (await rows(db, `select k.status, k.licence_name, coalesce(c.display_name, k.company_name) as company, k.review_note
                             from company_claims k left join companies c on c.id = k.company_id where k.user_id = coalesce($2::uuid, $1::uuid)
@@ -28,6 +30,13 @@ export default async function Settings({ searchParams }: { searchParams: Promise
       <Flash sp={sp} />
       {sp.upgrade && <div className="ok">Thanks. Our team will contact you to set up the paid plan.</div>}
       <div className="grid g2">
+        {u.account_type === 'manufacturer' ? (
+          <section className="card stack" id="plan">
+            <h2>Your plan</h2>
+            <p className="note">Your suggested subscription, the other plans and add-ons. Our team confirms scope and price with you.</p>
+            <Link className="btn btn-blue btn-sm" href="/m/plan" style={{ alignSelf: 'flex-start' }}>See your plan</Link>
+          </section>
+        ) : (
         <section className="card stack" id="plan">
           <div className="between"><h2>Plan and usage</h2><span className={`pill ${paid ? 'solid' : ''}`}>{paid ? 'Paid' : 'Free'}</span></div>
           <table className="tbl"><tbody>
@@ -44,11 +53,12 @@ export default async function Settings({ searchParams }: { searchParams: Promise
                 <button className="btn btn-blue" type="submit">Upgrade</button>
               </form>))}
         </section>
+        )}
         {u.account_type === 'manufacturer' ? (
           <section className="card stack" id="company">
             <h2>Your company</h2>
             <p className="note">Company details, certifications and the markets you want to enter.</p>
-            <Link className="btn btn-ghost btn-sm" href="/m/onboarding?next=/settings" style={{ alignSelf: 'flex-start' }}>Edit company</Link>
+            <Link className="btn btn-ghost btn-sm" href="/m/onboarding?step=1" style={{ alignSelf: 'flex-start' }}>Edit company</Link>
           </section>
         ) : (
           <section className="card stack" id="focus">
@@ -85,6 +95,13 @@ export default async function Settings({ searchParams }: { searchParams: Promise
                 <option value="fr" disabled>Français (soon)</option><option value="ru" disabled>Русский (soon)</option></select></div>
             <button className="btn btn-blue btn-sm" type="submit">Save</button>
           </form>
+        </section>
+        <section className="card stack" id="documents">
+          <h2>Documents</h2>
+          <p className="note">Agreements, invoices and other papers from Nazryx. Documents for a request or engagement are on its page.</p>
+          {d.docs.length === 0 ? <p className="muted">None yet.</p> : d.docs.map((x) => (
+            <div key={x.id} className="between"><a href={`/files/account/${x.id}`}>{x.title || x.file_name}</a>
+              <span className="sub2">{ACCOUNT_DOC_KINDS[x.kind]} · {fmtDate(x.created_at)}</span></div>))}
         </section>
         <section className="card stack">
           <h2>Profile and verification</h2>

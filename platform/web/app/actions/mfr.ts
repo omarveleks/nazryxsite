@@ -5,7 +5,8 @@ import { requireUser } from '@/lib/auth';
 import { dbMessage, one, withUser } from '@/lib/db';
 import { back, int, str } from '@/lib/forms';
 import { findMolecule } from '@/lib/match';
-import { AGENCY_KINDS, CERTIFICATIONS, MFR_COUNTRIES, REPORT_TYPES, SERVICES } from '@/lib/mfr';
+import { ADD_ONS, AGENCY_KINDS, APPROACHES, CERTIFICATIONS, COMPANY_SIZES, CONTACT_ROLES, DOSAGE_FORMS, MFR_COUNTRIES, MFR_PLANS, NEEDS, REPORT_TYPES,
+  SERVICES, THERAPEUTIC_AREAS, TIMELINES, countryName, suggestPlan, type PlanKey } from '@/lib/mfr';
 import { DOSSIER_ITEMS } from '@/lib/format';
 import { saveUpload } from '@/lib/uploads';
 
@@ -17,54 +18,135 @@ async function teamNote(db: any, subject: string, body: string) {
   await db.query(`insert into notifications (user_id, channel, subject, body) values (null, 'email', $1, $2)`, [subject, body]);
 }
 
-/** Manufacturer onboarding and profile edits. New profiles wait for the team's approval. */
-export async function saveMfrProfile(f: FormData) {
+const ONB = '/m/onboarding';
+const opts = (f: FormData, k: string, list: [string, string][] | string[]) =>
+  pick(f, k, list.map((x) => (Array.isArray(x) ? x[0] : x)));
+const oneOf = (v: string, list: [string, string][] | string[]) => (list.map((x) => (Array.isArray(x) ? x[0] : x)).includes(v) ? v : null);
+const errText = (e: unknown) => (e instanceof Error && !('code' in e) ? e.message : dbMessage(e));
+const isRedirect = (e: unknown) => Boolean((e as { digest?: string })?.digest?.startsWith('NEXT_REDIRECT'));
+
+/** Products from a pasted list, one per line, each matched to a molecule where possible. */
+async function insertProducts(db: any, userId: string, text: string) {
+  const lines = text.split(/\n+/).map((x) => x.trim()).filter(Boolean).slice(0, 500);
+  let added = 0, matched = 0;
+  for (const line of lines) {
+    const strength = line.match(/[\d.,]+\s*(mg|mcg|µg|g|ml|iu|%)(\s*\/\s*[\d.,]*\s*(ml|g))?/i)?.[0] ?? null;
+    const form = line.match(/tablets?|capsules?|injection|infusion|syrup|suspension|cream|ointment|gel|drops|inhaler|powder|solution|suppositor(y|ies)/i)?.[0] ?? null;
+    const id = await findMolecule(db, line);
+    await db.query(`insert into mfr_products (user_id, name, molecule_id, strength, dosage_form) values ($1, $2, $3, $4, $5)`,
+      [userId, line.slice(0, 200), id, strength, form]);
+    added++; if (id) matched++;
+  }
+  return { added, matched };
+}
+
+/** Manufacturer onboarding, one step at a time, and later profile edits. Steps: company, manufacturing, markets,
+ *  catalogue, needs, then the suggested plan. New profiles wait for the team's approval. */
+export async function saveMfrStep(f: FormData) {
   const u = await requireUser({ allowOnboarding: true, manufacturer: true });
-  const next = safeNext(str(f, 'next', 200), '/m?welcome=1');
-  const company = str(f, 'company_name', 200);
-  if (!company) back('/m/onboarding', { error: 'Enter your company name.' });
-  const fields = [company, str(f, 'hq_country', 80) || null, str(f, 'website', 200) || null,
-    pick(f, 'certifications', CERTIFICATIONS), pick(f, 'target_countries', codes)];
+  const step = Math.min(Math.max(int(f, 'step') ?? 1, 1), 5);
+  const here = `${ONB}?step=${step}`;
+  let note = '';
   try {
     await withUser(u.id, async (db) => {
       const had = await one(db, 'select 1 as x from manufacturer_profiles where user_id = $1', [u.id]);
-      if (had) {
-        await db.query(`update manufacturer_profiles set company_name = $2, hq_country = $3, website = $4, certifications = $5,
-                        target_countries = $6 where user_id = $1`, [u.id, ...fields]);
-      } else {
-        await db.query(`insert into manufacturer_profiles (user_id, company_name, hq_country, website, certifications, target_countries)
-                        values ($1, $2, $3, $4, $5, $6)`, [u.id, ...fields]);
-        await teamNote(db, 'New manufacturer', `${company} (${u.email}) signed up. Review it in Admin > Manufacturers.`);
+      if (step === 1) {
+        const company = str(f, 'company_name', 200);
+        if (!company) throw new Error('Enter your company name.');
+        const v = [company, str(f, 'hq_country', 80) || null, str(f, 'website', 200) || null, oneOf(str(f, 'company_size', 40), COMPANY_SIZES),
+          oneOf(str(f, 'contact_role', 60), CONTACT_ROLES)];
+        if (had) await db.query(`update manufacturer_profiles set company_name = $2, hq_country = $3, website = $4, company_size = $5, contact_role = $6
+                                 where user_id = $1`, [u.id, ...v]);
+        else await db.query(`insert into manufacturer_profiles (user_id, company_name, hq_country, website, company_size, contact_role)
+                             values ($1, $2, $3, $4, $5, $6)`, [u.id, ...v]);
+        const phone = str(f, 'whatsapp', 40);
+        if (phone) await db.query('update users set whatsapp = $2 where id = $1', [u.id, phone]);
+      } else if (!had) {
+        throw new Error('Start with your company.');
+      } else if (step === 2) {
+        await db.query(`update manufacturer_profiles set certifications = $2, dosage_forms = $3, therapeutic_areas = $4, plant_countries = $5,
+                        export_markets = $6 where user_id = $1`,
+          [u.id, pick(f, 'certifications', CERTIFICATIONS), opts(f, 'dosage_forms', DOSAGE_FORMS), opts(f, 'therapeutic_areas', THERAPEUTIC_AREAS),
+            str(f, 'plant_countries', 200) || null, str(f, 'export_markets', 400) || null]);
+      } else if (step === 3) {
+        const targets = pick(f, 'target_countries', codes);
+        if (!targets.length) throw new Error('Pick at least one market.');
+        await db.query(`update manufacturer_profiles set target_countries = $2, registered_in = $3, timeline = $4, approach = $5 where user_id = $1`,
+          [u.id, targets, pick(f, 'registered_in', codes), oneOf(str(f, 'timeline', 20), TIMELINES), oneOf(str(f, 'approach', 20), APPROACHES)]);
+      } else if (step === 4) {
+        const r = await insertProducts(db, u.id, str(f, 'list', 20000));
+        if (r.added) note = `${r.added} products added, ${r.matched} matched to the market.`;
+      } else if (step === 5) {
+        const n = int(f, 'products_next_year');
+        await db.query('update manufacturer_profiles set services = $2, products_next_year = $3 where user_id = $1',
+          [u.id, opts(f, 'services', NEEDS), n != null && n >= 0 && n < 10000 ? n : null]);
       }
+      await db.query('update manufacturer_profiles set step = greatest(step, $2) where user_id = $1', [u.id, step + 1]);
+    });
+    if (step === 4) {
+      // a catalogue file (Excel, PDF ...) for the team to load, alongside or instead of the pasted list
+      const saved = await saveUpload(f.get('catalogue'), u.id);
+      if (saved) {
+        await withUser(u.id, (db) => db.query('update manufacturer_profiles set catalogue_path = $2, catalogue_name = $3 where user_id = $1',
+          [u.id, saved.path, saved.name]));
+        note = `${note} ${saved.name} uploaded; our team loads it for you.`.trim();
+      }
+    }
+  } catch (e) {
+    if (isRedirect(e)) throw e;
+    back(here, { error: errText(e) });
+  }
+  if (u.onboarded && f.get('stay') === '1') back(here, { saved: '1', ...(note ? { note } : {}) });
+  back(`${ONB}?step=${step + 1}`, note ? { note } : {});
+}
+
+/** Last onboarding step: take the suggested plan (or another), or explore first. Finishes onboarding either way. */
+export async function choosePlan(f: FormData) {
+  const u = await requireUser({ allowOnboarding: true, manufacturer: true });
+  const plan = str(f, 'plan', 20);
+  const chosen = (plan in MFR_PLANS ? plan : null) as PlanKey | null;
+  const addOns = pick(f, 'add_ons', Object.keys(ADD_ONS));
+  const firstTime = !u.onboarded;
+  const from = str(f, 'from', 20) === 'plan' ? '/m/plan' : `${ONB}?step=6`;
+  try {
+    await withUser(u.id, async (db) => {
+      const p = await one(db, 'select * from manufacturer_profiles where user_id = $1', [u.id]);
+      if (!p) throw new Error('Start with your company.');
+      const s = suggestPlan(p);
+      await db.query(`update manufacturer_profiles set suggested_plan = $2, chosen_plan = coalesce($3, chosen_plan), completed_at = coalesce(completed_at, now())
+                      where user_id = $1`, [u.id, s.plan, chosen]);
       await db.query('update users set onboarded = true where id = $1', [u.id]);
+      const markets = (p.target_countries ?? []).map(countryName).join(', ') || 'none';
+      if (chosen) {
+        const label = MFR_PLANS[chosen].name + (addOns.length ? ` + ${addOns.map((a) => ADD_ONS[a].name).join(', ')}` : '');
+        await db.query('insert into plan_requests (user_id, wanted, note) values ($1, $2, $3)',
+          [u.id, `mfr:${chosen}`, `${label}. Markets: ${markets}. ${str(f, 'note', 1000)}`.trim()]);
+      }
+      if (firstTime || chosen) {
+        await teamNote(db, chosen ? `${p.company_name} chose ${MFR_PLANS[chosen].name}` : 'New manufacturer',
+          `${p.company_name} (${u.email}) ${firstTime ? 'finished onboarding' : 'picked a plan'}. Suggested ${MFR_PLANS[s.plan].name}`
+          + `${chosen ? `, chose ${MFR_PLANS[chosen].name}` : ', exploring first'}. Markets: ${markets}. Review in Admin > Manufacturers.`);
+      }
     });
   } catch (e) {
-    back('/m/onboarding', { error: dbMessage(e) });
+    if (isRedirect(e)) throw e;
+    back(from, { error: errText(e) });
   }
-  redirect(next);
+  redirect(chosen ? '/m/plan?requested=1' : '/m?welcome=1');
 }
 
 /** Add products by pasting a list; each is matched to a molecule where possible. */
 export async function addMfrProducts(f: FormData) {
   const u = await requireUser({ manufacturer: true });
-  const lines = str(f, 'list', 20000).split(/\n+/).map((x) => x.trim()).filter(Boolean).slice(0, 500);
-  if (!lines.length) back('/m/products', { error: 'Paste at least one product, one per line.' });
-  let added = 0, matched = 0;
+  const text = str(f, 'list', 20000);
+  if (!text.trim()) back('/m/products', { error: 'Paste at least one product, one per line.' });
+  let r = { added: 0, matched: 0 };
   try {
-    await withUser(u.id, async (db) => {
-      for (const line of lines) {
-        const strength = line.match(/[\d.,]+\s*(mg|mcg|µg|g|ml|iu|%)(\s*\/\s*[\d.,]*\s*(ml|g))?/i)?.[0] ?? null;
-        const form = line.match(/tablets?|capsules?|injection|infusion|syrup|suspension|cream|ointment|gel|drops|inhaler|powder|solution|suppositor(y|ies)/i)?.[0] ?? null;
-        const id = await findMolecule(db, line);
-        await db.query(`insert into mfr_products (user_id, name, molecule_id, strength, dosage_form) values ($1, $2, $3, $4, $5)`,
-          [u.id, line.slice(0, 200), id, strength, form]);
-        added++; if (id) matched++;
-      }
-    });
+    r = await withUser(u.id, (db) => insertProducts(db, u.id, text));
   } catch (e) {
     back('/m/products', { error: dbMessage(e) });
   }
-  redirect(`/m/products?added=${added}&matched=${matched}`);
+  redirect(`/m/products?added=${r.added}&matched=${r.matched}`);
 }
 
 /** The manufacturer's own dossier self-check for one product. */

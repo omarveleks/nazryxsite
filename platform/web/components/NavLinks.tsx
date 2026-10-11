@@ -9,7 +9,7 @@ const NAV = [
 
 // Manufacturer accounts: their own area for expanding into new markets.
 const MFR_NAV = [
-  ['/m', 'Home'], ['/m/products', 'My products'], ['/m/partners', 'Partners'], ['/m/services', 'Services'],
+  ['/m', 'Home'], ['/m/products', 'My products'], ['/m/partners', 'Partners'], ['/m/services', 'Services'], ['/m/plan', 'Plan'],
   ['/expert', 'Ask the expert'], ['/settings', 'Settings'],
 ] as const;
 

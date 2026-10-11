@@ -598,3 +598,67 @@ def test_manufacturer_side_privacy(env):
         a.execute("update engagements set stage = 'Market assessment' where id = %s", (eid,))
         a.commit()
     assert q("select status from manufacturer_profiles where user_id = %s", maker)[0][0] == "approved"
+
+
+def test_team_documents_everywhere_and_internal_files(env):
+    with psycopg.connect(URL) as c:
+        cust = c.execute("insert into users (email, password_hash, onboarded) values ('doc1@example.com', 'x', true) returning id").fetchone()[0]
+        other = c.execute("insert into users (email, password_hash, onboarded) values ('doc2@example.com', 'x', true) returning id").fetchone()[0]
+        team = c.execute("insert into users (email, password_hash, role) values ('doct@example.com', 'x', 'team') returning id").fetchone()[0]
+        rid = c.execute("insert into requests (user_id, molecule_text) values (%s, 'Doc test') returning id", (cust,)).fetchone()[0]
+        sid = c.execute("insert into suppliers (name) values ('Doc Supplier') returning id").fetchone()[0]
+        c.commit()
+    with app_conn(env) as a:
+        as_user(a, team)
+        f1 = a.execute("insert into stored_files (name, size, data, uploaded_by) values ('a.pdf', 1, 'x', %s) returning id", (team,)).fetchone()[0]
+        f2 = a.execute("insert into stored_files (name, size, data, uploaded_by) values ('b.pdf', 1, 'x', %s) returning id", (team,)).fetchone()[0]
+        f3 = a.execute("insert into stored_files (name, size, data, uploaded_by) values ('c.pdf', 1, 'x', %s) returning id", (team,)).fetchone()[0]
+        a.execute("""insert into request_files (request_id, path, file_name, kind, item, from_team, internal, uploaded_by)
+                     values (%s, %s, 'gmp.pdf', 'dossier', 'gmp', true, false, %s), (%s, %s, 'margin.pdf', 'other', null, true, true, %s)""",
+                  (rid, f"db:{f1}", team, rid, f"db:{f2}", team))
+        a.execute("""insert into account_documents (user_id, kind, file_path, file_name, internal, uploaded_by)
+                     values (%s, 'agreement', %s, 'agreement.pdf', false, %s), (%s, 'other', %s, 'notes.pdf', true, %s)""",
+                  (cust, f"db:{f3}", team, cust, f"db:{f2}", team))
+        a.execute("insert into supplier_documents (supplier_id, kind, file_path, file_name, uploaded_by) values (%s, 'gmp', %s, 'gmp.pdf', %s)",
+                  (sid, f"db:{f1}", team))
+        a.execute("insert into plan_prices (key, price) values ('mfr_entry', 'USD 1 / month') on conflict (key) do update set price = excluded.price")
+        a.commit()
+        as_user(a, cust)
+        assert [r[0] for r in a.execute("select file_name from request_files where request_id = %s", (rid,))] == ["gmp.pdf"]   # internal hidden
+        assert [r[0] for r in a.execute("select file_name from account_documents")] == ["agreement.pdf"]
+        assert a.execute("select count(*) from supplier_documents").fetchone()[0] == 0                                   # team only
+        assert a.execute("select count(*) from stored_files where id = %s", (f2,)).fetchone()[0] == 0                    # internal file body too
+        assert a.execute("select count(*) from stored_files where id = %s", (f3,)).fetchone()[0] == 1
+        assert a.execute("select price from plan_prices where key = 'mfr_entry'").fetchone()[0] == "USD 1 / month"
+        assert a.execute("delete from request_files where request_id = %s", (rid,)).rowcount == 0                       # only the team removes
+        with pytest.raises(psycopg.errors.InsufficientPrivilege):                                                       # cannot pose as the team
+            a.execute("""insert into request_files (request_id, path, file_name, kind, from_team, uploaded_by)
+                         values (%s, %s, 'fake.pdf', 'dossier', true, %s)""", (rid, f"db:{f3}", cust))
+        a.rollback()
+        as_user(a, other)
+        assert a.execute("select count(*) from account_documents").fetchone()[0] == 0
+        assert a.execute("select count(*) from request_files where request_id = %s", (rid,)).fetchone()[0] == 0
+        a.rollback()
+        as_user(a, team)
+        assert a.execute("delete from request_files where request_id = %s and internal", (rid,)).rowcount == 1
+        a.commit()
+    assert q("select count(*) from audit_log where table_name = 'request_files' and action = 'delete'")[0][0] >= 1
+
+
+def test_manufacturer_onboarding_answers(env):
+    with psycopg.connect(URL) as c:
+        maker = c.execute("insert into users (email, password_hash, account_type) values ('mk9@example.com', 'x', 'manufacturer') returning id").fetchone()[0]
+        c.commit()
+    with app_conn(env) as a:
+        as_user(a, maker)
+        a.execute("insert into manufacturer_profiles (user_id, company_name) values (%s, 'Maker Nine')", (maker,))
+        a.execute("""update manufacturer_profiles set dosage_forms = '{Tablets}', target_countries = '{TZ,KE,UZ}', timeline = 'now',
+                     services = '{registration,eac}', products_next_year = 8, step = 6, suggested_plan = 'regional', chosen_plan = 'regional',
+                     completed_at = now() where user_id = %s""", (maker,))
+        a.execute("update users set onboarded = true where id = %s", (maker,))
+        a.commit()
+        as_user(a, maker)
+        with pytest.raises(psycopg.errors.RaiseException):          # still cannot approve itself
+            a.execute("update manufacturer_profiles set status = 'approved' where user_id = %s", (maker,))
+        a.rollback()
+    assert q("select chosen_plan, step from manufacturer_profiles where user_id = %s", maker)[0] == ("regional", 6)

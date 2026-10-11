@@ -4,6 +4,8 @@ import Shell from '@/components/Shell';
 import { Empty, Flash, Stages } from '@/components/ui';
 import { addOfferAndQuote, saveDossier, saveEvaluation, setOrderStatus, setStage } from '@/app/actions/admin';
 import { postMessage } from '@/app/actions/app';
+import { deleteRequestDoc, uploadRequestDoc } from '@/app/actions/docs';
+import { REQUEST_DOC_KINDS, TEAM_REQUEST_KINDS, requestDocLabel } from '@/lib/docs';
 import { requireTeam } from '@/lib/auth';
 import { one, rows, withUser } from '@/lib/db';
 import { BE_STATUS, DOSSIER_ITEMS, DOSSIER_STATUS, GMP_BY, ORDER_STATUSES, SHIPMENT_DOCS, STAGES, beSuggestion, fmtDate } from '@/lib/format';
@@ -22,7 +24,7 @@ export default async function AdminRequest({ params, searchParams }: { params: P
       quotes: await rows(db, `select q.*, s.name as supplier, o.price, o.currency, o.unit from quotes q join supplier_offers o on o.id = q.supplier_offer_id
                               join suppliers s on s.id = o.supplier_id where q.request_id = $1 order by q.label`, [id]),
       suppliers: await rows(db, 'select id, name, country from suppliers order by name'),
-      files: await rows(db, 'select id, file_name, kind from request_files where request_id = $1', [id]),
+      files: await rows(db, 'select id, file_name, kind, item, note, internal, from_team, created_at from request_files where request_id = $1 order by created_at', [id]),
       messages: await rows(db, 'select from_team, body, created_at from request_messages where request_id = $1 order by created_at', [id]),
       order: await one(db, 'select * from orders where request_id = $1', [id]),
       docs: await rows(db, 'select d.doc, d.ready from shipment_documents d join orders o on o.id = d.order_id where o.request_id = $1', [id]),
@@ -141,9 +143,11 @@ export default async function AdminRequest({ params, searchParams }: { params: P
                       <option value="">Not checked</option>
                       {Object.entries(DOSSIER_STATUS).map(([v, [l]]) => <option key={v} value={v}>{l}</option>)}</select>
                     <input className="input" name={`note_${k}`} defaultValue={it?.note ?? ''} placeholder="Note" aria-label={`Note: ${label}`} style={{ flex: '1 1 160px' }} />
+                    {d.files.filter((x) => x.item === k).map((x) => <a key={x.id} className="small" href={`/files/request/${x.id}`}>{x.file_name}</a>)}
                   </div>);
               })}
               <button className="btn btn-blue btn-sm" type="submit">Save dossier readiness</button>
+              <p className="note">Upload each dossier document under Documents with its item: the item turns Ready on its own.</p>
             </form>
           </section>
           {d.order && (
@@ -168,10 +172,34 @@ export default async function AdminRequest({ params, searchParams }: { params: P
               <textarea className="input" name="body" placeholder="Message to the customer (also sent by email/WhatsApp)" aria-label="Message" required />
               <button className="btn btn-blue btn-sm" type="submit">Send</button></form>
           </section>
-          <section className="card stack">
-            <h2>Attachments</h2>
-            {d.files.length === 0 && <Empty>None.</Empty>}
-            {d.files.map((f) => <a key={f.id} href={`/files/request/${f.id}`}>{f.file_name}{f.kind === 'requirement_list' ? ' (requirement list)' : ''}</a>)}
+          <section className="card stack" id="documents">
+            <h2>Documents</h2>
+            <p className="note">Everything on this request, from the customer and from us. Internal files are never shown to the customer.</p>
+            {d.files.length === 0 && <Empty>None yet.</Empty>}
+            {d.files.map((f) => (
+              <div key={f.id} className="between" style={{ alignItems: 'flex-start' }}>
+                <span style={{ minWidth: 0 }}><a href={`/files/request/${f.id}`}>{f.file_name}</a>
+                  <span className="sub2"> · {requestDocLabel(f.kind, f.item)} · {f.from_team ? 'Nazryx' : 'Customer'} · {fmtDate(f.created_at)}</span>
+                  {f.note && <div className="sub2">{f.note}</div>}</span>
+                <span className="row" style={{ gap: 6, flexWrap: 'nowrap' }}>{f.internal && <span className="pill peach">Internal</span>}
+                  <form action={deleteRequestDoc}><input type="hidden" name="request_id" value={id} /><input type="hidden" name="file_id" value={f.id} />
+                    <button className="btn btn-ghost btn-sm" type="submit" aria-label={`Remove ${f.file_name}`}>Remove</button></form></span>
+              </div>))}
+            <form action={uploadRequestDoc} className="stack" style={{ gap: 8, borderTop: '1px solid var(--line)', paddingTop: 12 }}>
+              <input type="hidden" name="request_id" value={id} />
+              <span className="lbl">Upload a document</span>
+              <select className="input" name="kind" aria-label="Document type" defaultValue="dossier">
+                {TEAM_REQUEST_KINDS.map((k) => <option key={k} value={k}>{REQUEST_DOC_KINDS[k]}</option>)}</select>
+              <select className="input" name="item" aria-label="Dossier item or shipment document" defaultValue="">
+                <option value="">Not tied to an item</option>
+                <optgroup label="Dossier item (marks it ready)">{DOSSIER_ITEMS.map(([k, l]) => <option key={k} value={k}>{l}</option>)}</optgroup>
+                <optgroup label="Shipment document (marks it received)">{SHIPMENT_DOCS.map(([k, l]) => <option key={k} value={k}>{l}</option>)}</optgroup>
+              </select>
+              <input className="input" name="note" placeholder="Note (optional)" aria-label="Note" />
+              <input name="file" type="file" required aria-label="File" />
+              <label className="row small" style={{ gap: 6 }}><input type="checkbox" name="internal" /> Internal: team only, not shown to the customer</label>
+              <button className="btn btn-blue btn-sm" type="submit">Upload</button>
+            </form>
           </section>
         </div>
       </div>

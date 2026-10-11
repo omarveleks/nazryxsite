@@ -1,3 +1,4 @@
+import { ENGAGEMENT_DOC_ITEMS } from '@/lib/docs';
 import { postEngagementMessage, uploadEngagementFile } from '@/app/actions/mfr';
 import { one, rows, type Db } from '@/lib/db';
 import { Empty } from '@/components/ui';
@@ -5,7 +6,7 @@ import { DOSSIER_ITEMS, fmtDate } from '@/lib/format';
 import { OBLIGATION_KINDS, REPORT_TYPES, SERVICES, countryName } from '@/lib/mfr';
 
 const REVIEW: Record<string, [string, string]> = { submitted: ['Submitted', ''], accepted: ['Accepted', 'mint'], gap: ['Gap', 'peach'] };
-const itemLabel = (k: string) => (k === 'report' ? 'Report' : k === 'other' ? 'Other document' : DOSSIER_ITEMS.find(([x]) => x === k)?.[1] ?? k);
+const itemLabel = (k: string) => ENGAGEMENT_DOC_ITEMS.find(([x]) => x === k)?.[1] ?? k;
 
 /** One engagement as both the client and the team see it. The team adds its controls around it. */
 export function Milestones({ kind, stage, status }: { kind: string; stage: string; status: string }) {
@@ -44,7 +45,7 @@ export function EngagementBody({ e, files, messages, obligations, team }: {
           <section className="card stack">
             <h2>{e.kind === 'report' ? 'Your report' : 'From Nazryx'}</h2>
             {ours.length === 0 ? <Empty>Your report appears here as soon as it is ready.</Empty>
-              : ours.map((f) => <a key={f.id} href={`/files/engagement/${f.id}`}>{f.file_name}<span className="sub2"> · {fmtDate(f.created_at)}</span></a>)}
+              : ours.map((f) => <a key={f.id} href={`/files/engagement/${f.id}`}>{f.file_name}<span className="sub2"> · {itemLabel(f.item)} · {fmtDate(f.created_at)}</span></a>)}
           </section>)}
 
         {docs && (
@@ -100,7 +101,7 @@ export async function loadEngagement(db: Db, id: number) {
   if (!e) return null;
   return {
     e,
-    files: await rows(db, 'select id, item, file_name, from_team, review, team_comment, created_at from engagement_files where engagement_id = $1 order by created_at', [id]),
+    files: await rows(db, 'select id, item, file_name, from_team, internal, review, team_comment, created_at from engagement_files where engagement_id = $1 order by created_at', [id]),
     messages: await rows(db, 'select id, from_team, body, created_at from engagement_messages where engagement_id = $1 order by created_at', [id]),
     obligations: e.kind === 'post_registration' ? await rows(db, `select o.*, coalesce(m.inn, p.name) as product from obligations o
         left join mfr_products p on p.id = o.product_id left join molecules m on m.id = p.molecule_id where o.user_id = $1 order by o.done, o.due_date`, [e.user_id]) : [],

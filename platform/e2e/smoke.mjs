@@ -25,7 +25,7 @@ async function page(width = 1280) {
   return p;
 }
 async function signin(p, email, pw, secret) {
-  await p.goto(B + '/signup?mode=signin'); await p.fill('#email', email); await p.fill('#password', pw);
+  await p.goto(B + '/signup?mode=signin&as=distributor'); await p.fill('#email', email); await p.fill('#password', pw);
   await Promise.all([p.waitForURL(/home|verify|onboarding/), p.click('button[type=submit]')]);
   if (p.url().includes('/signin/verify')) {
     await p.fill('#code', totp(secret));
@@ -36,7 +36,10 @@ async function signin(p, email, pw, secret) {
 // 1. a new customer signs up, claims a company, enriches a molecule, sends a request
 const c = await page();
 const email = `smoke${Date.now()}@alphapharma.co.tz`;
-await c.goto(B + '/signup'); await c.fill('#name', 'Smoke Test'); await c.fill('#email', email); await c.fill('#password', 'smoke-password-123');
+await c.goto(B + '/signup');
+check((await c.locator('a.tile').count()) === 2, 'sign-up starts with two big choices');
+await Promise.all([c.waitForURL(/as=distributor/), c.click('a.tile:has-text("distributor")')]);
+await c.fill('#name', 'Smoke Test'); await c.fill('#email', email); await c.fill('#password', 'smoke-password-123');
 await Promise.all([c.waitForURL(/onboarding/), c.click('button[type=submit]')]);
 await c.fill('#q', 'alpha'); await Promise.all([c.waitForURL(/q=alpha/), c.click('form[method=get] button')]);
 await c.locator('input[name=company_id]').first().check();
@@ -105,7 +108,7 @@ const secret = (await t.locator('code').first().innerText()).replace(/\s+/g, '')
 await t.fill('input[name=code]', totp(secret));
 await Promise.all([t.waitForURL(/on=1/), t.click('button:has-text("Turn on")')]);
 check(true, 'team turns on two-step sign-in');
-for (const tab of ['', '?tab=review', '?tab=claims', '?tab=requests', '?tab=accounts', '?tab=content', '?tab=activity']) {
+for (const tab of ['', '?tab=review', '?tab=claims', '?tab=requests', '?tab=documents', '?tab=manufacturers', '?tab=accounts', '?tab=content', '?tab=activity']) {
   const r = await t.goto(B + '/admin' + tab); check(r.status() === 200, `admin ${tab || 'data updates'}`);
 }
 await t.goto(B + '/admin?tab=claims');
@@ -132,6 +135,25 @@ const evalPage = await c.content();
 check((await c.locator('main').innerText()).includes('1 of 10 items ready'), 'customer sees dossier readiness');
 check(evalPage.includes('Few competitors and supply is ready.') && evalPage.includes('USD 1.00-1.20') && evalPage.includes('Nobody holds an active registration.'),
   'customer sees the assessment, step by step, in the request');
+// the team uploads documents on the request: a dossier document marks its item ready; an internal one stays hidden
+await t.goto(B + `/admin/requests/${reqId}`);
+await t.selectOption('#documents select[name=kind]', 'dossier'); await t.selectOption('#documents select[name=item]', 'stability');
+await t.setInputFiles('#documents input[name=file]', { name: 'stability.pdf', mimeType: 'application/pdf', buffer: Buffer.from('%PDF-1.4 s') });
+await Promise.all([t.waitForURL(/saved=1/), t.click('#documents button:has-text("Upload")')]);
+await t.selectOption('#documents select[name=kind]', 'other'); await t.check('#documents input[name=internal]');
+await t.setInputFiles('#documents input[name=file]', { name: 'margin-notes.pdf', mimeType: 'application/pdf', buffer: Buffer.from('%PDF-1.4 m') });
+await Promise.all([t.waitForURL(/saved=1/), t.click('#documents button:has-text("Upload")')]);
+await c.goto(B + `/requests/${reqId}`);
+const docPage = await c.locator('main').innerText();
+check(docPage.includes('stability.pdf') && docPage.includes('2 of 10 items ready'), 'team dossier upload reaches the customer and marks the item ready');
+check(!docPage.includes('margin-notes.pdf'), 'internal documents stay with the team');
+await t.goto(B + '/admin?tab=documents');
+await t.fill('input[name=supplier_name]', 'Smoke Supplier'); await t.selectOption('form:has(input[name=supplier_name]) select[name=kind]', 'gmp');
+await t.fill('input[name=expires_on]', new Date(Date.now() + 20 * 86400e3).toISOString().slice(0, 10));
+await t.setInputFiles('form:has(input[name=supplier_name]) input[name=file]', { name: 'smoke-gmp.pdf', mimeType: 'application/pdf', buffer: Buffer.from('%PDF-1.4 g') });
+await Promise.all([t.waitForURL(/saved=1/), t.click('button:has-text("Upload supplier document")')]);
+const dtab = await t.locator('main').innerText();
+check(dtab.includes('smoke-gmp.pdf') && dtab.includes('stability.pdf'), 'supplier documents and all documents in Admin');
 const t2 = await page();
 await signin(t2, process.env.SEED_TEAM_EMAIL || 'team@nazryx.test', process.env.SEED_TEAM_PASSWORD, secret);
 check(t2.url().includes('/home'), 'team signs in with a two-step code');
@@ -146,16 +168,34 @@ if (XLS) {
 // 5. a manufacturer signs up, adds products, asks for market entry and uploads a dossier document; the team works it
 const k = await page();
 const kmail = `maker${Date.now()}@example.com`;
-await k.goto(B + '/signup?as=manufacturer'); await k.fill('#name', 'Maker Test'); await k.fill('#email', kmail); await k.fill('#password', 'smoke-password-123');
+await k.goto(B + '/signup');
+await Promise.all([k.waitForURL(/as=manufacturer/), k.click('a.tile:has-text("manufacturer")')]);
+await k.fill('#name', 'Maker Test'); await k.fill('#email', kmail); await k.fill('#password', 'smoke-password-123');
 await Promise.all([k.waitForURL(/\/m\/onboarding/), k.click('button[type=submit]')]);
 await k.fill('#company_name', 'Smoke Generics'); await k.fill('#hq_country', 'India');
-await k.locator('input[name=certifications][value="WHO GMP"]').check();
-await Promise.all([k.waitForURL(/\/m\?welcome/), k.click('button:has-text("Continue")')]);
+await k.selectOption('#company_size', '250-1,000 people');
+await Promise.all([k.waitForURL(/step=2/), k.click('button:has-text("Continue")')]);
+await k.locator('input[name=certifications][value="WHO prequalification"]').check();
+await k.locator('input[name=dosage_forms][value=Capsules]').check();
+await k.locator('input[name=therapeutic_areas][value=Anti-infectives]').check();
+await Promise.all([k.waitForURL(/step=3/), k.click('button:has-text("Continue")')]);
+await k.locator('input[name=target_countries][value=KE]').check();
+await k.locator('input[name=timeline][value=now]').check(); await k.locator('input[name=approach][value=own]').check();
+await Promise.all([k.waitForURL(/step=4/), k.click('button:has-text("Continue")')]);
+await k.fill('textarea[name=list]', 'Doxycycline 100mg capsules\nAmoxicillin 500mg capsules\nNot A Real Product');
+await k.setInputFiles('input[name=catalogue]', { name: 'catalogue.csv', mimeType: 'text/csv', buffer: Buffer.from('name\nDoxycycline 100mg capsules') });
+await Promise.all([k.waitForURL(/step=5/), k.click('button:has-text("Continue")')]);
+check((await k.locator('main, body').first().innerText()).includes('3 products added, 2 matched'), 'catalogue is matched to the market during onboarding');
+await k.locator('input[name=services][value=registration]').check(); await k.locator('input[name=services][value=local_rep]').check();
+await k.fill('#products_next_year', '4');
+await Promise.all([k.waitForURL(/step=6/), k.click('button:has-text("Continue")')]);
+const planText = await k.locator('body').innerText();
+check(planText.includes('Suggested') && planText.includes('Regional Expansion') && planText.includes('East Africa can go through one joint assessment'), 'onboarding ends with a suggested plan and add-ons');
+await Promise.all([k.waitForURL(/\/m\/plan\?requested=1/), k.locator('form:has(.pill:has-text("Suggested")) button[type=submit]').click()]);
+check((await k.locator('main').innerText()).includes('Requested'), 'manufacturer requests the suggested plan');
+await k.goto(B + '/m');
 check((await k.locator('main').innerText()).includes('Register these first'), 'manufacturer lands on its own home');
 await k.goto(B + '/home'); check(k.url().endsWith('/m'), 'manufacturers are kept out of the distributor area');
-await k.goto(B + '/m/products'); await k.fill('#list', 'Doxycycline 100mg capsules\nAmoxicillin 500mg capsules\nNot A Real Product');
-await Promise.all([k.waitForURL(/added=3/), k.click('text=Add and match')]);
-check(new URL(k.url()).searchParams.get('matched') === '2', 'catalogue is matched to the market');
 await k.locator('a .nm', { hasText: 'Doxycycline' }).first().click(); await k.waitForURL(/\/m\/products\/\d+/);
 const kp = await k.locator('main').innerText();
 check(kp.includes('Why Tanzania') && kp.includes('Route and timeline'), 'product opportunity page');
@@ -167,6 +207,14 @@ await Promise.all([k.waitForURL(/uploaded=1/), k.click('button:has-text("Upload"
 check((await k.locator('main').innerText()).includes('gmp.pdf'), 'manufacturer uploads to the dossier room');
 await t.goto(B + '/admin?tab=manufacturers');
 await Promise.all([t.waitForURL(/saved=1/), t.locator(`tr:has-text("${kmail}") button:has-text("Approve")`).click()]);
+await t.locator('a:has-text("Smoke Generics")').first().click(); await t.waitForURL(/admin\/accounts\//);
+const acct = await t.locator('main').innerText();
+check(acct.includes('Anti-infectives') && acct.includes('chose Regional Expansion') && acct.includes('catalogue.csv'), 'team sees every onboarding answer');
+await t.selectOption('#documents select[name=kind]', 'agreement'); await t.fill('#documents input[name=title]', 'Smoke services agreement');
+await t.setInputFiles('#documents input[name=file]', { name: 'agreement.pdf', mimeType: 'application/pdf', buffer: Buffer.from('%PDF-1.4 a') });
+await Promise.all([t.waitForURL(/saved=1/), t.click('#documents button:has-text("Upload")')]);
+await k.goto(B + '/settings');
+check((await k.locator('main').innerText()).includes('Smoke services agreement'), 'customer finds account documents in Settings');
 await t.goto(B + `/admin/engagements/${engId}`);
 await t.selectOption('select[name=stage]', 'Market assessment');
 await Promise.all([t.waitForURL(/saved=1/), t.click('button:has-text("Update")')]);
@@ -190,6 +238,12 @@ for (const path of ['/home', '/search?q=amox', '/market', '/market/whitespace', 
   await m.goto(B + path);
   const w = await m.evaluate(() => document.documentElement.scrollWidth);
   check(w <= 380, `no sideways scroll at 375px on ${path}`);
+}
+
+const m2 = await page(375);
+for (const path of ['/signup', '/signup?as=manufacturer', '/signup?mode=signin']) {
+  await m2.goto(B + path);
+  check(await m2.evaluate(() => document.documentElement.scrollWidth) <= 380, `no sideways scroll at 375px on ${path}`);
 }
 
 await browser.close();

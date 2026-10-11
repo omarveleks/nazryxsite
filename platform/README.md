@@ -176,6 +176,20 @@ confirming → production → import permit → shipped → arrived → sampling
 checklist and ETA. My portfolio → Supply and shipments brings all of it together per product. Suggested selling prices (Admin > Content) show on the
 molecule page for paid plans.
 
+## Sign-up choice, manufacturer onboarding, documents (migration 015)
+
+- **Sign up and sign in** start with two big choices: distributor or manufacturer. The choice sets the account type at sign-up;
+  at sign-in it only sets the wording (everyone lands in their own area).
+- **Manufacturer onboarding** has six steps: company, manufacturing (certifications, dosage forms, therapeutic areas, plants,
+  current markets), markets (targets, existing registrations, timeline, approach), catalogue (paste a list, matched at once, or
+  upload a file for the team), needs, then a **suggested plan** (`suggestPlan` in `lib/mfr.ts`) with reasons and add-ons.
+  Picking a plan files a plan request for the team; nothing is charged. `/m/plan` shows it again later.
+- **Plan prices** are set in Admin > Content. Empty shows "Priced on your scope".
+- **Documents everywhere in Admin**: on a request (tagged to a dossier item, which turns Ready, or a shipment document, which
+  turns received), on an engagement, on a customer account (customers see them in Settings > Documents), and on suppliers
+  (team only, with expiry dates). Any file can be marked internal: team only, enforced by RLS on the file and its body.
+  Admin > Documents lists every document and searches them; Admin > Accounts > a customer shows all their onboarding answers.
+
 ## Manufacturer side (migration 014)
 
 Manufacturers sign up with "I am a manufacturer" (or /signup?as=manufacturer) and get their own area under /m;

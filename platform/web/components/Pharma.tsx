@@ -16,8 +16,14 @@ export function QuoteTerms({ q }: { q: Quote }) {
 }
 
 /** Dossier readiness: a bar, the bioequivalence call, then each item. Items marked not needed do not count. */
-export function DossierReadiness({ be, beNote, items, compact }: {
-  be?: string | null; beNote?: string | null; items: { item: string; status: string; note?: string | null }[]; compact?: boolean;
+type DocFile = { id: number; file_name: string; item?: string | null };
+const FileLinks = ({ files, item }: { files?: DocFile[]; item: string }) => {
+  const mine = (files ?? []).filter((f) => f.item === item);
+  return mine.length ? <div className="sub2">{mine.map((f, i) => <span key={f.id}>{i ? ' · ' : ''}<a href={`/files/request/${f.id}`}>{f.file_name}</a></span>)}</div> : null;
+};
+
+export function DossierReadiness({ be, beNote, items, compact, files }: {
+  be?: string | null; beNote?: string | null; items: { item: string; status: string; note?: string | null }[]; compact?: boolean; files?: DocFile[];
 }) {
   const counted = items.filter((i) => i.status !== 'not_needed');
   const ready = counted.filter((i) => i.status === 'have').length;
@@ -32,7 +38,7 @@ export function DossierReadiness({ be, beNote, items, compact }: {
         <table className="tbl"><tbody>{DOSSIER_ITEMS.map(([k, label]) => {
           const it = items.find((x) => x.item === k);
           const [l, cls] = it ? DOSSIER_STATUS[it.status] : ['Not checked yet', ''];
-          return (<tr key={k}><td>{label}{it?.note ? <div className="sub2">{it.note}</div> : null}</td>
+          return (<tr key={k}><td>{label}{it?.note ? <div className="sub2">{it.note}</div> : null}<FileLinks files={files} item={k} /></td>
             <td className="r"><span className={`pill ${cls}`}>{l}</span></td></tr>);
         })}</tbody></table>)}
     </div>
@@ -40,7 +46,7 @@ export function DossierReadiness({ be, beNote, items, compact }: {
 }
 
 /** Where a shipment is on the import route, its ETA and which documents are ready. */
-export function ShipmentTrack({ status, eta, docs }: { status: string; eta?: string | Date | null; docs: { doc: string; ready: boolean }[] }) {
+export function ShipmentTrack({ status, eta, docs, files }: { status: string; eta?: string | Date | null; docs: { doc: string; ready: boolean }[]; files?: DocFile[] }) {
   const at = SHIPMENT_FLOW.indexOf(status as (typeof SHIPMENT_FLOW)[number]);
   const ready = SHIPMENT_DOCS.filter(([k]) => docs.some((d) => d.doc === k && d.ready));
   const missing = SHIPMENT_DOCS.filter(([k]) => !docs.some((d) => d.doc === k && d.ready));
@@ -52,6 +58,9 @@ export function ShipmentTrack({ status, eta, docs }: { status: string; eta?: str
       <div className="between small"><span>Documents ready: <b className="num">{ready.length} of {SHIPMENT_DOCS.length}</b></span>
         {eta && <span>ETA {fmtDate(eta)}</span>}</div>
       {missing.length > 0 && <span className="sub2">Waiting for: {missing.map(([, l]) => l).join(', ')}</span>}
+      {ready.some(([k]) => files?.some((f) => f.item === k)) && (
+        <div className="stack" style={{ gap: 4 }}>{ready.map(([k, l]) => files?.some((f) => f.item === k) &&
+          <div key={k} className="small">{l}<FileLinks files={files} item={k} /></div>)}</div>)}
     </div>
   );
 }

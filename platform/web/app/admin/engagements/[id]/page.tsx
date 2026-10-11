@@ -4,7 +4,8 @@ import Shell from '@/components/Shell';
 import { Flash } from '@/components/ui';
 import { EngagementBody, loadEngagement } from '@/components/EngagementView';
 import { addObligation, reviewEngagementFile, setEngagementStage, toggleObligation } from '@/app/actions/admin';
-import { uploadEngagementFile } from '@/app/actions/mfr';
+import { deleteEngagementDoc, uploadEngagementDoc } from '@/app/actions/docs';
+import { ENGAGEMENT_DOC_ITEMS } from '@/lib/docs';
 import { requireTeam } from '@/lib/auth';
 import { one, rows, withUser } from '@/lib/db';
 import { DOSSIER_ITEMS, fmtDate, title } from '@/lib/format';
@@ -44,13 +45,21 @@ export default async function AdminEngagement({ params, searchParams }: { params
         </form>
         {e.kind === 'partner_intro' && (
           <p className="note">Profile stands for: {d.partner ? <Link href={`/company/${d.partner.id}`}><b>{title(d.partner.display_name)}</b></Link> : 'not found (the registry may have changed)'}. Never share the name until both sides agree.</p>)}
-        <form action={uploadEngagementFile} className="row">
+        <form action={uploadEngagementDoc} className="row">
           <input type="hidden" name="engagement_id" value={id} />
-          <select className="input" name="item" defaultValue={e.kind === 'report' ? 'report' : 'other'} aria-label="Document type" style={{ flex: '0 1 200px' }}>
-            <option value="report">Report</option><option value="other">Other document</option></select>
+          <select className="input" name="item" defaultValue={e.kind === 'report' ? 'report' : 'other'} aria-label="Document type" style={{ flex: '0 1 240px' }}>
+            {ENGAGEMENT_DOC_ITEMS.map(([k, l]) => <option key={k} value={k}>{l}</option>)}</select>
           <input name="file" type="file" required aria-label="File" />
-          <button className="btn btn-ghost btn-sm" type="submit">Send to the client</button>
+          <label className="row small" style={{ gap: 6 }}><input type="checkbox" name="internal" /> Internal (team only)</label>
+          <button className="btn btn-ghost btn-sm" type="submit">Upload</button>
         </form>
+        {d.files.length > 0 && (
+          <div className="stack" style={{ gap: 6 }}>{d.files.map((f) => (
+            <div key={f.id} className="between small"><span><a href={`/files/engagement/${f.id}`}>{f.file_name}</a>
+              <span className="sub2"> · {ENGAGEMENT_DOC_ITEMS.find(([k]) => k === f.item)?.[1] ?? f.item} · {f.from_team ? 'Nazryx' : 'Client'}</span></span>
+              <span className="row" style={{ gap: 6, flexWrap: 'nowrap' }}>{f.internal && <span className="pill peach">Internal</span>}
+                <form action={deleteEngagementDoc}><input type="hidden" name="engagement_id" value={id} /><input type="hidden" name="file_id" value={f.id} />
+                  <button className="btn btn-ghost btn-sm" type="submit">Remove</button></form></span></div>))}</div>)}
         {e.kind === 'report' && e.due_at && <p className="note">Due {fmtDate(e.due_at)}. After uploading the report, set the stage to Delivered.</p>}
       </section>
 

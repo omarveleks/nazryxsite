@@ -4,16 +4,18 @@ import { Empty, Flash, Tabs } from '@/components/ui';
 import { requireTeam } from '@/lib/auth';
 import { one, rows, withUser } from '@/lib/db';
 import { STAGES, ago, fmtDate, title } from '@/lib/format';
-import { SERVICES, countryName } from '@/lib/mfr';
+import { ADD_ONS, MFR_PLANS, SERVICES, countryName } from '@/lib/mfr';
 import { answerQuestion, reviewManufacturer, grantCredits, keepSeparate, saveRoutes, setMoleculeRoute, matchMolecule, mergeCompanies, postRegulatory, addPrice, editUseCase, queueRecompute,
   rejectSuggestion, resetPassword, resetTwoStep, reviewClaim, setPlan } from '@/app/actions/admin';
 import { StagePill } from '@/components/ui';
+import { deleteAccountDoc, deleteSupplierDoc, savePlanPrices, uploadAccountDoc, uploadSupplierDoc } from '@/app/actions/docs';
+import { ACCOUNT_DOC_KINDS, SUPPLIER_DOC_KINDS, daysLeft } from '@/lib/docs';
 
 export const metadata = { title: 'Admin' };
 export const dynamic = 'force-dynamic';
 const H48 = 48 * 3600e3;
 
-export default async function Admin({ searchParams }: { searchParams: Promise<{ tab?: string; error?: string; saved?: string; queued?: string }> }) {
+export default async function Admin({ searchParams }: { searchParams: Promise<{ tab?: string; error?: string; saved?: string; queued?: string; dq?: string }> }) {
   const sp = await searchParams;
   const u = await requireTeam();
   const tab = sp.tab ?? 'data';
@@ -32,6 +34,7 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
       (select count(*)::int from manufacturer_profiles where status = 'pending')
         + (select count(*)::int from engagements where status = 'open') as mfr_open,
       (select count(*)::int from plan_requests where status = 'open') as plan_requests,
+      (select count(*)::int from supplier_documents where expires_on < current_date + 60) as expiring,
       (select count(*)::int from registry_uploads where status in ('queued', 'running')) as running`);
     if (tab === 'data') {
       out.history = await rows(db, `select r.id, r.kind, r.uploaded_at, r.finished_at, r.file_name, r.rows, r.status, r.error, u.email
@@ -65,6 +68,37 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
                                  from engagements e join users u on u.id = e.user_id left join manufacturer_profiles mp on mp.user_id = e.user_id
                                  order by (e.status = 'open') desc, coalesce(e.due_at, e.updated_at) limit 150`);
     }
+    if (tab === 'documents') {
+      out.suppliers = await rows(db, 'select id, name, country from suppliers order by name');
+      out.sdocs = await rows(db, `select d.*, s.name as supplier, s.country from supplier_documents d join suppliers s on s.id = d.supplier_id
+                                  order by d.expires_on nulls last, s.name limit 200`);
+      const q = (sp.dq ?? '').trim();
+      out.recent = await rows(db, `select * from (
+          select 'Request #' || f.request_id as place, '/admin/requests/' || f.request_id || '#documents' as place_href, '/files/request/' || f.id as href,
+                 f.file_name, f.kind as what, f.internal, f.from_team, f.created_at, u.email
+            from request_files f join requests r on r.id = f.request_id join users u on u.id = r.user_id
+          union all
+          select 'Engagement #' || f.engagement_id, '/admin/engagements/' || f.engagement_id, '/files/engagement/' || f.id,
+                 f.file_name, coalesce(f.item, 'other'), f.internal, f.from_team, f.created_at, u.email
+            from engagement_files f join engagements e on e.id = f.engagement_id join users u on u.id = e.user_id
+          union all
+          select 'Account', '/admin/accounts/' || d.user_id, '/files/account/' || d.id, d.file_name, d.kind, d.internal, true, d.created_at, u.email
+            from account_documents d join users u on u.id = d.user_id
+          union all
+          select 'Supplier: ' || s.name, '/admin?tab=documents', '/files/supplier/' || d.id, d.file_name, d.kind, true, true, d.created_at, null
+            from supplier_documents d join suppliers s on s.id = d.supplier_id
+          union all
+          select 'Company claim', '/admin?tab=claims', '/files/licence/' || k.id, k.licence_name, 'licence', false, false, k.created_at, u.email
+            from company_claims k join users u on u.id = k.user_id where k.licence_path is not null
+          union all
+          select 'Company claim', '/admin?tab=claims', '/files/catalogue/' || k.id, k.catalogue_name, 'catalogue', false, false, k.created_at, u.email
+            from company_claims k join users u on u.id = k.user_id where k.catalogue_path is not null
+          union all
+          select 'Manufacturer catalogue', '/admin/accounts/' || p.user_id, '/files/mcatalogue/' || p.user_id, p.catalogue_name, 'catalogue', false, false, p.created_at, u.email
+            from manufacturer_profiles p join users u on u.id = p.user_id where p.catalogue_path is not null
+        ) x where $1 = '' or x.file_name ilike '%' || $1 || '%' or x.email ilike '%' || $1 || '%' or x.place ilike '%' || $1 || '%'
+        order by created_at desc limit 80`, [q]);
+    }
     if (tab === 'questions') {
       out.questions = await rows(db, `select q.id, q.body, q.answer, q.created_at, q.answered_at, u.email, m.inn
                                       from expert_questions q join users u on u.id = q.user_id left join molecules m on m.id = q.molecule_id
@@ -88,6 +122,7 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
     }
     if (tab === 'content') {
       out.routes = await rows(db, 'select key, label, description, months_low, months_high from registration_routes order by sort');
+      out.prices = await rows(db, 'select key, price, note from plan_prices');
       out.feed = await rows(db, `select title, created_at from feed_items where kind = 'regulatory' order by created_at desc limit 8`);
       out.notifs = await rows(db, `select channel, subject, body, status, created_at from notifications order by id desc limit 12`);
     }
@@ -105,6 +140,7 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
     { key: 'requests', label: `Requests (${c.open_requests})`, href: '/admin?tab=requests' },
     { key: 'questions', label: `Questions (${c.open_questions})`, href: '/admin?tab=questions' },
     { key: 'manufacturers', label: `Manufacturers (${c.mfr_open})`, href: '/admin?tab=manufacturers' },
+    { key: 'documents', label: `Documents${c.expiring ? ` (${c.expiring})` : ''}`, href: '/admin?tab=documents' },
     { key: 'accounts', label: `Accounts${c.plan_requests ? ` (${c.plan_requests})` : ''}`, href: '/admin?tab=accounts' },
     { key: 'content', label: 'Content', href: '/admin?tab=content' },
     { key: 'activity', label: 'Activity', href: '/admin?tab=activity' },
@@ -243,7 +279,10 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
           <p className="note">Check the company, its certifications and the work email, then approve. Approval opens partner introductions.</p>
           {d.mfrs.length === 0 && <p className="note">No manufacturers yet.</p>}
           <div className="tbl-wrap"><table className="tbl"><tbody>{d.mfrs.map((m: any) => (
-            <tr key={m.user_id}><td><b>{m.company_name}</b><div className="sub2">{m.email} · {m.hq_country || 'country not given'} · {m.products} products · {m.plan} plan</div>
+            <tr key={m.user_id}><td><Link href={`/admin/accounts/${m.user_id}`}><b>{m.company_name}</b></Link>
+              <div className="sub2">{m.email} · {m.hq_country || 'country not given'} · {m.products} products
+                {m.completed_at ? '' : ` · onboarding step ${Math.min(m.step, 6)} of 6`}
+                {m.chosen_plan ? ` · chose ${MFR_PLANS[m.chosen_plan as keyof typeof MFR_PLANS]?.name}` : m.suggested_plan ? ` · suggested ${MFR_PLANS[m.suggested_plan as keyof typeof MFR_PLANS]?.name}` : ''}</div>
               <div className="sub2">{(m.certifications ?? []).join(', ') || 'No certifications listed'} · targets {(m.target_countries ?? []).map(countryName).join(', ') || 'none'}</div></td>
               <td className="r">{m.status === 'pending' ? (
                 <form action={reviewManufacturer} className="row" style={{ justifyContent: 'flex-end' }}><input type="hidden" name="user_id" value={m.user_id} />
@@ -301,7 +340,7 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
           <div className="card-h"><h2>Accounts</h2><span className="note">Billing is manual for now: invoice, then switch the plan here.</span></div>
           <div className="tbl-wrap"><table className="tbl"><thead><tr><th>Account</th><th>Role</th><th>Plan</th><th className="r">Credits</th><th className="r">Actions</th></tr></thead>
             <tbody>{d.users.map((x: any) => (
-              <tr key={x.id}><td><b>{x.name || x.email}</b><div className="sub2">{x.email}{x.owner_id ? ' · teammate seat' : ''}</div>
+              <tr key={x.id}><td><Link href={`/admin/accounts/${x.id}`}><b>{x.name || x.email}</b></Link><div className="sub2">{x.email}{x.owner_id ? ' · teammate seat' : ''}</div>
                 {x.wants && <span className="pill solid">Asked for: {x.wants}</span>}</td>
                 <td>{x.role}</td><td>{x.plan}</td><td className="r num">{x.credits}</td>
                 <td className="r">{x.role === 'customer' && !x.owner_id && (<div className="row" style={{ justifyContent: 'flex-end' }}>
@@ -321,6 +360,66 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
             </tbody></table></div>
         </section>
       )}
+      {tab === 'documents' && (<>
+        <p className="note">Upload documents where they belong: on a request (dossier items, shipment documents, assessments), on an engagement,
+          on a customer account, or on a supplier. Market data files (registry, essential lists) go under Data updates.</p>
+        <div className="grid g2">
+          <section className="card stack">
+            <h2>Supplier documents</h2>
+            <p className="note">GMP certificates, CPPs, DMFs and agreements. Team only, never shown to customers. Expiring within 60 days turns peach, expired turns red.</p>
+            <form action={uploadSupplierDoc} className="form-grid">
+              <select className="input full" name="supplier_id" aria-label="Supplier" defaultValue=""><option value="">New supplier (fill below)</option>
+                {d.suppliers.map((x: any) => <option key={x.id} value={x.id}>{x.name}{x.country ? ` (${x.country})` : ''}</option>)}</select>
+              <input className="input" name="supplier_name" placeholder="New supplier name" aria-label="New supplier name" />
+              <input className="input" name="supplier_country" placeholder="Country" aria-label="Supplier country" />
+              <select className="input" name="kind" aria-label="Document type" defaultValue="gmp">
+                {Object.entries(SUPPLIER_DOC_KINDS).map(([k, l]) => <option key={k} value={k}>{l}</option>)}</select>
+              <label className="row small" style={{ gap: 6 }}>Expires <input className="input" type="date" name="expires_on" aria-label="Expiry date" /></label>
+              <input className="input full" name="product" placeholder="Product or molecule it covers (optional)" aria-label="Product" />
+              <input className="full" name="file" type="file" required aria-label="File" />
+              <button className="btn btn-blue btn-sm full" type="submit">Upload supplier document</button>
+            </form>
+          </section>
+          <section className="card stack">
+            <h2>Document for a customer account</h2>
+            <p className="note">Agreements, invoices, NDAs, certificates. The customer finds them in Settings, Documents, unless marked internal.
+              For a request or engagement, upload on its page instead.</p>
+            <form action={uploadAccountDoc} className="form-grid">
+              <input className="input full" name="email" type="email" placeholder="Customer email" aria-label="Customer email" required />
+              <select className="input" name="kind" aria-label="Document type" defaultValue="agreement">
+                {Object.entries(ACCOUNT_DOC_KINDS).map(([k, l]) => <option key={k} value={k}>{l}</option>)}</select>
+              <input className="input" name="title" placeholder="Title (optional)" aria-label="Title" />
+              <input className="full" name="file" type="file" required aria-label="File" />
+              <label className="row small full" style={{ gap: 6 }}><input type="checkbox" name="internal" /> Internal: team only</label>
+              <button className="btn btn-blue btn-sm full" type="submit">Upload to account</button>
+            </form>
+          </section>
+        </div>
+        <section className="card stack">
+          <h2>Supplier files ({d.sdocs.length})</h2>
+          {d.sdocs.length === 0 ? <Empty>No supplier documents yet.</Empty> : (
+            <div className="tbl-wrap"><table className="tbl"><tbody>{d.sdocs.map((x: any) => {
+              const left = daysLeft(x.expires_on);
+              return (<tr key={x.id}><td><a href={`/files/supplier/${x.id}`}><b>{x.file_name}</b></a>
+                <div className="sub2">{x.supplier}{x.country ? ` (${x.country})` : ''} · {SUPPLIER_DOC_KINDS[x.kind]}{x.product ? ` · ${x.product}` : ''}</div></td>
+                <td className="r">{x.expires_on ? <span className={`pill ${left! < 0 ? 'alert' : left! < 60 ? 'peach' : 'mint'}`}>{left! < 0 ? 'Expired' : 'Expires'} {fmtDate(x.expires_on)}</span> : <span className="note">No expiry</span>}</td>
+                <td className="r"><form action={deleteSupplierDoc}><input type="hidden" name="doc_id" value={x.id} />
+                  <button className="btn btn-ghost btn-sm" type="submit">Remove</button></form></td></tr>);
+            })}</tbody></table></div>)}
+        </section>
+        <section className="card stack">
+          <div className="card-h"><h2>All documents</h2>
+            <form className="row" action="/admin"><input type="hidden" name="tab" value="documents" />
+              <input className="input" name="dq" defaultValue={sp.dq ?? ''} placeholder="File, email or place" aria-label="Search documents" style={{ width: 220 }} />
+              <button className="btn btn-ghost btn-sm" type="submit">Search</button></form></div>
+          {d.recent.length === 0 ? <Empty>No documents{sp.dq ? ' match' : ' yet'}.</Empty> : (
+            <div className="tbl-wrap"><table className="tbl"><thead><tr><th>File</th><th>Where</th><th>From</th><th className="r">When</th></tr></thead>
+              <tbody>{d.recent.map((x: any, i: number) => (
+                <tr key={i}><td><a href={x.href}>{x.file_name}</a><div className="sub2">{x.what.replaceAll('_', ' ')}{x.internal ? ' · internal' : ''}</div></td>
+                  <td><Link href={x.place_href}>{x.place}</Link>{x.email && <div className="sub2">{x.email}</div>}</td>
+                  <td className="small">{x.from_team ? 'Nazryx' : 'Customer'}</td><td className="r small">{ago(x.created_at)}</td></tr>))}</tbody></table></div>)}
+        </section>
+      </>)}
       {tab === 'activity' && (
         <section className="card">
           <div className="card-h"><h2>Team activity</h2><span className="note">Every change a team account makes, recorded by the database. Latest 200.</span></div>
@@ -384,6 +483,22 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
               <input className="input" name="molecule" placeholder="Molecule name (exact)" aria-label="Molecule" required />
               <textarea className="input" name="use_case" placeholder="Indication, class and typical use" aria-label="Use case" required />
               <button className="btn btn-ghost btn-sm" type="submit">Save use case</button>
+            </form>
+          </section>
+          <section className="card stack" style={{ gridColumn: '1 / -1' }}>
+            <h2>Manufacturer plan prices</h2>
+            <p className="note">Shown to manufacturers on their suggested plan. Leave empty to show &ldquo;Priced on your scope&rdquo;. Example: USD 1,500 / month per country.</p>
+            <form action={savePlanPrices} className="stack" style={{ gap: 8 }}>
+              {[...Object.entries(MFR_PLANS).map(([k, v]) => [`mfr_${k}`, v.name]), ...Object.entries(ADD_ONS).map(([k, v]) => [`addon_${k}`, `Add-on: ${v.name}`])].map(([k, label]) => {
+                const cur = d.prices.find((x: any) => x.key === k);
+                return (
+                  <div key={k} className="row">
+                    <b style={{ flex: '0 1 220px' }}>{label}</b>
+                    <input className="input" name={`price_${k}`} defaultValue={cur?.price ?? ''} placeholder="Price" aria-label={`${label}: price`} style={{ flex: '0 1 220px' }} />
+                    <input className="input" name={`note_${k}`} defaultValue={cur?.note ?? ''} placeholder="Note, e.g. 6-month minimum" aria-label={`${label}: note`} style={{ flex: '1 1 220px' }} />
+                  </div>);
+              })}
+              <button className="btn btn-blue btn-sm" type="submit" style={{ alignSelf: 'flex-start' }}>Save prices</button>
             </form>
           </section>
           <section className="card stack" style={{ gridColumn: '1 / -1' }}>

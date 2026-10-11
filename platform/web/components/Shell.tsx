@@ -17,7 +17,7 @@ export default function Shell({ user, title, sub, crumb, actions, children }: {
         <NavLinks team={user.role === 'team'} manufacturer={user.account_type === 'manufacturer'} />
         <div className="plan-box">
           <b>{user.role === 'team' ? 'Nazryx team' : user.plan === 'paid' ? 'Paid plan' : 'Free plan'}</b>
-          {user.account_type === 'manufacturer' ? <span className="hide-m">Market entry</span> : user.plan !== 'paid' && user.role !== 'team' ? (
+          {user.account_type === 'manufacturer' ? <Link className="hide-m" href="/m/plan">Your plan</Link> : user.plan !== 'paid' && user.role !== 'team' ? (
             <span className="num">{user.credits} enrich credits left</span>
           ) : <span className="hide-m">Unlimited enrich</span>}
           {user.plan !== 'paid' && user.role !== 'team' && <Link className="btn-link hide-m" href="/settings#plan">Upgrade</Link>}

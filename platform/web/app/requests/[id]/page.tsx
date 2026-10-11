@@ -8,6 +8,7 @@ import { acceptQuote, addRequestFile, postMessage } from '@/app/actions/app';
 import { requireUser } from '@/lib/auth';
 import { one, rows, withUser } from '@/lib/db';
 import { PIPELINE, STAGE_INFO, fmtDate } from '@/lib/format';
+import { requestDocLabel } from '@/lib/docs';
 
 const VERDICT: Record<string, { label: string; cls: string }> = {
   go: { label: 'Go', cls: 'mint' }, maybe: { label: 'Worth a look', cls: 'blue' }, no: { label: 'Skip', cls: 'peach' },
@@ -32,7 +33,7 @@ export default async function RequestDetail({ params, searchParams }: { params: 
       items: await rows(db, 'select item, status, note from dossier_items where request_id = $1', [id]),
       docs: await rows(db, 'select d.doc, d.ready from shipment_documents d join orders o on o.id = d.order_id where o.request_id = $1', [id]),
       revealed: await one(db, 'select * from accepted_supplier where request_id = $1', [id]),
-      files: await rows(db, 'select id, file_name, kind, created_at from request_files where request_id = $1 order by created_at', [id]),
+      files: await rows(db, 'select id, file_name, kind, item, note, from_team, created_at from request_files where request_id = $1 order by created_at', [id]),
       messages: await rows(db, 'select from_team, body, created_at from request_messages where request_id = $1 order by created_at', [id]),
       order: await one(db, 'select id, status, eta, updated_at from orders where request_id = $1', [id]),
       evaluation: await one(db, `select verdict, summary, regulatory_check, supply, price_range, route, evaluated_at
@@ -86,7 +87,7 @@ export default async function RequestDetail({ params, searchParams }: { params: 
             <div className="card-h"><h2>Dossier readiness</h2><span className="note">For registration</span></div>
             <p className="note" style={{ marginBottom: 10 }}>What the supplier&apos;s registration dossier holds, item by item, and whether a bioequivalence study is needed.</p>
             {d.items.length === 0 && !d.dossier ? <Empty>We check the dossier once a supplier is lined up.</Empty>
-              : <DossierReadiness be={d.dossier?.be_status} beNote={d.dossier?.be_note} items={d.items} />}
+              : <DossierReadiness be={d.dossier?.be_status} beNote={d.dossier?.be_note} items={d.items} files={d.files} />}
           </section>
           <section className="card">
             <div className="card-h"><h2>4. Pricing and logistics</h2>{state('Pricing and logistics') && <span className={`pill ${state('Pricing and logistics') === 'Now' ? 'solid' : state('Pricing and logistics') === 'Done' ? 'mint' : ''}`}>{state('Pricing and logistics')}</span>}</div>
@@ -123,7 +124,7 @@ export default async function RequestDetail({ params, searchParams }: { params: 
               : <Empty>Starts once you accept a quote.</Empty>}
           </Step>
           <Step n={6} s="Shipment">
-            {d.order && r.stage === 'Shipment' ? <ShipmentTrack status={d.order.status} eta={d.order.eta} docs={d.docs} />
+            {d.order && r.stage === 'Shipment' ? <ShipmentTrack status={d.order.status} eta={d.order.eta} docs={d.docs} files={d.files} />
               : <Empty>Starts once the product is registered.</Empty>}
           </Step>
         </div>
@@ -143,10 +144,12 @@ export default async function RequestDetail({ params, searchParams }: { params: 
             </form>
           </section>
         <section className="card">
-          <div className="card-h"><h2>Attachments</h2></div>
+          <div className="card-h"><h2>Documents</h2></div>
           <div className="stack" style={{ gap: 8 }}>
             {d.files.length === 0 && <Empty>No files yet.</Empty>}
-            {d.files.map((f) => <a key={f.id} href={`/files/request/${f.id}`}>{f.file_name}{f.kind === 'requirement_list' ? ' (requirement list)' : ''}</a>)}
+            {d.files.map((f) => <div key={f.id}><a href={`/files/request/${f.id}`}>{f.file_name}</a>
+              <span className="sub2"> · {requestDocLabel(f.kind, f.item)} · {f.from_team ? 'from Nazryx' : 'yours'} · {fmtDate(f.created_at)}</span>
+              {f.note && <div className="sub2">{f.note}</div>}</div>)}
           </div>
           <form action={addRequestFile} className="stack" style={{ marginTop: 14 }}>
             <input type="hidden" name="request_id" value={id} />
@@ -154,7 +157,7 @@ export default async function RequestDetail({ params, searchParams }: { params: 
             <input id="file" name="file" type="file" required />
             <button className="btn btn-ghost btn-sm" type="submit">Upload</button>
           </form>
-          <p className="note" style={{ marginTop: 12 }}>Documents live only inside requests.</p>
+          <p className="note" style={{ marginTop: 12 }}>Dossier and shipment documents from our team also appear next to their item.</p>
         </section>
         </div>
       </div>

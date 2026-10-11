@@ -4,7 +4,7 @@ import { Badges, Empty, Flash, StagePill } from '@/components/ui';
 import { requireUser } from '@/lib/auth';
 import { one, rows, withUser } from '@/lib/db';
 import { fmtDate } from '@/lib/format';
-import { MFR_COUNTRIES, MFR_PRODUCTS_SQL, OBLIGATION_KINDS, SERVICES, countryName, reasons } from '@/lib/mfr';
+import { MFR_COUNTRIES, MFR_PLANS, MFR_PRODUCTS_SQL, OBLIGATION_KINDS, SERVICES, countryName, reasons } from '@/lib/mfr';
 
 export const metadata = { title: 'Home' };
 
@@ -14,7 +14,7 @@ export default async function MfrHome({ searchParams }: { searchParams: Promise<
   const u = await requireUser({ manufacturer: true });
   const paid = u.plan === 'paid' || u.role === 'team';
   const d = await withUser(u.id, async (db) => {
-    const profile = await one(db, 'select company_name, status, target_countries from manufacturer_profiles where user_id = $1', [u.id]);
+    const profile = await one(db, 'select company_name, status, target_countries, suggested_plan, chosen_plan from manufacturer_profiles where user_id = $1', [u.id]);
     const counts = await one(db, `select count(*)::int as products, count(p.molecule_id)::int as matched,
         count(*) filter (where cm.registrants = 0 and cm.on_national_list)::int as open,
         count(*) filter (where cm.registrants between 1 and 3)::int as few
@@ -33,7 +33,8 @@ export default async function MfrHome({ searchParams }: { searchParams: Promise<
       actions={<Link className="btn btn-blue btn-sm" href="/m/services">Start market entry</Link>}>
       <Flash sp={sp} />
       {d.profile?.status === 'pending' && <div className="note">Our team is reviewing your company. You can add products and explore now; partner introductions open once you are approved.</div>}
-      {sp.welcome && <div className="ok">Welcome. Start by adding your products: we match them to the market in seconds.</div>}
+      {sp.welcome && <div className="ok">{d.counts?.products ? `Welcome. Your ${d.counts.products} products are matched to the market below.`
+        : 'Welcome. Start by adding your products: we match them to the market in seconds.'}</div>}
 
       <div className="grid g4">
         <Link className="tile t-white" href="/m/products"><span className="k">Your products</span><span className="v num">{d.counts?.products}</span></Link>
@@ -76,7 +77,17 @@ export default async function MfrHome({ searchParams }: { searchParams: Promise<
 
         <div className="stack">
           <section className="card">
-            <div className="card-h"><h2>Your markets</h2><Link className="btn-link" href="/m/onboarding?next=/m">Edit</Link></div>
+            <div className="card-h"><h2>Your plan</h2><Link className="btn-link" href="/m/plan">{d.profile?.chosen_plan ? 'Change' : 'See plans'}</Link></div>
+            {d.profile?.chosen_plan ? (
+              <p><b>{MFR_PLANS[d.profile.chosen_plan as keyof typeof MFR_PLANS]?.name}</b> <span className="pill blue">Requested</span><br />
+                <span className="note">Our team confirms scope and price with you, usually within one working day.</span></p>
+            ) : (<>
+              <p>Suggested for you: <b>{MFR_PLANS[(d.profile?.suggested_plan ?? 'insight') as keyof typeof MFR_PLANS]?.name}</b></p>
+              <Link className="btn btn-blue btn-sm" href="/m/plan" style={{ marginTop: 10 }}>See why</Link>
+            </>)}
+          </section>
+          <section className="card">
+            <div className="card-h"><h2>Your markets</h2><Link className="btn-link" href="/m/onboarding?step=3">Edit</Link></div>
             <div className="stack" style={{ gap: 8 }}>{MFR_COUNTRIES.filter((c) => targets.includes(c.code)).map((c) => (
               <div key={c.code} className="between"><span>{c.name}</span>
                 <span className={`pill ${c.data ? 'mint' : ''}`}>{c.data ? 'Market data live' : 'Agency coverage'}</span></div>))}</div>
