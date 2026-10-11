@@ -187,7 +187,7 @@ molecule page for paid plans.
   Markets without loaded data say so and offer a report. `/m/market` is the manufacturer's market page.
 - **My products**: a portfolio dashboard (competition spread, average competitors, top class, by class) above every product.
   Products are added from a search over the molecules we track plus a worldwide list of 4,260 medicines with WHO ATC codes
-  (`ingest/data/medicines.csv`, from Wikidata, CC0; loaded once by `migrate.py`).
+  (`ingest/catalog/medicines.csv`, from Wikidata, CC0; loaded once by `migrate.py`).
 - **Partners** opens on every distributor in the market, filterable by class, molecule, size and local manufacturing, with
   "open to X of your molecules". Without a plan, five profiles show; names always stay behind codes (`partner_search`).
 - **Services** is a menu; each service has its own page with how it runs, what we need, and the form.

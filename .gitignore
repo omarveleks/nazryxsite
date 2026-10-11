@@ -12,3 +12,5 @@ node_modules/
 .DS_Store
 *.png
 !site/**/*.png
+# the public medicine list (Wikidata, CC0); see platform/ingest/catalog/README.md
+!platform/ingest/catalog/medicines.csv

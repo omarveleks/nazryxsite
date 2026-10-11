@@ -49,12 +49,12 @@ def migrate():
 
 
 def load_medicines(conn):
-    """Fill the worldwide medicine list once (ingest/data/medicines.csv: Wikidata, CC0)."""
+    """Fill the worldwide medicine list once (ingest/catalog/medicines.csv: Wikidata, CC0)."""
     if not conn.execute("select to_regclass('medicine_catalog')").fetchone()[0]:
         return
     if conn.execute("select exists (select 1 from medicine_catalog)").fetchone()[0]:
         return
-    path = os.path.join(HERE, "data", "medicines.csv")
+    path = os.path.join(HERE, "catalog", "medicines.csv")
     if not os.path.exists(path):
         return
     import csv
