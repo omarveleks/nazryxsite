@@ -85,7 +85,7 @@ export default async function MfrHome({ searchParams }: { searchParams: Promise<
 
       <div className="split">
         <div className="stack">
-          <section className="card">
+          <section className="card" data-tour="home">
             <div className="card-h"><div><h2>Register these first</h2><p className="note">The clearest openings for your products in {countryName(d.focus)}.</p></div>
               <Link className="btn-link" href="/m/products">All products</Link></div>
             {d.counts?.products === 0 ? (

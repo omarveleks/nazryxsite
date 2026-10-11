@@ -56,7 +56,7 @@ export default async function Services({ searchParams }: { searchParams: Promise
   return (
     <Shell user={u} title="Services" sub="Tell us what you want. We point you to the right help.">
       <Flash sp={sp} />
-      <section className="card stack" id="want">
+      <section className="card stack" id="want" data-tour="services">
         <div className="between"><h2>What do you want?</h2>{goal && <Link className="btn-link small" href="/m/services#want">Start again</Link>}</div>
         <div className="grid g2">{GOALS.map(([k, l]) => <Choice key={k} href={`/m/services?goal=${k}#want`} on={goal === k}>{l}</Choice>)}</div>
         {step >= 2 && (<>

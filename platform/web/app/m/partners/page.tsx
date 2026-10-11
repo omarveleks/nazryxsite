@@ -62,7 +62,7 @@ export default async function Partners({ searchParams }: { searchParams: Promise
               <button className="btn btn-blue btn-sm" type="submit">Apply</button></div>
           </div>
         </form>
-        <section className="card">
+        <section className="card" data-tour="distributors">
           <div className="card-h"><h2>{total} distributors{d.cls ? ` in ${d.cls}` : ''}</h2></div>
           {shown.length === 0 ? <Empty>No distributor matches these filters.</Empty> : (
             <div>{shown.map((p, i) => (

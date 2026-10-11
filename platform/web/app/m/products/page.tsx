@@ -94,7 +94,7 @@ export default async function MfrProducts({ searchParams }: { searchParams: Prom
       <MarketPicker targets={d.targets} current={market} path="/m/products" />
 
       {market !== 'all' && !hasData(market) ? <AgencyMarket code={market} /> : n > 0 && (<>
-        <div className="grid g4">
+        <div className="grid g4" data-tour="portfolio">
           <div className="tile t-white"><span className="k">Products</span><span className="v num">{n}</span><span className="small">{matched} matched to a molecule</span></div>
           <div className="tile t-peach"><span className="k"><DemandIcon /> In high demand{focus && market === 'all' ? ` in ${countryName(focus)}` : ''}</span>
             <span className="v num">{list.filter((p) => Number(p.f?.demand ?? 0) >= HIGH_DEMAND).length}</span>
@@ -141,7 +141,7 @@ export default async function MfrProducts({ searchParams }: { searchParams: Prom
       </section>
 
       </>)}
-      <section className="card stack" id="add">
+      <section className="card stack" id="add" data-tour="add-products">
         <h2>Add a product</h2>
         <p className="note">Search by name. Not there? Add it as written and our team takes care of it.</p>
         <div style={{ maxWidth: 560 }}><MedicineSearch /></div>

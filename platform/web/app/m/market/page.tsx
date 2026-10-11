@@ -66,7 +66,7 @@ export default async function MfrMarket({ searchParams }: { searchParams: Promis
       <MarketPicker targets={d.targets} current={m} path="/m/market" />
 
       {m === 'all' && (
-        <div className="grid g2">{d.cards!.map(({ c, h }) => (
+        <div className="grid g2" data-tour="market">{d.cards!.map(({ c, h }) => (
           <section key={c} className="card stack">
             <h2>{countryName(c)}</h2>
             {h && (<>
@@ -85,7 +85,7 @@ export default async function MfrMarket({ searchParams }: { searchParams: Promis
       {m !== 'all' && !hasData(m) && <AgencyMarket code={m} />}
 
       {m !== 'all' && d.h && (<>
-        <div className="grid g4">
+        <div className="grid g4" data-tour="market">
           <div className="tile t-blue"><span className="k">Registered products</span><span className="v num">{d.h.products.toLocaleString('en')}</span></div>
           <div className="tile t-mint"><span className="k">Distributors holding registrations</span><span className="v num">{d.h.distributors}</span></div>
           <div className="tile t-lav"><span className="k">Molecules on the market</span><span className="v num">{d.h.molecules}</span></div>

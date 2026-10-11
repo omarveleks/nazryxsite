@@ -53,7 +53,7 @@ export default function PlanChooser({ p, prices, products, from, want }: {
           <p className="note">From your answers: {markets.length ? markets.join(', ') : 'no markets yet'} · {products} product{products === 1 ? '' : 's'} in your catalogue.</p>
         </section>)}
 
-      <div className="grid g3">
+      <div className="grid g3" data-tour="plans">
         {PLAN_ORDER.map((k) => {
           const pl = MFR_PLANS[k], pr = prices[`mfr_${k}`], on = k === highlight, isActive = k === active, asked = p.chosen_plan === k && !isActive;
           const amount = priceLine(k, prices), byCard = Boolean(amount) && card;

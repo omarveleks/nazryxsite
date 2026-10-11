@@ -77,7 +77,7 @@ export default async function MfrProduct({ params, searchParams }: { params: Pro
               })}</tbody></table>
             </section>
           ) : !hasData(market) ? <AgencyMarket code={market} /> : (<>
-            <section className="card stack">
+            <section className="card stack" data-tour="product">
               <div className="card-h"><h2>Why {countryName(market)}</h2>{p.registrants != null && <Badges m={p} />}</div>
               {p.registrants == null ? <Empty>Not registered in {countryName(market)} and not on its official lists yet.</Empty> : (
                 <table className="tbl"><tbody>

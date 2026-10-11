@@ -185,7 +185,8 @@ molecule page for paid plans.
 - **Sign-up** is one question per screen with a progress bar (`components/MfrWizard.tsx`): company, markets, what they want,
   where they want help, when to file, how many products, products (or skip), then the suggested plan. Single choices move on
   with one click. The rest of the profile (certifications, dosage forms, plants ...) stays editable from Settings.
-- **Guided tour** right after sign-up (`lib/tour.ts`, `components/TourBar.tsx`): eight stops, each on the page it explains
+- **Guided tour** right after sign-up (`lib/tour.ts`, `components/TourSpotlight.tsx`): eight stops, each on the page it explains,
+  spotlighting the feature (marked `data-tour`) while the rest of the page is dimmed and blurred (the one place blur is used)
   (add products, portfolio, one product in depth, market, distributors, services, plan, home), with Back, Next and End.
   It can be taken again from Home.
 - **Get set up** on Home: add products, certifications and dosage forms, the free full read, the launch tracker, a plan;
