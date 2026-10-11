@@ -15,7 +15,7 @@ export default async function AdminEngagement({ params, searchParams }: { params
   const id = Number((await params).id);
   const sp = await searchParams;
   if (!Number.isInteger(id)) notFound();
-  const u = await requireTeam();
+  const u = await requireTeam('manufacturers');
   const d = await withUser(u.id, async (db) => {
     const base = await loadEngagement(db, id);
     if (!base) return null;

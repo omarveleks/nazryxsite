@@ -1,6 +1,7 @@
 'use server';
 import { revalidatePath } from 'next/cache';
-import { redirect } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
+import { teamCan } from '@/lib/team';
 import { headers } from 'next/headers';
 import { checkoutUrl, portalUrl, stripeReady } from '@/lib/stripe';
 import { requireUser } from '@/lib/auth';
@@ -276,6 +277,7 @@ export async function postEngagementMessage(f: FormData) {
   const u = await requireUser({ manufacturer: true, shared: true });
   const id = int(f, 'engagement_id'), body = str(f, 'body', 4000);
   const team = u.role === 'team';
+  if (team && !teamCan(u, 'manufacturers')) notFound();
   const to = team ? `/admin/engagements/${id}` : `/m/engagements/${id}`;
   if (!body) back(to, { error: 'Write a message.' });
   await withUser(u.id, async (db) => {
@@ -296,6 +298,7 @@ export async function uploadEngagementFile(f: FormData) {
   const u = await requireUser({ manufacturer: true, shared: true });
   const id = int(f, 'engagement_id');
   const team = u.role === 'team';
+  if (team && !teamCan(u, 'manufacturers')) notFound();
   const to = team ? `/admin/engagements/${id}` : `/m/engagements/${id}`;
   const item = str(f, 'item', 30);
   if (item && item !== 'report' && item !== 'other' && !DOSSIER_ITEMS.some(([k]) => k === item)) back(to, { error: 'Pick what the document is.' });

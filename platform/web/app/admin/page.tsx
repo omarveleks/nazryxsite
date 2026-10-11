@@ -2,6 +2,8 @@ import Link from 'next/link';
 import Shell from '@/components/Shell';
 import { Empty, Flash, Tabs } from '@/components/ui';
 import { requireTeam } from '@/lib/auth';
+import { TAB_PERMISSION, TEAM_PERMISSIONS, teamCan } from '@/lib/team';
+import { addTeamMember, removeTeamMember, updateTeamMember } from '@/app/actions/team';
 import { one, rows, withUser } from '@/lib/db';
 import { STAGES, ago, fmtDate, title } from '@/lib/format';
 import { MFR_PLANS, SERVICES, countryName } from '@/lib/mfr';
@@ -18,7 +20,9 @@ const H48 = 48 * 3600e3;
 export default async function Admin({ searchParams }: { searchParams: Promise<{ tab?: string; error?: string; saved?: string; queued?: string; dq?: string }> }) {
   const sp = await searchParams;
   const u = await requireTeam();
-  const tab = sp.tab ?? 'data';
+  // each team member sees only the tabs their permissions open; owners see all of them and the Team tab
+  const allowedTabs = Object.keys(TAB_PERMISSION).filter((k) => teamCan(u, TAB_PERMISSION[k]));
+  const tab = sp.tab && allowedTabs.includes(sp.tab) ? sp.tab : allowedTabs[0] ?? 'none';
   const d = await withUser(u.id, async (db) => {
     const out: Record<string, any> = {};
     out.last = await one(db, `select finished_at, diff from registry_uploads where status = 'applied' and country = 'TZ' and kind <> 'recompute'
@@ -116,6 +120,10 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
                                   auth_totp_enabled(u.id) as two_step
                                   from users u order by (select count(*) from plan_requests p where p.user_id = u.id and p.status = 'open') desc, u.created_at desc limit 200`);
     }
+    if (tab === 'team') {
+      out.members = await rows(db, `select id, email, name, team_owner, team_permissions, disabled, created_at, auth_totp_enabled(id) as two_step
+                                    from users where role = 'team' order by disabled, team_owner desc, created_at`);
+    }
     if (tab === 'activity') {
       out.log = await rows(db, `select a.at, a.action, a.table_name, a.row_id, a.changes, u.email
                                 from audit_log a left join users u on u.id = a.actor order by a.at desc limit 200`);
@@ -134,7 +142,7 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
   const diff = d.lastAny?.diff ?? {};
   const c = d.counts;
   const tabs = [
-    { key: 'data', label: 'Data updates', href: '/admin' },
+    { key: 'data', label: 'Data updates', href: '/admin?tab=data' },
     { key: 'review', label: `Review queue (${c.suggestions + c.dups})`, href: '/admin?tab=review' },
     { key: 'claims', label: `Claims (${c.claims})`, href: '/admin?tab=claims' },
     { key: 'requests', label: `Requests (${c.open_requests})`, href: '/admin?tab=requests' },
@@ -144,7 +152,8 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
     { key: 'accounts', label: `Accounts${c.plan_requests ? ` (${c.plan_requests})` : ''}`, href: '/admin?tab=accounts' },
     { key: 'content', label: 'Content', href: '/admin?tab=content' },
     { key: 'activity', label: 'Activity', href: '/admin?tab=activity' },
-  ];
+    { key: 'team', label: 'Team', href: '/admin?tab=team' },
+  ].filter((t) => allowedTabs.includes(t.key));
   return (
     <Shell user={u} title="Admin" sub="Nazryx team only. Not visible to customers.">
       <Tabs items={tabs} current={tab} />
@@ -420,6 +429,48 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
                 <tr key={i}><td><a href={x.href}>{x.file_name}</a><div className="sub2">{x.what.replaceAll('_', ' ')}{x.internal ? ' · internal' : ''}</div></td>
                   <td><Link href={x.place_href}>{x.place}</Link>{x.email && <div className="sub2">{x.email}</div>}</td>
                   <td className="small">{x.from_team ? 'Nazryx' : 'Customer'}</td><td className="r small">{ago(x.created_at)}</td></tr>))}</tbody></table></div>)}
+        </section>
+      </>)}
+      {tab === 'none' && <section className="card"><p className="muted">Your account has no Admin areas yet. Ask an owner to give you access.</p></section>}
+      {tab === 'team' && (<>
+        <section className="card stack">
+          <h2>Add a team member</h2>
+          <form action={addTeamMember} className="stack">
+            <div className="form-grid">
+              <input className="input" name="name" placeholder="Full name" aria-label="Full name" required />
+              <input className="input" name="email" type="email" placeholder="Work email" aria-label="Work email" required />
+              <input className="input full" name="password" type="text" minLength={10} required placeholder="Temporary password (at least 10 characters)"
+                aria-label="Temporary password" autoComplete="off" />
+            </div>
+            <span className="lbl">What they can open</span>
+            <div className="grid g3">{TEAM_PERMISSIONS.map(([k, l, what]) => (
+              <label key={k} className="choice"><input type="checkbox" name="perm" value={k} /><span><b>{l}</b><br /><span className="note">{what}</span></span></label>))}</div>
+            <label className="row small" style={{ gap: 6 }}><input type="checkbox" name="owner" /> Owner: everything, including adding and removing team members</label>
+            <button className="btn btn-blue btn-sm" type="submit" style={{ alignSelf: 'flex-start' }}>Add team member</button>
+            <p className="note">Send them the email and temporary password yourself; they can change the password in Settings.</p>
+          </form>
+        </section>
+        <section className="card stack">
+          <h2>Team ({d.members.filter((m: any) => !m.disabled).length})</h2>
+          {d.members.map((m: any) => (
+            <form key={m.id} action={updateTeamMember} className="stack" style={{ gap: 8, paddingTop: 12, borderTop: '1px solid var(--line)', opacity: m.disabled ? 0.6 : 1 }}>
+              <input type="hidden" name="user_id" value={m.id} />
+              <div className="between"><span><b>{m.name || m.email}</b><span className="sub2"> · {m.email}{m.two_step ? ' · two-step on' : ''}</span></span>
+                <span className="row" style={{ gap: 6 }}>{m.disabled ? <span className="pill">Removed</span> : m.team_owner ? <span className="pill solid">Owner</span> : null}
+                  {m.id === u.id && <span className="pill blue">You</span>}</span></div>
+              {!m.disabled && (<>
+                <div className="row" style={{ gap: 6 }}>{TEAM_PERMISSIONS.map(([k, l]) => (
+                  <label key={k} className="row small" style={{ gap: 4, marginRight: 8 }}><input type="checkbox" name="perm" value={k} defaultChecked={m.team_owner || m.team_permissions?.includes(k)} /> {l}</label>))}</div>
+                <label className="row small" style={{ gap: 6 }}><input type="checkbox" name="owner" defaultChecked={m.team_owner} disabled={m.id === u.id} /> Owner
+                  {m.id === u.id && <input type="hidden" name="owner" value="on" />}</label>
+              </>)}
+              <div className="row">
+                {!m.disabled && <button className="btn btn-blue btn-sm" type="submit">Save</button>}
+                {m.id !== u.id && <button className="btn btn-ghost btn-sm" type="submit" formAction={removeTeamMember} name="restore" value={m.disabled ? '1' : '0'}>
+                  {m.disabled ? 'Give access back' : 'Remove access'}</button>}
+              </div>
+            </form>))}
+          <p className="note">Owners can open everything. Removing someone signs them out at once and stops them signing in; their past work stays in the activity log.</p>
         </section>
       </>)}
       {tab === 'activity' && (

@@ -1,3 +1,4 @@
+import { teamCan, type TeamPermission } from './team';
 import 'server-only';
 import { cache } from 'react';
 import { cookies } from 'next/headers';
@@ -15,6 +16,7 @@ export type User = {
   language: string; whatsapp: string | null; notify_email: boolean; notify_whatsapp: boolean;
   company_name: string | null; claim_status: string | null; list_count: number; account_type: 'distributor' | 'manufacturer';
   mfr_plan: string | null; mfr_plan_chosen: boolean; mfr_active: string | null; mfr_tier: number;
+  team_owner: boolean; team_permissions: string[];
 };
 
 export const sha = (s: string) => createHash('sha256').update(s).digest('hex');
@@ -53,7 +55,7 @@ export const getUser = cache(async (): Promise<User | null> => {
   const id: string | null = r.rows[0]?.id ?? null;
   if (!id) return null;
   return withUser(id, (db) => one<User>(db, `
-    select u.id, u.email, u.name, u.role, app_plan() as plan, u.country, u.company_id, u.credits, u.onboarded,
+    select u.id, u.email, u.name, u.role, u.team_owner, u.team_permissions, app_plan() as plan, u.country, u.company_id, u.credits, u.onboarded,
            u.owner_id, u.language, u.whatsapp, u.notify_email, u.notify_whatsapp,
            coalesce(c.display_name, cl.company_name) as company_name, cl.status as claim_status,
            (select count(*)::int from sourcing_list l where l.user_id = u.id) as list_count, u.account_type,
@@ -81,17 +83,19 @@ export async function requireUser(opts: { allowOnboarding?: boolean; manufacture
   return u;
 }
 
-export const teamTwoStepRequired = () => process.env.TEAM_2FA_REQUIRED !== '0';
+/** Two-step sign-in is optional for team accounts unless TEAM_2FA_REQUIRED=1 is set on the host. */
+export const teamTwoStepRequired = () => process.env.TEAM_2FA_REQUIRED === '1';
 
 export async function twoStepEnabled(userId: string): Promise<boolean> {
   return withUser(userId, async (db) => Boolean((await one(db, 'select enabled from user_totp where user_id = $1', [userId]))?.enabled));
 }
 
 /** Team-only pages answer 404 to everyone else, so customers cannot tell they exist.
- *  Team accounts must have two-step sign-in on before they get in. */
-export async function requireTeam(): Promise<User> {
+ *  Two-step sign-in is optional (see teamTwoStepRequired). */
+export async function requireTeam(perm?: TeamPermission | 'team'): Promise<User> {
   const u = await getUser();
   if (!u || u.role !== 'team') notFound();
+  if (perm && !teamCan(u, perm)) notFound();
   if (teamTwoStepRequired() && !(await twoStepEnabled(u.id))) redirect('/settings/security?required=1');
   return u;
 }

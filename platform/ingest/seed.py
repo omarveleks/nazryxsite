@@ -107,7 +107,8 @@ def seed():
         demo_pw, g2 = password("DEMO_PASSWORD")
         new_team = not cur.execute("select 1 from users where email = %s", (os.environ.get("SEED_TEAM_EMAIL", "team@nazryx.test"),)).fetchone()
         new_demo = not cur.execute("select 1 from users where email = %s", (os.environ.get("DEMO_FREE_EMAIL", "demo-free@nazryx.test"),)).fetchone()
-        team = upsert_user(cur, os.environ.get("SEED_TEAM_EMAIL", "team@nazryx.test"), "Nazryx team", team_pw, g1, role="team", plan="paid")
+        team = upsert_user(cur, os.environ.get("SEED_TEAM_EMAIL", "team@nazryx.test"), "Nazryx team", team_pw, g1, role="team", plan="paid",
+                           team_owner=True)   # the main account owns the team
         free = upsert_user(cur, os.environ.get("DEMO_FREE_EMAIL", "demo-free@nazryx.test"), "Demo Distributor", demo_pw, g2,
                            credits=17, whatsapp="+255 700 000 000", notify_whatsapp=True)
         paid = upsert_user(cur, os.environ.get("DEMO_PAID_EMAIL", "demo-paid@nazryx.test"), "Demo Paid Distributor", demo_pw, g2, plan="paid")
@@ -244,7 +245,7 @@ def ensure_team():
     with connect() as conn:
         cur = conn.cursor()
         is_new = not cur.execute("select 1 from users where email = %s", (email,)).fetchone()
-        upsert_user(cur, email, "Nazryx team", pw, generated, role="team", plan="paid")
+        upsert_user(cur, email, "Nazryx team", pw, generated, role="team", plan="paid", team_owner=True)   # the main account owns the team
         conn.commit()
     if generated and is_new:
         print(f"team account: {email}  password: {pw}")

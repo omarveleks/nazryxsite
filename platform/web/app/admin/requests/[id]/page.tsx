@@ -14,7 +14,7 @@ export default async function AdminRequest({ params, searchParams }: { params: P
   const id = Number((await params).id);
   const sp = await searchParams;
   if (!Number.isInteger(id)) notFound();
-  const u = await requireTeam();
+  const u = await requireTeam('requests');
   const d = await withUser(u.id, async (db) => {
     const r = await one(db, `select r.*, coalesce(m.inn, r.molecule_text) as molecule, us.email, us.name, us.whatsapp, us.plan
                              from requests r join users us on us.id = r.user_id left join molecules m on m.id = r.molecule_id where r.id = $1`, [id]);

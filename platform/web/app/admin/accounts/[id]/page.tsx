@@ -17,7 +17,7 @@ export default async function AdminAccount({ params, searchParams }: { params: P
   const id = (await params).id;
   const sp = await searchParams;
   if (!/^[0-9a-f-]{36}$/.test(id)) notFound();
-  const u = await requireTeam();
+  const u = await requireTeam('accounts');
   const d = await withUser(u.id, async (db) => {
     const a = await one(db, 'select id, email, name, role, plan, whatsapp, account_type, onboarded, created_at from users where id = $1', [id]);
     if (!a) return null;

@@ -1,3 +1,4 @@
+import { teamCan } from '@/lib/team';
 import { getUser } from '@/lib/auth';
 import { withUser } from '@/lib/db';
 import { saveUpload } from '@/lib/uploads';
@@ -9,7 +10,7 @@ const TXT = new Set(['.txt']);
 
 export async function POST(req: Request) {
   const u = await getUser();
-  if (!u || u.role !== 'team') return new Response('Not found', { status: 404 });
+  if (!u || !teamCan(u, 'data')) return new Response('Not found', { status: 404 });
   const to = (q: string) => new Response(null, { status: 303, headers: { Location: `/admin?${q}` } });
   const form = await req.formData();
   let n = 0;

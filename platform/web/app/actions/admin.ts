@@ -7,7 +7,7 @@ import { BE_STATUS, DOSSIER_ITEMS, DOSSIER_STATUS, GMP_BY, ORDER_STATUSES, SHIPM
 import { hashPassword } from '@/lib/password';
 import { SERVICES } from '@/lib/mfr';
 
-// Every action re-checks the team role here AND in the database (RLS policies / definer functions).
+// Every action re-checks the team member's permission here, and the team role in the database (RLS policies / definer functions).
 
 async function team<T>(fn: (db: Parameters<Parameters<typeof withUser>[1]>[0], uid: string) => Promise<T>, onError: string) {
   const u = await requireTeam();
@@ -30,6 +30,7 @@ async function notifyCustomer(db: any, requestId: number, subject: string, body:
 
 // ---------------------------------------------------------------- requests
 export async function setStage(f: FormData) {
+  await requireTeam('requests');
   const id = int(f, 'request_id')!, stage = str(f, 'stage', 30);
   const to = `/admin/requests/${id}`;
   if (!STAGES.includes(stage as any)) back(to, { error: 'Unknown stage' });
@@ -47,6 +48,7 @@ const VERDICTS: Record<string, string> = { go: 'Go', maybe: 'Worth a look', no: 
 /** Our assessment inside a request (regulatory check, regulatory analysis, pricing). Saving it moves a new request to
  *  "Regulatory check" and tells the customer. */
 export async function saveEvaluation(f: FormData) {
+  await requireTeam('requests');
   const id = int(f, 'request_id')!, verdict = str(f, 'verdict', 10), summary = str(f, 'summary', 1200);
   const to = `/admin/requests/${id}`;
   if (!VERDICTS[verdict]) back(to, { error: 'Pick a verdict.' });
@@ -74,6 +76,7 @@ export async function saveEvaluation(f: FormData) {
 }
 
 export async function addOfferAndQuote(f: FormData) {
+  await requireTeam('requests');
   const id = int(f, 'request_id')!;
   const to = `/admin/requests/${id}`;
   await team(async (db) => {
@@ -109,6 +112,7 @@ export async function addOfferAndQuote(f: FormData) {
 }
 
 export async function setOrderStatus(f: FormData) {
+  await requireTeam('requests');
   const id = int(f, 'request_id')!, order = int(f, 'order_id'), status = str(f, 'status', 30);
   const to = `/admin/requests/${id}`;
   if (!ORDER_STATUSES.includes(status as any)) back(to, { error: 'Unknown status' });
@@ -131,6 +135,7 @@ export async function setOrderStatus(f: FormData) {
 
 /** Dossier readiness: each item the supplier's dossier needs, and the bioequivalence call. */
 export async function saveDossier(f: FormData) {
+  await requireTeam('requests');
   const id = int(f, 'request_id')!;
   const to = `/admin/requests/${id}`;
   const be = str(f, 'be_status', 20);
@@ -155,6 +160,7 @@ export async function saveDossier(f: FormData) {
 
 /** Answer an expert question; the customer is told by email and WhatsApp and sees it on the Ask the expert page. */
 export async function answerQuestion(f: FormData) {
+  await requireTeam('questions');
   const id = int(f, 'question_id'), answer = str(f, 'answer', 4000);
   if (!answer) back('/admin?tab=questions', { error: 'Write an answer.' });
   await team(async (db, uid) => {
@@ -170,6 +176,7 @@ export async function answerQuestion(f: FormData) {
 
 // ---------------------------------------------------------------- manufacturers
 export async function reviewManufacturer(f: FormData) {
+  await requireTeam('manufacturers');
   const user = str(f, 'user_id', 40), approve = str(f, 'decision', 10) === 'approve';
   await team(async (db) => {
     await db.query(`update manufacturer_profiles set status = $2, team_note = nullif($3, ''), reviewed_at = now() where user_id = $1`,
@@ -182,6 +189,7 @@ export async function reviewManufacturer(f: FormData) {
 }
 
 export async function setEngagementStage(f: FormData) {
+  await requireTeam('manufacturers');
   const id = int(f, 'engagement_id')!, stage = str(f, 'stage', 60), status = str(f, 'status', 12);
   const to = `/admin/engagements/${id}`;
   await team(async (db) => {
@@ -198,6 +206,7 @@ export async function setEngagementStage(f: FormData) {
 }
 
 export async function reviewEngagementFile(f: FormData) {
+  await requireTeam('manufacturers');
   const id = int(f, 'engagement_id')!, file = int(f, 'file_id'), review = str(f, 'review', 12);
   const to = `/admin/engagements/${id}`;
   if (!['submitted', 'accepted', 'gap'].includes(review)) back(to, { error: 'Pick accepted or gap.' });
@@ -210,6 +219,7 @@ export async function reviewEngagementFile(f: FormData) {
 }
 
 export async function addObligation(f: FormData) {
+  await requireTeam('manufacturers');
   const id = int(f, 'engagement_id')!, to = `/admin/engagements/${id}`;
   const kind = str(f, 'kind', 20), due = str(f, 'due_date', 10);
   if (!['renewal', 'variation', 'safety_report', 'other'].includes(kind) || !due) back(to, { error: 'Pick a type and a due date.' });
@@ -222,6 +232,7 @@ export async function addObligation(f: FormData) {
 }
 
 export async function toggleObligation(f: FormData) {
+  await requireTeam('manufacturers');
   const id = int(f, 'engagement_id')!, to = `/admin/engagements/${id}`;
   await team((db) => db.query('update obligations set done = not done where id = $1', [int(f, 'obligation_id')]), to);
   redirect(to);
@@ -229,17 +240,20 @@ export async function toggleObligation(f: FormData) {
 
 // ---------------------------------------------------------------- claims and accounts
 export async function reviewClaim(f: FormData) {
+  await requireTeam('claims');
   await team((db) => db.query('select review_claim($1, $2, $3)', [int(f, 'claim_id'), str(f, 'decision') === 'approve', str(f, 'note', 500) || null]),
     '/admin?tab=claims');
   redirect('/admin?tab=claims');
 }
 
 export async function setPlan(f: FormData) {
+  await requireTeam('accounts');
   await team((db) => db.query('select admin_set_plan($1, $2)', [str(f, 'user_id', 40), str(f, 'plan', 10) === 'paid' ? 'paid' : 'free']), '/admin?tab=accounts');
   redirect('/admin?tab=accounts');
 }
 
 export async function grantCredits(f: FormData) {
+  await requireTeam('accounts');
   const n = Math.min(500, Math.max(1, int(f, 'credits') ?? 0));
   await team((db) => db.query('select admin_grant_credits($1, $2)', [str(f, 'user_id', 40), n]), '/admin?tab=accounts');
   redirect('/admin?tab=accounts');
@@ -247,6 +261,7 @@ export async function grantCredits(f: FormData) {
 
 // ---------------------------------------------------------------- content
 export async function postRegulatory(f: FormData) {
+  await requireTeam('content');
   const t = str(f, 'title', 200);
   if (!t) back('/admin?tab=content', { error: 'Add a headline.' });
   await team((db) => db.query(`insert into feed_items (kind, title, body, link) values ('regulatory', $1, $2, $3)`,
@@ -256,6 +271,7 @@ export async function postRegulatory(f: FormData) {
 
 /** Typical months per registration route (shown to paid plans on molecule pages). */
 export async function saveRoutes(f: FormData) {
+  await requireTeam('content');
   await team(async (db) => {
     for (const key of ['full', 'abridged', 'eac']) {
       const lo = int(f, `low_${key}`), hi = int(f, `high_${key}`);
@@ -269,6 +285,7 @@ export async function saveRoutes(f: FormData) {
 
 /** Set the likely route for one molecule (overrides the default full dossier). */
 export async function setMoleculeRoute(f: FormData) {
+  await requireTeam('content');
   await team(async (db) => {
     const m = await one(db, 'select id from molecules where lower(inn) = lower($1)', [str(f, 'molecule', 200)]);
     if (!m) back('/admin?tab=content', { error: 'Molecule not found. Use the exact name.' });
@@ -282,6 +299,7 @@ export async function setMoleculeRoute(f: FormData) {
 }
 
 export async function addPrice(f: FormData) {
+  await requireTeam('content');
   await team(async (db, uid) => {
     const m = await one(db, 'select id from molecules where lower(inn) = lower($1)', [str(f, 'molecule', 200)]);
     if (!m) back('/admin?tab=content', { error: 'Molecule not found. Use the exact name.' });
@@ -296,6 +314,7 @@ export async function addPrice(f: FormData) {
 }
 
 export async function editUseCase(f: FormData) {
+  await requireTeam('content');
   await team(async (db) => {
     const r = await db.query('update molecules set use_case = $2 where lower(inn) = lower($1)', [str(f, 'molecule', 200), str(f, 'use_case', 1000)]);
     if (!r.rowCount) back('/admin?tab=content', { error: 'Molecule not found. Use the exact name.' });
@@ -305,6 +324,7 @@ export async function editUseCase(f: FormData) {
 
 // ---------------------------------------------------------------- review queue (applied by a recompute job)
 export async function matchMolecule(f: FormData) {
+  await requireTeam('data');
   await team(async (db) => {
     let target = int(f, 'to');
     if (!target) {
@@ -318,26 +338,31 @@ export async function matchMolecule(f: FormData) {
 }
 
 export async function rejectSuggestion(f: FormData) {
+  await requireTeam('data');
   await team((db) => db.query('select team_reject_suggestion($1)', [int(f, 'from')]), '/admin?tab=review');
   redirect('/admin?tab=review');
 }
 
 export async function mergeCompanies(f: FormData) {
+  await requireTeam('data');
   await team((db) => db.query('select team_merge_companies($1, $2)', [str(f, 'keep', 200), str(f, 'merge', 200)]), '/admin?tab=review');
   redirect('/admin?tab=review&saved=1');
 }
 
 export async function keepSeparate(f: FormData) {
+  await requireTeam('data');
   await team((db) => db.query('select team_keep_separate($1, $2)', [str(f, 'a', 200), str(f, 'b', 200)]), '/admin?tab=review');
   redirect('/admin?tab=review');
 }
 
 export async function queueRecompute() {
+  await requireTeam('data');
   await team((db) => db.query('select team_queue_recompute()'), '/admin');
   redirect('/admin?queued=1');
 }
 
 export async function resetPassword(f: FormData) {
+  await requireTeam('accounts');
   const pw = String(f.get('password') ?? '');
   if (pw.length < 10) back('/admin?tab=accounts', { error: 'Temporary password: at least 10 characters.' });
   await team((db) => db.query('select admin_reset_password($1, $2)', [str(f, 'user_id', 40), hashPassword(pw)]), '/admin?tab=accounts');
@@ -345,6 +370,7 @@ export async function resetPassword(f: FormData) {
 }
 
 export async function resetTwoStep(f: FormData) {
+  await requireTeam('accounts');
   await team((db) => db.query('select admin_reset_totp($1)', [str(f, 'user_id', 40)]), '/admin?tab=accounts');
   redirect('/admin?tab=accounts&saved=1');
 }

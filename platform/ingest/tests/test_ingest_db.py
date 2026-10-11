@@ -741,3 +741,38 @@ def test_payments_invoices_launches_and_watch(env):
         c.commit()
     assert q("select status from invoices where user_id = %s", other)[0][0] == "due"
     assert q("select active_plan from manufacturer_profiles where user_id = %s", maker)[0][0] is None   # cancelled subscription ends the plan
+
+
+def test_team_members_and_permissions(env):
+    with psycopg.connect(URL) as c:
+        owner = c.execute("insert into users (email, password_hash, role, team_owner) values ('own@example.com', 'x', 'team', true) returning id").fetchone()[0]
+        c.commit()
+    with app_conn(env) as a:
+        as_user(a, owner)
+        member = a.execute("select team_add_member('mem@example.com', 'Member', 'h', array['requests'], false)").fetchone()[0]
+        a.commit()
+        with pytest.raises(psycopg.errors.RaiseException):           # unknown permission
+            as_user(a, owner)
+            a.execute("select team_add_member('x@example.com', 'X', 'h', array['everything'], false)")
+        a.rollback()
+        as_user(a, member)
+        assert a.execute("select app_is_team(), app_is_owner()").fetchone() == (True, False)
+        for sql_text, args in (("select team_add_member('y@example.com', 'Y', 'h', array['requests'], true)", ()),   # members cannot add
+                               ("select team_set_member(%s, array['accounts'], true)", (member,)),                  # nor promote themselves
+                               ("select admin_reset_password(%s, 'h2')", (owner,))):                                # nor take over an owner
+            with pytest.raises(psycopg.errors.RaiseException):
+                a.execute(sql_text, args)
+            a.rollback()
+            as_user(a, member)
+        a.rollback()
+        as_user(a, owner)
+        with pytest.raises(psycopg.errors.RaiseException):           # an owner cannot lock themselves out
+            a.execute("select team_set_member(%s, array[]::text[], false)", (owner,))
+        a.rollback()
+        as_user(a, owner)
+        a.execute("select team_remove_member(%s, true)", (member,))
+        a.commit()
+        as_user(a, member)
+        assert a.execute("select app_is_team()").fetchone()[0] is False  # removed: no longer team
+        assert a.execute("select count(*) from auth_find_user('mem@example.com')").fetchone()[0] == 0   # and cannot sign in
+        a.rollback()

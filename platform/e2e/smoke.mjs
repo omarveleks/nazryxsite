@@ -101,8 +101,9 @@ check(sup.includes('Documents ready') && sup.includes('items ready'), 'portfolio
 // 3. the team account must set up two-step sign-in before Admin opens, then works the admin pages
 const t = await page();
 await signin(t, process.env.SEED_TEAM_EMAIL || 'team@nazryx.test', process.env.SEED_TEAM_PASSWORD);
-await t.goto(B + '/admin');
-check(t.url().includes('/settings/security'), 'team is sent to two-step set-up');
+const adm = await t.goto(B + '/admin');
+check(adm.status() === 200 && t.url().endsWith('/admin'), 'team opens Admin without two-step sign-in');
+await t.goto(B + '/settings/security');   // two-step sign-in stays available as an option
 await Promise.all([t.waitForLoadState('networkidle'), t.click('text=Set up two-step sign-in')]);
 const secret = (await t.locator('code').first().innerText()).replace(/\s+/g, '');
 await t.fill('input[name=code]', totp(secret));
@@ -154,6 +155,21 @@ await t.setInputFiles('form:has(input[name=supplier_name]) input[name=file]', { 
 await Promise.all([t.waitForURL(/saved=1/), t.click('button:has-text("Upload supplier document")')]);
 const dtab = await t.locator('main').innerText();
 check(dtab.includes('smoke-gmp.pdf') && dtab.includes('stability.pdf'), 'supplier documents and all documents in Admin');
+// the owner adds a team member who can only work on sourcing requests
+const memberMail = `member${Date.now()}@nazryx.test`;
+await t.goto(B + '/admin?tab=team');
+await t.fill('input[name=name]', 'Smoke Member'); await t.fill('input[name=email]', memberMail); await t.fill('input[name=password]', 'member-password-123');
+await t.locator('form:has(input[name=password]) input[name=perm][value=requests]').check();
+await Promise.all([t.waitForURL(/saved=1/), t.click('button:has-text("Add team member")')]);
+const mb = await page();
+await mb.goto(B + '/signup?mode=signin&as=distributor'); await mb.fill('#email', memberMail); await mb.fill('#password', 'member-password-123');
+await Promise.all([mb.waitForURL(/home/), mb.click('button[type=submit]')]);
+await mb.goto(B + '/admin');
+const mtabs = await mb.locator('.tabs').innerText();
+check(mtabs.includes('Requests') && !mtabs.includes('Accounts') && !mtabs.includes('Team'), 'a team member sees only the areas they were given');
+check((await mb.goto(B + '/admin?tab=accounts')) && !(await mb.locator('.tabs').innerText()).includes('Accounts'), 'other areas stay closed');
+const acc404 = await mb.goto(B + `/admin/requests/${reqId}`);
+check(acc404.status() === 200, 'the member works on requests');
 const t2 = await page();
 await signin(t2, process.env.SEED_TEAM_EMAIL || 'team@nazryx.test', process.env.SEED_TEAM_PASSWORD, secret);
 check(t2.url().includes('/home'), 'team signs in with a two-step code');

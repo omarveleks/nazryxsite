@@ -1,6 +1,7 @@
 'use server';
+import { teamCan } from '@/lib/team';
 import { revalidatePath } from 'next/cache';
-import { redirect } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import { requireUser } from '@/lib/auth';
 import { dbMessage, one, rows, withUser } from '@/lib/db';
 import { back, int, isEmail, str } from '@/lib/forms';
@@ -247,6 +248,7 @@ export async function postMessage(f: FormData) {
   const id = int(f, 'request_id'), body = str(f, 'body', 4000);
   const to = ret(f, `/requests/${id}`);
   if (!body) redirect(to);
+  if (u.role === 'team' && !teamCan(u, 'requests')) notFound();
   await withUser(u.id, async (db) => {
     await db.query('insert into request_messages (request_id, from_team, author_id, body) values ($1, $2, $3, $4)',
       [id, u.role === 'team', u.id, body]);

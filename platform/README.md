@@ -56,7 +56,7 @@ cd ../web && npm run typecheck && npm run build
 ```
 The database URL must point at a throwaway database: the tests drop and recreate it.
 
-Browser smoke test (34 checks: sign-up, claim, enrich, request, quote acceptance, team two-step set-up, admin pages,
+Browser smoke test (34 checks: sign-up, claim, enrich, request, quote acceptance, optional two-step sign-in, admin pages,
 activity log, upload through the worker, phone width) on synthetic data, the same way CI runs it:
 ```
 python e2e/make_fixture.py /tmp/nzx && DATA_DIR=/tmp/nzx python ingest/bootstrap.py   # plus the env vars above
@@ -117,9 +117,12 @@ against a real database.
 ### Accounts and security
 - Passwords are hashed with scrypt; sessions are random tokens stored hashed in Postgres (HttpOnly cookie).
 - After five wrong passwords for an email within 15 minutes, sign-in is refused until the window passes.
-- Two-step sign-in with an authenticator app (Settings › Two-step sign-in). **Required for team accounts**: Admin
-  does not open until it is on (`TEAM_2FA_REQUIRED=0` turns that off for local testing only). A team member can reset
-  it for someone who lost their phone on Admin › Accounts.
+- **Team members**: owners add team members in Admin › Team, choose which Admin areas each can open (requests, manufacturers,
+  accounts and plans, claims, questions, documents, market data, content and prices, activity) and remove access. Every action
+  checks the permission; the database checks owner rights and blocks non-owners from resetting a team member's password.
+- Two-step sign-in with an authenticator app (Settings › Two-step sign-in). Optional for every account, the team
+  included; set `TEAM_2FA_REQUIRED=1` on the web service to make it compulsory for team accounts again. A team member
+  can reset it for someone who lost their phone on Admin › Accounts.
 - No reset email yet: a team member sets a temporary password on Admin › Accounts, which signs that user out everywhere.
 - Limits enforced in Postgres: 5 new accounts per network address per hour (200 overall), 60 uploaded files or
   300 MB per customer per day.
@@ -316,7 +319,6 @@ all in Frankfurt. Uploaded files are stored in Postgres, so the services share n
    - `TEAM_ALERT_EMAILS` and `ANTHROPIC_API_KEY`: optional, can stay empty.
 3. Apply. The first build takes a few minutes. The worker migrates the database and creates the team account.
 4. Open the web service's `https://…onrender.com` address, sign in with the team account, go to **Admin**:
-   - First, set up two-step sign-in when asked (team accounts need it).
    - **Reference lists**: upload `tz_nemlit_ocr.txt` and `who_eml_2025.txt` from the handoff. The registry upload
      stays disabled until both are loaded.
    - **Upload new list**: upload `Registered_Products_….xls`. About 30 seconds later the data is live, and the demo

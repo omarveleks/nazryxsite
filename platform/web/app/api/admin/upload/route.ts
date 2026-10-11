@@ -1,3 +1,4 @@
+import { teamCan } from '@/lib/team';
 import { getUser } from '@/lib/auth';
 import { one, withUser } from '@/lib/db';
 import { saveUpload } from '@/lib/uploads';
@@ -8,7 +9,7 @@ const ALLOWED = new Set(['.xls', '.xlsx', '.html', '.htm']);
 
 export async function POST(req: Request) {
   const u = await getUser();
-  if (!u || u.role !== 'team') return new Response('Not found', { status: 404 });
+  if (!u || !teamCan(u, 'data')) return new Response('Not found', { status: 404 });
   const to = (q: string) => new Response(null, { status: 303, headers: { Location: `/admin?${q}` } });
   let saved;
   try {

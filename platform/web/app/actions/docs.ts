@@ -36,6 +36,7 @@ async function tellUser(db: any, userId: string, subject: string, body: string, 
 // ---------------------------------------------------------------- requests
 /** A document on a request. Dossier documents mark their item ready; shipment documents mark theirs received. */
 export async function uploadRequestDoc(f: FormData) {
+  await requireTeam('requests');
   const id = int(f, 'request_id')!;
   const to = safe(str(f, 'return', 200), `/admin/requests/${id}`);
   const kind = str(f, 'kind', 20), item = str(f, 'item', 20) || null, internal = f.get('internal') === 'on';
@@ -63,6 +64,7 @@ export async function uploadRequestDoc(f: FormData) {
 }
 
 export async function deleteRequestDoc(f: FormData) {
+  await requireTeam('requests');
   const id = int(f, 'request_id')!, file = int(f, 'file_id');
   const to = safe(str(f, 'return', 200), `/admin/requests/${id}`);
   const u = await requireTeam();
@@ -76,6 +78,7 @@ export async function deleteRequestDoc(f: FormData) {
 
 // ---------------------------------------------------------------- engagements
 export async function uploadEngagementDoc(f: FormData) {
+  await requireTeam('manufacturers');
   const id = int(f, 'engagement_id')!;
   const to = `/admin/engagements/${id}`;
   const item = str(f, 'item', 20) || 'other', internal = f.get('internal') === 'on';
@@ -93,6 +96,7 @@ export async function uploadEngagementDoc(f: FormData) {
 }
 
 export async function deleteEngagementDoc(f: FormData) {
+  await requireTeam('manufacturers');
   const id = int(f, 'engagement_id')!, file = int(f, 'file_id');
   const to = `/admin/engagements/${id}`;
   const u = await requireTeam();
@@ -107,6 +111,7 @@ export async function deleteEngagementDoc(f: FormData) {
 // ---------------------------------------------------------------- accounts
 /** A document for one customer account: agreements, invoices, NDAs ... Found by account id or email. */
 export async function uploadAccountDoc(f: FormData) {
+  await requireTeam('accounts');
   const to = safe(str(f, 'return', 200), '/admin?tab=documents');
   const kind = str(f, 'kind', 20), internal = f.get('internal') === 'on';
   if (!ACCOUNT_DOC_KINDS[kind]) back(to, { error: 'Pick what the document is.' });
@@ -122,6 +127,7 @@ export async function uploadAccountDoc(f: FormData) {
 }
 
 export async function deleteAccountDoc(f: FormData) {
+  await requireTeam('accounts');
   const to = safe(str(f, 'return', 200), '/admin?tab=documents');
   const u = await requireTeam();
   try {
@@ -134,6 +140,7 @@ export async function deleteAccountDoc(f: FormData) {
 
 // ---------------------------------------------------------------- suppliers (team only, never shown to customers)
 export async function uploadSupplierDoc(f: FormData) {
+  await requireTeam('documents');
   const to = '/admin?tab=documents';
   const kind = str(f, 'kind', 20);
   if (!SUPPLIER_DOC_KINDS[kind]) back(to, { error: 'Pick what the document is.' });
@@ -153,6 +160,7 @@ export async function uploadSupplierDoc(f: FormData) {
 }
 
 export async function deleteSupplierDoc(f: FormData) {
+  await requireTeam('documents');
   const u = await requireTeam();
   try {
     await withUser(u.id, (db) => db.query('delete from supplier_documents where id = $1', [int(f, 'doc_id')]));
@@ -164,6 +172,7 @@ export async function deleteSupplierDoc(f: FormData) {
 
 // ---------------------------------------------------------------- plan prices
 export async function savePlanPrices(f: FormData) {
+  await requireTeam('content');
   const u = await requireTeam();
   try {
     await withUser(u.id, async (db) => {
@@ -184,6 +193,7 @@ export async function savePlanPrices(f: FormData) {
 // ---------------------------------------------------------------- manufacturer plans
 /** Turn on (or change, or end) the plan a manufacturer has agreed and paid for. Unlocks the matching screens. */
 export async function setMfrPlan(f: FormData) {
+  await requireTeam('accounts');
   const u = await requireTeam();
   const uid = str(f, 'user_id', 40), plan = str(f, 'plan', 10);
   const to = safe(str(f, 'return', 200), `/admin/accounts/${uid}`);
@@ -211,6 +221,7 @@ export async function setMfrPlan(f: FormData) {
 
 /** The verified badge: our team has checked the manufacturer's GMP and certification pack. */
 export async function setVerified(f: FormData) {
+  await requireTeam('manufacturers');
   const u = await requireTeam();
   const uid = str(f, 'user_id', 40);
   try {
