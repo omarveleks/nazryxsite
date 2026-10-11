@@ -165,17 +165,18 @@ export async function deleteSupplierDoc(f: FormData) {
 // ---------------------------------------------------------------- plan prices
 export async function savePlanPrices(f: FormData) {
   const u = await requireTeam();
-  const keys = PLAN_ORDER.map((k) => `mfr_${k}`);
   try {
     await withUser(u.id, async (db) => {
-      for (const k of keys) {
-        await db.query(`insert into plan_prices (key, price, note, updated_at) values ($1, $2, $3, now())
-                        on conflict (key) do update set price = excluded.price, note = excluded.note, updated_at = now()`,
-          [k, str(f, `price_${k}`, 80) || null, str(f, `note_${k}`, 200) || null]);
+      for (const k of PLAN_ORDER) {
+        const amount = k === 'entry' ? null : int(f, `amount_mfr_${k}`);
+        if (amount != null && (amount <= 0 || amount > 100000)) throw new Error('Use a monthly price in whole US dollars.');
+        await db.query(`insert into plan_prices (key, amount_usd, note, updated_at) values ($1, $2, $3, now())
+                        on conflict (key) do update set amount_usd = excluded.amount_usd, note = excluded.note, updated_at = now()`,
+          [`mfr_${k}`, amount, str(f, `note_mfr_${k}`, 200) || null]);
       }
     });
   } catch (e) {
-    back('/admin?tab=content', { error: dbMessage(e) });
+    back('/admin?tab=content', { error: e instanceof Error && !('code' in e) ? e.message : dbMessage(e) });
   }
   redirect('/admin?tab=content&saved=1');
 }
@@ -194,10 +195,29 @@ export async function setMfrPlan(f: FormData) {
       if (plan) {
         await db.query("update plan_requests set status = 'done' where user_id = $1 and status = 'open' and wanted like 'mfr:%'", [uid]);
         await tellUser(db, uid, 'Your plan is active', `${MFR_PLANS[plan as PlanKey].name} is now active. Everything it includes is unlocked.`, '/m/plan');
+        // the worker issues the order confirmation and the invoice (amount from the form, else the list price)
+        const amount = int(f, 'amount_usd') ?? (await one(db, 'select amount_usd from plan_prices where key = $1', [`mfr_${plan}`]))?.amount_usd ?? null;
+        if (f.get('documents') === 'on') {
+          await db.query(`insert into payment_events (kind, user_id, plan, amount_cents) values ('manual_activation', $1, $2, $3)`,
+            [uid, plan, amount != null ? amount * 100 : null]);
+        }
       }
     });
   } catch (e) {
     back(to, { error: dbMessage(e) });
   }
   redirect(`${to}${to.includes('?') ? '&' : '?'}saved=1`);
+}
+
+/** The verified badge: our team has checked the manufacturer's GMP and certification pack. */
+export async function setVerified(f: FormData) {
+  const u = await requireTeam();
+  const uid = str(f, 'user_id', 40);
+  try {
+    await withUser(u.id, (db) => db.query('update manufacturer_profiles set verified_at = case when $2 then now() else null end where user_id = $1',
+      [uid, f.get('on') === '1']));
+  } catch (e) {
+    back(`/admin/accounts/${uid}`, { error: dbMessage(e) });
+  }
+  redirect(`/admin/accounts/${uid}?saved=1`);
 }

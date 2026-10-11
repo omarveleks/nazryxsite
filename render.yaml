@@ -33,6 +33,10 @@ services:
         sync: false
       - key: SENTRY_DSN             # error monitoring; leave empty to keep it off
         sync: false
+      - key: STRIPE_SECRET_KEY      # card payments for Basic Market Data and Complete Market Access; empty = invoiced by the team
+        sync: false
+      - key: STRIPE_WEBHOOK_SECRET  # signing secret of the webhook pointing at /api/stripe/webhook
+        sync: false
       - fromGroup: nazryx-shared
 
   - type: worker

@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import Shell from '@/components/Shell';
-import MarketPicker, { AgencyMarket, hasData, targetMarkets } from '@/components/MarketPicker';
+import MarketPicker, { AgencyMarket, hasData, loadLive, targetMarkets } from '@/components/MarketPicker';
 import { Empty, Flash, PlanLock } from '@/components/ui';
 import { requestIntro } from '@/app/actions/mfr';
 import { requireUser } from '@/lib/auth';
@@ -8,7 +8,7 @@ import { one, rows, withUser } from '@/lib/db';
 import { categories } from '@/lib/queries';
 import { canUse, countryName } from '@/lib/mfr';
 
-export const metadata = { title: 'Partners' };
+export const metadata = { title: 'Distributors' };
 
 const SIZES: [string, string][] = [['0', 'Any size'], ['20', '20+ products'], ['100', '100+ products'], ['300', '300+ products']];
 const SORTS: [string, string][] = [['open', 'Sort: most open to you'], ['size', 'Sort: largest'], ['class', 'Sort: strongest in class']];
@@ -19,6 +19,7 @@ export default async function Partners({ searchParams }: { searchParams: Promise
   const u = await requireUser({ manufacturer: true });
   const lists = canUse(u.mfr_tier, 'distributors'), matching = canUse(u.mfr_tier, 'matching'), intro = canUse(u.mfr_tier, 'partner_intro');
   const d = await withUser(u.id, async (db) => {
+    await loadLive(db);
     const prof = await one(db, 'select target_countries, status from manufacturer_profiles where user_id = $1', [u.id]);
     const targets = targetMarkets(prof?.target_countries);
     const market = sp.market && targets.includes(sp.market) ? sp.market : targets.find(hasData) ?? targets[0];
@@ -28,16 +29,16 @@ export default async function Partners({ searchParams }: { searchParams: Promise
     const molecule = mine.find((x) => x.id === Number(sp.molecule)) ?? null;
     const sort = SORTS.some(([k]) => k === sp.sort) ? sp.sort! : cls ? 'class' : 'open';
     const list = hasData(market) ? await rows(db, 'select * from partner_search($1, $2, $3, $4, $5, $6)',
-      [market, cls, molecule?.id ?? null, sp.local === '1', Number(sp.min) || 0, sort]) : [];
+      [market, cls, molecule?.id ?? null, false, Number(sp.min) || 0, sort]) : [];
     const products = await rows(db, `select p.id, coalesce(m.inn, p.name) as name from mfr_products p left join molecules m on m.id = p.molecule_id
                                      where p.user_id = $1 order by 2 limit 300`, [u.id]);
     return { targets, market, cats, mine, cls, molecule, sort, list, products, status: prof?.status };
   });
   const shown = d.molecule && sp.gap === '1' ? d.list.filter((p) => !p.carries) : d.list;
   const total = d.list[0]?.total ?? 0, mineN = d.list[0]?.mine ?? d.mine.length;
-  const filtered = Boolean(d.cls || d.molecule || sp.local === '1' || Number(sp.min));
+  const filtered = Boolean(d.cls || d.molecule || Number(sp.min));
   return (
-    <Shell user={u} title="Partners" sub={`Distributors in ${countryName(d.market)} who could carry your products`}>
+    <Shell user={u} title="Distributors" sub={`Who could carry your products in ${countryName(d.market)}`}>
       <Flash sp={sp} />
       <MarketPicker targets={d.targets} current={d.market} path="/m/partners" noAll />
       {!hasData(d.market) ? <AgencyMarket code={d.market} /> : (<>
@@ -56,7 +57,6 @@ export default async function Partners({ searchParams }: { searchParams: Promise
           <div className="row" style={{ justifyContent: 'space-between' }}>
             <div className="row">
               <label className="row small" style={{ gap: 6 }}><input type="checkbox" name="gap" value="1" defaultChecked={sp.gap === '1'} /> Only those who do not carry the molecule</label>
-              <label className="row small" style={{ gap: 6 }}><input type="checkbox" name="local" value="1" defaultChecked={sp.local === '1'} /> Also manufacture locally</label>
             </div>
             <div className="row">{filtered && <Link className="btn btn-ghost btn-sm" href={`/m/partners?market=${d.market}`}>Clear</Link>}
               <button className="btn btn-blue btn-sm" type="submit">Apply</button></div>
@@ -75,13 +75,12 @@ export default async function Partners({ searchParams }: { searchParams: Promise
                     {mineN > 0 && (matching ? <span className={`pill ${p.open_to > 0 ? 'mint' : ''}`}>Open to {p.open_to} of your {mineN} molecules</span>
                       : <PlanLock compact need="access" title="Open to how many of your molecules" />)}
                     {d.molecule && <span className={`pill ${p.carries ? '' : 'blue'}`}>{p.carries ? `Already carries ${d.molecule.inn}` : `Does not carry ${d.molecule.inn}`}</span>}
-                    {p.local_maker && <span className="pill">Also manufactures</span>}
                   </div>
                 </div>
-                {!intro ? <PlanLock compact need="entry" title="Request introduction" />
+                {!intro ? <PlanLock compact need="entry" title="Introduction" />
                   : d.status !== 'approved' ? <span className="note">Introductions open once our team approves your company.</span> : (
                   <form action={requestIntro} className="row" style={{ gap: 6 }}>
-                    <input type="hidden" name="code" value={p.code} /><input type="hidden" name="class" value={d.cls ?? ''} />
+                    <input type="hidden" name="code" value={p.code} /><input type="hidden" name="class" value={d.cls ?? ''} /><input type="hidden" name="market" value={d.market} />
                     <select className="input" name="product_id" aria-label="For which product" defaultValue={d.molecule ? '' : ''} style={{ maxWidth: 200 }}>
                       <option value="">Any product</option>{d.products.map((x) => <option key={x.id} value={x.id}>{x.name}</option>)}</select>
                     <button className="btn btn-blue btn-sm" type="submit">Request introduction</button>
@@ -91,7 +90,7 @@ export default async function Partners({ searchParams }: { searchParams: Promise
             <div style={{ marginTop: 12 }}><PlanLock need="data" title={`${total - shown.length} more distributors`}>
               The full target distributor list for {countryName(d.market)}, with every filter.</PlanLock></div>)}
         </section>
-        <p className="note">Introductions are done for you: we contact the distributor, present your product and help agree terms.</p>
+        <p className="note">Introductions are part of market entry: we contact the distributor, present your product and help agree terms.</p>
       </>)}
     </Shell>
   );

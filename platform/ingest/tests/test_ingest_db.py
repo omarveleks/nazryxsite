@@ -693,3 +693,51 @@ def test_plan_tier_partner_search_and_catalog(env):
         full = a.execute("select total from partner_search('TZ')").fetchall()
         assert len(full) == min(full[0][0], 200)                                     # with a plan: every distributor
         a.rollback()
+
+
+def test_payments_invoices_launches_and_watch(env):
+    import billing
+    with psycopg.connect(URL) as c:
+        maker = c.execute("insert into users (email, password_hash, account_type, onboarded) values ('pay1@example.com', 'x', 'manufacturer', true) returning id").fetchone()[0]
+        other = c.execute("insert into users (email, password_hash, account_type, onboarded) values ('pay2@example.com', 'x', 'manufacturer', true) returning id").fetchone()[0]
+        team = c.execute("insert into users (email, password_hash, role) values ('payt@example.com', 'x', 'team') returning id").fetchone()[0]
+        c.execute("insert into manufacturer_profiles (user_id, company_name) values (%s, 'Pay Pharma'), (%s, 'Other Pharma')", (maker, other))
+        c.commit()
+    with app_conn(env) as a:
+        # the webhook (no signed-in user) records a payment; a signed-in customer cannot
+        a.execute("""insert into payment_events (stripe_event_id, kind, user_id, plan, amount_cents, stripe_customer, stripe_subscription)
+                     values ('evt_1', 'checkout_completed', %s, 'data', 19900, 'cus_1', 'sub_1'),
+                            ('evt_2', 'invoice_paid', %s, 'data', 19900, 'cus_1', 'sub_1')""", (maker, maker))
+        a.commit()
+        as_user(a, maker)
+        with pytest.raises(psycopg.errors.InsufficientPrivilege):
+            a.execute("insert into payment_events (kind, user_id, plan) values ('checkout_completed', %s, 'entry')", (maker,))
+        a.rollback()
+    with psycopg.connect(URL) as c:
+        assert billing.process(c.cursor()) == 2
+        c.commit()
+    plan, docs, inv = q("""select p.active_plan, (select count(*) from account_documents d where d.user_id = p.user_id),
+                           (select status from invoices i where i.user_id = p.user_id) from manufacturer_profiles p where p.user_id = %s""", maker)[0]
+    assert plan == "data" and docs == 2 and inv == "paid"           # plan on, order confirmation and paid invoice issued
+    with app_conn(env) as a:
+        as_user(a, maker)
+        assert a.execute("select count(*) from invoices").fetchone()[0] == 1
+        pid = a.execute("insert into mfr_products (user_id, name) values (%s, 'X') returning id", (maker,)).fetchone()[0]
+        a.execute("insert into launches (user_id, product_id, country, stage) values (%s, %s, 'TZ', 'selected')", (maker, pid))
+        assert a.execute("select count(*) from my_market_watch(array['TZ'], 90)").fetchone()[0] >= 0
+        a.commit()
+        as_user(a, other)
+        assert a.execute("select count(*) from launches").fetchone()[0] == 0
+        assert a.execute("select count(*) from invoices").fetchone()[0] == 0
+        assert a.execute("select count(*) from account_documents").fetchone()[0] == 0
+        a.rollback()
+        as_user(a, team)                                                     # an invoiced plan, switched on by the team
+        a.execute("insert into payment_events (kind, user_id, plan, amount_cents) values ('manual_activation', %s, 'entry', 500000)", (other,))
+        a.commit()
+    with psycopg.connect(URL) as c:
+        billing.process(c.cursor())
+        c.execute("""insert into payment_events (stripe_event_id, kind, stripe_subscription) values ('evt_3', 'subscription_ended', 'sub_1')""")
+        billing.process(c.cursor())
+        c.commit()
+    assert q("select status from invoices where user_id = %s", other)[0][0] == "due"
+    assert q("select active_plan from manufacturer_profiles where user_id = %s", maker)[0][0] is None   # cancelled subscription ends the plan

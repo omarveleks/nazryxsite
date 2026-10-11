@@ -71,6 +71,7 @@ def seed_manufacturer(cur, maker, team):
     # the demo manufacturer has Complete Market Access switched on, so the walkthrough shows unlocked and locked parts
     cur.execute("""update manufacturer_profiles set active_plan = 'access', active_since = now(), chosen_plan = coalesce(chosen_plan, 'access')
                    where user_id = %s and active_plan is null""", (maker,))
+    cur.execute("update manufacturer_profiles set verified_at = coalesce(verified_at, now()) where user_id = %s", (maker,))
     if not cur.execute("select 1 from account_documents where user_id = %s", (maker,)).fetchone():
         fid = cur.execute("""insert into stored_files (name, size, data, uploaded_by) values ('demo-agreement.txt', %s, %s, %s) returning id""",
                           (len(DEMO_DOC), DEMO_DOC, team)).fetchone()[0]
@@ -89,6 +90,10 @@ def seed_manufacturer(cur, maker, team):
                          returning id""", (maker, pid)).fetchone()[0]
     cur.execute("""insert into engagement_messages (engagement_id, from_team, author_id, body) values (%s, true, %s,
                    'We have started the market assessment. Please upload your doxycycline dossier index in the dossier room.')""", (eid, team))
+    for name, stage in (("Doxycycline%%", "dossier"), ("Glibenclamide%%", "selected")):
+        cur.execute("""insert into launches (user_id, product_id, country, stage)
+                       select %s, id, 'TZ', %s from mfr_products where user_id = %s and name like %s limit 1
+                       on conflict (product_id, country) do nothing""", (maker, stage, maker, name))
     cur.execute("""insert into engagements (user_id, kind, country, report_type, detail, due_at)
                    values (%s, 'report', 'KE', 'country', 'Which of our products should go to Kenya first?', now() + interval '20 hours')""", (maker,))
 

@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import Shell from '@/components/Shell';
 import { Empty, Flash, StagePill } from '@/components/ui';
-import { deleteAccountDoc, setMfrPlan, uploadAccountDoc } from '@/app/actions/docs';
+import { deleteAccountDoc, setMfrPlan, setVerified, uploadAccountDoc } from '@/app/actions/docs';
 import { requireTeam } from '@/lib/auth';
 import { one, rows, withUser } from '@/lib/db';
 import { ACCOUNT_DOC_KINDS } from '@/lib/docs';
@@ -103,9 +103,18 @@ export default async function AdminAccount({ params, searchParams }: { params: P
                 <input type="hidden" name="user_id" value={id} />
                 <select className="input" name="plan" defaultValue={p.active_plan ?? ''} aria-label="Active plan" style={{ flex: '1 1 200px' }}>
                   <option value="">No plan</option>{PLAN_ORDER.map((k) => <option key={k} value={k}>{MFR_PLANS[k].name}</option>)}</select>
+                <input className="input" name="amount_usd" inputMode="numeric" placeholder="USD per month" aria-label="Price in US dollars per month" style={{ flex: '0 1 140px' }} />
                 <button className="btn btn-blue btn-sm" type="submit">Save</button>
+                <label className="row small" style={{ gap: 6, flexBasis: '100%' }}><input type="checkbox" name="documents" defaultChecked /> Issue the order confirmation and invoice</label>
               </form>
-              {p.active_since && <span className="note">Active since {fmtDate(p.active_since)}.</span>}
+              <p className="note">Card subscriptions switch on by themselves. Use this for invoiced plans and Complete Market Entry. Leave the price
+                empty to use the list price.</p>
+              {p.active_since && <span className="note">Active since {fmtDate(p.active_since)}{p.stripe_subscription ? ', paid by card' : ''}.</span>}
+              <form action={setVerified} className="row">
+                <input type="hidden" name="user_id" value={id} /><input type="hidden" name="on" value={p.verified_at ? '' : '1'} />
+                <span className="small" style={{ flex: 1 }}>{p.verified_at ? `Verified manufacturer since ${fmtDate(p.verified_at)}` : 'Not verified yet'}</span>
+                <button className="btn btn-ghost btn-sm" type="submit">{p.verified_at ? 'Remove badge' : 'Mark verified (GMP checked)'}</button>
+              </form>
             </section>)}
           <section className="card stack" id="documents">
             <h2>Account documents</h2>

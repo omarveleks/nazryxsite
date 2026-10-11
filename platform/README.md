@@ -176,6 +176,30 @@ confirming → production → import permit → shipped → arrived → sampling
 checklist and ETA. My portfolio → Supply and shipments brings all of it together per product. Suggested selling prices (Admin > Content) show on the
 molecule page for paid plans.
 
+## Payments, invoices, launch tracker, market watch (migration 018)
+
+- **Prices**: Basic Market Data and Complete Market Access are monthly card subscriptions at the price set in Admin > Content
+  (starting at USD 199 and USD 999). Complete Market Entry is always "Get in touch".
+- **Card payments (Stripe)**: set `STRIPE_SECRET_KEY` and `STRIPE_WEBHOOK_SECRET` on the web service in Render (never in the
+  repository), and add a webhook in Stripe to `https://<web host>/api/stripe/webhook` for `checkout.session.completed`,
+  `invoice.paid` and `customer.subscription.deleted`. Enable the customer portal in Stripe so customers can change cards or
+  cancel. Without the keys, choosing a plan becomes a request the team invoices.
+- **Billing documents**: the worker (`ingest/billing.py`) switches plans on or off from payment events and issues an order
+  confirmation when a plan starts and an invoice for every payment (Settings > Documents). Switching a plan on by hand in
+  Admin > Accounts issues both too, with the invoice due in 14 days.
+- **Markets**: Tanzania, Kazakhstan, Kyrgyzstan, Uzbekistan and Kenya get full market screens as soon as their data is loaded
+  (a market counts as live when it has registrations). Senegal, Cameroon, Côte d'Ivoire and Haiti are worked by the team and
+  kept in the background of the interface.
+- **Services**: three only. Market entry (distributor, local technical representative, registration and launch; includes
+  introductions), Dossier and regulatory review (Complete Market Access), Renewals and compliance (everyone). The Services page
+  starts with "What do you want?": goal, market, how much we should do, then the plan or service that fits.
+- **Home**: market watch (new competitors, exits, lapsed registrations in the manufacturer's molecules), a free full read of
+  one product, the verified badge (set by the team in Admin > Accounts).
+- **My products > Launch tracker**: each product per market, from chosen to launched. **Market read**: `/m/report`, a printable
+  report (Save as PDF).
+- **Website copy to revisit later** (not changed yet, on request): nazryx.com/manufacturers mentions how distributors and markets
+  are read; align it with the portal's rule of not explaining where the data comes from.
+
 ## Manufacturer workspace: plans that unlock, markets, products, partners (migration 017)
 
 - **Active plan**: the team switches a plan on in Admin > Accounts > the manufacturer (after it is agreed and invoiced).

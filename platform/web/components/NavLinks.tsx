@@ -9,8 +9,8 @@ const NAV = [
 
 // Manufacturer accounts: their own area for expanding into new markets.
 const MFR_NAV = [
-  ['/m', 'Home'], ['/m/products', 'My products'], ['/m/market', 'Market'], ['/m/partners', 'Partners'], ['/m/services', 'Services'], ['/m/plan', 'Plan'],
-  ['/expert', 'Ask the expert'], ['/settings', 'Settings'],
+  ['/m', 'Home'], ['/m/market', 'Market'], ['/m/products', 'My products'], ['/m/partners', 'Distributors'], ['/m/services', 'Services'],
+  ['/m/plan', 'Plan'], ['/settings', 'Settings'],
 ] as const;
 
 export default function NavLinks({ team, manufacturer }: { team: boolean; manufacturer?: boolean }) {

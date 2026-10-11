@@ -1,32 +1,36 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import Shell from '@/components/Shell';
-import MarketPicker, { AgencyMarket, hasData, pickMarket, targetMarkets } from '@/components/MarketPicker';
+import MarketPicker, { AgencyMarket, hasData, loadLive, pickMarket, targetMarkets } from '@/components/MarketPicker';
 import { Badges, Empty, Flash, LockIcon, PlanLock } from '@/components/ui';
-import { deleteMfrProduct, updateProductChecks } from '@/app/actions/mfr';
+import { deleteMfrProduct, saveLaunch, updateProductChecks } from '@/app/actions/mfr';
 import { requireUser } from '@/lib/auth';
 import { one, rows, withUser } from '@/lib/db';
 import { BE_STATUS, beSuggestion, levelLabel, registeredLine } from '@/lib/format';
-import { AGENCY_KINDS, MFR_PLANS, NEEDS_PLAN, SERVICES, canUse, countryName, mfrProductsSql, productClass, reasons } from '@/lib/mfr';
+import { AGENCY_KINDS, LAUNCH_STAGES, MFR_PLANS, NEEDS_PLAN, SERVICES, canUse, countryName, mfrProductsSql, productClass, reasons } from '@/lib/mfr';
 
 export const metadata = { title: 'Product' };
 
 // One product against one market (or all of them): why it fits, the route, the price, the distributors who could take it.
-export default async function MfrProduct({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ saved?: string; error?: string; market?: string; added?: string }> }) {
+export default async function MfrProduct({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ saved?: string; error?: string; market?: string; added?: string; sample?: string }> }) {
   const id = Number((await params).id);
   const sp = await searchParams;
   if (!Number.isInteger(id)) notFound();
   const u = await requireUser({ manufacturer: true });
-  const t = u.mfr_tier;
   const d = await withUser(u.id, async (db) => {
-    const prof = await one(db, 'select target_countries from manufacturer_profiles where user_id = $1', [u.id]);
+    await loadLive(db);
+    const prof = await one(db, 'select target_countries, sample_product_id from manufacturer_profiles where user_id = $1', [u.id]);
+    // the free full read opens every section for one product
+    const sampled = prof?.sample_product_id === id;
+    const t = sampled ? 3 : u.mfr_tier;
     const targets = targetMarkets(prof?.target_countries);
     // a product page opens on a market with data; the general view is one click away
     const market = sp.market ? pickMarket(sp.market, targets) : targets.find(hasData) ?? targets[0];
     const focus = market === 'all' ? targets.find(hasData) ?? 'TZ' : market;
     const p = await one(db, `${mfrProductsSql(focus)} where p.id = $1 and p.user_id = $2`, [id, u.id]);
     if (!p) return null;
-    const base = { p, targets, market };
+    const launches = await rows(db, 'select id, country, stage from launches where product_id = $1 and user_id = $2', [id, u.id]);
+    const base = { p, targets, market, t, sampled, launches };
     if (!p.molecule_id) return base;
     const across = market === 'all' ? await rows(db, `select country, registrants, registrations, on_national_list, facility_level from country_molecules
         where molecule_id = $1 and country = any($2)`, [p.molecule_id, targets]) : [];
@@ -54,6 +58,7 @@ export default async function MfrProduct({ params, searchParams }: { params: Pro
       sub={[p.inn ? p.name : null, cls].filter(Boolean).join(' · ') || 'Product'}
       actions={<Link className="btn btn-blue btn-sm" href={`/m/services?product=${id}`}>Get help with this product</Link>}>
       <Flash sp={sp} />
+      {d.sampled && <div className="ok" role="status">Your free full read: every section of this product is open.</div>}
       {sp.added && <div className="ok" role="status">Added. {p.molecule_id ? 'Here is how it fits your markets.' : 'Our team is matching it to the market.'}</div>}
       <MarketPicker targets={d.targets} current={market} path={`/m/products/${id}`} />
       <div className="split">
@@ -64,11 +69,10 @@ export default async function MfrProduct({ params, searchParams }: { params: Pro
           ) : market === 'all' ? (
             <section className="card">
               <div className="card-h"><h2>Across your markets</h2></div>
-              <table className="tbl"><tbody>{d.targets.map((c) => {
+              <table className="tbl"><tbody>{d.targets.filter(hasData).map((c) => {
                 const f = 'across' in d ? d.across?.find((x) => x.country === c) : null;
                 return (<tr key={c}><td><Link href={`/m/products/${id}?market=${c}`}>{countryName(c)}</Link></td>
-                  <td className="r">{!hasData(c) ? <span className="note">Agency coverage</span>
-                    : f ? <>{registeredLine(f.registrants, f.registrations)}{f.on_national_list ? ` · essential list${f.facility_level ? `, level ${f.facility_level}` : ''}` : ''}</>
+                  <td className="r">{f ?  <>{registeredLine(f.registrants, f.registrations)}{f.on_national_list ? ` · essential list${f.facility_level ? `, level ${f.facility_level}` : ''}` : ''}</>
                     : 'Not on this market yet'}</td></tr>);
               })}</tbody></table>
             </section>
@@ -82,9 +86,9 @@ export default async function MfrProduct({ params, searchParams }: { params: Pro
                   <tr><td>Competition</td><td className="r">{registeredLine(p.registrants, p.registrations)}</td></tr>
                   {'origin' in d && d.origin ? (<>
                     <tr><td>Registered products made in</td><td className="r">{d.origin.length ? d.origin.map((o) => `${o.country} ${o.n}`).join(', ') : 'Nowhere yet'}</td></tr>
-                    <tr><td>Made locally</td><td className="r">{Number(p.local_made) > 0 ? `Yes, ${p.local_made} products` : 'No'}</td></tr>
+                    <tr><td>Made by factories in {countryName(market)}</td><td className="r">{Number(p.local_made) > 0 ? `${p.local_made} products` : 'None'}</td></tr>
                     <tr><td>Registrations lapsed or cancelled</td><td className="r">{d.lapsed}</td></tr>
-                  </>) : <tr><td colSpan={2}><PlanLock compact need="data" title="Where competitors make it, local makers, lapsed registrations" /></td></tr>}
+                  </>) : <tr><td colSpan={2}><PlanLock compact need="data" title="Where competitors make it, and lapsed registrations" /></td></tr>}
                 </tbody></table>)}
               {p.registrants != null && <p className="note">In short: {reasons(p).join(', ')}.</p>}
             </section>
@@ -104,7 +108,7 @@ export default async function MfrProduct({ params, searchParams }: { params: Pro
             </section>
             <section className="card stack">
               <h2>Suggested selling price</h2>
-              {!canUse(u.mfr_tier, 'pricing') ? <PlanLock need="access" title="Pricing analysis">The price band we suggest for this product in {countryName(market)}.</PlanLock>
+              {!canUse(d.t, 'pricing') ? <PlanLock need="access" title="Pricing analysis">The price band we suggest for this product in {countryName(market)}.</PlanLock>
                 : 'price' in d && d.price ? <p><b>{d.price.currency} {Number(d.price.price_low).toFixed(2)}–{Number(d.price.price_high).toFixed(2)}</b> per {d.price.unit}{d.price.note ? ` · ${d.price.note}` : ''}</p>
                 : <p className="note">Our team is setting it. Ask for a price check and we answer within 24 hours.</p>}
             </section>
@@ -124,7 +128,7 @@ export default async function MfrProduct({ params, searchParams }: { params: Pro
         <div className="stack">
           <section className="card stack">
             <h2>What we can do for it</h2>
-            {[...AGENCY_KINDS, 'report'].map((k) => {
+            {AGENCY_KINDS.map((k) => {
               const ok = canUse(u.mfr_tier, k);
               return (
                 <Link key={k} href={ok ? `/m/services/${k}?product=${id}` : `/m/plan?want=${NEEDS_PLAN[k]}`} className="between"
@@ -133,6 +137,21 @@ export default async function MfrProduct({ params, searchParams }: { params: Pro
                   {ok ? <span className="small" style={{ whiteSpace: 'nowrap' }}>Open →</span> : <span className="pill lav"><LockIcon /> Locked</span>}
                 </Link>);
             })}
+          </section>
+          <section className="card stack">
+            <h2>Launch tracker</h2>
+            {d.launches.length > 0 && <div className="stack" style={{ gap: 6 }}>{d.launches.map((l) => (
+              <div key={l.id} className="between small"><span>{countryName(l.country)}</span><span className="pill blue">{LAUNCH_STAGES.find(([k]) => k === l.stage)?.[1]}</span></div>))}</div>}
+            <form action={saveLaunch} className="stack" style={{ gap: 8 }}>
+              <input type="hidden" name="product_id" value={id} /><input type="hidden" name="return" value={`/m/products/${id}`} />
+              <div className="row">
+                <select className="input" name="country" aria-label="Market" defaultValue={market === 'all' ? d.targets[0] : market} style={{ flex: '1 1 120px' }}>
+                  {d.targets.map((c) => <option key={c} value={c}>{countryName(c)}</option>)}</select>
+                <select className="input" name="stage" aria-label="Stage" defaultValue="selected" style={{ flex: '1 1 140px' }}>
+                  {LAUNCH_STAGES.map(([k, l]) => <option key={k} value={k}>{l}</option>)}</select>
+              </div>
+              <button className="btn btn-ghost btn-sm" type="submit" style={{ alignSelf: 'flex-start' }}>{d.launches.length ? 'Update' : 'Add to the tracker'}</button>
+            </form>
           </section>
           <form action={deleteMfrProduct}><input type="hidden" name="product_id" value={id} />
             <button className="btn-link small" type="submit">Remove this product</button></form>

@@ -4,7 +4,7 @@ import PlanChooser, { loadPlanPrices } from '@/components/PlanChooser';
 import { saveMfrStep } from '@/app/actions/mfr';
 import { requireUser } from '@/lib/auth';
 import { one, withUser } from '@/lib/db';
-import { APPROACHES, CERTIFICATIONS, GOALS, LAUNCH_SCOPES, COMPANY_SIZES, CONTACT_ROLES, DOSAGE_FORMS, MFR_COUNTRIES, MFR_STEPS, NEEDS, THERAPEUTIC_AREAS, TIMELINES } from '@/lib/mfr';
+import { APPROACHES, CERTIFICATIONS, GOALS, LAUNCH_SCOPES, COMPANY_SIZES, CONTACT_ROLES, CORE_MARKETS, DOSAGE_FORMS, MFR_COUNTRIES, MFR_STEPS, OTHER_MARKETS, NEEDS, THERAPEUTIC_AREAS, TIMELINES } from '@/lib/mfr';
 
 export const metadata = { title: 'Your company' };
 
@@ -101,11 +101,15 @@ export default async function MfrOnboarding({ searchParams }: { searchParams: Pr
       {step === 3 && (
         <form action={saveMfrStep} className="stack"><input type="hidden" name="step" value="3" />
           <section className="card stack"><h2>Markets you want to enter</h2>
-            <p className="note">Tanzania has live market data today. In the others our team works the market for you; data screens follow.</p>
-            <div className="grid g3">{MFR_COUNTRIES.map((c) => (
+            <div className="grid g3">{CORE_MARKETS.map((c) => (
               <label key={c.code} className="choice"><input type="checkbox" name="target_countries" value={c.code}
-                defaultChecked={p?.target_countries?.length ? p.target_countries.includes(c.code) : c.code === 'TZ'} />
-                <span>{c.name}{c.data ? <span className="note"> · live data</span> : <span className="note"> · agency</span>}</span></label>))}</div>
+                defaultChecked={p?.target_countries?.length ? p.target_countries.includes(c.code) : c.code === 'TZ'} /><span>{c.name}</span></label>))}</div>
+            <details open={OTHER_MARKETS.some((c) => p?.target_countries?.includes(c.code))}>
+              <summary className="btn-link small">More markets</summary>
+              <div className="grid g3" style={{ marginTop: 10 }}>{OTHER_MARKETS.map((c) => (
+                <label key={c.code} className="choice"><input type="checkbox" name="target_countries" value={c.code}
+                  defaultChecked={p?.target_countries?.includes(c.code)} /><span>{c.name}</span></label>))}</div>
+            </details>
           </section>
           <section className="card stack"><h2>Already registered in any of them?</h2>
             <Checks name="registered_in" list={MFR_COUNTRIES.map((c) => [c.code, c.name] as [string, string])} cols="g3" /></section>

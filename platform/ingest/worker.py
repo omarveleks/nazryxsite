@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
-"""Background worker: runs queued ingest jobs (oldest first), delivers queued notifications through the stubbed
+"""Background worker: runs queued ingest jobs (oldest first), applies payments, delivers queued notifications through the stubbed
 providers and sends the 48-hour upload reminder. Wakes on NOTIFY 'ingest' or every POLL_SECONDS."""
 import logging
 import os
 import time
 
 from db import connect
+import billing
 import ingest_job
 import notify
 import reminder
@@ -30,6 +31,7 @@ def tick():
             pass  # recorded on the job row; keep the worker alive
     with connect() as conn:
         cur = conn.cursor()
+        billing.process(cur)          # plans switched on or off, invoices and order confirmations
         notify.deliver_queued(cur)
         for (code,) in cur.execute("select code from countries where enabled").fetchall():
             reminder.check_and_remind(cur, code)

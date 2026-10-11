@@ -122,7 +122,7 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
     }
     if (tab === 'content') {
       out.routes = await rows(db, 'select key, label, description, months_low, months_high from registration_routes order by sort');
-      out.prices = await rows(db, 'select key, price, note from plan_prices');
+      out.prices = await rows(db, 'select key, price, note, amount_usd from plan_prices');
       out.feed = await rows(db, `select title, created_at from feed_items where kind = 'regulatory' order by created_at desc limit 8`);
       out.notifs = await rows(db, `select channel, subject, body, status, created_at from notifications order by id desc limit 12`);
     }
@@ -489,15 +489,17 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
           </section>
           <section className="card stack" style={{ gridColumn: '1 / -1' }}>
             <h2>Manufacturer plan prices</h2>
-            <p className="note">Shown to manufacturers on their suggested plan. Leave empty to show &ldquo;Priced on your scope&rdquo;. Example: USD 1,500 / month per market.</p>
+            <p className="note">Monthly price in US dollars. Basic Market Data and Complete Market Access are paid by card at this price;
+              Complete Market Entry always shows &ldquo;Get in touch&rdquo;.</p>
             <form action={savePlanPrices} className="stack" style={{ gap: 8 }}>
               {Object.entries(MFR_PLANS).map(([k, v]) => [`mfr_${k}`, v.name]).map(([k, label]) => {
                 const cur = d.prices.find((x: any) => x.key === k);
                 return (
                   <div key={k} className="row">
                     <b style={{ flex: '0 1 220px' }}>{label}</b>
-                    <input className="input" name={`price_${k}`} defaultValue={cur?.price ?? ''} placeholder="Price" aria-label={`${label}: price`} style={{ flex: '0 1 220px' }} />
-                    <input className="input" name={`note_${k}`} defaultValue={cur?.note ?? ''} placeholder="Note, e.g. 6-month minimum" aria-label={`${label}: note`} style={{ flex: '1 1 220px' }} />
+                    {k === 'mfr_entry' ? <span className="note" style={{ flex: '0 1 220px' }}>Get in touch</span>
+                      : <input className="input" name={`amount_${k}`} defaultValue={cur?.amount_usd ?? ''} placeholder="USD per month" inputMode="numeric" aria-label={`${label}: US dollars per month`} style={{ flex: '0 1 220px' }} />}
+                    <input className="input" name={`note_${k}`} defaultValue={cur?.note ?? ''} placeholder="Note shown under the price (optional)" aria-label={`${label}: note`} style={{ flex: '1 1 220px' }} />
                   </div>);
               })}
               <button className="btn btn-blue btn-sm" type="submit" style={{ alignSelf: 'flex-start' }}>Save prices</button>

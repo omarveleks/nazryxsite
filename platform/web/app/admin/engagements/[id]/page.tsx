@@ -20,7 +20,7 @@ export default async function AdminEngagement({ params, searchParams }: { params
     const base = await loadEngagement(db, id);
     if (!base) return null;
     // partner introductions: which company the profile code stands for (team only)
-    const code = base.e.kind === 'partner_intro' ? /profile ([0-9A-F]{8})/.exec(base.e.detail ?? '')?.[1] : null;
+    const code = /profile ([0-9A-F]{8})/.exec(base.e.detail ?? '')?.[1] ?? null;
     const partner = code ? await one(db, `select c.id, c.display_name from companies c where c.id = partner_company($1)`, [code]) : null;
     const products = await rows(db, `select p.id, coalesce(m.inn, p.name) as name from mfr_products p left join molecules m on m.id = p.molecule_id
                                      where p.user_id = $1 order by 2`, [base.e.user_id]);
@@ -43,7 +43,7 @@ export default async function AdminEngagement({ params, searchParams }: { params
             <option value="open">Open</option><option value="done">Done</option><option value="cancelled">Cancelled</option></select>
           <button className="btn btn-blue btn-sm" type="submit">Update</button>
         </form>
-        {e.kind === 'partner_intro' && (
+        {/profile [0-9A-F]{8}/.test(e.detail ?? '') && (
           <p className="note">Profile stands for: {d.partner ? <Link href={`/company/${d.partner.id}`}><b>{title(d.partner.display_name)}</b></Link> : 'not found (the registry may have changed)'}. Never share the name until both sides agree.</p>)}
         <form action={uploadEngagementDoc} className="row">
           <input type="hidden" name="engagement_id" value={id} />

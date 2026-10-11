@@ -8,7 +8,7 @@ import { MFR_PLANS, tierOf, type PlanKey } from '@/lib/mfr';
 
 export const metadata = { title: 'Your plan' };
 
-export default async function MfrPlan({ searchParams }: { searchParams: Promise<{ requested?: string; error?: string; want?: string }> }) {
+export default async function MfrPlan({ searchParams }: { searchParams: Promise<{ requested?: string; error?: string; want?: string; paid?: string }> }) {
   const sp = await searchParams;
   const u = await requireUser({ manufacturer: true });
   const d = await withUser(u.id, async (db) => ({
@@ -20,7 +20,8 @@ export default async function MfrPlan({ searchParams }: { searchParams: Promise<
     <Shell user={u} title="Plans" sub="Three plans, from market data to a market entry run for you"
       actions={<Link className="btn btn-ghost btn-sm" href="/m/onboarding?step=3">Change your answers</Link>}>
       <Flash sp={sp} />
-      {sp.requested && <div className="ok" role="status">Thanks. Our team will confirm the scope and price with you within one working day, then switch your plan on.</div>}
+      {sp.paid && <div className="ok" role="status">Payment received. Your plan switches on within a minute; your order confirmation and invoice follow in Settings, Documents.</div>}
+      {sp.requested && <div className="ok" role="status">Thanks. Our team will get in touch within one working day.</div>}
       {d.p ? <PlanChooser p={d.p} prices={d.prices} products={d.products} from="plan"
         want={sp.want && sp.want in MFR_PLANS && (d.p.active_plan ? tierOf(d.p.active_plan) < tierOf(sp.want) : true) ? sp.want as PlanKey : null} /> : <p>Tell us about your company first. <Link href="/m/onboarding">Start</Link></p>}
     </Shell>

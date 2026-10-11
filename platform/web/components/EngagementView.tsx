@@ -3,7 +3,7 @@ import { postEngagementMessage, uploadEngagementFile } from '@/app/actions/mfr';
 import { one, rows, type Db } from '@/lib/db';
 import { Empty } from '@/components/ui';
 import { DOSSIER_ITEMS, fmtDate } from '@/lib/format';
-import { OBLIGATION_KINDS, REPORT_TYPES, SERVICES, countryName } from '@/lib/mfr';
+import { OBLIGATION_KINDS, SERVICES, countryName } from '@/lib/mfr';
 
 const REVIEW: Record<string, [string, string]> = { submitted: ['Submitted', ''], accepted: ['Accepted', 'mint'], gap: ['Gap', 'peach'] };
 const itemLabel = (k: string) => ENGAGEMENT_DOC_ITEMS.find(([x]) => x === k)?.[1] ?? k;
@@ -35,7 +35,7 @@ export function EngagementBody({ e, files, messages, obligations, team }: {
           <table className="tbl"><tbody>
             {e.country && <tr><td>Country</td><td>{countryName(e.country)}</td></tr>}
             {e.product && <tr><td>Product</td><td>{e.product}</td></tr>}
-            {e.report_type && <tr><td>Report</td><td>{REPORT_TYPES.find(([k]) => k === e.report_type)?.[1]}</td></tr>}
+            {e.report_type && <tr><td>Report</td><td>{String(e.report_type).replaceAll('_', ' ')}</td></tr>}
             {e.kind === 'report' && e.due_at && <tr><td>Due</td><td>{new Date(e.due_at).toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</td></tr>}
             {e.detail && <tr><td>Your note</td><td style={{ whiteSpace: 'pre-wrap' }}>{e.detail}</td></tr>}
           </tbody></table>

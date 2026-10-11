@@ -14,11 +14,8 @@ export function Locked({ title, children, cta = 'Upgrade' }: { title: string; ch
   );
 }
 
-export const LockIcon = () => (
-  <svg width="11" height="12" viewBox="0 0 11 12" aria-hidden="true" style={{ flex: 'none' }}>
-    <rect x="1" y="5" width="9" height="6.5" rx="1.5" fill="currentColor" />
-    <path d="M3 5V3.6a2.5 2.5 0 0 1 5 0V5" fill="none" stroke="currentColor" strokeWidth="1.4" />
-  </svg>);
+export { LockIcon } from './Icons';
+import { LockIcon } from './Icons';
 
 /** A feature the manufacturer's plan does not include: what it is, which plan unlocks it, and the way there. */
 export function PlanLock({ need, title, children, compact }: { need: 'data' | 'access' | 'entry'; title: string; children?: ReactNode; compact?: boolean }) {
@@ -59,7 +56,7 @@ export function Badges({ m, full }: { m: BadgeFacts; full?: boolean }) {
         : regs === 0 ? <span className="pill peach">Nobody registered</span>
         : regs <= 3 ? <span className="pill peach">Few competitors</span> : null}
       {m.channel_flag === 'programme' && <span className="pill lav">Programme channel</span>}
-      {full && Number(m.local_made ?? 0) > 0 && <span className="pill">Made locally</span>}
+      {full && Number(m.local_made ?? 0) > 0 && <span className="pill">Made by a local factory</span>}
       {m.supply && <span className="pill mint">Supply confirmed</span>}
       {m.watched && <span className="pill">Watching</span>}
     </span>

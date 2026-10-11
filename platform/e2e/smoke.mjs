@@ -200,11 +200,16 @@ await k.goto(B + '/home'); check(k.url().endsWith('/m'), 'manufacturers are kept
 // without an active plan: the free screens work, the rest is locked with a way to unlock it
 await k.goto(B + '/m/services');
 const svc = await k.locator('main').innerText();
-check(svc.includes('Picked for you') && svc.includes('Market entry') && !svc.includes('Send to our team'), 'services is a menu; forms open per service');
+check(svc.includes('What do you want?') && svc.includes('Dossier and regulatory review') && svc.includes('Renewals and compliance')
+  && !svc.includes('East African') && !svc.includes('Send to our team'), 'services: three services, forms open per service');
+await k.click('a.choice:has-text("Enter a new market")'); await k.waitForURL(/goal=enter/);
+await k.click('a.pill:has-text("Tanzania")'); await k.waitForURL(/market=TZ/);
+await k.click('a.choice:has-text("Take it over completely")'); await k.waitForURL(/depth=full/);
+check((await k.locator('#want').innerText()).includes('Complete Market Entry'), 'what do you want: answers lead to the plan that fits');
 check(await k.locator('a.card:has(h2:text-is("Market entry")) .pill:has-text("Complete Market Entry")').count() === 1, 'services outside the plan are locked');
 await k.goto(B + '/m/partners');
 const free = await k.locator('main').innerText();
-check(/Distributor [0-9A-F]{8}/.test(free) && !free.includes('Reaches EML') && (await k.locator('a.pill:has-text("Request introduction")').count()) > 0
+check(/Distributor [0-9A-F]{8}/.test(free) && !free.includes('Reaches EML') && !free.includes('manufacture locally') && (await k.locator('a.pill:has-text("Introduction")').count()) > 0
   && (await k.locator('.nm').count()) <= 5, 'partners opens on every distributor, five free, introductions locked');
 await k.goto(B + '/m/products');
 const prodFree = await k.locator('main').innerText();
@@ -218,6 +223,8 @@ await k.goto(B + '/m/products');
 await k.locator('a b', { hasText: 'Doxycycline' }).first().click(); await k.waitForURL(/\/m\/products\/\d+/);
 const kp = await k.locator('main').innerText();
 check(kp.includes('Why Tanzania') && kp.includes('Route and timeline') && kp.includes('Unlock with Complete Market Access'), 'product page with paid parts locked');
+await k.goto(B + '/m');
+check((await k.locator('main').innerText()).includes('Market watch'), 'market watch on the home page');
 await k.goto(B + '/m/plan?want=access');
 check((await k.locator('main').innerText()).includes('To unlock that') && (await k.locator('main').innerText()).includes('Compare the plans'), 'upgrade flow names the plan that unlocks it');
 
@@ -234,14 +241,24 @@ await t.goto(acctUrl);
 await t.selectOption('#documents select[name=kind]', 'agreement'); await t.fill('#documents input[name=title]', 'Smoke services agreement');
 await t.setInputFiles('#documents input[name=file]', { name: 'agreement.pdf', mimeType: 'application/pdf', buffer: Buffer.from('%PDF-1.4 a') });
 await Promise.all([t.waitForURL(/saved=1/), t.click('#documents button:has-text("Upload")')]);
-await k.goto(B + '/settings');
-check((await k.locator('main').innerText()).includes('Smoke services agreement'), 'customer finds account documents in Settings');
+let invoiced = false;
+for (let i = 0; i < 15 && !invoiced; i++) { await k.waitForTimeout(1000); await k.goto(B + '/settings'); invoiced = (await k.locator('main').innerText()).includes('Invoice NZX-'); }
+const settingsText = await k.locator('main').innerText();
+check(settingsText.includes('Smoke services agreement'), 'customer finds account documents in Settings');
+check(invoiced && settingsText.includes('Order confirmation'), 'switching a plan on issues the order confirmation and invoice');
 await k.goto(B + '/m/products');
 check((await k.locator('main').innerText()).includes('By therapeutic class'), 'active plan unlocks the portfolio analysis');
+await k.goto(B + '/m/products');
+await k.locator('a b', { hasText: 'Doxycycline' }).first().click(); await k.waitForURL(/\/m\/products\/\d+/);
+await Promise.all([k.waitForURL(/saved=1/), k.click('button:has-text("Add to the tracker")')]);
+await k.goto(B + '/m/products?tab=launches');
+check((await k.locator('main').innerText()).includes('Doxycycline'), 'launch tracker');
+await k.goto(B + '/m/report?market=TZ');
+check((await k.locator('body').innerText()).includes('Your portfolio against it'), 'market read to download');
 await k.goto(B + '/m/market?market=TZ');
 check((await k.locator('main').innerText()).includes('Where registered products are made'), 'market page for the manufacturer');
 await k.goto(B + '/m/market?market=KE');
-check((await k.locator('main').innerText()).includes('our team covers it directly'), 'markets without data say so and offer a report');
+check((await k.locator('main').innerText()).includes('Talk to our team'), 'markets without data point to our team');
 await k.goto(B + '/m/partners?class=' + encodeURIComponent('Anti-infective Medicines'));
 const kpart = await k.locator('main').innerText();
 check(/Distributor [0-9A-F]{8}/.test(kpart) && /Open to \d+ of your \d+ molecules/.test(kpart) && !kpart.includes('Alpha Pharma'), 'partners show codes and how open each is to you');

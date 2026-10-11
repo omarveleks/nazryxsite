@@ -1,65 +1,49 @@
 // Manufacturer side: countries, agency services and their milestones, report types.
 
-/** Countries manufacturers can target. `data` = we hold the registry and essential list, so market screens are live. */
-export const MFR_COUNTRIES: { code: string; name: string; data: boolean }[] = [
-  { code: 'TZ', name: 'Tanzania', data: true },
-  { code: 'KE', name: 'Kenya', data: false },
-  { code: 'KZ', name: 'Kazakhstan', data: false },
-  { code: 'UZ', name: 'Uzbekistan', data: false },
-  { code: 'CM', name: 'Cameroon', data: false },
-  { code: 'SN', name: 'Senegal', data: false },
+/** Markets manufacturers can target. Core markets get full market screens (live once their data is loaded); the others
+ *  are worked by our team and kept in the background of the interface. */
+export const MFR_COUNTRIES: { code: string; name: string; core: boolean }[] = [
+  { code: 'TZ', name: 'Tanzania', core: true },
+  { code: 'KZ', name: 'Kazakhstan', core: true },
+  { code: 'KG', name: 'Kyrgyzstan', core: true },
+  { code: 'UZ', name: 'Uzbekistan', core: true },
+  { code: 'KE', name: 'Kenya', core: true },
+  { code: 'SN', name: 'Senegal', core: false },
+  { code: 'CM', name: 'Cameroon', core: false },
+  { code: 'CI', name: 'Côte d’Ivoire', core: false },
+  { code: 'HT', name: 'Haiti', core: false },
 ];
+export const CORE_MARKETS = MFR_COUNTRIES.filter((c) => c.core);
+export const OTHER_MARKETS = MFR_COUNTRIES.filter((c) => !c.core);
 export const countryName = (c?: string | null) => MFR_COUNTRIES.find((x) => x.code === c)?.name ?? c ?? '';
-export const EAC = ['Tanzania', 'Kenya', 'Uganda', 'Rwanda', 'Burundi', 'South Sudan'];
 
 export const CERTIFICATIONS = ['WHO prequalification', 'EU GMP', 'US FDA', 'UK MHRA', 'PIC/S', 'WHO GMP', 'National GMP'];
 
-/** Agency services. Each one becomes an engagement the team works through, milestone by milestone. */
+/** Services. Each becomes an engagement the team works through, milestone by milestone. Only OFFERED ones can be asked
+ *  for; the others stay so older engagements keep their names. */
 export const SERVICES: Record<string, { label: string; what: string; milestones: string[] }> = {
   market_entry: {
     label: 'Market entry',
-    what: 'We take your products into the country end to end: assessment, product choice, partner, registration and launch.',
-    milestones: ['Requested', 'Market assessment', 'Product selection', 'Partner appointed', 'Dossier submitted', 'Regulator queries', 'Approved', 'Launched'],
+    what: 'We take your products into the market for you: the right distributor, a local technical representative, registration and launch.',
+    milestones: ['Requested', 'Market assessment', 'Distributor and representative chosen', 'Dossier submitted', 'Regulator queries', 'Approved', 'Launched'],
   },
   dossier_review: {
-    label: 'Dossier review',
-    what: 'Upload your dossier. We check every part against the country’s requirements and list the gaps before you file.',
+    label: 'Dossier and regulatory review',
+    what: 'Send us your dossier. We check it against the country’s requirements, confirm the route to approval and list every gap before you file.',
     milestones: ['Requested', 'Documents received', 'Under review', 'Gaps sent', 'Ready to file'],
   },
-  local_rep: {
-    label: 'Local representative',
-    what: 'Every registered product needs a local technical representative. We act as yours, or match you with one.',
-    milestones: ['Requested', 'Agreement', 'Appointed', 'Active'],
-  },
-  eac_rollout: {
-    label: 'East African roll-out',
-    what: 'One dossier through the East African Community joint assessment, then country by country across the region.',
-    milestones: ['Requested', 'Eligibility check', 'Joint assessment filed', 'Joint assessment outcome', 'National approvals', 'Done'],
-  },
   post_registration: {
-    label: 'After registration',
-    what: 'We keep your registrations alive: renewals, variations and safety reports, each tracked against its deadline.',
+    label: 'Renewals and compliance',
+    what: 'Once you are registered, we keep it that way: renewals, variations and safety reports, each tracked against its deadline.',
     milestones: ['Requested', 'Products onboarded', 'Active'],
   },
-  partner_intro: {
-    label: 'Partner introduction',
-    what: 'We introduce you to a distributor from the partner finder and help agree terms.',
-    milestones: ['Requested', 'Distributor contacted', 'Introduced', 'Agreement signed'],
-  },
-  report: {
-    label: '24-hour report',
-    what: 'A written report from our team within 24 hours of ordering.',
-    milestones: ['Requested', 'In progress', 'Delivered'],
-  },
+  local_rep: { label: 'Local representative', what: '', milestones: ['Requested', 'Agreement', 'Appointed', 'Active'] },
+  eac_rollout: { label: 'East African roll-out', what: '', milestones: ['Requested', 'Eligibility check', 'Joint assessment filed', 'Joint assessment outcome', 'National approvals', 'Done'] },
+  partner_intro: { label: 'Distributor introduction', what: '', milestones: ['Requested', 'Distributor contacted', 'Introduced', 'Agreement signed'] },
+  report: { label: 'Report', what: '', milestones: ['Requested', 'In progress', 'Delivered'] },
 };
-export const AGENCY_KINDS = ['market_entry', 'dossier_review', 'local_rep', 'eac_rollout', 'post_registration'] as const;
+export const AGENCY_KINDS = ['market_entry', 'dossier_review', 'post_registration'] as const;
 
-export const REPORT_TYPES: [string, string][] = [
-  ['molecule', 'Molecule opportunity: demand, competition, route and price for one product'],
-  ['country', 'Country entry plan: where to start, which products, partner and timeline'],
-  ['competitors', 'Competitor landscape: who holds what, made where, recent moves'],
-  ['price', 'Price check: market and suggested selling prices for your products'],
-];
 
 export const OBLIGATION_KINDS: Record<string, string> = { renewal: 'Renewal', variation: 'Variation', safety_report: 'Safety report', other: 'Other' };
 
@@ -83,7 +67,7 @@ export function mfrProductsSql(country: string) {
   const c = MFR_COUNTRIES.some((x) => x.code === country) ? country : 'TZ';   // whitelisted: safe to inline
   return `
   select p.*, m.inn, m.category, cm.registrants, cm.registrations, cm.on_national_list, cm.on_who_eml, cm.facility_level,
-         cm.local_made, cm.forms, cm.channel_flag, cm.in_combinations, coalesce(cm.rankable, false) as rankable, g.score
+         cm.local_made, cm.forms, cm.channel_flag, cm.in_combinations, coalesce(cm.rankable, false) as rankable, g.score, g.demand
   from mfr_products p
   left join molecules m on m.id = p.molecule_id
   left join country_molecules cm on cm.molecule_id = p.molecule_id and cm.country = '${c}'
@@ -130,7 +114,7 @@ export const MFR_PLANS: Record<PlanKey, { name: string; for: string; includes: s
   data: {
     name: 'Basic Market Data',
     for: 'See each market before you commit.',
-    includes: ['Complete market data', 'Target distributor lists', 'Portfolio analysis'],
+    includes: ['Complete market data', 'Target distributor lists', 'Portfolio analysis', 'Market watch on your molecules'],
   },
   access: {
     name: 'Complete Market Access',
@@ -143,8 +127,7 @@ export const MFR_PLANS: Record<PlanKey, { name: string; for: string; includes: s
     for: 'We take your products into the market for you.',
     includes: ['Everything in Complete Market Access', 'Distributor sourcing, done for you',
       'Regulatory submissions and approvals, done for you (government fees paid by you)', 'Sales forecasts and strategic review',
-      'Launch planned with the distributor’s sales team', 'Market watch: new registrations, competitors, renewals',
-      'One contact and weekly reports per market'],
+      'Launch planned with the distributor’s sales team', 'One contact and weekly reports per market'],
   },
 };
 
@@ -173,24 +156,14 @@ export function suggestPlan(a: Answers): { plan: PlanKey; why: string[] } {
   return { plan, why };
 }
 
-/** Services to offer first, from what the manufacturer told us (needs, markets, approach, plan). Ordered, no repeats. */
-export function recommendServices(p: {
-  services?: string[] | null; target_countries?: string[] | null; registered_in?: string[] | null; approach?: string | null;
-  chosen_plan?: string | null; suggested_plan?: string | null;
-} | null): { kind: string; why: string; report?: string }[] {
-  const needs = new Set(p?.services ?? []), targets = p?.target_countries ?? [], plan = p?.chosen_plan ?? p?.suggested_plan;
-  const out: { kind: string; why: string; report?: string }[] = [];
-  const add = (kind: string, why: string, report?: string) => { if (!out.some((x) => x.kind === kind)) out.push({ kind, why, report }); };
-  if (plan === 'entry' || needs.has('sales') || needs.has('reporting')) add('market_entry', 'you want us to take your products into the market');
-  if (needs.has('register') || needs.has('quality') || plan === 'access')
-    add('dossier_review', needs.has('quality') ? 'you want every quality check passed' : needs.has('register') ? 'you want to get registered'
-      : 'your plan includes a documentation and regulatory check');
-  if (needs.has('distributor')) add('partner_intro', 'you want the right distributor');
-  if (p?.approach === 'own') add('local_rep', 'you want to register in your own name');
-  if ((p?.registered_in ?? []).length || needs.has('watch')) add('post_registration', (p?.registered_in ?? []).length ? 'you already hold registrations' : 'you want the market watched for you');
-  if (targets.includes('TZ') && targets.includes('KE') && (needs.has('register') || plan === 'entry')) add('eac_rollout', 'Tanzania and Kenya can share one joint assessment');
-  if (needs.has('pricing')) add('report', 'you want to price to win', 'price');
-  else if (needs.has('launch') || !out.length) add('report', 'you want to choose what to launch, and where', 'country');
+/** Services to offer first, from what the manufacturer told us. Ordered, no repeats. */
+export function recommendServices(p: { services?: string[] | null; registered_in?: string[] | null; chosen_plan?: string | null; suggested_plan?: string | null } | null) {
+  const needs = new Set(p?.services ?? []), plan = p?.chosen_plan ?? p?.suggested_plan;
+  const out: { kind: string; why: string }[] = [];
+  const add = (kind: string, why: string) => { if (!out.some((x) => x.kind === kind)) out.push({ kind, why }); };
+  if (plan === 'entry' || ['sales', 'reporting', 'distributor'].some((n) => needs.has(n))) add('market_entry', 'you want us to take your products into the market');
+  if (needs.has('register') || needs.has('quality') || plan === 'access') add('dossier_review', needs.has('quality') ? 'you want every quality check passed' : 'you want a clear route to approval');
+  if ((p?.registered_in ?? []).length || needs.has('watch')) add('post_registration', 'you already hold registrations');
   return out;
 }
 
@@ -199,9 +172,9 @@ export const TIER: Record<string, number> = { data: 1, access: 2, entry: 3 };
 export const tierOf = (plan?: string | null) => TIER[plan ?? ''] ?? 0;
 /** The lowest plan that includes a feature or service. 24-hour reports are open to everyone. */
 export const NEEDS_PLAN: Record<string, PlanKey> = {
-  market: 'data', portfolio: 'data', distributors: 'data',
+  market: 'data', portfolio: 'data', distributors: 'data', watch: 'data', market_read: 'data',
   matching: 'access', pricing: 'access', pathway: 'access', dossier_review: 'access',
-  partner_intro: 'entry', market_entry: 'entry', local_rep: 'entry', eac_rollout: 'entry', post_registration: 'entry', forecast: 'entry',
+  partner_intro: 'entry', market_entry: 'entry', forecast: 'entry',
 };
 export const canUse = (tier: number, feature: string) => !NEEDS_PLAN[feature] || tier >= TIER[NEEDS_PLAN[feature]];
 
@@ -218,12 +191,13 @@ export const productClass = (p: { category?: string | null; atc?: string | null 
 export const SERVICE_NEEDS: Record<string, string[]> = {
   market_entry: ['Your product list with strengths and forms', 'Your GMP and certification pack', 'One person we can ask questions of'],
   dossier_review: ['The dossier, or its index to start', 'GMP certificate and CPP', 'Stability data for climatic zone IVb, if you have it'],
-  local_rep: ['Your company documents', 'The products to register', 'A signed letter of authorisation (we send the template)'],
-  eac_rollout: ['A CTD dossier for the product', 'GMP certificate and CPP', 'Which East African countries you want'],
   post_registration: ['Your registration certificates', 'Renewal dates if you know them', 'Planned changes to the product or site'],
-  partner_intro: ['The distributor profile you picked', 'The products you want them to carry', 'Your price range and terms'],
-  report: ['The market and, if you have one, the product', 'Anything specific you want answered'],
 };
 
 /** High demand: the demand measure behind the ranking (official essential list, how widely it is used, WHO list) at 0.8 or more. */
 export const HIGH_DEMAND = 0.8;
+
+/** Launch tracker stages, from chosen to on the shelf. */
+export const LAUNCH_STAGES: [string, string][] = [
+  ['selected', 'Chosen'], ['dossier', 'Dossier in preparation'], ['filed', 'Filed'], ['approved', 'Approved'], ['launched', 'Launched'],
+];

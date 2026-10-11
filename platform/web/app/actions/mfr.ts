@@ -1,12 +1,14 @@
 'use server';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
+import { headers } from 'next/headers';
+import { checkoutUrl, portalUrl, stripeReady } from '@/lib/stripe';
 import { requireUser } from '@/lib/auth';
 import { dbMessage, one, withUser } from '@/lib/db';
 import { back, int, str } from '@/lib/forms';
 import { findMolecule } from '@/lib/match';
-import { AGENCY_KINDS, APPROACHES, GOALS, LAUNCH_SCOPES, CERTIFICATIONS, COMPANY_SIZES, CONTACT_ROLES, DOSAGE_FORMS, MFR_COUNTRIES, MFR_PLANS, NEEDS, REPORT_TYPES,
-  SERVICES, THERAPEUTIC_AREAS, TIMELINES, NEEDS_PLAN, canUse, countryName, suggestPlan, type PlanKey } from '@/lib/mfr';
+import { AGENCY_KINDS, APPROACHES, GOALS, LAUNCH_SCOPES, CERTIFICATIONS, COMPANY_SIZES, CONTACT_ROLES, DOSAGE_FORMS, MFR_COUNTRIES, MFR_PLANS, NEEDS,
+  SERVICES, THERAPEUTIC_AREAS, TIMELINES, NEEDS_PLAN, LAUNCH_STAGES, canUse, countryName, suggestPlan, tierOf, type PlanKey } from '@/lib/mfr';
 import { DOSSIER_ITEMS } from '@/lib/format';
 import { saveUpload } from '@/lib/uploads';
 
@@ -132,6 +134,48 @@ export async function choosePlan(f: FormData) {
   redirect(chosen ? '/m/plan?requested=1' : '/m?welcome=1');
 }
 
+async function origin() {
+  const h = await headers();
+  return `${h.get('x-forwarded-proto') ?? 'https'}://${h.get('x-forwarded-host') ?? h.get('host')}`;
+}
+
+/** Subscribe to Basic Market Data or Complete Market Access by card. Without card payments set up, it becomes a
+ *  plan request our team invoices. Complete Market Entry is always a conversation (choosePlan). */
+export async function startCheckout(f: FormData) {
+  const u = await requireUser({ manufacturer: true });
+  const plan = str(f, 'plan', 10) as PlanKey;
+  if (plan !== 'data' && plan !== 'access') return choosePlan(f);
+  if (u.mfr_tier >= tierOf(plan)) redirect('/m/plan');
+  if (!stripeReady()) return choosePlan(f);
+  const d = await withUser(u.id, async (db) => ({
+    price: await one(db, 'select amount_usd from plan_prices where key = $1', [`mfr_${plan}`]),
+    p: await one(db, 'select stripe_customer from manufacturer_profiles where user_id = $1', [u.id]),
+  }));
+  if (!d.price?.amount_usd) return choosePlan(f);
+  let url = '';
+  try {
+    url = await checkoutUrl({ userId: u.id, email: u.email, plan, planName: MFR_PLANS[plan].name, amountUsd: d.price.amount_usd,
+      origin: await origin(), customer: d.p?.stripe_customer });
+  } catch (e) {
+    back('/m/plan', { error: `Card payment could not start: ${(e as Error).message}. Try again, or ask us to invoice you.` });
+  }
+  redirect(url);
+}
+
+/** The card, invoices and cancellation, on the payment provider's own page. */
+export async function openBillingPortal() {
+  const u = await requireUser({ manufacturer: true });
+  const p = await withUser(u.id, (db) => one(db, 'select stripe_customer from manufacturer_profiles where user_id = $1', [u.id]));
+  if (!p?.stripe_customer || !stripeReady()) back('/m/plan', { error: 'Your plan is invoiced by our team. Write to us to change it.' });
+  let url = '';
+  try {
+    url = await portalUrl(p!.stripe_customer, await origin());
+  } catch (e) {
+    back('/m/plan', { error: (e as Error).message });
+  }
+  redirect(url);
+}
+
 /** Add one product picked from the medicine search, with its strength and form. */
 export async function addMfrProduct(f: FormData) {
   const u = await requireUser({ manufacturer: true });
@@ -185,7 +229,7 @@ export async function deleteMfrProduct(f: FormData) {
   redirect('/m/products');
 }
 
-/** Ask for an agency service: market entry, dossier review, local representative, EAC roll-out, after registration. */
+/** Ask for a service: market entry, dossier and regulatory review, renewals and compliance. */
 export async function requestService(f: FormData) {
   const u = await requireUser({ manufacturer: true });
   const kind = str(f, 'kind', 30), country = str(f, 'country', 2), product = int(f, 'product_id');
@@ -207,27 +251,6 @@ export async function requestService(f: FormData) {
   redirect(`/m/engagements/${id}?new=1`);
 }
 
-/** Order a 24-hour report. */
-export async function orderReport(f: FormData) {
-  const u = await requireUser({ manufacturer: true });
-  const type = str(f, 'report_type', 30), country = str(f, 'country', 2) || 'TZ', product = int(f, 'product_id');
-  if (!REPORT_TYPES.some(([k]) => k === type)) back('/m/services/report', { error: 'Pick a report.' });
-  if (!codes.includes(country)) back('/m/services/report', { error: 'Pick a country.' });
-  let id = 0;
-  try {
-    id = await withUser(u.id, async (db) => {
-      const r = await one(db, `insert into engagements (user_id, kind, country, product_id, report_type, detail, due_at)
-                               values ($1, 'report', $2, $3, $4, $5, now() + interval '24 hours') returning id`,
-        [u.id, country, product, type, str(f, 'detail', 2000) || null]);
-      await teamNote(db, '24-hour report ordered', `${u.email} ordered a ${type} report for ${country}. Due in 24 hours. Engagement #${r!.id}.`);
-      return r!.id as number;
-    });
-  } catch (e) {
-    back('/m/services/report', { error: dbMessage(e) });
-  }
-  redirect(`/m/engagements/${id}?new=1`);
-}
-
 /** Ask the team to introduce an anonymised distributor from the partner finder. */
 export async function requestIntro(f: FormData) {
   const u = await requireUser({ manufacturer: true });
@@ -237,8 +260,9 @@ export async function requestIntro(f: FormData) {
   let id = 0;
   try {
     id = await withUser(u.id, async (db) => {
-      const r = await one(db, `insert into engagements (user_id, kind, country, product_id, detail) values ($1, 'partner_intro', 'TZ', $2, $3) returning id`,
-        [u.id, product, `Distributor profile ${code}${str(f, 'class', 120) ? ` (${str(f, 'class', 120)})` : ''}. ${str(f, 'detail', 1000)}`.trim()]);
+      const country = codes.includes(str(f, 'market', 2)) ? str(f, 'market', 2) : 'TZ';
+      const r = await one(db, `insert into engagements (user_id, kind, country, product_id, detail) values ($1, 'market_entry', $2, $3, $4) returning id`,
+        [u.id, country, product, `Start with distributor profile ${code}${str(f, 'class', 120) ? ` (${str(f, 'class', 120)})` : ''}. ${str(f, 'detail', 1000)}`.trim()]);
       await teamNote(db, 'Introduction requested', `${u.email} asked to meet distributor profile ${code}. Engagement #${r!.id}.`);
       return r!.id as number;
     });
@@ -295,4 +319,39 @@ export async function uploadEngagementFile(f: FormData) {
   }
   revalidatePath(to);
   redirect(`${to}?uploaded=1`);
+}
+
+/** Put a product on the launch tracker for a market, or move it to another stage. */
+export async function saveLaunch(f: FormData) {
+  const u = await requireUser({ manufacturer: true });
+  const product = int(f, 'product_id'), country = str(f, 'country', 2), stage = str(f, 'stage', 12) || 'selected';
+  const to = safeNext(str(f, 'return', 200), '/m/products?tab=launches');
+  if (!codes.includes(country) || !LAUNCH_STAGES.some(([k]) => k === stage)) back(to, { error: 'Pick a market and a stage.' });
+  try {
+    await withUser(u.id, (db) => db.query(`insert into launches (user_id, product_id, country, stage) values ($1, $2, $3, $4)
+                                           on conflict (product_id, country) do update set stage = excluded.stage, updated_at = now()`,
+      [u.id, product, country, stage]));
+  } catch (e) {
+    back(to, { error: dbMessage(e) });
+  }
+  back(to, { saved: '1' });
+}
+
+export async function removeLaunch(f: FormData) {
+  const u = await requireUser({ manufacturer: true });
+  await withUser(u.id, (db) => db.query('delete from launches where id = $1 and user_id = $2', [int(f, 'launch_id'), u.id]));
+  redirect('/m/products?tab=launches');
+}
+
+/** The free full read: one product of the manufacturer's choice, with every section open. Once only. */
+export async function chooseSample(f: FormData) {
+  const u = await requireUser({ manufacturer: true });
+  const id = int(f, 'product_id');
+  try {
+    await withUser(u.id, (db) => db.query(`update manufacturer_profiles set sample_product_id = $2 where user_id = $1 and sample_product_id is null
+                                           and exists (select 1 from mfr_products where id = $2 and user_id = $1)`, [u.id, id]));
+  } catch (e) {
+    back('/m', { error: dbMessage(e) });
+  }
+  redirect(`/m/products/${id}?sample=1`);
 }
