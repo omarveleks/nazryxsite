@@ -3,7 +3,7 @@ import Shell from '@/components/Shell';
 import MarketPicker, { AgencyMarket, dataMarkets, hasData, loadLive, pickMarket, targetMarkets } from '@/components/MarketPicker';
 import MedicineSearch from '@/components/MedicineSearch';
 import { Bar, Empty, Flash, LockIcon, PlanLock, Tabs } from '@/components/ui';
-import { DemandIcon, OpeningIcon } from '@/components/Icons';
+import { DemandIcon } from '@/components/Icons';
 import { addMfrProducts, saveLaunch } from '@/app/actions/mfr';
 import { requireUser } from '@/lib/auth';
 import { one, rows, withUser } from '@/lib/db';
@@ -128,14 +128,14 @@ export default async function MfrProducts({ searchParams }: { searchParams: Prom
             <tbody>{list.map((p, i) => (
               <tr key={p.id}>
                 <td><Link href={`/m/products/${p.id}${market !== 'all' ? `?market=${market}` : ''}`}><b>{p.inn ?? p.name}</b></Link>
-                  {Number(p.f?.demand ?? 0) >= HIGH_DEMAND && visible(i) && <span className="pill peach" style={{ marginLeft: 8 }}><DemandIcon size={11} /> High demand</span>}
+                  {Number(p.f?.demand ?? 0) >= HIGH_DEMAND && visible(i) && <span style={{ marginLeft: 6, color: 'var(--pastel-peach-ink)' }}><DemandIcon size={11} title="High demand" /></span>}
                   <div className="sub2">{[p.inn ? p.name : null, p.molecule_id ? null : 'Not matched yet'].filter(Boolean).join(' · ')}</div></td>
                 <td className="small hide-m">{p.cls ?? '—'}</td>
                 {(market === 'all' ? live : [market]).map((c) => {
                   const f = fact(p.molecule_id, c);
                   return <td key={c} className="r">{!hasData(c) ? <span className="note">—</span>
                     : !visible(i) ? <span className="note row" style={{ justifyContent: 'flex-end', gap: 4 }}><LockIcon /> Locked</span>
-                    : <span className={`pill ${COMP[competition(f)][1]}`}>{competition(f) === 'open' && <OpeningIcon size={11} />} {competition(f) === 'some' || competition(f) === 'crowded' ? `${f!.registrants} competitors` : COMP[competition(f)][0]}</span>}</td>;
+                    : <span className={`pill ${COMP[competition(f)][1]}`}>{competition(f) === 'some' || competition(f) === 'crowded' ? `${f!.registrants} competitors` : COMP[competition(f)][0]}</span>}</td>;
                 })}
               </tr>))}</tbody></table></div>)}
       </section>

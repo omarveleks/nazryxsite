@@ -66,7 +66,7 @@ export default async function Partners({ searchParams }: { searchParams: Promise
           <div className="card-h"><h2>{total} distributors{d.cls ? ` in ${d.cls}` : ''}</h2></div>
           {shown.length === 0 ? <Empty>No distributor matches these filters.</Empty> : (
             <div>{shown.map((p, i) => (
-              <div key={p.code} className="between" style={{ alignItems: 'flex-start', flexWrap: 'wrap', padding: '14px 0', borderTop: i ? '1px solid var(--line)' : undefined }}>
+              <div key={p.code} className="between" style={{ alignItems: 'flex-start', flexWrap: 'wrap', padding: '10px 0', borderTop: i ? '1px solid var(--line)' : undefined }}>
                 <div style={{ minWidth: 0, flex: '1 1 320px' }}>
                   <span className="nm">Distributor {p.code}</span>
                   <div className="sub2">{p.products} registered products · {p.molecules} molecules · {p.classes} classes{d.cls ? ` · ${p.in_class} in ${d.cls}` : ''}</div>

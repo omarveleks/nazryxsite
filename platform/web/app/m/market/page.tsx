@@ -3,6 +3,7 @@ import Shell from '@/components/Shell';
 import MarketPicker, { AgencyMarket, hasData, loadLive, pickMarket, targetMarkets } from '@/components/MarketPicker';
 import YearChart from '@/components/YearChart';
 import { PlanLock } from '@/components/ui';
+import { OpeningIcon } from '@/components/Icons';
 import { requireUser } from '@/lib/auth';
 import { one, rows, withUser } from '@/lib/db';
 import { HIGH_DEMAND, canUse, countryName } from '@/lib/mfr';
@@ -88,7 +89,7 @@ export default async function MfrMarket({ searchParams }: { searchParams: Promis
           <div className="tile t-blue"><span className="k">Registered products</span><span className="v num">{d.h.products.toLocaleString('en')}</span></div>
           <div className="tile t-mint"><span className="k">Distributors holding registrations</span><span className="v num">{d.h.distributors}</span></div>
           <div className="tile t-lav"><span className="k">Molecules on the market</span><span className="v num">{d.h.molecules}</span></div>
-          <div className="tile t-peach"><span className="k">Essential medicines nobody registered</span><span className="v num">{d.h.open}</span></div>
+          <div className="tile t-peach"><span className="k"><OpeningIcon /> Essential medicines nobody registered</span><span className="v num">{d.h.open}</span></div>
         </div>
         <section className="card between" style={{ flexWrap: 'wrap', gap: 12 }}>
           <span><b>Your catalogue here:</b> {d.h.mine_high} of your molecules are in high demand in {countryName(m)}, and {d.h.mine_on_market} are already

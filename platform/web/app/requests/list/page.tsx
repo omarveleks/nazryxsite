@@ -42,7 +42,7 @@ export default async function SourcingList({ searchParams }: { searchParams: Pro
           ) : (
             <form id="send" action={sendList}>
               {d.items.map((m, i) => (
-                <div key={m.id} className="between" style={{ alignItems: 'flex-start', flexWrap: 'wrap', padding: '14px 0', borderTop: i ? '1px solid var(--line)' : undefined }}>
+                <div key={m.id} className="between" style={{ alignItems: 'flex-start', flexWrap: 'wrap', padding: '10px 0', borderTop: i ? '1px solid var(--line)' : undefined }}>
                   <div style={{ minWidth: 0, flex: '1 1 260px' }}>
                     <Link href={`/molecule/${m.id}`}><span className="nm">{m.inn}</span></Link>
                     <div className="sub2">{[m.category, Number(m.registrants) > 0 ? registeredLine(m.registrants, m.registrations) : null].filter(Boolean).join(' · ')}</div>

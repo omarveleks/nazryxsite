@@ -75,7 +75,7 @@ export default async function MfrHome({ searchParams }: { searchParams: Promise<
             ) : d.first.length === 0 ? <Empty>None of your matched products is on the official essential list yet.</Empty> : (
               <div>{d.first.map((x, i) => (
                 <Link key={x.id} href={`/m/products/${x.id}?market=${d.focus}`} className="between"
-                  style={{ alignItems: 'flex-start', flexWrap: 'wrap', padding: '14px 0', borderTop: i ? '1px solid var(--line)' : undefined, textDecoration: 'none', color: 'inherit' }}>
+                  style={{ alignItems: 'flex-start', flexWrap: 'wrap', padding: '10px 0', borderTop: i ? '1px solid var(--line)' : undefined, textDecoration: 'none', color: 'inherit' }}>
                   <div style={{ minWidth: 0, flex: '1 1 300px' }}>
                     <span className="nm">{x.inn ?? x.name}</span>
                     <div className="sub2">{cap(reasons(x).join(' · '))}</div>

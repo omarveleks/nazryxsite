@@ -66,7 +66,7 @@ export default async function Whitespace({ searchParams }: { searchParams: Promi
                 extra={m.same_cat > 0 ? <span className="pill solid">In your classes</span> : null}
                 actions={<SourceLink id={m.id} stage={m.request_stage} inList={m.in_list} back={back} />} />))}
             {free && [FREE.whitespace + 1, FREE.whitespace + 2].map((n) => (
-              <div key={n} className="muted" style={{ padding: '14px 0', borderTop: '1px solid var(--line)' }}><span className="num">{n}</span> Paid</div>))}
+              <div key={n} className="muted" style={{ padding: '10px 0', borderTop: '1px solid var(--line)' }}><span className="num">{n}</span> Paid</div>))}
           </div>
         )}
         {free && (
