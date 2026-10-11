@@ -5,7 +5,7 @@ import { requireUser } from '@/lib/auth';
 import { dbMessage, one, withUser } from '@/lib/db';
 import { back, int, str } from '@/lib/forms';
 import { findMolecule } from '@/lib/match';
-import { ADD_ONS, AGENCY_KINDS, APPROACHES, CERTIFICATIONS, COMPANY_SIZES, CONTACT_ROLES, DOSAGE_FORMS, MFR_COUNTRIES, MFR_PLANS, NEEDS, REPORT_TYPES,
+import { AGENCY_KINDS, APPROACHES, GOALS, LAUNCH_SCOPES, CERTIFICATIONS, COMPANY_SIZES, CONTACT_ROLES, DOSAGE_FORMS, MFR_COUNTRIES, MFR_PLANS, NEEDS, REPORT_TYPES,
   SERVICES, THERAPEUTIC_AREAS, TIMELINES, countryName, suggestPlan, type PlanKey } from '@/lib/mfr';
 import { DOSSIER_ITEMS } from '@/lib/format';
 import { saveUpload } from '@/lib/uploads';
@@ -77,9 +77,8 @@ export async function saveMfrStep(f: FormData) {
         const r = await insertProducts(db, u.id, str(f, 'list', 20000));
         if (r.added) note = `${r.added} products added, ${r.matched} matched to the market.`;
       } else if (step === 5) {
-        const n = int(f, 'products_next_year');
-        await db.query('update manufacturer_profiles set services = $2, products_next_year = $3 where user_id = $1',
-          [u.id, opts(f, 'services', NEEDS), n != null && n >= 0 && n < 10000 ? n : null]);
+        await db.query('update manufacturer_profiles set goals = $2, services = $3, launch_scope = $4 where user_id = $1',
+          [u.id, opts(f, 'goals', GOALS), opts(f, 'services', NEEDS), oneOf(str(f, 'launch_scope', 20), LAUNCH_SCOPES)]);
       }
       await db.query('update manufacturer_profiles set step = greatest(step, $2) where user_id = $1', [u.id, step + 1]);
     });
@@ -105,7 +104,6 @@ export async function choosePlan(f: FormData) {
   const u = await requireUser({ allowOnboarding: true, manufacturer: true });
   const plan = str(f, 'plan', 20);
   const chosen = (plan in MFR_PLANS ? plan : null) as PlanKey | null;
-  const addOns = pick(f, 'add_ons', Object.keys(ADD_ONS));
   const firstTime = !u.onboarded;
   const from = str(f, 'from', 20) === 'plan' ? '/m/plan' : `${ONB}?step=6`;
   try {
@@ -118,9 +116,8 @@ export async function choosePlan(f: FormData) {
       await db.query('update users set onboarded = true where id = $1', [u.id]);
       const markets = (p.target_countries ?? []).map(countryName).join(', ') || 'none';
       if (chosen) {
-        const label = MFR_PLANS[chosen].name + (addOns.length ? ` + ${addOns.map((a) => ADD_ONS[a].name).join(', ')}` : '');
         await db.query('insert into plan_requests (user_id, wanted, note) values ($1, $2, $3)',
-          [u.id, `mfr:${chosen}`, `${label}. Markets: ${markets}. ${str(f, 'note', 1000)}`.trim()]);
+          [u.id, `mfr:${chosen}`, `${MFR_PLANS[chosen].name}. Markets: ${markets}. ${str(f, 'note', 1000)}`.trim()]);
       }
       if (firstTime || chosen) {
         await teamNote(db, chosen ? `${p.company_name} chose ${MFR_PLANS[chosen].name}` : 'New manufacturer',

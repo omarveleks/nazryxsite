@@ -653,7 +653,7 @@ def test_manufacturer_onboarding_answers(env):
         as_user(a, maker)
         a.execute("insert into manufacturer_profiles (user_id, company_name) values (%s, 'Maker Nine')", (maker,))
         a.execute("""update manufacturer_profiles set dosage_forms = '{Tablets}', target_countries = '{TZ,KE,UZ}', timeline = 'now',
-                     services = '{registration,eac}', products_next_year = 8, step = 6, suggested_plan = 'regional', chosen_plan = 'regional',
+                     goals = '{launch}', services = '{register,sales}', launch_scope = 'data_first', step = 6, suggested_plan = 'entry', chosen_plan = 'entry',
                      completed_at = now() where user_id = %s""", (maker,))
         a.execute("update users set onboarded = true where id = %s", (maker,))
         a.commit()
@@ -661,4 +661,4 @@ def test_manufacturer_onboarding_answers(env):
         with pytest.raises(psycopg.errors.RaiseException):          # still cannot approve itself
             a.execute("update manufacturer_profiles set status = 'approved' where user_id = %s", (maker,))
         a.rollback()
-    assert q("select chosen_plan, step from manufacturer_profiles where user_id = %s", maker)[0] == ("regional", 6)
+    assert q("select chosen_plan, step from manufacturer_profiles where user_id = %s", maker)[0] == ("entry", 6)

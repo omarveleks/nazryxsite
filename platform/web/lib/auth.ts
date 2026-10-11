@@ -14,6 +14,7 @@ export type User = {
   country: string; company_id: number | null; credits: number; onboarded: boolean; owner_id: string | null;
   language: string; whatsapp: string | null; notify_email: boolean; notify_whatsapp: boolean;
   company_name: string | null; claim_status: string | null; list_count: number; account_type: 'distributor' | 'manufacturer';
+  mfr_plan: string | null; mfr_plan_chosen: boolean;
 };
 
 export const sha = (s: string) => createHash('sha256').update(s).digest('hex');
@@ -55,11 +56,13 @@ export const getUser = cache(async (): Promise<User | null> => {
     select u.id, u.email, u.name, u.role, app_plan() as plan, u.country, u.company_id, u.credits, u.onboarded,
            u.owner_id, u.language, u.whatsapp, u.notify_email, u.notify_whatsapp,
            coalesce(c.display_name, cl.company_name) as company_name, cl.status as claim_status,
-           (select count(*)::int from sourcing_list l where l.user_id = u.id) as list_count, u.account_type
+           (select count(*)::int from sourcing_list l where l.user_id = u.id) as list_count, u.account_type,
+           mp.chosen_plan is not null as mfr_plan_chosen, coalesce(mp.chosen_plan, mp.suggested_plan) as mfr_plan
     from users u
     left join companies c on c.id = u.company_id
     left join lateral (select * from company_claims k where k.user_id = coalesce(u.owner_id, u.id)
                        order by k.created_at desc limit 1) cl on true
+    left join manufacturer_profiles mp on mp.user_id = u.id
     where u.id = $1`, [id]));
 });
 

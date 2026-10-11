@@ -63,7 +63,7 @@ export default async function Partners({ searchParams }: { searchParams: Promise
         {!paid && d.list.length > shown.length && (
           <div className="locked" style={{ marginTop: 12 }}><span className="pill lav">Paid</span>
             <b>{d.list.length - shown.length} more distributors in this class</b>
-            <Link className="btn btn-ghost btn-sm" href="/settings#plan">Upgrade</Link></div>)}
+            <Link className="btn btn-ghost btn-sm" href="/m/plan">Upgrade</Link></div>)}
       </section>
       <p className="note">Introductions are part of our agency service: we contact the distributor, present your product and help agree terms.</p>
     </Shell>

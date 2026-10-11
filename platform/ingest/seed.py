@@ -65,8 +65,8 @@ def seed_manufacturer(cur, maker, team):
     cur.execute("""update manufacturer_profiles set company_size = '250-1,000 people', contact_role = 'Export or business development',
                    dosage_forms = '{Tablets,Capsules,Oral liquids}', therapeutic_areas = '{Anti-infectives,Cardiovascular,Diabetes}',
                    plant_countries = 'India', export_markets = 'Nigeria, Ghana, Vietnam', registered_in = '{}', timeline = '6m',
-                   approach = 'partner', services = '{market_data,partner,registration,dossier_review}', products_next_year = 6,
-                   step = 7, suggested_plan = 'regional', completed_at = coalesce(completed_at, now())
+                   approach = 'partner', goals = '{launch,grow}', services = '{launch,distributor,register,pricing}',
+                   launch_scope = 'data_first', step = 7, suggested_plan = 'access', completed_at = coalesce(completed_at, now())
                    where user_id = %s and completed_at is null""", (maker,))
     if not cur.execute("select 1 from account_documents where user_id = %s", (maker,)).fetchone():
         fid = cur.execute("""insert into stored_files (name, size, data, uploaded_by) values ('demo-agreement.txt', %s, %s, %s) returning id""",

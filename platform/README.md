@@ -182,8 +182,13 @@ molecule page for paid plans.
   at sign-in it only sets the wording (everyone lands in their own area).
 - **Manufacturer onboarding** has six steps: company, manufacturing (certifications, dosage forms, therapeutic areas, plants,
   current markets), markets (targets, existing registrations, timeline, approach), catalogue (paste a list, matched at once, or
-  upload a file for the team), needs, then a **suggested plan** (`suggestPlan` in `lib/mfr.ts`) with reasons and add-ons.
-  Picking a plan files a plan request for the team; nothing is charged. `/m/plan` shows it again later.
+  upload a file for the team), goals (what they want and where they want help, worded as on nazryx.com/manufacturers, and how
+  many products could launch, including "depends on what the data shows"), then a **suggested plan** (`suggestPlan` in
+  `lib/mfr.ts`) with the reasons. Three plans (migration 016): Basic Market Data, Complete Market Access, Complete Market Entry.
+  Picking one files a plan request for the team; nothing is charged. `/m/plan` shows it again later.
+- **Services** (`/m/services`) offers what fits first (`recommendServices`: their needs, markets, approach and plan), each with
+  the reason; everything else is folded under "Something else?". The East African roll-out is offered when the markets call for it,
+  never asked at sign-up.
 - **Plan prices** are set in Admin > Content. Empty shows "Priced on your scope".
 - **Documents everywhere in Admin**: on a request (tagged to a dossier item, which turns Ready, or a shipment document, which
   turns received), on an engagement, on a customer account (customers see them in Settings > Documents), and on suppliers

@@ -4,7 +4,7 @@ import PlanChooser, { loadPlanPrices } from '@/components/PlanChooser';
 import { saveMfrStep } from '@/app/actions/mfr';
 import { requireUser } from '@/lib/auth';
 import { one, withUser } from '@/lib/db';
-import { APPROACHES, CERTIFICATIONS, COMPANY_SIZES, CONTACT_ROLES, DOSAGE_FORMS, MFR_COUNTRIES, MFR_STEPS, NEEDS, THERAPEUTIC_AREAS, TIMELINES } from '@/lib/mfr';
+import { APPROACHES, CERTIFICATIONS, GOALS, LAUNCH_SCOPES, COMPANY_SIZES, CONTACT_ROLES, DOSAGE_FORMS, MFR_COUNTRIES, MFR_STEPS, NEEDS, THERAPEUTIC_AREAS, TIMELINES } from '@/lib/mfr';
 
 export const metadata = { title: 'Your company' };
 
@@ -45,7 +45,7 @@ export default async function MfrOnboarding({ searchParams }: { searchParams: Pr
       <div>
         <div className="crumb">{editing ? <Link href="/settings">Settings</Link> : `Step ${step} of ${MFR_STEPS.length}`}</div>
         <h1>{step === 6 ? 'Your suggested plan' : editing ? 'Your company' : ['Tell us about your company', 'What you make', 'Where you want to go',
-          'Your product catalogue', 'What you need from us'][step - 1]}</h1>
+          'Your product catalogue', 'Your goals'][step - 1]}</h1>
         <p className="muted" style={{ marginTop: 8 }}>{step === 6
           ? 'From your answers. Pick the one that fits; our team confirms scope and price with you.'
           : 'We use this to match your products to markets, brief our team and suggest the right plan. Our team reviews every manufacturer before partner introductions.'}</p>
@@ -132,11 +132,11 @@ export default async function MfrOnboarding({ searchParams }: { searchParams: Pr
 
       {step === 5 && (
         <form action={saveMfrStep} className="stack"><input type="hidden" name="step" value="5" />
-          <section className="card stack"><h2>What do you need?</h2><p className="note">Pick all that apply.</p><Checks name="services" list={NEEDS} /></section>
-          <section className="card stack">
-            <div className="field"><label htmlFor="products_next_year">How many products do you want to register in the next 12 months?</label>
-              <input className="input" id="products_next_year" name="products_next_year" inputMode="numeric" defaultValue={p?.products_next_year ?? ''} placeholder="e.g. 5" style={{ maxWidth: 160 }} /></div>
-          </section>
+          <section className="card stack"><h2>What do you want?</h2><Checks name="goals" list={GOALS} cols="g3" /></section>
+          <section className="card stack"><h2>Where do you want our help?</h2><p className="note">Pick all that apply.</p><Checks name="services" list={NEEDS} /></section>
+          <section className="card stack"><h2>How many products could you launch in these markets in the next 12 months?</h2>
+            <p className="note">Often it depends on what the market data shows. That is a fine answer.</p>
+            <Radios name="launch_scope" list={LAUNCH_SCOPES} /></section>
           <Buttons />
         </form>)}
 

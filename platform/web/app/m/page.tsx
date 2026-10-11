@@ -61,7 +61,7 @@ export default async function MfrHome({ searchParams }: { searchParams: Promise<
                   </div>
                   <Link className="btn btn-blue btn-sm" href={`/m/products/${p.id}`}>Open</Link>
                 </div>))}</div>)}
-            {!paid && d.first.length > 0 && <p className="note" style={{ marginTop: 12 }}>Free plan: top 3. <Link href="/settings#plan">Upgrade</Link> for the full ranking, suggested prices and timelines.</p>}
+            {!paid && d.first.length > 0 && <p className="note" style={{ marginTop: 12 }}>Showing the top 3. <Link href="/m/plan">A plan</Link> opens the full ranking, suggested prices and timelines.</p>}
           </section>
 
           <section className="card">
@@ -82,7 +82,7 @@ export default async function MfrHome({ searchParams }: { searchParams: Promise<
               <p><b>{MFR_PLANS[d.profile.chosen_plan as keyof typeof MFR_PLANS]?.name}</b> <span className="pill blue">Requested</span><br />
                 <span className="note">Our team confirms scope and price with you, usually within one working day.</span></p>
             ) : (<>
-              <p>Suggested for you: <b>{MFR_PLANS[(d.profile?.suggested_plan ?? 'insight') as keyof typeof MFR_PLANS]?.name}</b></p>
+              <p>Suggested for you: <b>{MFR_PLANS[(d.profile?.suggested_plan ?? 'data') as keyof typeof MFR_PLANS]?.name}</b></p>
               <Link className="btn btn-blue btn-sm" href="/m/plan" style={{ marginTop: 10 }}>See why</Link>
             </>)}
           </section>

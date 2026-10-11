@@ -88,7 +88,7 @@ export const MFR_PRODUCTS_SQL = `
   left join visible_gap_scores g on g.molecule_id = p.molecule_id and g.country = 'TZ'`;
 
 // ---------------------------------------------------------------- onboarding questions
-export const MFR_STEPS = ['Company', 'Manufacturing', 'Markets', 'Catalogue', 'Needs', 'Your plan'] as const;
+export const MFR_STEPS = ['Company', 'Manufacturing', 'Markets', 'Catalogue', 'Goals', 'Your plan'] as const;
 export const COMPANY_SIZES = ['Under 50 people', '50-250 people', '250-1,000 people', 'Over 1,000 people'];
 export const CONTACT_ROLES = ['Export or business development', 'Regulatory affairs', 'Management', 'Other'];
 export const DOSAGE_FORMS = ['Tablets', 'Capsules', 'Oral liquids', 'Injectables', 'Infusions', 'Creams and ointments', 'Eye and ear drops',
@@ -99,71 +99,93 @@ export const TIMELINES: [string, string][] = [
   ['now', 'Now: we want to file this quarter'], ['6m', 'In the next 6 months'], ['12m', 'In the next 12 months'], ['exploring', 'Exploring for now'],
 ];
 export const APPROACHES: [string, string][] = [
-  ['own', 'Register in our own name, with a local representative'], ['partner', 'Through a local distributor who registers or co-markets'],
+  ['own', 'Register in our own name, with a local representative'], ['partner', 'Through a local distributor who holds the registration'],
   ['unsure', 'Not sure yet: advise us'],
 ];
-/** Services a manufacturer can say it needs during onboarding. */
+/** What the manufacturer wants, as on nazryx.com/manufacturers. */
+export const GOALS: [string, string][] = [
+  ['grow', 'Grow exports: more volume, more orders, steady reorders'], ['launch', 'Launch in new markets'],
+  ['win', 'Win more of the markets we are already in'],
+];
+/** What we run for manufacturers, as on nazryx.com/manufacturers. */
 export const NEEDS: [string, string][] = [
-  ['market_data', 'Market data: which products to register where'], ['partner', 'Finding a distributor'],
-  ['dossier_review', 'Dossier check before filing'], ['registration', 'Handling registration end to end'],
-  ['local_rep', 'A local representative'], ['eac', 'East African joint assessment'], ['post_registration', 'Keeping registrations alive'],
-  ['reports', 'One-off reports'],
+  ['launch', 'Choose what to launch, and where'], ['distributor', 'Find the right distributor'],
+  ['register', 'Get registered: route, dossier and filing'], ['quality', 'Pass every quality check: GMP, CPP and certification packs'],
+  ['pricing', 'Price to win'], ['sales', 'Drive sales after launch'], ['watch', 'Watch the market for us'],
+  ['reporting', 'One contact and weekly reports'],
+];
+/** How many products could launch. Often depends on what the data shows, so that is an answer too. */
+export const LAUNCH_SCOPES: [string, string][] = [
+  ['data_first', 'Depends on what the data shows'], ['1_3', '1 to 3'], ['4_10', '4 to 10'], ['10_plus', 'More than 10'],
 ];
 
-// ---------------------------------------------------------------- subscriptions
-export type PlanKey = 'insight' | 'entry' | 'regional';
-export const MFR_PLANS: Record<PlanKey, { name: string; kind: string; for: string; includes: string[] }> = {
-  insight: {
-    name: 'Market Insight', kind: 'Subscription',
-    for: 'You are choosing markets and products, and want the data before committing.',
-    includes: ['Market screens for every country with live data', 'Your catalogue matched to each market, with reasons',
-      'Partner finder with anonymous distributor profiles', 'Registration route and timeline per product', '24-hour reports on order'],
+// ---------------------------------------------------------------- plans
+export type PlanKey = 'data' | 'access' | 'entry';
+export const PLAN_ORDER: PlanKey[] = ['data', 'access', 'entry'];
+export const MFR_PLANS: Record<PlanKey, { name: string; for: string; includes: string[] }> = {
+  data: {
+    name: 'Basic Market Data',
+    for: 'See each market before you commit.',
+    includes: ['Complete market data', 'Target distributor lists', 'Portfolio analysis'],
+  },
+  access: {
+    name: 'Complete Market Access',
+    for: 'Know who to supply, at what price, and how to get approved.',
+    includes: ['Everything in Basic Market Data', 'Distributor portfolio matching, and the potential to supply them', 'Pricing analysis',
+      'Documentation and regulatory check', 'Pathway to approval'],
   },
   entry: {
-    name: 'Market Entry', kind: 'Agency retainer, per country',
-    for: 'You know where you want to go and want us to take your products there.',
-    includes: ['Everything in Market Insight', 'A Nazryx team member running your entry', 'Dossier review against the country’s requirements',
-      'Distributor introductions and terms', 'Filing and regulator queries until approval'],
+    name: 'Complete Market Entry',
+    for: 'We take your products into the market for you.',
+    includes: ['Everything in Complete Market Access', 'Distributor sourcing, done for you',
+      'Regulatory submissions and approvals, done for you (government fees paid by you)', 'Sales forecasts and strategic review',
+      'Launch planned with the distributor’s sales team', 'Market watch: new registrations, competitors, renewals',
+      'One contact and weekly reports per market'],
   },
-  regional: {
-    name: 'Regional Expansion', kind: 'Agency retainer, several countries',
-    for: 'You want several markets, or East Africa through one joint assessment.',
-    includes: ['Everything in Market Entry, in each country', 'East African Community joint assessment', 'Local representative in each market',
-      'After-registration upkeep: renewals, variations, safety reports', 'One plan and one report across all markets'],
-  },
-};
-export const ADD_ONS: Record<string, { name: string; what: string }> = {
-  local_rep: { name: 'Local representative', what: 'We act as your registered local technical representative, or appoint one.' },
-  post_registration: { name: 'After registration', what: 'Renewals, variations and safety reports tracked and filed on time.' },
-  dossier_review: { name: 'Dossier review', what: 'A full check of one dossier before you file it.' },
 };
 
-type Answers = {
-  target_countries?: string[] | null; services?: string[] | null; timeline?: string | null; approach?: string | null;
-  registered_in?: string[] | null; products_next_year?: number | null; certifications?: string[] | null;
-};
-/** The plan that fits a manufacturer's onboarding answers, with plain reasons and recommended add-ons. */
-export function suggestPlan(a: Answers): { plan: PlanKey; why: string[]; addOns: string[] } {
-  const markets = a.target_countries ?? [], needs = new Set(a.services ?? []), registered = a.registered_in ?? [];
-  const eacMarkets = markets.filter((c) => ['TZ', 'KE'].includes(c));
-  const hands = ['registration', 'dossier_review', 'local_rep', 'eac', 'post_registration', 'partner'].some((n) => needs.has(n));
+type Answers = { target_countries?: string[] | null; services?: string[] | null; timeline?: string | null; launch_scope?: string | null; goals?: string[] | null };
+/** The plan that fits a manufacturer's onboarding answers, with plain reasons. */
+export function suggestPlan(a: Answers): { plan: PlanKey; why: string[] } {
+  const needs = new Set(a.services ?? []);
+  const doneForYou = ['register', 'sales', 'reporting'].some((n) => needs.has(n));
+  const access = ['distributor', 'pricing', 'quality', 'register'].some((n) => needs.has(n));
+  const soon = a.timeline === 'now' || a.timeline === '6m';
+  const dataFirst = a.launch_scope === 'data_first' || a.timeline === 'exploring';
   const why: string[] = [];
-  let plan: PlanKey = 'insight';
-  if (markets.length >= 3 || needs.has('eac') || (eacMarkets.length >= 2 && hands)) {
-    plan = 'regional';
-    if (markets.length >= 3) why.push(`you picked ${markets.length} markets`);
-    if (needs.has('eac') || eacMarkets.length >= 2) why.push('East Africa can go through one joint assessment');
-  } else if (hands && a.timeline !== 'exploring') {
+  let plan: PlanKey = 'data';
+  if (doneForYou && soon && !dataFirst) {
     plan = 'entry';
-    why.push(markets.length === 2 ? 'you picked two markets and want us to do the work' : 'you want us to do the work in your market');
+    why.push('you want registration and sales handled for you', a.timeline === 'now' ? 'you want to file this quarter' : 'you want to file within 6 months');
+  } else if (access || doneForYou) {
+    plan = 'access';
+    why.push(needs.has('distributor') ? 'you want the right distributor' : needs.has('pricing') ? 'you want to price to win' : 'you want a clear route to approval');
+    if (dataFirst) why.push('you want to see the data before choosing products');
   } else {
-    why.push(a.timeline === 'exploring' ? 'you are exploring first' : 'you mainly want market data and partners');
+    why.push(dataFirst ? 'you want to see the market first' : 'you mainly want market data and distributor lists');
   }
-  if (a.timeline === 'now' && plan !== 'insight') why.push('you want to file this quarter');
-  if ((a.products_next_year ?? 0) >= 5) why.push(`you plan ${a.products_next_year} registrations in the next year`);
-  const addOns: string[] = [];
-  if ((needs.has('local_rep') || a.approach === 'own') && plan !== 'regional') addOns.push('local_rep');
-  if ((needs.has('post_registration') || registered.length > 0) && plan !== 'regional') addOns.push('post_registration');
-  if (needs.has('dossier_review') && plan === 'insight') addOns.push('dossier_review');
-  return { plan, why, addOns };
+  const n = (a.target_countries ?? []).length;
+  if (n > 1) why.push(`it covers all ${n} of your markets`);
+  return { plan, why };
+}
+
+/** Services to offer first, from what the manufacturer told us (needs, markets, approach, plan). Ordered, no repeats. */
+export function recommendServices(p: {
+  services?: string[] | null; target_countries?: string[] | null; registered_in?: string[] | null; approach?: string | null;
+  chosen_plan?: string | null; suggested_plan?: string | null;
+} | null): { kind: string; why: string; report?: string }[] {
+  const needs = new Set(p?.services ?? []), targets = p?.target_countries ?? [], plan = p?.chosen_plan ?? p?.suggested_plan;
+  const out: { kind: string; why: string; report?: string }[] = [];
+  const add = (kind: string, why: string, report?: string) => { if (!out.some((x) => x.kind === kind)) out.push({ kind, why, report }); };
+  if (plan === 'entry' || needs.has('sales') || needs.has('reporting')) add('market_entry', 'you want us to take your products into the market');
+  if (needs.has('register') || needs.has('quality') || plan === 'access')
+    add('dossier_review', needs.has('quality') ? 'you want every quality check passed' : needs.has('register') ? 'you want to get registered'
+      : 'your plan includes a documentation and regulatory check');
+  if (needs.has('distributor')) add('partner_intro', 'you want the right distributor');
+  if (p?.approach === 'own') add('local_rep', 'you want to register in your own name');
+  if ((p?.registered_in ?? []).length || needs.has('watch')) add('post_registration', (p?.registered_in ?? []).length ? 'you already hold registrations' : 'you want the market watched for you');
+  if (targets.includes('TZ') && targets.includes('KE') && (needs.has('register') || plan === 'entry')) add('eac_rollout', 'Tanzania and Kenya can share one joint assessment');
+  if (needs.has('pricing')) add('report', 'you want to price to win', 'price');
+  else if (needs.has('launch') || !out.length) add('report', 'you want to choose what to launch, and where', 'country');
+  return out;
 }

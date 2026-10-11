@@ -6,6 +6,7 @@ import { back, int, str } from '@/lib/forms';
 import { ACCOUNT_DOC_KINDS, ENGAGEMENT_DOC_ITEMS, SUPPLIER_DOC_KINDS, TEAM_REQUEST_KINDS, requestDocLabel } from '@/lib/docs';
 import { DOSSIER_ITEMS, SHIPMENT_DOCS } from '@/lib/format';
 import { saveUpload } from '@/lib/uploads';
+import { PLAN_ORDER } from '@/lib/mfr';
 
 // Team document uploads everywhere: requests, engagements, customer accounts and suppliers. Every action re-checks
 // the team role here and in the database (RLS). Internal files are never visible to customers.
@@ -164,7 +165,7 @@ export async function deleteSupplierDoc(f: FormData) {
 // ---------------------------------------------------------------- plan prices
 export async function savePlanPrices(f: FormData) {
   const u = await requireTeam();
-  const keys = ['mfr_insight', 'mfr_entry', 'mfr_regional', 'addon_local_rep', 'addon_post_registration', 'addon_dossier_review'];
+  const keys = PLAN_ORDER.map((k) => `mfr_${k}`);
   try {
     await withUser(u.id, async (db) => {
       for (const k of keys) {

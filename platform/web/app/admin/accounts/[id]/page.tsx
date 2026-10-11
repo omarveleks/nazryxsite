@@ -7,7 +7,7 @@ import { requireTeam } from '@/lib/auth';
 import { one, rows, withUser } from '@/lib/db';
 import { ACCOUNT_DOC_KINDS } from '@/lib/docs';
 import { fmtDate } from '@/lib/format';
-import { APPROACHES, MFR_PLANS, NEEDS, SERVICES, TIMELINES, countryName, suggestPlan } from '@/lib/mfr';
+import { APPROACHES, GOALS, LAUNCH_SCOPES, MFR_PLANS, NEEDS, SERVICES, TIMELINES, countryName, suggestPlan } from '@/lib/mfr';
 
 export const metadata = { title: 'Account' };
 
@@ -61,8 +61,9 @@ export default async function AdminAccount({ params, searchParams }: { params: P
                 <tr><td>Already registered in</td><td>{p.registered_in?.map(countryName).join(', ') || 'none'}</td></tr>
                 <tr><td>Timeline</td><td>{label(TIMELINES, p.timeline)}</td></tr>
                 <tr><td>Approach</td><td>{label(APPROACHES, p.approach)}</td></tr>
-                <tr><td>Needs</td><td>{p.services?.map((x: string) => label(NEEDS, x)).join('; ') || '—'}</td></tr>
-                <tr><td>Registrations planned (12 months)</td><td>{p.products_next_year ?? '—'}</td></tr>
+                <tr><td>Wants help with</td><td>{p.services?.map((x: string) => label(NEEDS, x)).join('; ') || '—'}</td></tr>
+                <tr><td>Goals</td><td>{p.goals?.map((x: string) => label(GOALS, x)).join('; ') || '—'}</td></tr>
+                <tr><td>Products that could launch</td><td>{label(LAUNCH_SCOPES, p.launch_scope)}</td></tr>
                 <tr><td>Plan</td><td>Suggested {s ? MFR_PLANS[s.plan].name : '—'}{p.chosen_plan ? <>, <b>chose {MFR_PLANS[p.chosen_plan as keyof typeof MFR_PLANS]?.name}</b></> : ''}
                   {s?.why.length ? <div className="sub2">Because {s.why.join(', ')}</div> : null}</td></tr>
                 <tr><td>Onboarding</td><td>{p.completed_at ? `Finished ${fmtDate(p.completed_at)}` : `At step ${Math.min(p.step, 6)} of 6`}</td></tr>

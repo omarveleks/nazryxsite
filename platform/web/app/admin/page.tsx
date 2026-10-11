@@ -4,7 +4,7 @@ import { Empty, Flash, Tabs } from '@/components/ui';
 import { requireTeam } from '@/lib/auth';
 import { one, rows, withUser } from '@/lib/db';
 import { STAGES, ago, fmtDate, title } from '@/lib/format';
-import { ADD_ONS, MFR_PLANS, SERVICES, countryName } from '@/lib/mfr';
+import { MFR_PLANS, SERVICES, countryName } from '@/lib/mfr';
 import { answerQuestion, reviewManufacturer, grantCredits, keepSeparate, saveRoutes, setMoleculeRoute, matchMolecule, mergeCompanies, postRegulatory, addPrice, editUseCase, queueRecompute,
   rejectSuggestion, resetPassword, resetTwoStep, reviewClaim, setPlan } from '@/app/actions/admin';
 import { StagePill } from '@/components/ui';
@@ -487,9 +487,9 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
           </section>
           <section className="card stack" style={{ gridColumn: '1 / -1' }}>
             <h2>Manufacturer plan prices</h2>
-            <p className="note">Shown to manufacturers on their suggested plan. Leave empty to show &ldquo;Priced on your scope&rdquo;. Example: USD 1,500 / month per country.</p>
+            <p className="note">Shown to manufacturers on their suggested plan. Leave empty to show &ldquo;Priced on your scope&rdquo;. Example: USD 1,500 / month per market.</p>
             <form action={savePlanPrices} className="stack" style={{ gap: 8 }}>
-              {[...Object.entries(MFR_PLANS).map(([k, v]) => [`mfr_${k}`, v.name]), ...Object.entries(ADD_ONS).map(([k, v]) => [`addon_${k}`, `Add-on: ${v.name}`])].map(([k, label]) => {
+              {Object.entries(MFR_PLANS).map(([k, v]) => [`mfr_${k}`, v.name]).map(([k, label]) => {
                 const cur = d.prices.find((x: any) => x.key === k);
                 return (
                   <div key={k} className="row">

@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { MFR_PLANS } from '@/lib/mfr';
 import type { ReactNode } from 'react';
 import type { User } from '@/lib/auth';
 import Brand from './Brand';
@@ -15,13 +16,20 @@ export default function Shell({ user, title, sub, crumb, actions, children }: {
       <aside className="side">
         <Brand />
         <NavLinks team={user.role === 'team'} manufacturer={user.account_type === 'manufacturer'} />
+        {user.account_type === 'manufacturer' && user.role !== 'team' ? (
+          <div className="plan-box">
+            <b>{MFR_PLANS[user.mfr_plan as keyof typeof MFR_PLANS]?.name ?? 'No plan yet'}</b>
+            <span className="hide-m">{user.mfr_plan_chosen ? 'Requested' : user.mfr_plan ? 'Suggested for you' : 'Pick the one that fits'}</span>
+            <Link className="btn-link hide-m" href="/m/plan">{user.mfr_plan_chosen ? 'Your plan' : 'See plans'}</Link>
+          </div>
+        ) : (
         <div className="plan-box">
           <b>{user.role === 'team' ? 'Nazryx team' : user.plan === 'paid' ? 'Paid plan' : 'Free plan'}</b>
-          {user.account_type === 'manufacturer' ? <Link className="hide-m" href="/m/plan">Your plan</Link> : user.plan !== 'paid' && user.role !== 'team' ? (
+          {user.plan !== 'paid' && user.role !== 'team' ? (
             <span className="num">{user.credits} enrich credits left</span>
           ) : <span className="hide-m">Unlimited enrich</span>}
           {user.plan !== 'paid' && user.role !== 'team' && <Link className="btn-link hide-m" href="/settings#plan">Upgrade</Link>}
-        </div>
+        </div>)}
         <div className="side-foot">
           <Link href="/help">Help and contact</Link>
           <span>{user.email}</span>
