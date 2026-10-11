@@ -37,8 +37,8 @@ export function AgencyMarket({ code }: { code: string }) {
   return (
     <section className="card stack">
       <h2>{countryName(code)}: our team covers it directly</h2>
-      <p className="muted">We have not loaded {countryName(code)}&apos;s register and essential medicines list into the portal yet. Our team works the
-        market for you in the meantime, and the screens fill in as soon as the data is in.</p>
+      <p className="muted">Full {countryName(code)} market screens are on the way. Until then our team works the market for you directly:
+        ask for a report and you have it within 24 hours.</p>
       <div className="row">
         <Link className="btn btn-blue btn-sm" href={`/m/services/report?country=${code}`}>Order a {countryName(code)} report</Link>
         <Link className="btn btn-ghost btn-sm" href="/expert">Ask our team</Link>

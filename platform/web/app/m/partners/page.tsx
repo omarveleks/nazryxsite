@@ -63,8 +63,7 @@ export default async function Partners({ searchParams }: { searchParams: Promise
           </div>
         </form>
         <section className="card">
-          <div className="card-h"><div><h2>{total} distributors{d.cls ? ` in ${d.cls}` : ''}</h2>
-            <p className="note">Built from {countryName(d.market)}&apos;s public register. Names stay with us until an introduction both sides agree to.</p></div></div>
+          <div className="card-h"><h2>{total} distributors{d.cls ? ` in ${d.cls}` : ''}</h2></div>
           {shown.length === 0 ? <Empty>No distributor matches these filters.</Empty> : (
             <div>{shown.map((p, i) => (
               <div key={p.code} className="between" style={{ alignItems: 'flex-start', flexWrap: 'wrap', padding: '14px 0', borderTop: i ? '1px solid var(--line)' : undefined }}>

@@ -6,12 +6,12 @@ import { Bar, Empty, Flash, LockIcon, PlanLock } from '@/components/ui';
 import { addMfrProducts } from '@/app/actions/mfr';
 import { requireUser } from '@/lib/auth';
 import { one, rows, withUser } from '@/lib/db';
-import { canUse, countryName, productClass } from '@/lib/mfr';
+import { HIGH_DEMAND, canUse, countryName, productClass } from '@/lib/mfr';
 
 export const metadata = { title: 'My products' };
 
 type Fact = { molecule_id: number; country: string; registrants: number; registrations: number; on_national_list: boolean; facility_level: string | null;
-  rankable: boolean; score: number | null };
+  rankable: boolean; score: number | null; demand: number | null };
 const competition = (f?: Fact) => !f || (!f.registrations && !f.on_national_list) ? 'absent'
   : f.registrants === 0 ? 'open' : f.registrants <= 3 ? 'few' : f.registrants < 8 ? 'some' : 'crowded';
 const COMP: Record<string, [string, string]> = {
@@ -31,7 +31,7 @@ export default async function MfrProducts({ searchParams }: { searchParams: Prom
         from mfr_products p left join molecules m on m.id = p.molecule_id where p.user_id = $1 order by coalesce(m.inn, p.name)`, [u.id]);
     const ids = products.map((p) => p.molecule_id).filter(Boolean);
     const facts = ids.length ? await rows(db, `select cm.molecule_id, cm.country, cm.registrants, cm.registrations, cm.on_national_list, cm.facility_level,
-        coalesce(cm.rankable, false) as rankable, g.score from country_molecules cm
+        coalesce(cm.rankable, false) as rankable, g.score, g.demand from country_molecules cm
         left join visible_gap_scores g on g.molecule_id = cm.molecule_id and g.country = cm.country
         where cm.molecule_id = any($1) and cm.country = any($2)`, [ids, dataMarkets(targets)]) as Fact[] : [];
     return { targets, products, facts };
@@ -67,8 +67,9 @@ export default async function MfrProducts({ searchParams }: { searchParams: Prom
       {market !== 'all' && !hasData(market) ? <AgencyMarket code={market} /> : n > 0 && (<>
         <div className="grid g4">
           <div className="tile t-white"><span className="k">Products</span><span className="v num">{n}</span><span className="small">{matched} matched to a molecule</span></div>
-          <div className="tile t-peach"><span className="k">Nobody registered{focus && market === 'all' ? ` in ${countryName(focus)}` : ''}</span><span className="v num">{by('open')}</span>
-            <span className="small">Open to you</span></div>
+          <div className="tile t-peach"><span className="k">In high demand{focus && market === 'all' ? ` in ${countryName(focus)}` : ''}</span>
+            <span className="v num">{list.filter((p) => Number(p.f?.demand ?? 0) >= HIGH_DEMAND).length}</span>
+            <span className="small">{by('open')} of your products have nobody registered</span></div>
           {analysis ? (<>
             <div className="tile t-blue"><span className="k">Average competitors</span><span className="v num">{avg}</span><span className="small">per product already on the market</span></div>
             <div className="tile t-mint"><span className="k">Top class</span><span className="v" style={{ fontSize: 20, lineHeight: 1.2 }}>{top?.cls ?? '—'}</span>
@@ -111,7 +112,7 @@ export default async function MfrProducts({ searchParams }: { searchParams: Prom
 
       <section className="card stack" id="add">
         <h2>Add a product</h2>
-        <p className="note">Search thousands of medicines: everything registered or listed in our markets, plus the worldwide list of medicines with a WHO drug class. Not there? Add it as written.</p>
+        <p className="note">Search by name. Not there? Add it as written and our team takes care of it.</p>
         <div style={{ maxWidth: 560 }}><MedicineSearch /></div>
         <details>
           <summary className="btn-link">Add many at once</summary>

@@ -82,7 +82,7 @@ export default async function Company({ params, searchParams }: { params: Promis
           </section>
         </div>
       </div>
-      <p className="note">Public registration data only. {COVERAGE_NOTE}</p>
+      <p className="note">{COVERAGE_NOTE}</p>
     </Shell>
   );
 }

@@ -129,7 +129,7 @@ export default async function Molecule({ params, searchParams }: {
               : m.route ? (<div className="stack" style={{ gap: 4, marginTop: 6 }}>
                 <b>{m.route.label}{m.route.months_low != null ? `: about ${m.route.months_low}–${m.route.months_high ?? m.route.months_low} months` : ''}</b>
                 <span className="note">{m.route.note || m.route.description}{m.route.specific ? '' : ' Typical route; we confirm it in the regulatory analysis.'}</span>
-                {beSuggestion(m.forms) && <span className="note">Bioequivalence: {BE_STATUS[beSuggestion(m.forms)!].toLowerCase()} (from the registered forms).</span>}
+                {beSuggestion(m.forms) && <span className="note">Bioequivalence: {BE_STATUS[beSuggestion(m.forms)!].toLowerCase()}.</span>}
               </div>) : null}
           </div>
         </section>

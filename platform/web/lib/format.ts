@@ -2,7 +2,7 @@
 export const OFFICIAL_LIST = (country = 'Tanzania') => `Official TMDA essential medicines list - ${country}`;
 export const OFFICIAL_SHORT = 'Official TMDA list';
 export const GLOBAL_LIST = 'WHO essential list';
-export const COVERAGE_NOTE = 'Registered coverage, not sales. Based on TMDA registration data.';
+export const COVERAGE_NOTE = 'Counts registered products, not sales.';
 
 // The pharmaceutical route a sourcing request follows. Closed is the exit at any point.
 export const STAGES = ['Product request', 'Regulatory check', 'Regulatory analysis', 'Pricing and logistics', 'Registration', 'Shipment', 'Closed'] as const;

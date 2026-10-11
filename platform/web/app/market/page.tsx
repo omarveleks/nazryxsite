@@ -63,7 +63,7 @@ export default async function Market() {
         <div className="card-h"><h2>Registered products by certificate year</h2><span className="note">Products still registered today</span></div>
         <YearChart data={d.years} />
       </section>
-      <p className="note">Data only. Saturation compares registrants per molecule with a crowded market (8 or more). {COVERAGE_NOTE}</p>
+      <p className="note">{COVERAGE_NOTE}</p>
     </Shell>
   );
 }

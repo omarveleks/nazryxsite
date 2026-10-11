@@ -208,7 +208,7 @@ check(/Distributor [0-9A-F]{8}/.test(free) && !free.includes('Reaches EML') && (
   && (await k.locator('.nm').count()) <= 5, 'partners opens on every distributor, five free, introductions locked');
 await k.goto(B + '/m/products');
 const prodFree = await k.locator('main').innerText();
-check(prodFree.includes('Nobody registered') && prodFree.includes('Your portfolio analysis'), 'products dashboard with the analysis locked');
+check(prodFree.includes('In high demand') && prodFree.includes('Your portfolio analysis'), 'products dashboard with the analysis locked');
 await k.fill('#med-q', 'amlodip');
 await k.locator('#med-hits button', { hasText: /amlodipine/i }).first().click();
 await k.fill('input[name=strength]', '5 mg'); await k.selectOption('select[name=form]', 'Tablets');

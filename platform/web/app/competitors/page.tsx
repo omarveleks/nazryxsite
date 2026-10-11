@@ -151,7 +151,6 @@ export default async function Competitors({ searchParams }: {
           {!paid && <p className="note">Free: follow {FREE.follows} companies, weekly email. Paid: alerts on every new registration.</p>}
         </div>
       )}
-      <p className="note">Confirmed Nazryx suppliers never appear here. Public registration data only.</p>
     </Shell>
   );
 }

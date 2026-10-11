@@ -224,3 +224,6 @@ export const SERVICE_NEEDS: Record<string, string[]> = {
   partner_intro: ['The distributor profile you picked', 'The products you want them to carry', 'Your price range and terms'],
   report: ['The market and, if you have one, the product', 'Anything specific you want answered'],
 };
+
+/** High demand: the demand measure behind the ranking (official essential list, how widely it is used, WHO list) at 0.8 or more. */
+export const HIGH_DEMAND = 0.8;

@@ -67,7 +67,7 @@ export default async function Onboarding({ searchParams }: { searchParams: Promi
         <section className="card stack">
           <h2>3. Add your portfolio</h2>
           <label className="choice"><input type="radio" name="portfolio_source" value="registry" defaultChecked />
-            <span><b>Use the registered list</b><br /><span className="note">We pre-fill your products from registration data once your claim is approved. You review and edit.</span></span></label>
+            <span><b>Use the registered list</b><br /><span className="note">We pre-fill your products once your claim is approved. You review and edit.</span></span></label>
           <label className="choice"><input type="radio" name="portfolio_source" value="catalogue" />
             <span><b>Send your catalogue</b><br /><span className="note">PDF or Excel. Nazryx loads it for you.</span></span></label>
           <div className="drop">

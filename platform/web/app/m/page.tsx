@@ -4,7 +4,7 @@ import { Badges, Empty, Flash, StagePill } from '@/components/ui';
 import { requireUser } from '@/lib/auth';
 import { one, rows, withUser } from '@/lib/db';
 import { fmtDate } from '@/lib/format';
-import { MFR_COUNTRIES, MFR_PLANS, MFR_PRODUCTS_SQL, OBLIGATION_KINDS, SERVICES, countryName, reasons } from '@/lib/mfr';
+import { HIGH_DEMAND, MFR_COUNTRIES, MFR_PLANS, MFR_PRODUCTS_SQL, OBLIGATION_KINDS, SERVICES, countryName, reasons } from '@/lib/mfr';
 
 export const metadata = { title: 'Home' };
 
@@ -16,9 +16,10 @@ export default async function MfrHome({ searchParams }: { searchParams: Promise<
   const d = await withUser(u.id, async (db) => {
     const profile = await one(db, 'select company_name, status, target_countries, suggested_plan, chosen_plan, active_plan from manufacturer_profiles where user_id = $1', [u.id]);
     const counts = await one(db, `select count(*)::int as products, count(p.molecule_id)::int as matched,
-        count(*) filter (where cm.registrants = 0 and cm.on_national_list)::int as open,
+        count(*) filter (where g.demand >= ${HIGH_DEMAND})::int as high,
         count(*) filter (where cm.registrants between 1 and 3)::int as few
-        from mfr_products p left join country_molecules cm on cm.molecule_id = p.molecule_id and cm.country = 'TZ' where p.user_id = $1`, [u.id]);
+        from mfr_products p left join country_molecules cm on cm.molecule_id = p.molecule_id and cm.country = 'TZ'
+        left join visible_gap_scores g on g.molecule_id = p.molecule_id and g.country = 'TZ' where p.user_id = $1`, [u.id]);
     const first = await rows(db, `${MFR_PRODUCTS_SQL} where p.user_id = $1 and cm.rankable and cm.on_national_list
         order by g.score desc nulls last, cm.registrants, p.name limit $2`, [u.id, paid ? 6 : 3]);
     const engagements = await rows(db, `select id, kind, country, stage, status, due_at, updated_at from engagements
@@ -39,7 +40,7 @@ export default async function MfrHome({ searchParams }: { searchParams: Promise<
       <div className="grid g4">
         <Link className="tile t-white" href="/m/products"><span className="k">Your products</span><span className="v num">{d.counts?.products}</span></Link>
         <Link className="tile t-blue" href="/m/products"><span className="k">Matched to the Tanzania market</span><span className="v num">{d.counts?.matched}</span></Link>
-        <Link className="tile t-peach" href="/m/products"><span className="k">On the TMDA list, nobody registered</span><span className="v num">{d.counts?.open}</span></Link>
+        <Link className="tile t-peach" href="/m/products"><span className="k">Your products in high demand in Tanzania</span><span className="v num">{d.counts?.high}</span></Link>
         <Link className="tile t-mint" href="/m/products"><span className="k">3 or fewer competitors</span><span className="v num">{d.counts?.few}</span></Link>
       </div>
 
@@ -93,7 +94,7 @@ export default async function MfrHome({ searchParams }: { searchParams: Promise<
             <div className="stack" style={{ gap: 8 }}>{MFR_COUNTRIES.filter((c) => targets.includes(c.code)).map((c) => (
               <div key={c.code} className="between"><span>{c.name}</span>
                 <span className={`pill ${c.data ? 'mint' : ''}`}>{c.data ? 'Market data live' : 'Agency coverage'}</span></div>))}</div>
-            <p className="note" style={{ marginTop: 10 }}>Agency coverage: our team works the market for you. Data screens follow as we load each country.</p>
+            <p className="note" style={{ marginTop: 10 }}>Agency coverage: our team works the market for you directly. Full market screens are on the way.</p>
           </section>
           <section className="card">
             <div className="card-h"><h2>Upcoming deadlines</h2></div>

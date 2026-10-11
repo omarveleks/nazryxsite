@@ -3,14 +3,13 @@ import type { ReactNode } from 'react';
 import Brand from '@/components/Brand';
 import Shell from '@/components/Shell';
 import { getUser } from '@/lib/auth';
-import { COVERAGE_NOTE, FREE, OFFICIAL_LIST } from '@/lib/format';
+import { COVERAGE_NOTE, FREE } from '@/lib/format';
 import { SUPPORT_EMAIL, SUPPORT_WHATSAPP } from '@/lib/support';
 
 export const metadata = { title: 'Help' };
 
 const QA: [string, ReactNode][] = [
-  ['Where does the data come from?', <>Public registration data for medicines in Tanzania, updated every two days, and the {OFFICIAL_LIST()}.
-    Company and competitor figures show <b>registered coverage, not sales</b>.</>],
+  ['How current is it?', <>Updated every two days. Company and competitor figures count <b>registered products, not sales</b>.</>],
   ['How do you pick molecules for me?', <>From the classes in your portfolio, we show a few official TMDA list molecules that few or no companies
     have registered in Tanzania. Hide the ones you do not want. You see how many companies registered each one, never a made-up score.</>],
   ['What happens when I source a molecule?', <>It follows the normal route for a medicine: product request, regulatory check (who holds a

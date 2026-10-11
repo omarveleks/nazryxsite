@@ -54,13 +54,13 @@ export default async function MfrProduct({ params, searchParams }: { params: Pro
       sub={[p.inn ? p.name : null, cls].filter(Boolean).join(' · ') || 'Product'}
       actions={<Link className="btn btn-blue btn-sm" href={`/m/services?product=${id}`}>Get help with this product</Link>}>
       <Flash sp={sp} />
-      {sp.added && <div className="ok" role="status">Added. {p.molecule_id ? 'Here is how it fits your markets.' : 'We could not match it to a molecule we track yet; our team will.'}</div>}
+      {sp.added && <div className="ok" role="status">Added. {p.molecule_id ? 'Here is how it fits your markets.' : 'Our team is matching it to the market.'}</div>}
       <MarketPicker targets={d.targets} current={market} path={`/m/products/${id}`} />
       <div className="split">
         <div className="stack">
           {!p.molecule_id ? (
             <section className="card stack"><h2>Not matched yet</h2>
-              <p className="muted">We could not match &ldquo;{p.name}&rdquo; to a molecule on our markets by name. Our team will match it; you can still ask for any service.</p></section>
+              <p className="muted">Our team is matching &ldquo;{p.name}&rdquo; to the market. You can still ask for any service in the meantime.</p></section>
           ) : market === 'all' ? (
             <section className="card">
               <div className="card-h"><h2>Across your markets</h2></div>
@@ -104,7 +104,7 @@ export default async function MfrProduct({ params, searchParams }: { params: Pro
             </section>
             <section className="card stack">
               <h2>Suggested selling price</h2>
-              {!canUse(u.mfr_tier, 'pricing') ? <PlanLock need="access" title="Pricing analysis">The price band we suggest for this product in {countryName(market)}, from real registered and competitor prices.</PlanLock>
+              {!canUse(u.mfr_tier, 'pricing') ? <PlanLock need="access" title="Pricing analysis">The price band we suggest for this product in {countryName(market)}.</PlanLock>
                 : 'price' in d && d.price ? <p><b>{d.price.currency} {Number(d.price.price_low).toFixed(2)}–{Number(d.price.price_high).toFixed(2)}</b> per {d.price.unit}{d.price.note ? ` · ${d.price.note}` : ''}</p>
                 : <p className="note">Our team is setting it. Ask for a price check and we answer within 24 hours.</p>}
             </section>
