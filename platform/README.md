@@ -176,6 +176,19 @@ confirming → production → import permit → shipped → arrived → sampling
 checklist and ETA. My portfolio → Supply and shipments brings all of it together per product. Suggested selling prices (Admin > Content) show on the
 molecule page for paid plans.
 
+## Focus, timelines, compare, export, ask the expert (migration 013)
+
+- **Set your focus** is onboarding step 3 (and Settings): goals, therapeutic classes, EML levels, supplier countries.
+  Home picks follow the focus classes and levels; the main goal decides which service leads Home. The team sees the
+  customer's goals and preferred supplier countries on each request.
+- **Registration timeline** (paid): routes and typical months are set by the team in Admin > Content (no months are
+  invented); a molecule uses the full dossier unless the team sets another route for it. The BE call comes from the
+  registered forms, or the forms on the official list when nobody has registered it.
+- **Compare** two molecules side by side (/compare). **Export to Excel** (paid): open molecules, search results,
+  portfolio gaps, sourcing list, a company's products (/export/...). **Ask the expert** (/expert): free plans 3 questions
+  a month (enforced in the database); the team answers in Admin > Questions; the worker reminds the team once a question
+  has waited 48 hours.
+
 ## Essential list from the 2026 PDF
 
 `ingest/tools/nemlit_pdf_to_table.py` reads the scanned PDF table cell by cell (ruled lines give rows and columns;

@@ -2,6 +2,7 @@ import Link from 'next/link';
 import Shell from '@/components/Shell';
 import { Bar, Empty, Flash, Locked, StagePill, Tabs } from '@/components/ui';
 import { DossierReadiness, QuoteTerms, ShipmentTrack } from '@/components/Pharma';
+import ExportLink from '@/components/ExportLink';
 import { addCustomerSupplier, deleteCustomerSupplier, togglePortfolio } from '@/app/actions/app';
 import { requireUser } from '@/lib/auth';
 import { rows, withUser } from '@/lib/db';
@@ -105,6 +106,7 @@ export default async function Portfolio({ searchParams }: { searchParams: Promis
             </div>
             <div className="row" style={{ marginTop: 16 }}>
               <Link className="btn btn-blue btn-sm" href={`/requests/new?missing=${encodeURIComponent(yourCats.map((c) => c.category).slice(0, 3).join('|'))}`}>Add missing to a request</Link>
+              {d.items.length > 0 && <ExportLink href="/export/gaps" paid={paid} />}
             </div>
             <p className="note" style={{ marginTop: 12 }}>Coverage is measured against the {OFFICIAL_LIST()}.</p>
           </section>

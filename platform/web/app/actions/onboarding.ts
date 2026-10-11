@@ -35,11 +35,11 @@ export async function completeOnboarding(f: FormData) {
     await db.query(`insert into notifications (user_id, channel, subject, body) values (null, 'email', 'New company claim', $1)`,
       [`${u.email} claims ${company?.display_name ?? manualName}. Review it on the admin page.`]);
   });
-  redirect(source === 'scratch' ? '/search?welcome=1' : '/home?welcome=1');
+  redirect('/onboarding/focus?next=' + encodeURIComponent(source === 'scratch' ? '/search?welcome=1' : '/home?welcome=1'));
 }
 
 export async function skipOnboarding() {
   const u = await requireUser({ allowOnboarding: true });
   await withUser(u.id, (db) => db.query('update users set onboarded = true where id = $1', [u.id]));
-  redirect('/search?welcome=1');
+  redirect('/onboarding/focus?next=' + encodeURIComponent('/search?welcome=1'));
 }

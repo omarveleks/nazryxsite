@@ -6,6 +6,7 @@ import { dbMessage, one, rows, withUser } from '@/lib/db';
 import { back, int, isEmail, str } from '@/lib/forms';
 import { hashPassword } from '@/lib/password';
 import { saveUpload } from '@/lib/uploads';
+import { FOCUS_GOALS, SUPPLIER_COUNTRIES } from '@/lib/format';
 
 const ret = (f: FormData, fallback: string) => {
   const r = str(f, 'return', 300);
@@ -140,6 +141,45 @@ export async function sendList(f: FormData) {
   }
   revalidatePath('/', 'layout');
   redirect(`/requests?sent=${sent}`);
+}
+
+/** Save the customer's focus (onboarding step 3, or from Settings). */
+export async function saveFocus(f: FormData) {
+  const u = await requireUser();
+  const nextRaw = str(f, 'next', 200);
+  const next = nextRaw.startsWith('/') && !nextRaw.startsWith('//') ? nextRaw : '/home';
+  const pick = (k: string, allowed?: readonly string[]) =>
+    [...new Set(f.getAll(k).map(String))].filter((v) => v.length <= 120 && (!allowed || allowed.includes(v))).slice(0, 60);
+  try {
+    await withUser(u.id, (db) => db.query(`insert into user_focus (user_id, classes, goals, supplier_countries, levels, updated_at)
+        values ($1, $2, $3, $4, $5, now())
+        on conflict (user_id) do update set classes = excluded.classes, goals = excluded.goals,
+          supplier_countries = excluded.supplier_countries, levels = excluded.levels, updated_at = now()`,
+      [u.id, pick('classes'), pick('goals', FOCUS_GOALS.map((g) => g[0])), pick('supplier_countries', SUPPLIER_COUNTRIES),
+       pick('levels', ['A', 'B', 'C', 'D', 'S'])]));
+  } catch (e) {
+    back(`/onboarding/focus?next=${encodeURIComponent(next)}`, { error: dbMessage(e) });
+  }
+  redirect(next);
+}
+
+/** Ask the Nazryx team a short question, optionally about one molecule. */
+export async function askExpert(f: FormData) {
+  const u = await requireUser();
+  const body = str(f, 'body', 2000), molText = str(f, 'molecule', 200);
+  if (!body) back('/expert', { error: 'Write your question.' });
+  try {
+    await withUser(u.id, async (db) => {
+      const m = molText ? await one(db, `select id from molecules where lower(inn) = lower($1)
+                                         union all select molecule_id from molecule_aliases where alias = lower($1) limit 1`, [molText]) : null;
+      await db.query('insert into expert_questions (user_id, molecule_id, body) values ($1, $2, $3)', [u.id, m?.id ?? null, body]);
+      await db.query(`insert into notifications (user_id, channel, subject, body) values (null, 'email', 'New expert question', $1)`,
+        [`${u.email}${molText ? ` about ${molText}` : ''}: ${body.slice(0, 300)}`]);
+    });
+  } catch (e) {
+    back('/expert', { error: dbMessage(e) });
+  }
+  redirect('/expert?sent=1');
 }
 
 /** Hide a molecule from "Picked for you". */

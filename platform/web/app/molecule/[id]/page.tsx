@@ -6,7 +6,7 @@ import { Badges, Flash, Locked, Tabs, Empty } from '@/components/ui';
 import { toggleList, togglePortfolio, toggleWatch } from '@/app/actions/app';
 import { requireUser } from '@/lib/auth';
 import { one, rows, withUser } from '@/lib/db';
-import { GLOBAL_LIST, channelLabel, fmtDate, levelLabel, registeredLine, title, COVERAGE_NOTE } from '@/lib/format';
+import { BE_STATUS, GLOBAL_LIST, beSuggestion, channelLabel, fmtDate, levelLabel, registeredLine, title, COVERAGE_NOTE } from '@/lib/format';
 import { COUNTRY } from '@/lib/queries';
 
 export default async function Molecule({ params, searchParams }: {
@@ -33,6 +33,9 @@ export default async function Molecule({ params, searchParams }: {
       where m.id = $1`, [id, u.id, COUNTRY]);
     if (!m) return null;
     m.supply = paid ? (await one(db, 'select molecule_supply_confirmed($1) as s', [id]))?.s : null;
+    m.route = paid ? await one(db, `select r.label, r.description, r.months_low, r.months_high, mr.note, (mr.molecule_id is not null) as specific
+                                     from registration_routes r left join molecule_routes mr on mr.molecule_id = $1 and mr.route_key = r.key
+                                     where r.key = coalesce((select route_key from molecule_routes where molecule_id = $1), 'full')`, [id]) : null;
     m.suggested = paid ? await one(db, `select price_low, price_high, currency, unit, note, observed_at from market_prices
                                          where molecule_id = $1 and country = $2 and kind = 'suggested' order by observed_at desc limit 1`, [id, COUNTRY]) : null;
     const open = m.enriched || paid;
@@ -98,6 +101,10 @@ export default async function Molecule({ params, searchParams }: {
                 <button className="btn btn-ghost" type="submit">{m.in_list ? 'In your sourcing list ✓' : 'Add to sourcing list'}</button></form>
             </div>
           </>)}
+          <div className="row small" style={{ gap: 14 }}>
+            <Link href={`/compare?a=${id}`}>Compare with another molecule</Link>
+            <Link href={`/expert?molecule=${id}`}>Ask the expert about {m.inn}</Link>
+          </div>
         </section>
         <section className="card stack" style={{ gap: 10 }}>
           <span className="lbl">Registered in Tanzania</span>
@@ -115,6 +122,15 @@ export default async function Molecule({ params, searchParams }: {
                   <span>per {m.suggested.unit}</span></div>
                 <span className="note">{[m.suggested.note, `updated ${fmtDate(m.suggested.observed_at)}`].filter(Boolean).join(' · ')}</span></>)
               : <p className="note" style={{ marginTop: 6 }}>No suggested price yet. Source it and we price it in step 4.</p>}
+          </div>
+          <div style={{ borderTop: '1px solid var(--line)', paddingTop: 12 }}>
+            <span className="lbl">Registration timeline</span>
+            {!paid ? <Locked title="Likely route and timeline">How this molecule would be registered in Tanzania and how long it typically takes.</Locked>
+              : m.route ? (<div className="stack" style={{ gap: 4, marginTop: 6 }}>
+                <b>{m.route.label}{m.route.months_low != null ? `: about ${m.route.months_low}–${m.route.months_high ?? m.route.months_low} months` : ''}</b>
+                <span className="note">{m.route.note || m.route.description}{m.route.specific ? '' : ' Typical route; we confirm it in the regulatory analysis.'}</span>
+                {beSuggestion(m.forms) && <span className="note">Bioequivalence: {BE_STATUS[beSuggestion(m.forms)!].toLowerCase()} (from the registered forms).</span>}
+              </div>) : null}
           </div>
         </section>
       </div>

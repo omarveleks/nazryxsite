@@ -41,8 +41,13 @@ await Promise.all([c.waitForURL(/onboarding/), c.click('button[type=submit]')]);
 await c.fill('#q', 'alpha'); await Promise.all([c.waitForURL(/q=alpha/), c.click('form[method=get] button')]);
 await c.locator('input[name=company_id]').first().check();
 await c.setInputFiles('#licence', { name: 'licence.pdf', mimeType: 'application/pdf', buffer: Buffer.from('%PDF-1.4 test') });
-await Promise.all([c.waitForURL(/home/), c.click('text=Continue')]);
+await Promise.all([c.waitForURL(/onboarding\/focus/), c.click('text=Continue')]);
 check(true, 'sign up and claim a company');
+await c.locator('input[name=goals][value=new_molecules]').check();
+await c.locator('input[name=classes]').first().check();
+await c.locator('input[name=supplier_countries][value=India]').check();
+await Promise.all([c.waitForURL(/\/home/), c.click('text=Save and continue')]);
+check((await c.locator('main').innerText()).includes('Your focus'), 'set your focus during onboarding');
 await c.goto(B + '/search?q=doxy');
 await Promise.all([c.waitForURL(/molecule\/\d+/), c.locator('a .nm').first().click()]);
 await c.locator('button:has-text("Enrich, 1 credit")').first().click();
@@ -70,6 +75,14 @@ await c.goto(B + '/requests/list');
 await Promise.all([c.waitForURL(/sent=1/), c.locator('button:has-text("Request 1 molecule")').click()]);
 check((await c.content()).includes('Product request'), 'sourcing list sends its molecules as requests');
 check((await c.goto(B + '/admin')).status() === 404, 'admin is hidden from customers');
+await c.goto(B + '/compare?an=Amoxicillin&bn=Doxycycline');
+const cmp = await c.locator('main').innerText();
+check(cmp.includes('Amoxicillin') && cmp.includes('Doxycycline') && cmp.includes('Registered forms'), 'compare two molecules');
+await c.goto(B + '/export/open');
+check(c.url().includes('/settings'), 'export sends free plans to the plans page');
+await c.goto(B + '/expert'); await c.fill('#body', 'Can Doxycycline go through the abridged route?');
+await Promise.all([c.waitForURL(/sent=1/), c.click('text=Send question')]);
+check(true, 'ask the expert');
 
 // 2. the demo customer accepts an anonymous quote and the supplier is revealed
 const d = await page();
@@ -98,6 +111,13 @@ for (const tab of ['', '?tab=review', '?tab=claims', '?tab=requests', '?tab=acco
 }
 await t.goto(B + '/admin?tab=claims');
 await Promise.all([t.waitForLoadState('networkidle'), t.locator(`tr:has-text("${email}") button:has-text("Approve")`).click()]);
+await t.goto(B + '/admin?tab=questions');
+await t.locator('textarea[name=answer]').first().fill('Yes, if the reference product is WHO-prequalified.');
+await Promise.all([t.waitForURL(/saved=1/), t.locator('button:has-text("Send answer")').first().click()]);
+await c.goto(B + '/expert');
+check((await c.locator('main').innerText()).includes('Yes, if the reference product is WHO-prequalified.'), 'customer sees the expert answer');
+const exp = await t.request.get(B + '/export/open');
+check(exp.status() === 200 && (exp.headers()['content-type'] || '').includes('text/csv'), 'export to Excel for paid plans and the team');
 await t.goto(B + '/admin?tab=activity');
 check((await t.content()).includes('company claims'), 'claim approval is in the activity log');
 await t.goto(B + `/admin/requests/${reqId}`);

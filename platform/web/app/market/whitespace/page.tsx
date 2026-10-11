@@ -2,6 +2,7 @@ import Link from 'next/link';
 import Shell from '@/components/Shell';
 import MarketTabs from '@/components/MarketTabs';
 import { Empty, Flash, SourceLink } from '@/components/ui';
+import ExportLink from '@/components/ExportLink';
 import { MoleculeRow } from '@/components/MoleculeRow';
 import { requireUser } from '@/lib/auth';
 import { rows, withUser } from '@/lib/db';
@@ -55,6 +56,7 @@ export default async function Whitespace({ searchParams }: { searchParams: Promi
         <label className="row small" style={{ gap: 6 }}><input type="checkbox" name="fit" value="1" defaultChecked={fitOnly} /> Only my classes</label>
         <button className="btn btn-blue" type="submit">Apply</button>
         {free && <span className="pill lav">Free: top {FREE.whitespace}</span>}
+        <ExportLink href={`/export/open?${new URLSearchParams({ class: cls, level })}`} paid={!free} />
       </form>
       <section className="card">
         {d.list.length === 0 ? <Empty>No open molecules match these filters.</Empty> : (

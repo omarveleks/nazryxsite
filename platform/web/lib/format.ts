@@ -83,5 +83,12 @@ export const channelLabel = (c?: string | null) =>
   c === 'programme' ? 'Programme channel: mostly bought through public and donor programmes. Check before pitching.' : null;
 
 export const FREE = { requests: 5, follows: 3, watches: 5, whitespace: 3, credits: 20 };
+export const FOCUS_GOALS: [string, string, string][] = [
+  ['new_molecules', 'Add new molecules', 'Find open molecules worth registering.'],
+  ['expand_sales', 'Grow sales of what I carry', 'Coverage gaps, competitor moves and pricing in my classes.'],
+  ['new_suppliers', 'Find new or better suppliers', 'Quotes from GMP suppliers on molecules I already sell.'],
+  ['more_from_suppliers', 'More from my current suppliers', 'What else my existing suppliers make that I could register.'],
+];
+export const SUPPLIER_COUNTRIES = ['India', 'China', 'Pakistan', 'Bangladesh', 'Egypt', 'Jordan', 'Turkey', 'Kenya', 'South Africa', 'Europe', 'Other'];
 export const LEVEL_FILTERS = [['A', 'Level A, dispensaries'], ['B', 'Level B, health centres'], ['C', 'Level C, district hospitals'],
   ['D', 'Level D, regional hospitals'], ['S', 'Level S, specialist']] as const;

@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import Shell from '@/components/Shell';
 import { Badges, Empty, Flash } from '@/components/ui';
+import ExportLink from '@/components/ExportLink';
 import { sendList, toggleList } from '@/app/actions/app';
 import { requireUser } from '@/lib/auth';
 import { rows, withUser } from '@/lib/db';
@@ -30,7 +31,8 @@ export default async function SourcingList({ searchParams }: { searchParams: Pro
       <div className="split">
         <section className="card">
           <div className="card-h"><h2>{d.items.length} {d.items.length === 1 ? 'molecule' : 'molecules'}</h2>
-            <Link className="btn-link" href="/market/whitespace">Add open molecules</Link></div>
+            <div className="row"><Link className="btn-link" href="/market/whitespace">Add open molecules</Link>
+              {d.items.length > 0 && <ExportLink href="/export/list" paid={!free} />}</div></div>
           {d.items.length === 0 ? (
             <div className="stack" style={{ alignItems: 'flex-start' }}>
               <Empty>Your list is empty. Use &quot;+ List&quot; on any molecule in Search, Open molecules or a molecule page.</Empty>

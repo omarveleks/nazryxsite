@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import Shell from '@/components/Shell';
 import { Flash } from '@/components/ui';
 import { addSeat, changePassword, requestUpgrade, updateSettings } from '@/app/actions/app';
@@ -42,6 +43,11 @@ export default async function Settings({ searchParams }: { searchParams: Promise
                 <textarea className="input" name="note" placeholder="Anything we should know (optional)" />
                 <button className="btn btn-blue" type="submit">Upgrade</button>
               </form>))}
+        </section>
+        <section className="card stack" id="focus">
+          <h2>Your focus</h2>
+          <p className="note">Therapeutic classes, goals, levels of care and supplier countries. They shape your home page and brief our team.</p>
+          <Link className="btn btn-ghost btn-sm" href="/onboarding/focus?next=/settings" style={{ alignSelf: 'flex-start' }}>Edit your focus</Link>
         </section>
         <section className="card stack" id="team">
           <h2>Team seats</h2>

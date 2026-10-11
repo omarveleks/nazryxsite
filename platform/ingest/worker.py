@@ -33,6 +33,7 @@ def tick():
         notify.deliver_queued(cur)
         for (code,) in cur.execute("select code from countries where enabled").fetchall():
             reminder.check_and_remind(cur, code)
+        reminder.remind_questions(cur)
         conn.commit()
     return bool(row)
 

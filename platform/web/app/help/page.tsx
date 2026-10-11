@@ -16,6 +16,8 @@ const QA: [string, ReactNode][] = [
   ['What happens when I source a molecule?', <>It follows the normal route for a medicine: product request, regulatory check (who holds a
     registration, its status, restrictions), regulatory analysis (the route and timeline to register it), pricing and logistics (anonymous
     quotes, landed price, lead time), then registration and shipment. You see each step on the request.</>],
+  ['Can I just ask a question?', <>Yes. Use <a href="/expert">Ask the expert</a> for regulatory, pricing or sourcing questions, with or
+    without a molecule. Free plans get 3 questions a month. Compare two molecules side by side from any molecule page.</>],
   ['What is the sourcing list?', <>Add molecules from Search, Open molecules or a molecule page with &quot;+ List&quot;, then request them
     all at once. Each becomes its own request.</>],
   ['What is the EML level?', <>Where the official TMDA list allows a medicine to be stocked: A dispensaries and up, B health centres,

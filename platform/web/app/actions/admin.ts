@@ -152,6 +152,21 @@ export async function saveDossier(f: FormData) {
   redirect(`${to}?saved=1`);
 }
 
+/** Answer an expert question; the customer is told by email and WhatsApp and sees it on the Ask the expert page. */
+export async function answerQuestion(f: FormData) {
+  const id = int(f, 'question_id'), answer = str(f, 'answer', 4000);
+  if (!answer) back('/admin?tab=questions', { error: 'Write an answer.' });
+  await team(async (db, uid) => {
+    const q = await one(db, `update expert_questions set answer = $2, answered_by = $3, answered_at = now() where id = $1 returning user_id`, [id, answer, uid]);
+    if (q) {
+      await db.query(`insert into notifications (user_id, channel, subject, body) values ($1, 'email', 'Your question is answered', $2),
+                      ($1, 'whatsapp', 'Your question is answered', $2)`, [q.user_id, answer.slice(0, 500)]);
+      await db.query(`insert into feed_items (kind, title, link, user_id) values ('request', 'Our expert answered your question', '/expert', $1)`, [q.user_id]);
+    }
+  }, '/admin?tab=questions');
+  redirect('/admin?tab=questions&saved=1');
+}
+
 // ---------------------------------------------------------------- claims and accounts
 export async function reviewClaim(f: FormData) {
   await team((db) => db.query('select review_claim($1, $2, $3)', [int(f, 'claim_id'), str(f, 'decision') === 'approve', str(f, 'note', 500) || null]),
@@ -176,6 +191,33 @@ export async function postRegulatory(f: FormData) {
   if (!t) back('/admin?tab=content', { error: 'Add a headline.' });
   await team((db) => db.query(`insert into feed_items (kind, title, body, link) values ('regulatory', $1, $2, $3)`,
     [t, str(f, 'body', 2000) || null, str(f, 'link', 300) || null]), '/admin?tab=content');
+  redirect('/admin?tab=content&saved=1');
+}
+
+/** Typical months per registration route (shown to paid plans on molecule pages). */
+export async function saveRoutes(f: FormData) {
+  await team(async (db) => {
+    for (const key of ['full', 'abridged', 'eac']) {
+      const lo = int(f, `low_${key}`), hi = int(f, `high_${key}`);
+      if (lo !== null && hi !== null && hi < lo) back('/admin?tab=content', { error: 'Months: high must be at least low.' });
+      await db.query('update registration_routes set months_low = $2, months_high = $3, description = coalesce(nullif($4, \'\'), description) where key = $1',
+        [key, lo, hi ?? lo, str(f, `desc_${key}`, 300)]);
+    }
+  }, '/admin?tab=content');
+  redirect('/admin?tab=content&saved=1');
+}
+
+/** Set the likely route for one molecule (overrides the default full dossier). */
+export async function setMoleculeRoute(f: FormData) {
+  await team(async (db) => {
+    const m = await one(db, 'select id from molecules where lower(inn) = lower($1)', [str(f, 'molecule', 200)]);
+    if (!m) back('/admin?tab=content', { error: 'Molecule not found. Use the exact name.' });
+    const route = str(f, 'route', 20);
+    if (!route) { await db.query('delete from molecule_routes where molecule_id = $1', [m!.id]); return; }
+    await db.query(`insert into molecule_routes (molecule_id, route_key, note, updated_at) values ($1, $2, $3, now())
+                    on conflict (molecule_id) do update set route_key = excluded.route_key, note = excluded.note, updated_at = now()`,
+      [m!.id, route, str(f, 'note', 300) || null]);
+  }, '/admin?tab=content');
   redirect('/admin?tab=content&saved=1');
 }
 

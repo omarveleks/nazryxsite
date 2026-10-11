@@ -4,7 +4,7 @@ import { Empty, Flash, Tabs } from '@/components/ui';
 import { requireTeam } from '@/lib/auth';
 import { one, rows, withUser } from '@/lib/db';
 import { STAGES, ago, fmtDate, title } from '@/lib/format';
-import { grantCredits, keepSeparate, matchMolecule, mergeCompanies, postRegulatory, addPrice, editUseCase, queueRecompute,
+import { answerQuestion, grantCredits, keepSeparate, saveRoutes, setMoleculeRoute, matchMolecule, mergeCompanies, postRegulatory, addPrice, editUseCase, queueRecompute,
   rejectSuggestion, resetPassword, resetTwoStep, reviewClaim, setPlan } from '@/app/actions/admin';
 import { StagePill } from '@/components/ui';
 
@@ -27,6 +27,7 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
       (select count(*)::int from company_review_queue where status = 'open') as dups,
       (select count(*)::int from company_claims where status = 'pending') as claims,
       (select count(*)::int from requests where stage <> 'Closed') as open_requests,
+      (select count(*)::int from expert_questions where answered_at is null) as open_questions,
       (select count(*)::int from plan_requests where status = 'open') as plan_requests,
       (select count(*)::int from registry_uploads where status in ('queued', 'running')) as running`);
     if (tab === 'data') {
@@ -54,6 +55,11 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
                                    from company_claims k join users u on u.id = k.user_id left join companies c on c.id = k.company_id
                                    order by (k.status = 'pending') desc, k.created_at desc limit 60`);
     }
+    if (tab === 'questions') {
+      out.questions = await rows(db, `select q.id, q.body, q.answer, q.created_at, q.answered_at, u.email, m.inn
+                                      from expert_questions q join users u on u.id = q.user_id left join molecules m on m.id = q.molecule_id
+                                      order by (q.answered_at is not null), q.created_at limit 100`);
+    }
     if (tab === 'requests') {
       out.requests = await rows(db, `select r.id, r.stage, r.quantity, r.updated_at, u.email, coalesce(m.inn, r.molecule_text) as molecule,
                                      (select count(*)::int from request_messages x where x.request_id = r.id and not x.from_team) as msgs
@@ -71,6 +77,7 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
                                 from audit_log a left join users u on u.id = a.actor order by a.at desc limit 200`);
     }
     if (tab === 'content') {
+      out.routes = await rows(db, 'select key, label, description, months_low, months_high from registration_routes order by sort');
       out.feed = await rows(db, `select title, created_at from feed_items where kind = 'regulatory' order by created_at desc limit 8`);
       out.notifs = await rows(db, `select channel, subject, body, status, created_at from notifications order by id desc limit 12`);
     }
@@ -86,6 +93,7 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
     { key: 'review', label: `Review queue (${c.suggestions + c.dups})`, href: '/admin?tab=review' },
     { key: 'claims', label: `Claims (${c.claims})`, href: '/admin?tab=claims' },
     { key: 'requests', label: `Requests (${c.open_requests})`, href: '/admin?tab=requests' },
+    { key: 'questions', label: `Questions (${c.open_questions})`, href: '/admin?tab=questions' },
     { key: 'accounts', label: `Accounts${c.plan_requests ? ` (${c.plan_requests})` : ''}`, href: '/admin?tab=accounts' },
     { key: 'content', label: 'Content', href: '/admin?tab=content' },
     { key: 'activity', label: 'Activity', href: '/admin?tab=activity' },
@@ -218,6 +226,26 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
               </tbody></table></div>)}
         </section>
       )}
+      {tab === 'questions' && (
+        <section className="card stack">
+          <h2>Expert questions</h2>
+          <p className="note">Answer within 48 hours. Red means overdue.</p>
+          {d.questions.length === 0 && <p className="note">No questions yet.</p>}
+          {d.questions.map((q: any) => {
+            const late = !q.answered_at && Date.now() - new Date(q.created_at).getTime() > H48;
+            return (
+              <div key={q.id} className="stack" style={{ gap: 6, paddingTop: 12, borderTop: '1px solid var(--line)' }}>
+                <div className="between"><span className="small"><b>{q.email}</b>{q.inn ? ` · ${q.inn}` : ''} · {ago(q.created_at)}</span>
+                  <span className={`pill ${q.answered_at ? 'mint' : late ? 'alert' : 'peach'}`}>{q.answered_at ? 'Answered' : late ? 'Overdue' : 'Open'}</span></div>
+                <p style={{ whiteSpace: 'pre-wrap' }}>{q.body}</p>
+                <form action={answerQuestion} className="stack" style={{ gap: 6 }}>
+                  <input type="hidden" name="question_id" value={q.id} />
+                  <textarea className="input" name="answer" defaultValue={q.answer ?? ''} aria-label="Answer" placeholder="Answer (sent to the customer)" required />
+                  <button className="btn btn-blue btn-sm" type="submit" style={{ alignSelf: 'flex-start' }}>{q.answered_at ? 'Update answer' : 'Send answer'}</button>
+                </form>
+              </div>);
+          })}
+        </section>)}
       {tab === 'requests' && (
         <section className="card">
           <div className="card-h"><h2>Requests</h2><span className="note">Handled by hand. Move the stage as you work; the customer sees it and gets an update.</span></div>
@@ -294,6 +322,25 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
             </form>
             <p className="note">Observed market prices, or the price we suggest customers sell at (shown on the molecule page, paid plans).
               Never enter supplier prices here.</p>
+            <h2>Registration routes and timelines</h2>
+            <form action={saveRoutes} className="stack" style={{ gap: 8 }}>
+              {d.routes.map((r: any) => (
+                <div key={r.key} className="row">
+                  <b style={{ flex: '0 1 180px' }}>{r.label}</b>
+                  <input className="input" name={`low_${r.key}`} defaultValue={r.months_low ?? ''} placeholder="Months from" aria-label={`${r.label}: months from`} inputMode="numeric" style={{ width: 110 }} />
+                  <input className="input" name={`high_${r.key}`} defaultValue={r.months_high ?? ''} placeholder="to" aria-label={`${r.label}: months to`} inputMode="numeric" style={{ width: 90 }} />
+                  <input className="input" name={`desc_${r.key}`} defaultValue={r.description ?? ''} aria-label={`${r.label}: description`} style={{ flex: '1 1 220px' }} />
+                </div>))}
+              <button className="btn btn-blue btn-sm" type="submit" style={{ alignSelf: 'flex-start' }}>Save routes</button>
+            </form>
+            <form action={setMoleculeRoute} className="form-grid">
+              <input className="input" name="molecule" placeholder="Molecule name (exact)" aria-label="Molecule" required />
+              <select className="input" name="route" aria-label="Route" defaultValue="full"><option value="">Back to default (full dossier)</option>
+                {d.routes.map((r: any) => <option key={r.key} value={r.key}>{r.label}</option>)}</select>
+              <input className="input full" name="note" placeholder="Note shown to customers, e.g. WHO-prequalified reference product exists" aria-label="Note" />
+              <button className="btn btn-ghost btn-sm full" type="submit">Set route for this molecule</button>
+            </form>
+            <p className="note">Paid plans see the route and months on each molecule page. Every molecule uses the full dossier unless set here.</p>
             <h2>Molecule use case</h2>
             <form action={editUseCase} className="stack">
               <input className="input" name="molecule" placeholder="Molecule name (exact)" aria-label="Molecule" required />

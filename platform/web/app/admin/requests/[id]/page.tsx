@@ -34,6 +34,7 @@ export default async function AdminRequest({ params, searchParams }: { params: P
                                              cm.channel_flag, molecule_supply_confirmed($1) as supply
                                              from country_molecules cm where cm.molecule_id = $1 and cm.country = 'TZ'`, [r.molecule_id]) : null,
       history: await rows(db, 'select stage, created_at from request_stage_history where request_id = $1 order by created_at', [id]),
+      focus: await one(db, 'select goals, supplier_countries, classes from user_focus where user_id = $1', [r.user_id]),
     };
   });
   if (!d) notFound();
@@ -42,6 +43,8 @@ export default async function AdminRequest({ params, searchParams }: { params: P
     <Shell user={u} title={`Request #${id}: ${r.molecule}`} crumb={<><Link href="/admin?tab=requests">Admin / Requests</Link> / #{id}</>}
       sub={`${r.name || r.email} (${r.email}${r.whatsapp ? `, WhatsApp ${r.whatsapp}` : ''}) · ${r.plan} plan`}>
       <Flash sp={sp} />
+      {d.focus && <p className="note">Customer focus: {[d.focus.goals?.length ? `goals ${d.focus.goals.join(', ').replaceAll('_', ' ')}` : null,
+        d.focus.supplier_countries?.length ? `prefers suppliers from ${d.focus.supplier_countries.join(', ')}` : null].filter(Boolean).join(' · ') || 'not set'}</p>}
       <Stages current={r.stage} />
       <div className="split">
         <div className="stack">

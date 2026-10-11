@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import ExportLink from '@/components/ExportLink';
 import { notFound, redirect } from 'next/navigation';
 import Shell from '@/components/Shell';
 import FollowButton from '@/components/FollowButton';
@@ -43,7 +44,7 @@ export default async function Company({ params, searchParams }: { params: Promis
   return (
     <Shell user={u} title={title(c.display_name)} crumb={<><Link href="/competitors">Competitors</Link> / {title(c.display_name)}</>}
       sub={`${type}, ${c.is_ltr ? 'Tanzania' : title(c.country) || 'Tanzania'}${c.verified ? ' · verified on Nazryx' : ''}`}
-      actions={<FollowButton id={id} following={c.following} back={`/company/${id}`} />}>
+      actions={<><ExportLink href={`/export/company?id=${id}`} paid={paid} /><FollowButton id={id} following={c.following} back={`/company/${id}`} /></>}>
       <Flash sp={sp} />
       <div className="grid g4">
         <div className="tile t-blue"><span className="k">Registered products</span><span className="v num">{c.registrations ?? 0}</span></div>

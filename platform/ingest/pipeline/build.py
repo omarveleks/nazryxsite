@@ -112,8 +112,14 @@ def _finish_nemlit(rows):
     d = d[d.key != ""]
     # one row per molecule key, keep the first category and the widest level
     lv = d.groupby("key")["level"].agg(lambda s: best_level(list(s)))
+    if "forms" in d:   # the table lists dosage forms: keep them as form categories (tablet, injection ...)
+        cats = d.groupby("key")["forms"].agg(lambda s: ", ".join(sorted({
+            form_of(p) for txt in s if isinstance(txt, str) for p in re.split(r"[;\n]|(?<=\w)\.\s", txt) if p.strip()} - {"other"})))
+        d = d.drop(columns=["forms"])
     d = d.drop_duplicates("key").copy()
     d["level"] = d.key.map(lv)
+    if "cats" in locals():
+        d["list_forms"] = d.key.map(cats)
     return d.reset_index(drop=True)
 
 

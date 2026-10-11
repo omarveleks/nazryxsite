@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import Shell from '@/components/Shell';
 import { Empty, Flash, SourceLink } from '@/components/ui';
+import ExportLink from '@/components/ExportLink';
 import { LEVEL_FILTERS } from '@/lib/format';
 import { MoleculeRow } from '@/components/MoleculeRow';
 import { requireUser } from '@/lib/auth';
@@ -75,7 +76,10 @@ export default async function Search({ searchParams }: { searchParams: Promise<{
         <div className="card-h">
           <div><h2>{searching ? 'Results' : 'Picked for you'}</h2>
             {!searching && <p className="note">Open molecules in the classes you already carry. Add them to your sourcing list, or source one now.</p>}</div>
-          {free && <span className="note">Opening a molecule's full page costs 1 credit. <b className="num">{u.credits}</b> left this month.</span>}
+          <div className="row">
+            {free && <span className="note">Opening a molecule&apos;s full page costs 1 credit. <b className="num">{u.credits}</b> left this month.</span>}
+            {searching && <ExportLink href={`/export/search?${new URLSearchParams({ q, class: cls, level })}`} paid={!free} />}
+          </div>
         </div>
         {d.list.length === 0 ? (
           searching ? <Empty>No molecules match. Try a shorter name or another class.</Empty> : (

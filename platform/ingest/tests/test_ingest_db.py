@@ -526,3 +526,34 @@ def test_dossier_and_shipment_documents_are_team_written(env):
         assert a.execute("select count(*) from dossier_items").fetchone()[0] == 0
         assert a.execute("select count(*) from shipment_documents").fetchone()[0] == 0
         a.rollback()
+
+
+def test_focus_questions_and_routes(env):
+    with psycopg.connect(URL) as c:
+        free = c.execute("insert into users (email, password_hash) values ('fq1@example.com', 'x') returning id").fetchone()[0]
+        other = c.execute("insert into users (email, password_hash) values ('fq2@example.com', 'x') returning id").fetchone()[0]
+        paid = c.execute("insert into users (email, password_hash, plan) values ('fq3@example.com', 'x', 'paid') returning id").fetchone()[0]
+        mol = c.execute("select id from molecules where inn = 'Doxycycline'").fetchone()[0]
+        c.execute("insert into molecule_routes (molecule_id, route_key, note) values (%s, 'abridged', 'WHO PQ reference exists')", (mol,))
+        c.commit()
+    with app_conn(env) as a:
+        as_user(a, free)
+        a.execute("insert into user_focus (user_id, classes, goals) values (%s, %s, %s)", (free, ["Anti-infective Medicines"], ["new_molecules"]))
+        for i in range(3):
+            a.execute("insert into expert_questions (user_id, body) values (%s, %s)", (free, f"q{i}"))
+        with pytest.raises(psycopg.errors.RaiseException):          # the fourth question this month is over the free limit
+            a.execute("insert into expert_questions (user_id, body) values (%s, 'q4')", (free,))
+        a.rollback()
+        as_user(a, free)
+        with pytest.raises(psycopg.errors.InsufficientPrivilege):   # customers cannot answer their own questions
+            a.execute("insert into expert_questions (user_id, body, answer) values (%s, 'x', 'self answer')", (free,))
+        a.rollback()
+        as_user(a, free)
+        assert a.execute("select count(*) from molecule_routes").fetchone()[0] == 0     # route detail is paid
+        assert a.execute("select count(*) from registration_routes").fetchone()[0] == 3
+        as_user(a, other)
+        assert a.execute("select count(*) from user_focus").fetchone()[0] == 0
+        assert a.execute("select count(*) from expert_questions").fetchone()[0] == 0
+        as_user(a, paid)
+        assert a.execute("select route_key from molecule_routes where molecule_id = %s", (mol,)).fetchone()[0] == "abridged"
+        a.rollback()

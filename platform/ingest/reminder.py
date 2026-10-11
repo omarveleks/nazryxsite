@@ -31,3 +31,16 @@ def check_and_remind(cur, country="TZ", now=None):
     cur.execute("insert into reminders_log (kind, detail) values (%s, jsonb_build_object('hours_since', %s::numeric))",
                 (f"registry_upload_{country}", st["hours_since"]))
     return True
+
+
+def remind_questions(cur, now=None):
+    """Expert questions left unanswered for 48 hours: tell the team once per question. Returns how many reminders went out."""
+    now = now or datetime.now(timezone.utc)
+    rows = cur.execute("""select q.id, u.email, left(q.body, 200) from expert_questions q join users u on u.id = q.user_id
+                          where q.answered_at is null and q.created_at < %s
+                            and not exists (select 1 from reminders_log l where l.kind = 'expert_question_' || q.id)""",
+                       (now - INTERVAL,)).fetchall()
+    for qid, email, body in rows:
+        notify_team(cur, "Expert question overdue", f"Question #{qid} from {email} has waited 48 hours: {body}")
+        cur.execute("insert into reminders_log (kind) values (%s)", (f"expert_question_{qid}",))
+    return len(rows)

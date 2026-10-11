@@ -89,6 +89,8 @@ def load_country_molecules(cur, data, key_to_id, ess, country):
     for mid, r in ess.items():
         base = rows.get(mid, dict(registrations=0, registrants=0, ltrs=0, manufacturers=0, local_made=0, forms=None,
                                   on_who_eml=False))
+        if not base.get("forms") and _s(getattr(r, "list_forms", None)):
+            base["forms"] = _s(r.list_forms)   # nobody registered it yet: show the forms the official list names
         base.update(list_name=r.molecule, on_national_list=True, on_who_eml=bool(r.in_who) or base.get("on_who_eml", False),
                     facility_level=_s(r.level), channel_flag=_s(r.channel_flag), note=_s(r.note),
                     rankable=bool(r.rankable), in_combinations=int(r.in_combinations))
