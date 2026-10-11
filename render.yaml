@@ -56,6 +56,8 @@ services:
         value: "1"
       - key: SEED_TEAM_EMAIL
         sync: false
+      - key: TEAM_OWNER_EMAIL       # the one owner of the team: opens everything, adds and removes team members
+        value: omar@nazryx.com
       - key: SEED_TEAM_PASSWORD
         sync: false
       - key: DEMO_PASSWORD

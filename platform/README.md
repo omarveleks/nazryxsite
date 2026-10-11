@@ -117,7 +117,8 @@ against a real database.
 ### Accounts and security
 - Passwords are hashed with scrypt; sessions are random tokens stored hashed in Postgres (HttpOnly cookie).
 - After five wrong passwords for an email within 15 minutes, sign-in is refused until the window passes.
-- **Team members**: owners add team members in Admin › Team, choose which Admin areas each can open (requests, manufacturers,
+- **Team members**: one owner, the account named by `TEAM_OWNER_EMAIL` on the worker (set on every start; owner rights cannot
+  be given or removed in the app). The owner adds team members in Admin › Team, choose which Admin areas each can open (requests, manufacturers,
   accounts and plans, claims, questions, documents, market data, content and prices, activity) and remove access. Every action
   checks the permission; the database checks owner rights and blocks non-owners from resetting a team member's password.
 - Two-step sign-in with an authenticator app (Settings › Two-step sign-in). Optional for every account, the team

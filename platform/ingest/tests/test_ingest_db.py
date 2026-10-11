@@ -766,8 +766,10 @@ def test_team_members_and_permissions(env):
             as_user(a, member)
         a.rollback()
         as_user(a, owner)
-        with pytest.raises(psycopg.errors.RaiseException):           # an owner cannot lock themselves out
-            a.execute("select team_set_member(%s, array[]::text[], false)", (owner,))
+        a.execute("select team_set_member(%s, array[]::text[], false)", (owner,))   # owner rights are not changed in the app
+        assert q("select team_owner from users where id = %s", owner)[0][0] is True
+        with pytest.raises(psycopg.errors.RaiseException):           # and the owner cannot be removed
+            a.execute("select team_remove_member(%s, true)", (owner,))
         a.rollback()
         as_user(a, owner)
         a.execute("select team_remove_member(%s, true)", (member,))

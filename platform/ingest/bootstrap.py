@@ -46,7 +46,25 @@ def run():
         seed.seed()
     else:
         seed.ensure_team()
+    set_owner()
     print("bootstrap done")
+
+
+def set_owner():
+    """Exactly one owner: the account named by TEAM_OWNER_EMAIL. If that account does not exist yet, owners stay as they
+    are, so the team is never left without one."""
+    email = os.environ.get("TEAM_OWNER_EMAIL", "").strip().lower()
+    if not email:
+        return
+    with connect() as conn:
+        found = conn.execute("update users set role = 'team', team_owner = true, disabled = false, onboarded = true where email = %s returning id",
+                             (email,)).fetchone()
+        if found:
+            conn.execute("update users set team_owner = false where role = 'team' and email <> %s", (email,))
+            log.info("team owner: %s", email)
+        else:
+            log.warning("TEAM_OWNER_EMAIL %s has no account yet; owners unchanged", email)
+        conn.commit()
 
 
 if __name__ == "__main__":

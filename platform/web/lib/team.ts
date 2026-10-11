@@ -1,4 +1,4 @@
-// What a team member can open in Admin. Owners can open everything and manage the team.
+// What a team member can open in Admin. The owner (TEAM_OWNER_EMAIL) opens everything and manages the team.
 export const TEAM_PERMISSIONS: [string, string, string][] = [
   ['requests', 'Sourcing requests', 'Requests, assessments, quotes, suppliers and shipments'],
   ['manufacturers', 'Manufacturers', 'Manufacturer approvals and engagements'],

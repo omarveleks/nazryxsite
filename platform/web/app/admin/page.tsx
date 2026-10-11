@@ -445,7 +445,6 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
             <span className="lbl">What they can open</span>
             <div className="grid g3">{TEAM_PERMISSIONS.map(([k, l, what]) => (
               <label key={k} className="choice"><input type="checkbox" name="perm" value={k} /><span><b>{l}</b><br /><span className="note">{what}</span></span></label>))}</div>
-            <label className="row small" style={{ gap: 6 }}><input type="checkbox" name="owner" /> Owner: everything, including adding and removing team members</label>
             <button className="btn btn-blue btn-sm" type="submit" style={{ alignSelf: 'flex-start' }}>Add team member</button>
             <p className="note">Send them the email and temporary password yourself; they can change the password in Settings.</p>
           </form>
@@ -458,19 +457,18 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
               <div className="between"><span><b>{m.name || m.email}</b><span className="sub2"> · {m.email}{m.two_step ? ' · two-step on' : ''}</span></span>
                 <span className="row" style={{ gap: 6 }}>{m.disabled ? <span className="pill">Removed</span> : m.team_owner ? <span className="pill solid">Owner</span> : null}
                   {m.id === u.id && <span className="pill blue">You</span>}</span></div>
-              {!m.disabled && (<>
+              {!m.disabled && !m.team_owner && (<>
                 <div className="row" style={{ gap: 6 }}>{TEAM_PERMISSIONS.map(([k, l]) => (
                   <label key={k} className="row small" style={{ gap: 4, marginRight: 8 }}><input type="checkbox" name="perm" value={k} defaultChecked={m.team_owner || m.team_permissions?.includes(k)} /> {l}</label>))}</div>
-                <label className="row small" style={{ gap: 6 }}><input type="checkbox" name="owner" defaultChecked={m.team_owner} disabled={m.id === u.id} /> Owner
-                  {m.id === u.id && <input type="hidden" name="owner" value="on" />}</label>
               </>)}
               <div className="row">
-                {!m.disabled && <button className="btn btn-blue btn-sm" type="submit">Save</button>}
-                {m.id !== u.id && <button className="btn btn-ghost btn-sm" type="submit" formAction={removeTeamMember} name="restore" value={m.disabled ? '1' : '0'}>
+                {!m.disabled && !m.team_owner && <button className="btn btn-blue btn-sm" type="submit">Save</button>}
+                {!m.team_owner && <button className="btn btn-ghost btn-sm" type="submit" formAction={removeTeamMember} name="restore" value={m.disabled ? '1' : '0'}>
                   {m.disabled ? 'Give access back' : 'Remove access'}</button>}
               </div>
             </form>))}
-          <p className="note">Owners can open everything. Removing someone signs them out at once and stops them signing in; their past work stays in the activity log.</p>
+          <p className="note">The owner opens everything and manages the team. Removing someone signs them out at once and stops them signing in;
+            their past work stays in the activity log.</p>
         </section>
       </>)}
       {tab === 'activity' && (
