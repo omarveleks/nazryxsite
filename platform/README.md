@@ -167,7 +167,13 @@ Product request → regulatory check → regulatory analysis → pricing and log
 shipment, with Closed as the exit at any point (migration 011). The team writes its assessment on the request in Admin
 (verdict, why, regulatory check, regulatory analysis, supply, indicative price); saving it starts the regulatory check.
 Accepting a quote moves the product to registration. The free-plan cap counts only the first four stages. Customers can
-collect molecules in a sourcing list and request them together. Suggested selling prices (Admin > Content) show on the
+collect molecules in a sourcing list and request them together.
+
+Dossier readiness (migration 012): the team marks each dossier item ready / missing / not needed and sets the
+bioequivalence call (pre-filled from the dosage form: oral solids need BE unless a biowaiver applies). Quotes carry
+payment terms, minimum shelf life on arrival, GMP certifier, manufacturer or trader, and exclusivity. Shipments follow
+confirming → production → import permit → shipped → arrived → sampling and release → delivered, with a document
+checklist and ETA. My portfolio → Supply and shipments brings all of it together per product. Suggested selling prices (Admin > Content) show on the
 molecule page for paid plans.
 
 ## Essential list from the 2026 PDF

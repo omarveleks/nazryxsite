@@ -21,7 +21,7 @@ export default async function Requests({ searchParams }: { searchParams: Promise
                           from requests r left join molecules m on m.id = r.molecule_id where r.user_id = $1 order by r.updated_at desc`, [u.id]),
     orders: await rows(db, `select o.id, o.status, o.updated_at, coalesce(m.inn, r.molecule_text) as molecule, r.id as request_id
                             from orders o join requests r on r.id = o.request_id left join molecules m on m.id = r.molecule_id
-                            where r.user_id = $1 order by o.updated_at desc`, [u.id]),
+                            where r.user_id = $1 and r.stage in ('Shipment', 'Closed') order by o.updated_at desc`, [u.id]),
   }));
   const early = d.reqs.filter((r) => ['Product request', 'Regulatory check', 'Regulatory analysis', 'Pricing and logistics'].includes(r.stage)).length;
   const closed = d.reqs.filter((r) => r.stage === 'Closed');

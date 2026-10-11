@@ -76,8 +76,12 @@ const d = await page();
 await signin(d, 'demo-free@nazryx.test', process.env.DEMO_PASSWORD);
 await d.goto(B + '/requests'); await d.click('.col:has-text("Pricing and logistics") .rcard'); await d.waitForURL(/requests\/\d+/);
 check(!(await d.content()).includes('Demo Supplier'), 'supplier hidden before accepting');
+check((await d.content()).includes('Shelf life on arrival'), 'quotes show payment terms, shelf life and GMP before accepting');
 await Promise.all([d.waitForURL(/accepted=1/), d.locator('button:has-text("Accept")').first().click()]);
 check((await d.content()).includes('Demo Supplier'), 'supplier revealed after accepting');
+await d.goto(B + '/portfolio?tab=sourced');
+const sup = await d.locator('main').innerText();
+check(sup.includes('Documents ready') && sup.includes('items ready'), 'portfolio shows supply and shipments');
 
 // 3. the team account must set up two-step sign-in before Admin opens, then works the admin pages
 const t = await page();
@@ -101,8 +105,12 @@ await t.selectOption('#verdict', 'go'); await t.fill('#summary', 'Few competitor
 await t.fill('#price_range', 'USD 1.00-1.20 per pack');
 await t.fill('#regulatory_check', 'Nobody holds an active registration.');
 await Promise.all([t.waitForURL(/saved=1/), t.click('text=Send assessment to the customer')]);
+await t.goto(B + `/admin/requests/${reqId}`);
+await t.selectOption('select[name=item_gmp]', 'have'); await t.selectOption('select[name=item_stability]', 'missing');
+await Promise.all([t.waitForURL(/saved=1/), t.click('text=Save dossier readiness')]);
 await c.goto(B + `/requests/${reqId}`);
 const evalPage = await c.content();
+check((await c.locator('main').innerText()).includes('1 of 10 items ready'), 'customer sees dossier readiness');
 check(evalPage.includes('Few competitors and supply is ready.') && evalPage.includes('USD 1.00-1.20') && evalPage.includes('Nobody holds an active registration.'),
   'customer sees the assessment, step by step, in the request');
 const t2 = await page();

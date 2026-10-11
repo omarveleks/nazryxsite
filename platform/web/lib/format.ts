@@ -18,7 +18,34 @@ export const STAGE_INFO: Record<string, string> = {
 /** Still being worked up: counts toward the free-plan cap. */
 export const EARLY_STAGES = ['Product request', 'Regulatory check', 'Regulatory analysis', 'Pricing and logistics'];
 export type Stage = (typeof STAGES)[number];
-export const ORDER_STATUSES = ['Confirming', 'In production', 'In transit', 'Delivered', 'Cancelled'] as const;
+// A shipment follows the import route; Cancelled is the exit.
+export const ORDER_STATUSES = ['Confirming', 'In production', 'Import permit', 'Shipped', 'Arrived', 'Sampling and release', 'Delivered', 'Cancelled'] as const;
+export const SHIPMENT_FLOW = ORDER_STATUSES.filter((s) => s !== 'Cancelled');
+export const SHIPMENT_DOCS: [string, string][] = [
+  ['proforma', 'Proforma invoice'], ['invoice', 'Commercial invoice'], ['coa', 'Certificate of analysis'], ['packing', 'Packing list'],
+  ['permit', 'Import permit'], ['bl', 'Bill of lading or air waybill'], ['insurance', 'Insurance certificate'],
+];
+
+// What a registration dossier needs from the supplier. The team marks each item have / missing / not needed.
+export const DOSSIER_ITEMS: [string, string][] = [
+  ['application', 'Application form and letter of authorisation'], ['labels', 'Labels and patient leaflet'],
+  ['api', 'Active ingredient documentation (DMF or CEP)'], ['quality', 'Finished product quality data'],
+  ['stability', 'Stability data for climatic zone IVb'], ['gmp', 'GMP certificate'],
+  ['cpp', 'Certificate of Pharmaceutical Product (CPP)'], ['be', 'Bioequivalence study or biowaiver'],
+  ['coa', 'Certificates of analysis'], ['samples', 'Samples and reference standards'],
+];
+export const DOSSIER_STATUS: Record<string, [string, string]> = { have: ['Ready', 'mint'], missing: ['Missing', 'peach'], not_needed: ['Not needed', ''] };
+export const BE_STATUS: Record<string, string> = {
+  needed: 'Bioequivalence study needed', biowaiver: 'Biowaiver possible (BCS class I or III)', not_needed: 'No bioequivalence study needed',
+};
+/** Default BE call from the dosage form: oral solids need BE unless a biowaiver applies; solutions, injections and topicals usually do not. */
+export function beSuggestion(forms?: string | null): keyof typeof BE_STATUS | null {
+  const f = (forms ?? '').toLowerCase();
+  if (/tablet|capsule/.test(f)) return 'needed';
+  if (/injection|oral liquid|topical|eye|inhalation|suppository/.test(f)) return 'not_needed';
+  return null;
+}
+export const GMP_BY = ['WHO prequalified', 'Stringent regulator (EU, US, UK, Japan ...)', 'TMDA inspected', 'Other national authority'];
 
 export const LEVELS: Record<string, string> = {
   A: 'Dispensaries and up', B: 'Health centres and up', C: 'District hospitals and up',

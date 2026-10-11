@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import Shell from '@/components/Shell';
 import { Empty, Stages } from '@/components/ui';
+import { DossierReadiness, QuoteTerms, ShipmentTrack } from '@/components/Pharma';
 import { acceptQuote, addRequestFile, postMessage } from '@/app/actions/app';
 import { requireUser } from '@/lib/auth';
 import { one, rows, withUser } from '@/lib/db';
@@ -25,11 +26,15 @@ export default async function RequestDetail({ params, searchParams }: { params: 
     if (!r) return null;
     return {
       r,
-      quotes: await rows(db, 'select id, label, moq, lead_time_weeks, certs, price_vs_target, accepted from quotes where request_id = $1 order by label', [id]),
+      quotes: await rows(db, `select id, label, moq, lead_time_weeks, certs, price_vs_target, accepted, payment_terms, shelf_life_pct, gmp_by,
+                              supplier_type, exclusive from quotes where request_id = $1 order by label`, [id]),
+      dossier: await one(db, 'select be_status, be_note from request_dossier where request_id = $1', [id]),
+      items: await rows(db, 'select item, status, note from dossier_items where request_id = $1', [id]),
+      docs: await rows(db, 'select d.doc, d.ready from shipment_documents d join orders o on o.id = d.order_id where o.request_id = $1', [id]),
       revealed: await one(db, 'select * from accepted_supplier where request_id = $1', [id]),
       files: await rows(db, 'select id, file_name, kind, created_at from request_files where request_id = $1 order by created_at', [id]),
       messages: await rows(db, 'select from_team, body, created_at from request_messages where request_id = $1 order by created_at', [id]),
-      order: await one(db, 'select id, status, updated_at from orders where request_id = $1', [id]),
+      order: await one(db, 'select id, status, eta, updated_at from orders where request_id = $1', [id]),
       evaluation: await one(db, `select verdict, summary, regulatory_check, supply, price_range, route, evaluated_at
                                   from request_evaluations where request_id = $1`, [id]),
     };
@@ -78,6 +83,12 @@ export default async function RequestDetail({ params, searchParams }: { params: 
             {ev?.route ? <p style={{ whiteSpace: 'pre-wrap' }}>{ev.route}</p> : <Empty>The registration route, requirements and timeline appear here.</Empty>}
           </Step>
           <section className="card">
+            <div className="card-h"><h2>Dossier readiness</h2><span className="note">For registration</span></div>
+            <p className="note" style={{ marginBottom: 10 }}>What the supplier&apos;s registration dossier holds, item by item, and whether a bioequivalence study is needed.</p>
+            {d.items.length === 0 && !d.dossier ? <Empty>We check the dossier once a supplier is lined up.</Empty>
+              : <DossierReadiness be={d.dossier?.be_status} beNote={d.dossier?.be_note} items={d.items} />}
+          </section>
+          <section className="card">
             <div className="card-h"><h2>4. Pricing and logistics</h2>{state('Pricing and logistics') && <span className={`pill ${state('Pricing and logistics') === 'Now' ? 'solid' : state('Pricing and logistics') === 'Done' ? 'mint' : ''}`}>{state('Pricing and logistics')}</span>}</div>
             <p className="note" style={{ marginBottom: 10 }}>{STAGE_INFO['Pricing and logistics']}</p>
             {(ev?.price_range || ev?.supply) && <table className="tbl" style={{ marginBottom: 12 }}><tbody>
@@ -95,7 +106,9 @@ export default async function RequestDetail({ params, searchParams }: { params: 
                       {q.accepted && d.revealed?.price != null ? `Price: ${d.revealed.currency} ${Number(d.revealed.price).toFixed(2)}${d.revealed.unit ? ' per ' + d.revealed.unit : ''} · ` : ''}
                       MOQ: {q.moq || '—'} · Lead time: {q.lead_time_weeks ? `${q.lead_time_weeks} weeks` : '—'} · Certs: {q.certs || '—'}
                     </div>
-                    {!q.accepted && q.price_vs_target && <span className={`pill ${q.price_vs_target === 'above' ? 'peach' : 'mint'}`} style={{ marginTop: 6 }}>{PVT[q.price_vs_target]}</span>}
+                    <div className="row" style={{ gap: 6, marginTop: 6 }}>
+                      {!q.accepted && q.price_vs_target && <span className={`pill ${q.price_vs_target === 'above' ? 'peach' : 'mint'}`}>{PVT[q.price_vs_target]}</span>}
+                      <QuoteTerms q={q} /></div>
                     {q.accepted && d.revealed?.contact && <div className="small" style={{ marginTop: 4 }}>Contact: {d.revealed.contact}</div>}
                   </div>
                   {q.accepted ? <span className="pill solid">Accepted</span> : canAccept && (
@@ -110,7 +123,7 @@ export default async function RequestDetail({ params, searchParams }: { params: 
               : <Empty>Starts once you accept a quote.</Empty>}
           </Step>
           <Step n={6} s="Shipment">
-            {d.order ? <p>Shipment #{d.order.id}: <span className="pill blue">{d.order.status}</span> <span className="sub2">updated {fmtDate(d.order.updated_at)}</span></p>
+            {d.order && r.stage === 'Shipment' ? <ShipmentTrack status={d.order.status} eta={d.order.eta} docs={d.docs} />
               : <Empty>Starts once the product is registered.</Empty>}
           </Step>
         </div>

@@ -141,8 +141,12 @@ def seed():
                                                                    (sups[2], 1.30, "10,000 packs", 4, "GMP", "above"))):
                 oid = cur.execute("""insert into supplier_offers (supplier_id, molecule_id, price, unit, moq, lead_time_weeks, certs)
                                      values (%s, %s, %s, 'pack', %s, %s, %s) returning id""", (sid, m4, price, moq, lt, certs)).fetchone()[0]
-                cur.execute("""insert into quotes (request_id, supplier_offer_id, label, moq, lead_time_weeks, certs, price_vs_target)
-                               values (%s, %s, %s, %s, %s, %s, %s)""", (r4, oid, f"Supplier {'ABC'[i]}", moq, lt, certs, pvt))
+                cur.execute("""insert into quotes (request_id, supplier_offer_id, label, moq, lead_time_weeks, certs, price_vs_target,
+                                                  payment_terms, shelf_life_pct, gmp_by, supplier_type)
+                               values (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)""",
+                            (r4, oid, f"Supplier {'ABC'[i]}", moq, lt, certs, pvt,
+                             ("30% deposit, 70% before shipment", "50% deposit, 50% on arrival", "100% before shipment")[i], (85, 80, 75)[i],
+                             ("WHO prequalified", "TMDA inspected", "Other national authority")[i], ("manufacturer", "manufacturer", "trader")[i]))
             cur.execute("insert into request_messages (request_id, from_team, author_id, body) values (%s, true, %s, %s)",
                         (r4, team, "Three quotes are ready. Compare them and accept the one you want."))
             cur.execute("""insert into feed_items (kind, title, link, user_id) values ('request', 'Quote ready on your Doxycycline request', %s, %s)""",
@@ -155,7 +159,19 @@ def seed():
                                  values (%s, %s, 'Supplier A', '10,000 packs', 5, 'GMP', 'below', true, now() - interval '20 days') returning id""",
                               (r5, oid)).fetchone()[0]
 
-            cur.execute("insert into orders (request_id, quote_id, status) values (%s, %s, 'In transit')", (r5, qid))
+            cur.execute("""update quotes set payment_terms = %s, shelf_life_pct = 80, gmp_by = 'WHO prequalified',
+                           supplier_type = 'manufacturer' where id = %s""", ("30% deposit, 70% before shipment", qid))
+            oid5 = cur.execute("insert into orders (request_id, quote_id, status, eta) values (%s, %s, 'Shipped', current_date + 18) returning id",
+                               (r5, qid)).fetchone()[0]
+            for doc, ready in (("proforma", True), ("invoice", True), ("coa", True), ("packing", True), ("permit", True), ("bl", True), ("insurance", False)):
+                cur.execute("insert into shipment_documents (order_id, doc, ready) values (%s, %s, %s)", (oid5, doc, ready))
+            cur.execute("insert into request_dossier (request_id, be_status, be_note) values (%s, 'needed', 'Supplier holds a BE study against the reference product.')", (r5,))
+            cur.execute("insert into request_dossier (request_id, be_status) values (%s, 'needed')", (r4,))
+            for rid, items in ((r5, ("application", "labels", "api", "quality", "stability", "gmp", "cpp", "be", "coa", "samples")),
+                               (r4, ("application", "api", "gmp", "cpp"))):
+                for it in items:
+                    cur.execute("insert into dossier_items (request_id, item, status) values (%s, %s, 'have')", (rid, it))
+            cur.execute("insert into dossier_items (request_id, item, status, note) values (%s, 'stability', 'missing', 'Zone IVb data due from the supplier')", (r4,))
             cur.execute("""insert into feed_items (kind, title, body) values
                            ('regulatory', 'Demo: regulatory notes from the Nazryx team appear here', 'Short updates that matter for registrations and imports.')""")
             cur.execute("insert into plan_requests (user_id, wanted, note) values (%s, 'paid', 'Demo upgrade request')", (free,))

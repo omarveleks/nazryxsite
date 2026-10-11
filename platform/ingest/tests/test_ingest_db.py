@@ -493,3 +493,36 @@ def test_sourcing_list_and_free_cap_counts_only_early_stages(env):
         a.rollback()
         as_user(a, other)
         assert a.execute("select count(*) from sourcing_list").fetchone()[0] == 0
+
+
+def test_dossier_and_shipment_documents_are_team_written(env):
+    with psycopg.connect(URL) as c:
+        cust = c.execute("insert into users (email, password_hash) values ('dos1@example.com', 'x') returning id").fetchone()[0]
+        other = c.execute("insert into users (email, password_hash) values ('dos2@example.com', 'x') returning id").fetchone()[0]
+        team = c.execute("insert into users (email, password_hash, role) values ('dost@example.com', 'x', 'team') returning id").fetchone()[0]
+        mol = c.execute("select id from molecules where inn = 'Doxycycline'").fetchone()[0]
+        req = c.execute("insert into requests (user_id, molecule_id) values (%s, %s) returning id", (cust, mol)).fetchone()[0]
+        sup = c.execute("insert into suppliers (name) values ('Dossier Supplier') returning id").fetchone()[0]
+        off = c.execute("insert into supplier_offers (supplier_id, molecule_id) values (%s, %s) returning id", (sup, mol)).fetchone()[0]
+        q = c.execute("""insert into quotes (request_id, supplier_offer_id, label, payment_terms, shelf_life_pct, gmp_by, supplier_type)
+                         values (%s, %s, 'Supplier A', '30%% deposit', 80, 'WHO prequalified', 'manufacturer') returning id""", (req, off)).fetchone()[0]
+        order = c.execute("insert into orders (request_id, quote_id, status) values (%s, %s, 'Import permit') returning id", (req, q)).fetchone()[0]
+        c.commit()
+    with app_conn(env) as a:
+        as_user(a, team)
+        a.execute("insert into dossier_items (request_id, item, status) values (%s, 'gmp', 'have')", (req,))
+        a.execute("insert into request_dossier (request_id, be_status) values (%s, 'needed')", (req,))
+        a.execute("insert into shipment_documents (order_id, doc, ready) values (%s, 'permit', true)", (order,))
+        a.commit()
+        as_user(a, cust)
+        assert a.execute("select status from dossier_items").fetchall() == [("have",)]
+        assert a.execute("select be_status from request_dossier").fetchall() == [("needed",)]
+        assert a.execute("select doc from shipment_documents").fetchall() == [("permit",)]
+        assert a.execute("select shelf_life_pct, supplier_type from quotes where id = %s", (q,)).fetchone() == (80, "manufacturer")
+        with pytest.raises(psycopg.errors.InsufficientPrivilege):
+            a.execute("insert into dossier_items (request_id, item, status) values (%s, 'cpp', 'have')", (req,))
+        a.rollback()
+        as_user(a, other)
+        assert a.execute("select count(*) from dossier_items").fetchone()[0] == 0
+        assert a.execute("select count(*) from shipment_documents").fetchone()[0] == 0
+        a.rollback()

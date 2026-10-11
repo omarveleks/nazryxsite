@@ -1,10 +1,11 @@
 import Link from 'next/link';
 import Shell from '@/components/Shell';
-import { Bar, Empty, Flash, Locked, Tabs } from '@/components/ui';
+import { Bar, Empty, Flash, Locked, StagePill, Tabs } from '@/components/ui';
+import { DossierReadiness, QuoteTerms, ShipmentTrack } from '@/components/Pharma';
 import { addCustomerSupplier, deleteCustomerSupplier, togglePortfolio } from '@/app/actions/app';
 import { requireUser } from '@/lib/auth';
 import { rows, withUser } from '@/lib/db';
-import { COVERAGE_NOTE, OFFICIAL_LIST, levelLabel, title } from '@/lib/format';
+import { COVERAGE_NOTE, OFFICIAL_LIST, SHIPMENT_DOCS, levelLabel, title } from '@/lib/format';
 import { COUNTRY } from '@/lib/queries';
 
 export const metadata = { title: 'My portfolio' };
@@ -52,7 +53,21 @@ export default async function Portfolio({ searchParams }: { searchParams: Promis
         select c.id, c.display_name, count(distinct r.molecule_id)::int as shared from registrations r join companies c on c.id = r.ltr_id
         where r.active and r.molecule_id in (select molecule_id from portfolio_items where user_id = $1)
         group by c.id order by shared desc limit 5`, [u.id]) : [];
-    return { items, coverage, peers, unreachable, suppliers, topPeers };
+    // products sourced through Nazryx once a supplier is chosen: terms, dossier readiness and shipment, in one place
+    const sourced = await rows(db, `
+        select r.id as request_id, r.stage, r.molecule_id, coalesce(m.inn, r.molecule_text) as molecule,
+               q.label, q.payment_terms, q.shelf_life_pct, q.gmp_by, q.supplier_type, q.exclusive,
+               a.supplier_name, a.supplier_country, a.price, a.currency, a.unit, a.lead_time_weeks,
+               o.id as order_id, o.status, o.eta, rd.be_status,
+               coalesce((select json_agg(json_build_object('doc', sd.doc, 'ready', sd.ready)) from shipment_documents sd where sd.order_id = o.id), '[]') as docs,
+               coalesce((select json_agg(json_build_object('item', di.item, 'status', di.status)) from dossier_items di where di.request_id = r.id), '[]') as ditems
+        from requests r join quotes q on q.request_id = r.id and q.accepted
+        left join accepted_supplier a on a.quote_id = q.id
+        left join orders o on o.request_id = r.id
+        left join molecules m on m.id = r.molecule_id
+        left join request_dossier rd on rd.request_id = r.id
+        where r.user_id = $1 order by r.updated_at desc`, [u.id]);
+    return { items, coverage, peers, unreachable, suppliers, topPeers, sourced };
   });
   const yourCats = d.coverage.filter((c) => c.covered > 0);
   const yourTotal = yourCats.reduce((a, c) => a + c.n, 0);
@@ -64,6 +79,7 @@ export default async function Portfolio({ searchParams }: { searchParams: Promis
   d.suppliers.forEach((s) => (s.molecule_ids as number[]).forEach((id) => counts.set(id, (counts.get(id) ?? 0) + 1)));
   const tabs = [
     { key: 'coverage', label: 'Coverage', href: '/portfolio' },
+    { key: 'sourced', label: `Supply and shipments${d.sourced.length ? ` · ${d.sourced.length}` : ''}`, href: '/portfolio?tab=sourced' },
     { key: 'suppliers', label: 'Suppliers', href: '/portfolio?tab=suppliers' },
     { key: 'benchmark', label: 'Benchmark', href: '/portfolio?tab=benchmark' },
   ];
@@ -112,6 +128,38 @@ export default async function Portfolio({ searchParams }: { searchParams: Promis
             ) : <Locked title="Channels you cannot reach">Sales channels and clinical requirements you miss because of the gaps.</Locked>}
           </div>
         </div>
+      </>)}
+      {tab === 'sourced' && (<>
+        <div className="grid g4">
+          <div className="tile t-white"><span className="k">Products sourced through Nazryx</span><span className="v num">{d.sourced.length}</span></div>
+          <div className="tile t-blue"><span className="k">In registration</span><span className="v num">{d.sourced.filter((x) => x.stage === 'Registration').length}</span></div>
+          <div className="tile t-mint"><span className="k">Shipments moving</span>
+            <span className="v num">{d.sourced.filter((x) => x.stage === 'Shipment' && !['Delivered', 'Cancelled'].includes(x.status)).length}</span></div>
+          <div className="tile t-peach"><span className="k">Documents still missing</span>
+            <span className="v num">{d.sourced.filter((x) => x.stage === 'Shipment' && x.status !== 'Cancelled').reduce((a, x) => a + SHIPMENT_DOCS.length - (x.docs as any[]).filter((y) => y.ready).length, 0)}</span></div>
+        </div>
+        {d.sourced.length === 0 ? (
+          <section className="card stack" style={{ alignItems: 'flex-start' }}>
+            <Empty>Products you source through Nazryx appear here once you accept a quote: supplier terms, dossier readiness and every shipment.</Empty>
+            <div className="row"><Link className="btn btn-blue btn-sm" href="/requests">See your requests</Link>
+              <Link className="btn btn-ghost btn-sm" href="/market/whitespace">Find open molecules</Link></div>
+          </section>
+        ) : d.sourced.map((x) => (
+          <section key={x.request_id} className="card">
+            <div className="card-h" style={{ flexWrap: 'wrap', gap: 8 }}>
+              <div><h2>{x.molecule}</h2>
+                <span className="sub2">{[x.supplier_name, x.supplier_country, x.price != null ? `${x.currency} ${Number(x.price).toFixed(2)}${x.unit ? ' per ' + x.unit : ''}` : null,
+                  x.lead_time_weeks ? `${x.lead_time_weeks} weeks lead time` : null].filter(Boolean).join(' · ')}</span></div>
+              <div className="row"><StagePill stage={x.stage} /><Link className="btn btn-ghost btn-sm" href={`/requests/${x.request_id}`}>Open</Link></div>
+            </div>
+            <QuoteTerms q={x} />
+            <div className="grid g2" style={{ marginTop: 14 }}>
+              <div className="stack" style={{ gap: 8 }}><span className="lbl">Dossier readiness</span>
+                <DossierReadiness be={x.be_status} items={x.ditems} compact /></div>
+              <div className="stack" style={{ gap: 8 }}><span className="lbl">Shipment{x.order_id ? ` #${x.order_id}` : ''}</span>
+                {x.stage === 'Shipment' && x.status ? <ShipmentTrack status={x.status} eta={x.eta} docs={x.docs} /> : <span className="note">Starts once the product is registered.</span>}</div>
+            </div>
+          </section>))}
       </>)}
       {tab === 'suppliers' && (
         <div className="split">

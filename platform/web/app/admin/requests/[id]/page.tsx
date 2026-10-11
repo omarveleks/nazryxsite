@@ -2,11 +2,11 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import Shell from '@/components/Shell';
 import { Empty, Flash, Stages } from '@/components/ui';
-import { addOfferAndQuote, saveEvaluation, setOrderStatus, setStage } from '@/app/actions/admin';
+import { addOfferAndQuote, saveDossier, saveEvaluation, setOrderStatus, setStage } from '@/app/actions/admin';
 import { postMessage } from '@/app/actions/app';
 import { requireTeam } from '@/lib/auth';
 import { one, rows, withUser } from '@/lib/db';
-import { ORDER_STATUSES, STAGES, fmtDate } from '@/lib/format';
+import { BE_STATUS, DOSSIER_ITEMS, DOSSIER_STATUS, GMP_BY, ORDER_STATUSES, SHIPMENT_DOCS, STAGES, beSuggestion, fmtDate } from '@/lib/format';
 
 export default async function AdminRequest({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ error?: string; saved?: string }> }) {
   const id = Number((await params).id);
@@ -25,6 +25,10 @@ export default async function AdminRequest({ params, searchParams }: { params: P
       files: await rows(db, 'select id, file_name, kind from request_files where request_id = $1', [id]),
       messages: await rows(db, 'select from_team, body, created_at from request_messages where request_id = $1 order by created_at', [id]),
       order: await one(db, 'select * from orders where request_id = $1', [id]),
+      docs: await rows(db, 'select d.doc, d.ready from shipment_documents d join orders o on o.id = d.order_id where o.request_id = $1', [id]),
+      dossier: await one(db, 'select * from request_dossier where request_id = $1', [id]),
+      items: await rows(db, 'select item, status, note from dossier_items where request_id = $1', [id]),
+      forms: r.molecule_id ? (await one(db, "select forms from country_molecules where molecule_id = $1 and country = 'TZ'", [r.molecule_id]))?.forms : null,
       evaluation: await one(db, 'select * from request_evaluations where request_id = $1', [id]),
       facts: r.molecule_id ? await one(db, `select cm.registrants, cm.registrations, cm.on_national_list, cm.on_who_eml, cm.facility_level,
                                              cm.channel_flag, molecule_supply_confirmed($1) as supply
@@ -102,16 +106,55 @@ export default async function AdminRequest({ params, searchParams }: { params: P
                 <input className="input" name="certs" placeholder="Certs, e.g. GMP" aria-label="Certificates" />
                 <select className="input" name="price_vs_target" aria-label="Price vs customer target" defaultValue=""><option value="">Price vs target: not set</option>
                   <option value="below">Below target</option><option value="at">At target</option><option value="above">Above target</option></select>
+                <input className="input full" name="payment_terms" placeholder="Payment terms, e.g. 30% deposit, 70% before shipment" aria-label="Payment terms" />
+                <input className="input" name="shelf_life_pct" placeholder="Min. shelf life on arrival, %" aria-label="Minimum shelf life on arrival in percent" inputMode="numeric" />
+                <select className="input" name="gmp_by" aria-label="GMP certified by" defaultValue=""><option value="">GMP certified by: not set</option>
+                  {GMP_BY.map((g) => <option key={g}>{g}</option>)}</select>
+                <select className="input" name="supplier_type" aria-label="Supplier type" defaultValue=""><option value="">Manufacturer or trader: not set</option>
+                  <option value="manufacturer">Manufacturer</option><option value="trader">Trader</option></select>
+                <label className="row small" style={{ gap: 6 }}><input type="checkbox" name="exclusive" /> Exclusive for this customer</label>
                 <button className="btn btn-blue btn-sm full" type="submit">Add offer and anonymous quote</button>
-                <p className="note full">The customer sees only the label (Supplier A, B ...), MOQ, lead time, certs and the target note. Name, contact and price unlock when they accept. Set the stage to &quot;Quote ready&quot; when done.</p>
+                <p className="note full">The customer sees the label (Supplier A, B ...), MOQ, lead time, certs, payment terms, shelf life, GMP certifier,
+                  manufacturer or trader, exclusivity and the target note. Name, contact and price unlock when they accept.</p>
               </form>)}
+          </section>
+          <section className="card stack">
+            <h2>Dossier readiness</h2>
+            <form action={saveDossier} className="stack" style={{ gap: 10 }}>
+              <input type="hidden" name="request_id" value={id} />
+              <div className="row">
+                <select className="input" name="be_status" aria-label="Bioequivalence" defaultValue={d.dossier?.be_status ?? beSuggestion(d.forms) ?? ''} style={{ flex: '0 1 300px' }}>
+                  <option value="">Bioequivalence: not decided</option>
+                  {Object.entries(BE_STATUS).map(([k, l]) => <option key={k} value={k}>{l}</option>)}</select>
+                <input className="input" name="be_note" defaultValue={d.dossier?.be_note ?? ''} placeholder="BE note (shown to the customer)" aria-label="BE note" style={{ flex: '1 1 200px' }} />
+              </div>
+              {!d.dossier && beSuggestion(d.forms) && <p className="note">Suggested from the registered forms ({d.forms}). Confirm or change it.</p>}
+              {DOSSIER_ITEMS.map(([k, label]) => {
+                const it = d.items.find((x) => x.item === k);
+                return (
+                  <div key={k} className="row">
+                    <span style={{ flex: '1 1 240px' }} className="small">{label}</span>
+                    <select className="input" name={`item_${k}`} defaultValue={it?.status ?? ''} aria-label={label} style={{ flex: '0 1 150px' }}>
+                      <option value="">Not checked</option>
+                      {Object.entries(DOSSIER_STATUS).map(([v, [l]]) => <option key={v} value={v}>{l}</option>)}</select>
+                    <input className="input" name={`note_${k}`} defaultValue={it?.note ?? ''} placeholder="Note" aria-label={`Note: ${label}`} style={{ flex: '1 1 160px' }} />
+                  </div>);
+              })}
+              <button className="btn btn-blue btn-sm" type="submit">Save dossier readiness</button>
+            </form>
           </section>
           {d.order && (
             <section className="card stack">
-              <h2>Order {d.order.id}</h2>
-              <form action={setOrderStatus} className="row"><input type="hidden" name="request_id" value={id} /><input type="hidden" name="order_id" value={d.order.id} />
-                <select className="input" name="status" defaultValue={d.order.status} aria-label="Order status" style={{ flex: '0 1 220px' }}>{ORDER_STATUSES.map((s) => <option key={s}>{s}</option>)}</select>
-                <button className="btn btn-blue btn-sm" type="submit">Update order</button></form>
+              <h2>Shipment #{d.order.id}</h2>
+              <form action={setOrderStatus} className="stack" style={{ gap: 10 }}><input type="hidden" name="request_id" value={id} /><input type="hidden" name="order_id" value={d.order.id} />
+                <div className="row">
+                  <select className="input" name="status" defaultValue={d.order.status} aria-label="Shipment status" style={{ flex: '0 1 220px' }}>{ORDER_STATUSES.map((s) => <option key={s}>{s}</option>)}</select>
+                  <label className="row small" style={{ gap: 6 }}>ETA <input className="input" type="date" name="eta" defaultValue={d.order.eta ? String(d.order.eta).slice(0, 10) : ''} /></label>
+                </div>
+                <div className="stack" style={{ gap: 6 }}>{SHIPMENT_DOCS.map(([k, l]) => (
+                  <label key={k} className="row small" style={{ gap: 6 }}>
+                    <input type="checkbox" name={`doc_${k}`} defaultChecked={d.docs.some((x) => x.doc === k && x.ready)} /> {l}</label>))}</div>
+                <button className="btn btn-blue btn-sm" type="submit">Update shipment</button></form>
             </section>)}
         </div>
         <div className="stack">

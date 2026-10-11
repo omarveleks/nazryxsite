@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation';
 import { requireTeam } from '@/lib/auth';
 import { dbMessage, one, withUser } from '@/lib/db';
 import { back, int, str } from '@/lib/forms';
-import { STAGES, ORDER_STATUSES } from '@/lib/format';
+import { BE_STATUS, DOSSIER_ITEMS, DOSSIER_STATUS, GMP_BY, ORDER_STATUSES, SHIPMENT_DOCS, STAGES } from '@/lib/format';
 import { hashPassword } from '@/lib/password';
 
 // Every action re-checks the team role here AND in the database (RLS policies / definer functions).
@@ -95,10 +95,14 @@ export async function addOfferAndQuote(f: FormData) {
     const n = await one(db, 'select count(*)::int as n from quotes where request_id = $1', [id]);
     const label = `Supplier ${String.fromCharCode(65 + (n?.n ?? 0))}`;
     const pvt = str(f, 'price_vs_target', 10);
-    await db.query(`insert into quotes (request_id, supplier_offer_id, label, moq, lead_time_weeks, certs, price_vs_target)
-                    values ($1, $2, $3, $4, $5, $6, $7)`,
+    const shelf = int(f, 'shelf_life_pct'), stype = str(f, 'supplier_type', 20);
+    await db.query(`insert into quotes (request_id, supplier_offer_id, label, moq, lead_time_weeks, certs, price_vs_target,
+                                        payment_terms, shelf_life_pct, gmp_by, supplier_type, exclusive)
+                    values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
       [id, offer!.id, label, str(f, 'moq', 60) || null, int(f, 'lead_time_weeks'), str(f, 'certs', 200) || null,
-       ['below', 'at', 'above'].includes(pvt) ? pvt : null]);
+       ['below', 'at', 'above'].includes(pvt) ? pvt : null, str(f, 'payment_terms', 200) || null,
+       shelf !== null && shelf >= 0 && shelf <= 100 ? shelf : null, GMP_BY.includes(str(f, 'gmp_by', 80)) ? str(f, 'gmp_by', 80) : null,
+       ['manufacturer', 'trader'].includes(stype) ? stype : null, f.get('exclusive') === 'on']);
   }, to);
   redirect(to);
 }
@@ -107,11 +111,45 @@ export async function setOrderStatus(f: FormData) {
   const id = int(f, 'request_id')!, order = int(f, 'order_id'), status = str(f, 'status', 30);
   const to = `/admin/requests/${id}`;
   if (!ORDER_STATUSES.includes(status as any)) back(to, { error: 'Unknown status' });
+  const eta = str(f, 'eta', 10);
   await team(async (db) => {
-    await db.query('update orders set status = $2, updated_at = now() where id = $1', [order, status]);
-    await notifyCustomer(db, id, `Order ${status}`, `Order ${order} for request #${id}: ${status}.`);
+    const before = await one(db, 'select status from orders where id = $1', [order]);
+    await db.query('update orders set status = $2, eta = $3, updated_at = now() where id = $1', [order, status, eta || null]);
+    for (const [doc] of SHIPMENT_DOCS) {
+      await db.query(`insert into shipment_documents (order_id, doc, ready) values ($1, $2, $3)
+                      on conflict (order_id, doc) do update set ready = excluded.ready,
+                        updated_at = case when shipment_documents.ready is distinct from excluded.ready then now() else shipment_documents.updated_at end`,
+        [order, doc, f.get(`doc_${doc}`) === 'on']);
+    }
+    if (before?.status !== status) {
+      await notifyCustomer(db, id, `Shipment ${status}`, `Shipment #${order} for request #${id}: ${status}.`);
+    }
   }, to);
-  redirect(to);
+  redirect(`${to}?saved=1`);
+}
+
+/** Dossier readiness: each item the supplier's dossier needs, and the bioequivalence call. */
+export async function saveDossier(f: FormData) {
+  const id = int(f, 'request_id')!;
+  const to = `/admin/requests/${id}`;
+  const be = str(f, 'be_status', 20);
+  await team(async (db, uid) => {
+    await db.query(`insert into request_dossier (request_id, be_status, be_note, updated_at) values ($1, $2, $3, now())
+                    on conflict (request_id) do update set be_status = excluded.be_status, be_note = excluded.be_note, updated_at = now()`,
+      [id, BE_STATUS[be] ? be : null, str(f, 'be_note', 400) || null]);
+    for (const [item] of DOSSIER_ITEMS) {
+      const st = str(f, `item_${item}`, 20), note = str(f, `note_${item}`, 300) || null;
+      if (!DOSSIER_STATUS[st]) {
+        await db.query('delete from dossier_items where request_id = $1 and item = $2', [id, item]);
+        continue;
+      }
+      await db.query(`insert into dossier_items (request_id, item, status, note, updated_by, updated_at) values ($1, $2, $3, $4, $5, now())
+                      on conflict (request_id, item) do update set status = excluded.status, note = excluded.note,
+                        updated_by = excluded.updated_by, updated_at = now()`, [id, item, st, note, uid]);
+    }
+    await notifyCustomer(db, id, 'Dossier readiness updated', `We updated the dossier readiness for request #${id}.`);
+  }, to);
+  redirect(`${to}?saved=1`);
 }
 
 // ---------------------------------------------------------------- claims and accounts
