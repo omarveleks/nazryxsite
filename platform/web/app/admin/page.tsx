@@ -4,7 +4,8 @@ import { Empty, Flash, Tabs } from '@/components/ui';
 import { requireTeam } from '@/lib/auth';
 import { one, rows, withUser } from '@/lib/db';
 import { STAGES, ago, fmtDate, title } from '@/lib/format';
-import { answerQuestion, grantCredits, keepSeparate, saveRoutes, setMoleculeRoute, matchMolecule, mergeCompanies, postRegulatory, addPrice, editUseCase, queueRecompute,
+import { SERVICES, countryName } from '@/lib/mfr';
+import { answerQuestion, reviewManufacturer, grantCredits, keepSeparate, saveRoutes, setMoleculeRoute, matchMolecule, mergeCompanies, postRegulatory, addPrice, editUseCase, queueRecompute,
   rejectSuggestion, resetPassword, resetTwoStep, reviewClaim, setPlan } from '@/app/actions/admin';
 import { StagePill } from '@/components/ui';
 
@@ -28,6 +29,8 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
       (select count(*)::int from company_claims where status = 'pending') as claims,
       (select count(*)::int from requests where stage <> 'Closed') as open_requests,
       (select count(*)::int from expert_questions where answered_at is null) as open_questions,
+      (select count(*)::int from manufacturer_profiles where status = 'pending')
+        + (select count(*)::int from engagements where status = 'open') as mfr_open,
       (select count(*)::int from plan_requests where status = 'open') as plan_requests,
       (select count(*)::int from registry_uploads where status in ('queued', 'running')) as running`);
     if (tab === 'data') {
@@ -54,6 +57,13 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
       out.claims = await rows(db, `select k.*, u.email, u.name, coalesce(c.display_name, k.company_name) as company, c.id as cid
                                    from company_claims k join users u on u.id = k.user_id left join companies c on c.id = k.company_id
                                    order by (k.status = 'pending') desc, k.created_at desc limit 60`);
+    }
+    if (tab === 'manufacturers') {
+      out.mfrs = await rows(db, `select p.*, u.email, u.plan, (select count(*)::int from mfr_products x where x.user_id = p.user_id) as products
+                                 from manufacturer_profiles p join users u on u.id = p.user_id order by (p.status = 'pending') desc, p.created_at desc limit 100`);
+      out.engs = await rows(db, `select e.id, e.kind, e.country, e.stage, e.status, e.due_at, e.updated_at, e.created_at, u.email, mp.company_name
+                                 from engagements e join users u on u.id = e.user_id left join manufacturer_profiles mp on mp.user_id = e.user_id
+                                 order by (e.status = 'open') desc, coalesce(e.due_at, e.updated_at) limit 150`);
     }
     if (tab === 'questions') {
       out.questions = await rows(db, `select q.id, q.body, q.answer, q.created_at, q.answered_at, u.email, m.inn
@@ -94,6 +104,7 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
     { key: 'claims', label: `Claims (${c.claims})`, href: '/admin?tab=claims' },
     { key: 'requests', label: `Requests (${c.open_requests})`, href: '/admin?tab=requests' },
     { key: 'questions', label: `Questions (${c.open_questions})`, href: '/admin?tab=questions' },
+    { key: 'manufacturers', label: `Manufacturers (${c.mfr_open})`, href: '/admin?tab=manufacturers' },
     { key: 'accounts', label: `Accounts${c.plan_requests ? ` (${c.plan_requests})` : ''}`, href: '/admin?tab=accounts' },
     { key: 'content', label: 'Content', href: '/admin?tab=content' },
     { key: 'activity', label: 'Activity', href: '/admin?tab=activity' },
@@ -226,6 +237,33 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
               </tbody></table></div>)}
         </section>
       )}
+      {tab === 'manufacturers' && (<>
+        <section className="card stack">
+          <h2>Manufacturer accounts</h2>
+          <p className="note">Check the company, its certifications and the work email, then approve. Approval opens partner introductions.</p>
+          {d.mfrs.length === 0 && <p className="note">No manufacturers yet.</p>}
+          <div className="tbl-wrap"><table className="tbl"><tbody>{d.mfrs.map((m: any) => (
+            <tr key={m.user_id}><td><b>{m.company_name}</b><div className="sub2">{m.email} · {m.hq_country || 'country not given'} · {m.products} products · {m.plan} plan</div>
+              <div className="sub2">{(m.certifications ?? []).join(', ') || 'No certifications listed'} · targets {(m.target_countries ?? []).map(countryName).join(', ') || 'none'}</div></td>
+              <td className="r">{m.status === 'pending' ? (
+                <form action={reviewManufacturer} className="row" style={{ justifyContent: 'flex-end' }}><input type="hidden" name="user_id" value={m.user_id} />
+                  <input className="input" name="note" placeholder="Note (optional)" aria-label="Note" style={{ width: 160 }} />
+                  <button className="btn btn-blue btn-sm" name="decision" value="approve" type="submit">Approve</button>
+                  <button className="btn btn-ghost btn-sm" name="decision" value="reject" type="submit">Reject</button></form>
+              ) : <span className={`pill ${m.status === 'approved' ? 'mint' : ''}`}>{m.status}</span>}</td></tr>))}</tbody></table></div>
+        </section>
+        <section className="card stack">
+          <h2>Engagements</h2>
+          <p className="note">Reports are due 24 hours after ordering; other engagements turn red after 48 hours without an update.</p>
+          <div className="tbl-wrap"><table className="tbl"><tbody>{d.engs.map((e: any) => {
+            const late = e.status === 'open' && (e.kind === 'report' ? e.stage !== 'Delivered' && e.due_at && new Date(e.due_at).getTime() < Date.now()
+              : Date.now() - new Date(e.updated_at).getTime() > H48);
+            return (<tr key={e.id}><td><Link href={`/admin/engagements/${e.id}`}><b>#{e.id} {SERVICES[e.kind].label}</b></Link>
+              <div className="sub2">{e.company_name || e.email}{e.country ? ` · ${countryName(e.country)}` : ''} · {ago(e.updated_at)}</div></td>
+              <td className="r"><span className={`pill ${late ? 'alert' : e.status === 'open' ? 'blue' : ''}`}>{late ? 'Late · ' : ''}{e.status === 'open' ? e.stage : e.status}</span></td></tr>);
+          })}</tbody></table></div>
+        </section>
+      </>)}
       {tab === 'questions' && (
         <section className="card stack">
           <h2>Expert questions</h2>

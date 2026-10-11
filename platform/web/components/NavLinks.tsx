@@ -7,13 +7,20 @@ const NAV = [
   ['/portfolio', 'My portfolio'], ['/requests', 'Requests'], ['/settings', 'Settings'],
 ] as const;
 
-export default function NavLinks({ team }: { team: boolean }) {
+// Manufacturer accounts: their own area for expanding into new markets.
+const MFR_NAV = [
+  ['/m', 'Home'], ['/m/products', 'My products'], ['/m/partners', 'Partners'], ['/m/services', 'Services'],
+  ['/expert', 'Ask the expert'], ['/settings', 'Settings'],
+] as const;
+
+export default function NavLinks({ team, manufacturer }: { team: boolean; manufacturer?: boolean }) {
   const path = usePathname();
-  const items = team ? [...NAV, ['/admin', 'Admin'] as const] : NAV;
+  const base = manufacturer ? MFR_NAV : NAV;
+  const items = team ? [...base, ['/admin', 'Admin'] as const] : base;
   return (
     <nav className="nav" aria-label="Main">
       {items.map(([href, label]) => (
-        <Link key={href} href={href} className={path === href || path.startsWith(href + '/') ? 'on' : ''}
+        <Link key={href} href={href} className={path === href || (href !== '/m' && path.startsWith(href + '/')) ? 'on' : ''}
           aria-current={path.startsWith(href) ? 'page' : undefined}>{label}</Link>
       ))}
     </nav>

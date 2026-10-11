@@ -11,7 +11,7 @@ export const metadata = { title: 'Settings' };
 
 export default async function Settings({ searchParams }: { searchParams: Promise<{ saved?: string; error?: string; upgrade?: string }> }) {
   const sp = await searchParams;
-  const u = await requireUser();
+  const u = await requireUser({ shared: true });
   const paid = u.plan === 'paid';
   const d = await withUser(u.id, async (db) => ({
     active: await activeRequestCount(db, u.id),
@@ -44,11 +44,19 @@ export default async function Settings({ searchParams }: { searchParams: Promise
                 <button className="btn btn-blue" type="submit">Upgrade</button>
               </form>))}
         </section>
-        <section className="card stack" id="focus">
-          <h2>Your focus</h2>
-          <p className="note">Therapeutic classes, goals, levels of care and supplier countries. They shape your home page and brief our team.</p>
-          <Link className="btn btn-ghost btn-sm" href="/onboarding/focus?next=/settings" style={{ alignSelf: 'flex-start' }}>Edit your focus</Link>
-        </section>
+        {u.account_type === 'manufacturer' ? (
+          <section className="card stack" id="company">
+            <h2>Your company</h2>
+            <p className="note">Company details, certifications and the markets you want to enter.</p>
+            <Link className="btn btn-ghost btn-sm" href="/m/onboarding?next=/settings" style={{ alignSelf: 'flex-start' }}>Edit company</Link>
+          </section>
+        ) : (
+          <section className="card stack" id="focus">
+            <h2>Your focus</h2>
+            <p className="note">Therapeutic classes, goals, levels of care and supplier countries. They shape your home page and brief our team.</p>
+            <Link className="btn btn-ghost btn-sm" href="/onboarding/focus?next=/settings" style={{ alignSelf: 'flex-start' }}>Edit your focus</Link>
+          </section>
+        )}
         <section className="card stack" id="team">
           <h2>Team seats</h2>
           {paid && !u.owner_id ? (<>

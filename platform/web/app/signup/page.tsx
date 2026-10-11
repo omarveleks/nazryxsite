@@ -6,7 +6,7 @@ import { signIn, signUp } from '@/app/actions/auth';
 
 export const metadata = { title: 'Sign up' };
 
-export default async function SignUp({ searchParams }: { searchParams: Promise<{ mode?: string; error?: string }> }) {
+export default async function SignUp({ searchParams }: { searchParams: Promise<{ mode?: string; error?: string; as?: string }> }) {
   const sp = await searchParams;
   if (await getUser()) redirect('/home');
   const signin = sp.mode === 'signin';
@@ -33,6 +33,13 @@ export default async function SignUp({ searchParams }: { searchParams: Promise<{
           </form>
         ) : (
           <form action={signUp} className="stack">
+            <fieldset className="stack" style={{ gap: 8, border: 0, padding: 0, margin: 0 }}>
+              <legend className="lbl" style={{ marginBottom: 8 }}>I am a</legend>
+              <label className="choice"><input type="radio" name="account_type" value="distributor" defaultChecked={sp.as !== 'manufacturer'} />
+                <span><b>Distributor or importer</b><br /><span className="note">Find open molecules, source them, analyse my portfolio.</span></span></label>
+              <label className="choice"><input type="radio" name="account_type" value="manufacturer" defaultChecked={sp.as === 'manufacturer'} />
+                <span><b>Manufacturer</b><br /><span className="note">Take my products into new markets.</span></span></label>
+            </fieldset>
             <div className="field"><label htmlFor="name">Full name</label>
               <input className="input" id="name" name="name" autoComplete="name" required placeholder="Full name" /></div>
             <div className="field"><label htmlFor="email">Work email</label>

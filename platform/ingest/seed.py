@@ -53,6 +53,28 @@ def mol(cur, name):
     return r[0] if r else None
 
 
+def seed_manufacturer(cur, maker, team):
+    """A fictional manufacturer with a small catalogue and two engagements, to show the manufacturer side."""
+    cur.execute("""insert into manufacturer_profiles (user_id, company_name, hq_country, certifications, target_countries, status, reviewed_at)
+                   values (%s, 'Demo Generics Manufacturing', 'India', '{WHO GMP,PIC/S}', '{TZ,KE,KZ}', 'approved', now())
+                   on conflict (user_id) do nothing""", (maker,))
+    if cur.execute("select 1 from mfr_products where user_id = %s", (maker,)).fetchone():
+        return
+    for name, inn, who_pq in (("Doxycycline 100mg capsules", "Doxycycline", True), ("Amoxicillin 500mg capsules", "Amoxicillin", False),
+                              ("Glibenclamide 5mg tablets", "Glibenclamide", False), ("Hydralazine 25mg tablets", "Hydralazine", False),
+                              ("Metformin 500mg tablets", "Metformin Hydrochloride", False), ("Atenolol 50mg tablets", "Atenolol", False)):
+        cur.execute("""insert into mfr_products (user_id, name, molecule_id, strength, dosage_form, who_pq, ctd_ready)
+                       values (%s, %s, %s, %s, %s, %s, true)""", (maker, name, mol(cur, inn), name.split()[1], name.split()[-1], who_pq))
+    pid = cur.execute("select id from mfr_products where user_id = %s and name like 'Doxycycline%%'", (maker,)).fetchone()[0]
+    eid = cur.execute("""insert into engagements (user_id, kind, country, product_id, detail, stage, updated_at)
+                         values (%s, 'market_entry', 'TZ', %s, 'Start with doxycycline, then the cardiovascular range.', 'Market assessment', now())
+                         returning id""", (maker, pid)).fetchone()[0]
+    cur.execute("""insert into engagement_messages (engagement_id, from_team, author_id, body) values (%s, true, %s,
+                   'We have started the market assessment. Please upload your doxycycline dossier index in the dossier room.')""", (eid, team))
+    cur.execute("""insert into engagements (user_id, kind, country, report_type, detail, due_at)
+                   values (%s, 'report', 'KE', 'country', 'Which of our products should go to Kenya first?', now() + interval '20 hours')""", (maker,))
+
+
 def seed():
     with connect() as conn:
         cur = conn.cursor()
@@ -66,6 +88,9 @@ def seed():
         free = upsert_user(cur, os.environ.get("DEMO_FREE_EMAIL", "demo-free@nazryx.test"), "Demo Distributor", demo_pw, g2,
                            credits=17, whatsapp="+255 700 000 000", notify_whatsapp=True)
         paid = upsert_user(cur, os.environ.get("DEMO_PAID_EMAIL", "demo-paid@nazryx.test"), "Demo Paid Distributor", demo_pw, g2, plan="paid")
+        maker = upsert_user(cur, os.environ.get("DEMO_MAKER_EMAIL", "demo-maker@nazryx.test"), "Demo Manufacturer", demo_pw, g2,
+                            account_type="manufacturer", plan="paid")
+        seed_manufacturer(cur, maker, team)
         g1, g2 = g1 and new_team, g2 and new_demo   # only print passwords that were actually set now
 
         already = cur.execute("select count(*) from requests where user_id = %s", (free,)).fetchone()[0]
@@ -179,7 +204,8 @@ def seed():
         conn.commit()
     print("\nDemo accounts (sign in at /signup?mode=signin):")
     print(f"  team:      {os.environ.get('SEED_TEAM_EMAIL', 'team@nazryx.test')}" + (f"  password: {team_pw}" if g1 else "  password: from SEED_TEAM_PASSWORD"))
-    for e in (os.environ.get("DEMO_FREE_EMAIL", "demo-free@nazryx.test"), os.environ.get("DEMO_PAID_EMAIL", "demo-paid@nazryx.test")):
+    for e in (os.environ.get("DEMO_FREE_EMAIL", "demo-free@nazryx.test"), os.environ.get("DEMO_PAID_EMAIL", "demo-paid@nazryx.test"),
+              os.environ.get("DEMO_MAKER_EMAIL", "demo-maker@nazryx.test")):
         print(f"  customer:  {e}" + (f"  password: {demo_pw}" if g2 else "  password: from DEMO_PASSWORD"))
 
 

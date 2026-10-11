@@ -6,6 +6,7 @@ import { dbMessage, one, rows, withUser } from '@/lib/db';
 import { back, int, isEmail, str } from '@/lib/forms';
 import { hashPassword } from '@/lib/password';
 import { saveUpload } from '@/lib/uploads';
+import { findMolecule } from '@/lib/match';
 import { FOCUS_GOALS, SUPPLIER_COUNTRIES } from '@/lib/format';
 
 const ret = (f: FormData, fallback: string) => {
@@ -52,17 +53,6 @@ export async function toggleWatch(f: FormData) {
   redirect(to);
 }
 
-// Same idea as the pipeline's molecule key: lower case, no strengths, forms or pharmacopoeia marks, sorted tokens.
-const FORM_WORDS = new Set(['tablet', 'tablets', 'tab', 'tabs', 'capsule', 'capsules', 'cap', 'caps', 'injection', 'inj', 'syrup',
-  'suspension', 'cream', 'ointment', 'gel', 'drops', 'eye', 'ear', 'oral', 'solution', 'powder', 'for', 'infusion', 'bp', 'usp', 'ip',
-  'and', 'with', 'film', 'coated', 'dispersible', 'sr', 'er', 'mr', 'forte', 'plus', 'sachet', 'sachets', 'lotion', 'vial', 'ampoule']);
-function moleculeKeyish(name: string) {
-  const t = name.toLowerCase().replace(/\(.*?\)|\[.*?\]/g, ' ')
-    .replace(/\b[\d.,]+\s*(mg|mcg|µg|g|ml|iu|%|units?)\b/g, ' ').replace(/[^a-z\- ]/g, ' ')
-    .split(/\s+/).filter((w) => w.length > 1 && !FORM_WORDS.has(w));
-  return [...new Set(t)].sort().join(' ');
-}
-
 /** Paste a product list (one per line, or comma separated): each name is matched to a molecule and added. */
 export async function addPortfolioList(f: FormData) {
   const u = await requireUser();
@@ -74,13 +64,10 @@ export async function addPortfolioList(f: FormData) {
   try {
     await withUser(u.id, async (db) => {
       for (const n of names) {
-        const m = await one(db, `select id from molecules where lower(inn) = lower($1)
-                                 union all select molecule_id from molecule_aliases where alias = $2
-                                 union all (select molecule_id from molecule_aliases where alias like $2 || ' %' order by length(alias) limit 1)
-                                 limit 1`, [n, moleculeKeyish(n)]);
-        if (!m) { missed.push(n); continue; }
+        const id = await findMolecule(db, n);
+        if (!id) { missed.push(n); continue; }
         const r = await db.query('insert into portfolio_items (user_id, molecule_id, source) values ($1, $2, $3) on conflict do nothing',
-          [u.id, m.id ?? m.molecule_id, 'list']);
+          [u.id, id, 'list']);
         added += r.rowCount ?? 0;
       }
     });
@@ -165,7 +152,7 @@ export async function saveFocus(f: FormData) {
 
 /** Ask the Nazryx team a short question, optionally about one molecule. */
 export async function askExpert(f: FormData) {
-  const u = await requireUser();
+  const u = await requireUser({ shared: true });
   const body = str(f, 'body', 2000), molText = str(f, 'molecule', 200);
   if (!body) back('/expert', { error: 'Write your question.' });
   try {
@@ -324,7 +311,7 @@ export async function deleteCustomerSupplier(f: FormData) {
 
 // ---------------------------------------------------------------- settings and plan
 export async function requestUpgrade(f: FormData) {
-  const u = await requireUser();
+  const u = await requireUser({ shared: true });
   const wanted = str(f, 'wanted', 20) || 'paid';
   await withUser(u.id, async (db) => {
     await db.query('insert into plan_requests (user_id, wanted, note) values ($1, $2, $3)', [u.id, wanted, str(f, 'note', 1000) || null]);
@@ -335,7 +322,7 @@ export async function requestUpgrade(f: FormData) {
 }
 
 export async function updateSettings(f: FormData) {
-  const u = await requireUser();
+  const u = await requireUser({ shared: true });
   const channel = str(f, 'channel', 20);
   const whatsapp = str(f, 'whatsapp', 30).replace(/[^\d+ ]/g, '');
   const language = ['en', 'fr', 'ru'].includes(str(f, 'language', 2)) ? str(f, 'language', 2) : 'en';
@@ -346,7 +333,7 @@ export async function updateSettings(f: FormData) {
 }
 
 export async function changePassword(f: FormData) {
-  const u = await requireUser();
+  const u = await requireUser({ shared: true });
   const pw = String(f.get('password') ?? '');
   if (pw.length < 10) back('/settings', { error: 'Use a password of at least 10 characters.' });
   await withUser(u.id, (db) => db.query('select auth_set_password($1, $2)', [u.id, hashPassword(pw)]));
@@ -354,7 +341,7 @@ export async function changePassword(f: FormData) {
 }
 
 export async function addSeat(f: FormData) {
-  const u = await requireUser();
+  const u = await requireUser({ shared: true });
   const email = str(f, 'email', 200).toLowerCase(), name = str(f, 'name', 120), pw = String(f.get('password') ?? '');
   if (!isEmail(email) || pw.length < 10) back('/settings', { error: 'Add a valid email and a password of 10+ characters for the teammate.' });
   try {

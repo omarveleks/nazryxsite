@@ -5,6 +5,7 @@ import { dbMessage, one, withUser } from '@/lib/db';
 import { back, int, str } from '@/lib/forms';
 import { BE_STATUS, DOSSIER_ITEMS, DOSSIER_STATUS, GMP_BY, ORDER_STATUSES, SHIPMENT_DOCS, STAGES } from '@/lib/format';
 import { hashPassword } from '@/lib/password';
+import { SERVICES } from '@/lib/mfr';
 
 // Every action re-checks the team role here AND in the database (RLS policies / definer functions).
 
@@ -165,6 +166,65 @@ export async function answerQuestion(f: FormData) {
     }
   }, '/admin?tab=questions');
   redirect('/admin?tab=questions&saved=1');
+}
+
+// ---------------------------------------------------------------- manufacturers
+export async function reviewManufacturer(f: FormData) {
+  const user = str(f, 'user_id', 40), approve = str(f, 'decision', 10) === 'approve';
+  await team(async (db) => {
+    await db.query(`update manufacturer_profiles set status = $2, team_note = nullif($3, ''), reviewed_at = now() where user_id = $1`,
+      [user, approve ? 'approved' : 'rejected', str(f, 'note', 300)]);
+    await db.query(`insert into notifications (user_id, channel, subject, body) values ($1, 'email', $2, $3)`,
+      [user, approve ? 'Your company is approved' : 'About your Nazryx account',
+       approve ? 'Partner introductions are now open in your portal.' : str(f, 'note', 300) || 'Our team will be in touch.']);
+  }, '/admin?tab=manufacturers');
+  redirect('/admin?tab=manufacturers&saved=1');
+}
+
+export async function setEngagementStage(f: FormData) {
+  const id = int(f, 'engagement_id')!, stage = str(f, 'stage', 60), status = str(f, 'status', 12);
+  const to = `/admin/engagements/${id}`;
+  await team(async (db) => {
+    const e = await one(db, 'select user_id, kind, stage from engagements where id = $1', [id]);
+    if (!e) back(to, { error: 'Not found' });
+    if (!SERVICES[e!.kind].milestones.includes(stage) || !['open', 'done', 'cancelled'].includes(status)) back(to, { error: 'Unknown stage' });
+    await db.query('update engagements set stage = $2, status = $3, updated_at = now() where id = $1', [id, stage, status]);
+    if (e!.stage !== stage) {
+      await db.query(`insert into notifications (user_id, channel, subject, body) values ($1, 'email', $2, $3), ($1, 'whatsapp', $2, $3)`,
+        [e!.user_id, `${SERVICES[e!.kind].label}: ${stage}`, `Your ${SERVICES[e!.kind].label.toLowerCase()} (#${id}) is now at "${stage}".`]);
+    }
+  }, to);
+  redirect(`${to}?saved=1`);
+}
+
+export async function reviewEngagementFile(f: FormData) {
+  const id = int(f, 'engagement_id')!, file = int(f, 'file_id'), review = str(f, 'review', 12);
+  const to = `/admin/engagements/${id}`;
+  if (!['submitted', 'accepted', 'gap'].includes(review)) back(to, { error: 'Pick accepted or gap.' });
+  await team(async (db) => {
+    await db.query('update engagement_files set review = $2, team_comment = nullif($3, \'\') where id = $1 and engagement_id = $4',
+      [file, review, str(f, 'comment', 600), id]);
+    await db.query('update engagements set updated_at = now() where id = $1', [id]);
+  }, to);
+  redirect(`${to}?saved=1`);
+}
+
+export async function addObligation(f: FormData) {
+  const id = int(f, 'engagement_id')!, to = `/admin/engagements/${id}`;
+  const kind = str(f, 'kind', 20), due = str(f, 'due_date', 10);
+  if (!['renewal', 'variation', 'safety_report', 'other'].includes(kind) || !due) back(to, { error: 'Pick a type and a due date.' });
+  await team(async (db) => {
+    const e = await one(db, 'select user_id, country from engagements where id = $1', [id]);
+    await db.query(`insert into obligations (user_id, product_id, country, kind, due_date, note) values ($1, $2, $3, $4, $5, $6)`,
+      [e!.user_id, int(f, 'product_id'), str(f, 'country', 2) || e!.country, kind, due, str(f, 'note', 300) || null]);
+  }, to);
+  redirect(`${to}?saved=1`);
+}
+
+export async function toggleObligation(f: FormData) {
+  const id = int(f, 'engagement_id')!, to = `/admin/engagements/${id}`;
+  await team((db) => db.query('update obligations set done = not done where id = $1', [int(f, 'obligation_id')]), to);
+  redirect(to);
 }
 
 // ---------------------------------------------------------------- claims and accounts

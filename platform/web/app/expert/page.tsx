@@ -12,7 +12,7 @@ export const metadata = { title: 'Ask the expert' };
 // A short question to the Nazryx team, without opening a full request. Free plans: 3 a month.
 export default async function Expert({ searchParams }: { searchParams: Promise<{ molecule?: string; error?: string; sent?: string }> }) {
   const sp = await searchParams;
-  const u = await requireUser();
+  const u = await requireUser({ shared: true });
   const free = u.plan !== 'paid' && u.role !== 'team';
   const d = await withUser(u.id, async (db) => ({
     mol: sp.molecule ? await one(db, 'select id, inn from molecules where id = $1', [Number(sp.molecule) || 0]) : null,

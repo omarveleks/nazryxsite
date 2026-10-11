@@ -176,6 +176,26 @@ confirming → production → import permit → shipped → arrived → sampling
 checklist and ETA. My portfolio → Supply and shipments brings all of it together per product. Suggested selling prices (Admin > Content) show on the
 molecule page for paid plans.
 
+## Manufacturer side (migration 014)
+
+Manufacturers sign up with "I am a manufacturer" (or /signup?as=manufacturer) and get their own area under /m;
+distributor and manufacturer accounts are kept to their own pages, the team sees both.
+
+- **Subscription screens:** Home with "register these first" (plain reasons from public data), My products (paste a
+  catalogue, matched to molecules), a product page (TMDA list and EML level, WHO list, competition, where registered
+  products are made, local manufacturing, lapsed registrations, route and timeline, BE call, suggested price for paid
+  plans, the manufacturer's own dossier self-check), and the partner finder: distributor profiles without names, each
+  with an opaque code that only the team can turn back into a company (`partner_company`). Distributor names are never
+  shown on the manufacturer side.
+- **Agency services as engagements:** market entry, dossier review (dossier room: the client uploads, the team marks
+  each document accepted or a gap), local representative, East African roll-out, after registration (renewals,
+  variations and safety reports as dated deadlines), partner introductions and 24-hour reports. Each has milestones the
+  client follows; the team works them in Admin > Manufacturers.
+- **Countries:** Tanzania has market data; Kenya, Kazakhstan, Uzbekistan, Cameroon and Senegal are agency coverage
+  until their registries and essential lists are loaded. Nothing is shown for them that we do not hold.
+- The team approves each manufacturer before introductions open. A demo manufacturer (demo-maker@nazryx.test) is seeded
+  with the demo data.
+
 ## Focus, timelines, compare, export, ask the expert (migration 013)
 
 - **Set your focus** is onboarding step 3 (and Settings): goals, therapeutic classes, EML levels, supplier countries.

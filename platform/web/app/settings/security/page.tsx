@@ -10,7 +10,7 @@ export const metadata = { title: 'Two-step sign-in' };
 
 export default async function Security({ searchParams }: { searchParams: Promise<{ error?: string; required?: string; on?: string; off?: string }> }) {
   const sp = await searchParams;
-  const u = await requireUser({ allowOnboarding: true });
+  const u = await requireUser({ allowOnboarding: true, shared: true });
   const row = await withUser(u.id, (db) => one(db, 'select secret, enabled from user_totp where user_id = $1', [u.id]));
   const pending = row && !row.enabled;
   const qr = pending ? await QRCode.toString(otpauthUri(row.secret, u.email), { type: 'svg', margin: 1, width: 200 }) : null;

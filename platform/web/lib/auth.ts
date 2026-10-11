@@ -13,7 +13,7 @@ export type User = {
   id: string; email: string; name: string; role: 'customer' | 'team'; plan: 'free' | 'paid';
   country: string; company_id: number | null; credits: number; onboarded: boolean; owner_id: string | null;
   language: string; whatsapp: string | null; notify_email: boolean; notify_whatsapp: boolean;
-  company_name: string | null; claim_status: string | null; list_count: number;
+  company_name: string | null; claim_status: string | null; list_count: number; account_type: 'distributor' | 'manufacturer';
 };
 
 export const sha = (s: string) => createHash('sha256').update(s).digest('hex');
@@ -55,7 +55,7 @@ export const getUser = cache(async (): Promise<User | null> => {
     select u.id, u.email, u.name, u.role, app_plan() as plan, u.country, u.company_id, u.credits, u.onboarded,
            u.owner_id, u.language, u.whatsapp, u.notify_email, u.notify_whatsapp,
            coalesce(c.display_name, cl.company_name) as company_name, cl.status as claim_status,
-           (select count(*)::int from sourcing_list l where l.user_id = u.id) as list_count
+           (select count(*)::int from sourcing_list l where l.user_id = u.id) as list_count, u.account_type
     from users u
     left join companies c on c.id = u.company_id
     left join lateral (select * from company_claims k where k.user_id = coalesce(u.owner_id, u.id)
@@ -63,10 +63,17 @@ export const getUser = cache(async (): Promise<User | null> => {
     where u.id = $1`, [id]));
 });
 
-export async function requireUser(opts: { allowOnboarding?: boolean } = {}): Promise<User> {
+/** Signed-in customer pages. Distributor and manufacturer accounts each have their own area; `shared` pages
+ *  (settings, help) serve both. The team can open everything. */
+export async function requireUser(opts: { allowOnboarding?: boolean; manufacturer?: boolean; shared?: boolean } = {}): Promise<User> {
   const u = await getUser();
   if (!u) redirect('/signup?mode=signin');
-  if (!u.onboarded && !opts.allowOnboarding && u.role !== 'team') redirect('/onboarding');
+  const mfr = u.account_type === 'manufacturer';
+  if (!u.onboarded && !opts.allowOnboarding && u.role !== 'team') redirect(mfr ? '/m/onboarding' : '/onboarding');
+  if (u.role !== 'team' && !opts.shared) {
+    if (opts.manufacturer && !mfr) redirect('/home');
+    if (!opts.manufacturer && mfr) redirect('/m');
+  }
   return u;
 }
 

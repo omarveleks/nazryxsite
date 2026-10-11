@@ -1,6 +1,6 @@
 'use server';
 import { redirect } from 'next/navigation';
-import { pool } from '@/lib/db';
+import { pool, withUser } from '@/lib/db';
 import { cookies, headers } from 'next/headers';
 import { CHALLENGE_COOKIE, createChallenge, createSession, destroySession, sha } from '@/lib/auth';
 import { verifyCode } from '@/lib/totp';
@@ -19,8 +19,10 @@ export async function signUp(f: FormData) {
   const exists = await pool.query('select id from auth_find_user($1)', [email]);
   if (exists.rowCount) back('/signup', { mode: 'signin', error: 'That email already has an account. Sign in.' });
   const r = await pool.query('select auth_create_user($1, $2, $3) as id', [email, name, hashPassword(pw)]);
+  const manufacturer = str(f, 'account_type', 20) === 'manufacturer';
+  if (manufacturer) await withUser(r.rows[0].id, (db) => db.query("update users set account_type = 'manufacturer' where id = $1", [r.rows[0].id]));
   await createSession(r.rows[0].id);
-  redirect('/onboarding');
+  redirect(manufacturer ? '/m/onboarding' : '/onboarding');
 }
 
 export async function signIn(f: FormData) {

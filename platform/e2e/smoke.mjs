@@ -143,6 +143,46 @@ if (XLS) {
   check(applied, 'registry upload is processed by the worker');
 }
 
+// 5. a manufacturer signs up, adds products, asks for market entry and uploads a dossier document; the team works it
+const k = await page();
+const kmail = `maker${Date.now()}@example.com`;
+await k.goto(B + '/signup?as=manufacturer'); await k.fill('#name', 'Maker Test'); await k.fill('#email', kmail); await k.fill('#password', 'smoke-password-123');
+await Promise.all([k.waitForURL(/\/m\/onboarding/), k.click('button[type=submit]')]);
+await k.fill('#company_name', 'Smoke Generics'); await k.fill('#hq_country', 'India');
+await k.locator('input[name=certifications][value="WHO GMP"]').check();
+await Promise.all([k.waitForURL(/\/m\?welcome/), k.click('button:has-text("Continue")')]);
+check((await k.locator('main').innerText()).includes('Register these first'), 'manufacturer lands on its own home');
+await k.goto(B + '/home'); check(k.url().endsWith('/m'), 'manufacturers are kept out of the distributor area');
+await k.goto(B + '/m/products'); await k.fill('#list', 'Doxycycline 100mg capsules\nAmoxicillin 500mg capsules\nNot A Real Product');
+await Promise.all([k.waitForURL(/added=3/), k.click('text=Add and match')]);
+check(new URL(k.url()).searchParams.get('matched') === '2', 'catalogue is matched to the market');
+await k.locator('a .nm', { hasText: 'Doxycycline' }).first().click(); await k.waitForURL(/\/m\/products\/\d+/);
+const kp = await k.locator('main').innerText();
+check(kp.includes('Why Tanzania') && kp.includes('Route and timeline'), 'product opportunity page');
+await Promise.all([k.waitForURL(/\/m\/engagements\/\d+\?new=1/), k.locator('form:has(input[name=kind][value=market_entry]) button').click()]);
+const engId = k.url().match(/engagements\/(\d+)/)[1];
+await k.selectOption('select[name=item]', 'gmp');
+await k.setInputFiles('input[name=file]', { name: 'gmp.pdf', mimeType: 'application/pdf', buffer: Buffer.from('%PDF-1.4 gmp') });
+await Promise.all([k.waitForURL(/uploaded=1/), k.click('button:has-text("Upload")')]);
+check((await k.locator('main').innerText()).includes('gmp.pdf'), 'manufacturer uploads to the dossier room');
+await t.goto(B + '/admin?tab=manufacturers');
+await Promise.all([t.waitForURL(/saved=1/), t.locator(`tr:has-text("${kmail}") button:has-text("Approve")`).click()]);
+await t.goto(B + `/admin/engagements/${engId}`);
+await t.selectOption('select[name=stage]', 'Market assessment');
+await Promise.all([t.waitForURL(/saved=1/), t.click('button:has-text("Update")')]);
+await t.goto(B + `/admin/engagements/${engId}`);
+await t.selectOption('select[name=review]', 'accepted');
+await Promise.all([t.waitForURL(/saved=1/), t.locator('form:has(select[name=review]) button:has-text("Save")').click()]);
+await k.goto(B + `/m/engagements/${engId}`);
+const ke = await k.locator('main').innerText();
+check(ke.includes('Accepted') && ke.includes('1 of 1 accepted'), 'team review shows in the dossier room');
+await k.goto(B + '/m/partners?class=' + encodeURIComponent('Anti-infective Medicines'));
+const kpart = await k.locator('main').innerText();
+check(/Distributor [0-9A-F]{8}/.test(kpart) && !kpart.includes('Alpha Pharma'), 'partner finder shows codes, not names');
+await Promise.all([k.waitForURL(/\/m\/engagements\/\d+\?new=1/), k.locator('button:has-text("Request introduction")').first().click()]);
+check(true, 'manufacturer requests an introduction');
+await c.goto(B + '/m'); check(c.url().includes('/home'), 'distributors are kept out of the manufacturer area');
+
 // 4. phone width: no sideways scrolling
 const m = await page(375);
 await signin(m, 'demo-free@nazryx.test', process.env.DEMO_PASSWORD);

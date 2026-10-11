@@ -557,3 +557,44 @@ def test_focus_questions_and_routes(env):
         as_user(a, paid)
         assert a.execute("select route_key from molecule_routes where molecule_id = %s", (mol,)).fetchone()[0] == "abridged"
         a.rollback()
+
+
+def test_manufacturer_side_privacy(env):
+    with psycopg.connect(URL) as c:
+        maker = c.execute("insert into users (email, password_hash, account_type, onboarded) values ('mk1@example.com', 'x', 'manufacturer', true) returning id").fetchone()[0]
+        other = c.execute("insert into users (email, password_hash, account_type, onboarded) values ('mk2@example.com', 'x', 'manufacturer', true) returning id").fetchone()[0]
+        team = c.execute("insert into users (email, password_hash, role) values ('mkt@example.com', 'x', 'team') returning id").fetchone()[0]
+        c.commit()
+    with app_conn(env) as a:
+        as_user(a, maker)
+        a.execute("insert into manufacturer_profiles (user_id, company_name) values (%s, 'Maker One')", (maker,))
+        pid = a.execute("insert into mfr_products (user_id, name) values (%s, 'Doxycycline 100mg capsules') returning id", (maker,)).fetchone()[0]
+        eid = a.execute("insert into engagements (user_id, kind, country, product_id) values (%s, 'market_entry', 'TZ', %s) returning id", (maker, pid)).fetchone()[0]
+        a.commit()
+        as_user(a, maker)
+        with pytest.raises(psycopg.errors.RaiseException):          # cannot approve itself
+            a.execute("update manufacturer_profiles set status = 'approved' where user_id = %s", (maker,))
+        a.rollback()
+        as_user(a, maker)
+        with pytest.raises(psycopg.errors.RaiseException):          # cannot switch account type after onboarding
+            a.execute("update users set account_type = 'distributor' where id = %s", (maker,))
+        a.rollback()
+        as_user(a, maker)
+        assert a.execute("update engagements set stage = 'Approved' where id = %s", (eid,)).rowcount == 0   # only the team moves stages
+        profiles = a.execute("select * from partner_profiles('Anti-infective Medicines', null)").fetchall()
+        assert profiles and all(len(p[0]) == 8 for p in profiles)                                        # codes, no names
+        with pytest.raises(psycopg.errors.RaiseException):          # only the team turns a code into a company
+            a.execute("select partner_company(%s)", (profiles[0][0],))
+        a.rollback()
+        as_user(a, other)
+        assert a.execute("select count(*) from mfr_products").fetchone()[0] == 0
+        assert a.execute("select count(*) from engagements").fetchone()[0] == 0
+        assert a.execute("select count(*) from manufacturer_profiles").fetchone()[0] == 0
+        a.rollback()
+        as_user(a, team)
+        code = a.execute("select code from partner_profiles('Anti-infective Medicines', null) limit 1").fetchone()[0]
+        assert a.execute("select partner_company(%s)", (code,)).fetchone()[0] is not None
+        a.execute("update manufacturer_profiles set status = 'approved' where user_id = %s", (maker,))
+        a.execute("update engagements set stage = 'Market assessment' where id = %s", (eid,))
+        a.commit()
+    assert q("select status from manufacturer_profiles where user_id = %s", maker)[0][0] == "approved"

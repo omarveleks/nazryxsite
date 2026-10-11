@@ -8,6 +8,7 @@ const QUERIES: Record<string, string> = {
   licence: 'select licence_path as path, licence_name as name from company_claims where id = $1',
   catalogue: 'select catalogue_path as path, catalogue_name as name from company_claims where id = $1',
   registry: 'select file_path as path, file_name as name from registry_uploads where id = $1',
+  engagement: 'select file_path as path, file_name as name from engagement_files where id = $1',
 };
 
 export async function GET(_req: Request, { params }: { params: Promise<{ kind: string; id: string }> }) {
