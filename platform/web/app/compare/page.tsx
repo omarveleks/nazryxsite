@@ -33,7 +33,7 @@ export default async function Compare({ searchParams }: { searchParams: Promise<
       if (!m) return null;
       const open = paid || m.enriched;
       m.holders = open ? await rows(db, `select c.id, c.display_name, count(*)::int as n from registrations r join companies c on c.id = r.ltr_id
-                                         where r.molecule_id = $1 and r.active group by c.id order by n desc limit 5`, [id]) : null;
+                                         where r.molecule_id = $1 and r.active and r.country = $2 group by c.id order by n desc limit 5`, [id, COUNTRY]) : null;
       m.suggested = paid ? await one(db, `select price_low, price_high, currency, unit from market_prices where molecule_id = $1 and kind = 'suggested'
                                            order by observed_at desc limit 1`, [id]) : null;
       m.route = paid ? await one(db, `select r.label, r.months_low, r.months_high from registration_routes r

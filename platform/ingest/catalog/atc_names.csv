@@ -1,0 +1,3989 @@
+atc,en,ru
+A01AA01,sodium fluoride,фторид натрия
+A01AA02,sodium monofluorophosphate,монофторофосфат натрия
+A01AA03,olaflur,олафлур
+A01AA04,tin(II) fluoride,фторид олова(ii)
+A01AB02,hydrogen peroxide,пероксид водорода
+A01AB03,chlorhexidine,хлоргексидин
+A01AB04,amphotericin B,амфотерицин b
+A01AB05,polynoxylin,полиноксилин
+A01AB06,domiphen,
+A01AB07,oxyquinoline,8-оксихинолин
+A01AB08,neomycin,неомицин
+A01AB09,miconazole,
+A01AB10,natamycin,натамицин
+A01AB12,hexetidine,гексорал
+A01AB13,tetracycline,тетрациклин
+A01AB14,benzoxonium chloride,
+A01AB15,tibezonium iodide,
+A01AB16,mepartricin,мепартрицин
+A01AB17,metronidazole,метронидазол
+A01AB18,clotrimazole,клотримазол
+A01AB19,sodium perborate,перборат натрия
+A01AB21,chlortetracycline,хлортетрациклин
+A01AB22,doxycycline,доксициклин
+A01AB23,minocycline,миноциклин
+A01AC01,triamcinolone,триамцинолон
+A01AC02,dexamethasone,дексаметазон
+A01AC03,cortisol,кортизол
+A01AD01,epinephrine,адреналин
+A01AD02,benzydamine,бензидамин
+A01AD05,aspirin,ацетилсалициловая кислота
+A01AD06,adrenalone,
+A01AD07,amlexanox,
+A01AD08,becaplermin,бекаплермин
+A02AA01,magnesium carbonate,карбонат магния
+A02AA02,magnesium oxide,оксид магния
+A02AA03,magnesium peroxide,пероксид магния
+A02AA04,magnesium hydroxide,гидроксид магния
+A02AA05,magnesium silicate,тетрасиликат магния
+A02AB01,aluminum hydroxide,гидроксид алюминия
+A02AB02,algeldrate,алгелдрат
+A02AB03,aluminium phosphate,фосфат алюминия
+A02AB04,dihydroxyaluminum sodium carbonate,
+A02AB05,aluminium acetoacetate,
+A02AB06,aloglutamol,
+A02AB07,Aluminium glycinate,
+A02AC01,calcium carbonate,карбонат кальция
+A02AC02,calcium silicate,силикат кальция
+A02AD02,magaldrate,
+A02AD03,almagate dihydrate,
+A02AD04,hydrotalcite,
+A02AD05,Almasilate,
+A02BA01,cimetidine,циметидин
+A02BA02,ranitidine,ранитидин
+A02BA03,famotidine,фамотидин
+A02BA04,nizatidine,низатидин
+A02BA05,niperotidine,
+A02BA06,roxatidine acetate,
+A02BA07,Ranitidine bismuth citrate,ранитидина висмута цитрат
+A02BA08,lafutidine,
+A02BB01,misoprostol,мизопростол
+A02BB02,enprostil,
+A02BC01,omeprazole,омепразол
+A02BC02,pantoprazole,пантопразол
+A02BC03,lansoprazole,лансопразол
+A02BC04,rabeprazole,рабепразол
+A02BC05,esomeprazole,эзомепразол
+A02BC06,dexlansoprazole,
+A02BC07,rabeprazole,
+A02BD08,bismuth subcitrate/metronidazole/tetracycline,
+A02BX01,carbenoxolone,
+A02BX02,sucralfate,сукральфат
+A02BX03,pirenzepine,пирензепин
+A02BX04,methylmethionine chloride,
+A02BX05,bismuth subcitrate,висмута трикалия дицитрат
+A02BX06,proglumide,
+A02BX07,gefarnate,
+A02BX08,sulglicotide,
+A02BX09,acetoxolone,
+A02BX10,zolimidine,
+A02BX11,troxipide,противоязвенные препараты и препараты для лечения гастроэзофагеального рефлюкса
+A02BX12,Bismuth subnitrate,
+A02BX13,alginic acid,альгиновая кислота
+A02BX14,rebamipide,ребамипид
+A03AA01,oxyphencyclimine,
+A03AA03,camylofin,
+A03AA04,mebeverine,мебеверин
+A03AA05,trimebutine,тримебутин
+A03AA06,rociverine,
+A03AA07,dicyclomine,дицикломин
+A03AA08,dihexyverine,
+A03AA09,Difemerine,
+A03AA30,piperidolate,
+A03AB01,Benzilone,
+A03AB02,glycopyrrolate,
+A03AB03,oxyphenonium,
+A03AB04,penthienate,
+A03AB05,propanthelinium,
+A03AB06,otilonium bromide,
+A03AB07,methantheline,
+A03AB08,tridihexethyl,
+A03AB09,isopropamide,
+A03AB10,hexocyclium,
+A03AB11,poldine,
+A03AB12,mepenzolate,
+A03AB13,bevonium,
+A03AB14,pipenzolate,
+A03AB15,diphemanil,
+A03AB18,prifinium bromide,
+A03AB19,timepidium bromide,
+A03AB21,fenpiverinium,
+A03AC02,dimethylaminopropionylphenothiazine,
+A03AC04,nicofetamide,
+A03AC05,tiropramide,
+A03AD01,papaverine,папаверин
+A03AD02,drotaverine,дротаверин
+A03AD30,moxaverine,
+A03AE01,alosetron,
+A03AE03,cilansetron,
+A03AX01,fenpiprane,
+A03AX02,diisopromine,
+A03AX03,chlorbenzoxamine,
+A03AX04,pinaverium,
+A03AX05,fenoverine,
+A03AX06,idanpramine,
+A03AX07,Proxazole,
+A03AX08,alverine,
+A03AX09,trepibutone,
+A03AX10,isometheptene,
+A03AX11,caroverine,
+A03AX12,phloroglucinol,флороглюцин
+A03AX13,silicone,силикон
+A03AX14,valethamate,
+A03AX30,trimethyldiphenylpropylamine,
+A03BA01,atropine,атропин
+A03BA03,hyoscyamine,гиосциамин
+A03BA04,belladonna alkaloids,
+A03BB01,butylscopolamine bromide,
+A03BB02,methylatropine,
+A03BB03,N-methylscopolamine(1+),
+A03BB04,fentonium bromide,
+A03BB05,cimetropium bromide,
+A03FA01,metoclopramide,метоклопрамид
+A03FA02,cisapride,цизаприд
+A03FA03,domperidone,домперидон
+A03FA04,bromopride,бромоприд
+A03FA05,alizapride,
+A03FA06,clebopride,
+A03FA07,itopride,
+A03FA08,cinitapride,
+A04AA01,ondansetron,ондансетрон
+A04AA02,granisetron,
+A04AA03,tropisetron,трописетрон
+A04AA04,dolasetron,доласетрон
+A04AA05,(3aS)-palonosetron,палоносетрон
+A04AD01,L-scopolamine,скополамин
+A04AD02,cerium(III) oxalate,
+A04AD04,chlorobutanol,
+A04AD05,metopimazine,метопимазин
+A04AD10,tetrahydrocannabinol,тетрагидроканнабинол
+A04AD11,nabilone,
+A04AD12,aprepitant,апрепитант
+A04AD13,casopitant,
+A04AD14,rolapitant,
+A05AA01,chenodiol,хенодезоксихолевая кислота
+A05AA02,ursodiol,урсодезоксихолевая кислота
+A05AA03,cholic acid,холевая кислота
+A05AA04,obeticholic acid,обетихолевая кислота
+A05AB01,nicotinyl methylamide,
+A05AX01,piprozolin,
+A05AX02,hymecromone,
+A05AX03,cyclobutyrol,
+A05BA01,arginine glutamate,
+A05BA03,silymarin,силимарин
+A05BA04,citiolone,
+A05BA05,Epomediol,
+A05BA06,ornithine oxoglurate,
+A05BA07,tidiacic arginine,
+A05BA08,glycyrrhizin,глицирризиновая кислота
+A06AA01,liquid paraffin,вазелиновое масло
+A06AA02,docusate sodium,докузат
+A06AB01,oxyphenisatin,
+A06AB02,bisacodyl,бисакодил
+A06AB03,danthron,
+A06AB04,phenolphthalein,фенолфталеин
+A06AB05,castor oil,касторовое масло
+A06AB06,senna glycoside,сеннозид
+A06AB07,Cascara,
+A06AB08,sodium picosulfate,гутталакс
+A06AB09,bisoxatin,
+A06AC01,Psyllium seed husks,подорожник
+A06AC02,Ethulose,
+A06AC03,gum karaya,
+A06AC05,flaxseed,льняное семя
+A06AC06,methyl cellulose,метилцеллюлоза
+A06AC07,polycarbophil calcium,
+A06AC08,polycarbophil calcium,
+A06AD01,magnesium carbonate,карбонат магния
+A06AD02,magnesium oxide,оксид магния
+A06AD03,magnesium peroxide,пероксид магния
+A06AD04,magnesium sulfate,сульфат магния
+A06AD11,β-lactulose,лактулоза
+A06AD12,lactitol,лактитол
+A06AD13,sodium lauryl sulfate,лаурилсульфат натрия
+A06AD15,polyethylene glycol,полиэтиленгликоль
+A06AD16,D-(-)-mannitol,маннит
+A06AD17,trisodium phosphate,ортофосфат натрия
+A06AD18,D-sorbitol,сорбит
+A06AD19,magnesium citrate,цитрат магния
+A06AG01,sodium phosphates,натрия фосфаты
+A06AG02,bisacodyl,бисакодил
+A06AG04,glycerol,глицерин
+A06AG07,D-sorbitol,сорбит
+A06AH01,methylnaltrexone bromide,метилналтрексона бромид
+A06AH02,alvimopan,
+A06AH03,naloxegol,налоксегол
+A06AH04,naloxone,налоксон
+A06AH05,naldemedine,налдемедин
+A06AX01,glycerol,глицерин
+A06AX03,lubiprostone,лубипростон
+A06AX04,linaclotide,линаклотид
+A06AX05,prucalopride,прукалоприд
+A06AX06,tegaserod,
+A06AX07,plecanatide,плеканатид
+A07AA01,neomycin,неомицин
+A07AA02,nystatin,нистатин
+A07AA03,natamycin,натамицин
+A07AA04,streptomycin,стрептомицин
+A07AA05,polymyxin B,полимиксин b
+A07AA06,paromomycin,
+A07AA07,amphotericin B,амфотерицин b
+A07AA08,kanamycin,канамицин
+A07AA09,vancomycin,ванкомицин
+A07AA10,colistin,колистин
+A07AA11,rifaximin,рифаксимин
+A07AA12,fidaxomicin,
+A07AA51,neomycin,неомицин
+A07AB02,phthalylsulfathiazole,фталазол
+A07AB03,sulfaguanidine,сульфагуанидин
+A07AB04,succinylsulfathiazole,
+A07AC01,miconazole,
+A07AX01,broxyquinoline,
+A07AX02,3-acetylamino-4-hydroxyphenyl arsonic acid,
+A07AX03,nifuroxazide,нифуроксазид
+A07AX04,nifurzide,
+A07BC01,pectin,пектиновые вещества
+A07BC02,kaolin,
+A07BC03,polyvinylpolypyrrolidone,повидон
+A07BC04,attapulgite,
+A07BC05,Diosmectite,диосмектит
+A07DA01,diphenoxylate,
+A07DA02,opium,опиум
+A07DA03,loperamide,лоперамид
+A07DA04,difenoxin,дифеноксин
+A07DA05,loperamide oxide,
+A07DA06,eluxadoline,
+A07EA01,prednisolone,преднизолон
+A07EA02,cortisol,кортизол
+A07EA03,prednisone,преднизон
+A07EA04,betamethasone,бетаметазон
+A07EA05,tixocortol,
+A07EA06,budesonide,будесонид
+A07EA07,beclomethasone dipropionate,беклометазона дипропионат
+A07EB01,cromoglicic acid,кромоглициевая кислота
+A07EC01,sulfasalazine,сульфасалазин
+A07EC02,mesalazine,месалазин
+A07EC03,olsalazine,
+A07EC04,balsalazide,
+A07FA02,Saccharomyces boulardii,saccharomyces boulardii
+A07XA01,Albumin tannate,
+A07XA02,Ceratonia,цератония
+A07XA03,calcium compounds,соединения кальция
+A07XA04,racecadotril,
+A07XA06,crofelemer,крофелемер
+A08AA01,phentermine,фентермин
+A08AA02,fenfluramine,фенфлурамин
+A08AA03,diethylpropion,амфепрамон
+A08AA04,dexfenfluramine,
+A08AA05,mazindol,
+A08AA06,N-ethylamphetamine,
+A08AA07,norpseudoephedrine,катин
+A08AA08,clobenzorex,
+A08AA09,mefenorex,мефенорекс
+A08AA10,sibutramine,сибутрамин
+A08AA11,lorcaserin,
+A08AA62,bupropion/naltrexone,
+A08AB01,orlistat,орлистат
+A08AX01,rimonabant,
+A09AA01,diastase,диастаза
+A09AA02,pancreatin,панкреатин
+A09AA03,pepsin,
+A09AA04,tilactase,
+A09AB01,glutamic acid hydrochloride,
+A09AB02,betaine hydrochloride,
+A09AB03,hydrochloric acid,соляная кислота
+A09AB04,citric acid,лимонная кислота
+A10AB01,regular insulin,
+A10AB04,Insulin Lispro,инсулин лиспро
+A10AB05,insulin aspart,
+A10AB06,insulin glulisine,
+A10AC04,Insulin Lispro,инсулин лиспро
+A10AD04,Insulin Lispro,инсулин лиспро
+A10AD05,insulin aspart,
+A10AD06,Insulin degludec,
+A10AE04,insulin glargine,инсулин гларгин
+A10AE05,insulin detemir,
+A10AE06,Insulin degludec,
+A10AE54,insulin glargine / lixisenatide,
+A10AE56,liraglutide/insulin degludek,
+A10BA01,phenformin,
+A10BA02,metformin,метформин
+A10BA03,buformin,
+A10BB01,glyburide,глибенкламид
+A10BB02,chlorpropamide,
+A10BB03,tolbutamide,
+A10BB04,glibornuride,
+A10BB05,tolazamide,
+A10BB06,carbutamide,
+A10BB07,glipizide,глипизид
+A10BB08,gliquidone,
+A10BB09,gliclazide,гликлазид
+A10BB10,metahexamide,
+A10BB11,glisoxepide,
+A10BB12,glimepiride,глимепирид
+A10BB31,acetohexamide,
+A10BC01,glymidine,
+A10BD03,rosiglitazone / metformin,
+A10BD04,rosiglitazone / glimepiride,
+A10BD05,metformin / pioglitazone,
+A10BD06,pioglitazone/glimepiride,
+A10BD07,sitagliptin/metformin,
+A10BD08,vildagliptin / metformin,
+A10BD09,alogliptin/pioglitazone,
+A10BD10,metformin / saxagliptin,
+A10BD11,linagliptin / metformin,
+A10BD13,alogliptin / metformin,
+A10BD15,dapagliflozin / metformin,
+A10BD16,canagliflozin / metformin hydrochloride,
+A10BD19,empagliflozin/linagliptin,
+A10BD20,empagliflozin / metformin,
+A10BD21,dapagliflozin / saxagliptin,
+A10BD23,ertugliflozin / metformin,
+A10BD24,ertugliflozin / sitagliptin,
+A10BF01,acarbose,акарбоза
+A10BF02,miglitol,
+A10BF03,voglibose,воглибозе
+A10BG01,troglitazone,
+A10BG02,rosiglitazone,росиглитазон
+A10BG03,pioglitazone,пиоглитазон
+A10BG04,lobeglitazone,
+A10BH01,sitagliptin,ситаглиптин
+A10BH02,vildagliptin,вилдаглиптин
+A10BH03,saxagliptin,
+A10BH04,alogliptin,
+A10BH05,linagliptin,линаглиптин
+A10BH06,gemigliptin,
+A10BH07,Evogliptin,
+A10BH51,simvastatin/sitagliptin,
+A10BJ01,exenatide,эксенатид
+A10BJ02,liraglutide,
+A10BJ03,lixisenatide,
+A10BJ04,albiglutide,
+A10BJ05,dulaglutide,
+A10BJ06,semaglutide,семаглутид
+A10BK01,dapagliflozin,дапаглифлозин
+A10BK02,canagliflozin,
+A10BK03,empagliflozin,эмпаглифлозин
+A10BK04,ertugliflozin,
+A10BK05,ipragliflozin,суглат (ипраглифлозин)
+A10BX01,guar gum,гуаровая камедь
+A10BX02,repaglinide,репаглинид
+A10BX03,nateglinide,
+A10BX04,exenatide,эксенатид
+A10BX05,pramlintide,прамлинтид
+A10BX06,benfluorex,
+A10BX07,liraglutide,
+A10BX08,mitiglinide,
+A10BX10,lixisenatide,
+A10BX11,canagliflozin,
+A10BX12,empagliflozin,эмпаглифлозин
+A10BX13,albiglutide,
+A10BX16,tirzepatide,тирзепатид
+A10XA01,tolrestat,
+A11CA01,retinol,ретинол
+A11CA02,β-carotene,β-каротин
+A11CC01,ergocalciferol,эргокальциферол
+A11CC02,dihydrotachysterol,дигидротахистерол
+A11CC03,alfacalcidol,альфакальцидол
+A11CC04,calcitriol,кальцитриол
+A11CC05,cholecalciferol,холекальциферол
+A11CC06,calcifediol,
+A11DA01,thiamine,тиамин
+A11DA02,sulbutiamine,сульбутиамин
+A11DA03,benfotiamine,бенфотиамин
+A11GA01,vitamin C,витамин c
+A11HA01,niacinamide,никотинамид
+A11HA02,pyridoxine,пиридоксин
+A11HA03,vitamin E,витамин e
+A11HA04,riboflavin,рибофлавин
+A11HA05,biotin,биотин
+A11HA06,pyridoxal phosphate,пиридоксальфосфат
+A11HA07,inositol,инозитол
+A11HA08,tocofersolan,
+A11HA30,panthenol,
+A11HA31,calcium pantothenate,
+A11HA32,pantethine,пантетин
+A12AA02,calcium glubionate,
+A12AA03,calcium gluconate,глюконат кальция
+A12AA04,calcium carbonate,карбонат кальция
+A12AA05,calcium DL-lactate,лактат кальция
+A12AA06,calcium lactate gluconate,
+A12AA07,calcium chloride,хлорид кальция
+A12AA08,calcium 2-glycerophosphate,глицерофосфат кальция
+A12AA10,calcium gluceptate,глюцептат кальция
+A12AA11,Calcium pangamate,
+A12AA13,calcium citrate,цитрат кальция
+A12AA30,calcium levulinate,
+A12BA01,potassium chloride,хлорид калия
+A12BA02,tripotassium citrate,цитрат калия
+A12BA03,potassium hydrogen tartrate,винный камень
+A12BA04,potassium hydrogen carbonate,гидрокарбонат калия
+A12BA05,potassium gluconate,
+A12CA01,sodium chloride,хлорид натрия
+A12CA02,sodium sulfate,сульфат натрия
+A12CB01,zinc sulfate,сульфат цинка
+A12CB02,zinc gluconate,
+A12CC01,magnesium chloride,хлорид магния
+A12CC02,magnesium sulfate,сульфат магния
+A12CC03,magnesium gluconate,
+A12CC04,magnesium citrate,цитрат магния
+A12CC05,magnesium aspartate,
+A12CC06,magnesium lactate,
+A12CC07,magnesium levulinate,
+A12CC08,magnesium pidolate,
+A12CC09,magnesium orotate,
+A12CC10,magnesium oxide,оксид магния
+A12CD01,sodium fluoride,фторид натрия
+A12CD02,sodium monofluorophosphate,монофторофосфат натрия
+A12CE01,sodium selenate,селенат натрия
+A12CE02,sodium selenite,селенит натрия
+A14AA01,dihydrotestosterone,дигидротестостерон
+A14AA02,stanozolol,станозолол
+A14AA03,methandrostenolone,метандиенон
+A14AA04,methenolone,
+A14AA05,oxymetholone,
+A14AA06,quinbolone,
+A14AA07,prasterone,
+A14AA08,oxandrolone,oxandrolone
+A14AA09,norethandrolone,
+A14AB01,nandrolone,нандролона деканоат
+A14AB02,ethylestrenol,
+A14AB03,oxabolone cipionate,
+A16AA01,carnitine,левокарнитин
+A16AA02,S-adenosylmethionine,s-аденозилметионин
+A16AA03,L-glutamine,глутамин
+A16AA04,cysteamine,
+A16AA05,carglumic acid,
+A16AA06,betaine,бетаин
+A16AA07,metreleptin,метрелептин
+A16AB01,alglucerase,
+A16AB02,imiglucerase,имиглюцераза
+A16AB03,galactosidase alpha,альфа-галактозидаза
+A16AB04,agalsidase beta,
+A16AB05,laronidase,
+A16AB06,sacrosidase,
+A16AB07,alglucosidase alfa,
+A16AB08,galsulfase,
+A16AB09,idursulfase,
+A16AB10,velaglucerase alfa,
+A16AB11,taliglucerase alfa,талиглюцераза альфа
+A16AB12,elosulfase alfa,элосульфаза альфа
+A16AB13,asfotase alfa,
+A16AB14,sebelipase alfa,sebelipase alfa
+A16AB15,velmanase alfa,
+A16AB17,cerliponase alfa,
+A16AB18,vestronidase alfa,вестронидаза альфа
+A16AX01,thioctic acid,липоевая кислота
+A16AX02,anethol trithione,
+A16AX03,sodium phenylbutyrate,
+A16AX04,nitisinone,
+A16AX05,zinc acetate,ацетат цинка
+A16AX06,miglustat,
+A16AX07,sapropterin,тетрагидробиоптерин
+A16AX08,teduglutide,
+A16AX09,glycerol phenylbutyrate,
+A16AX10,eliglustat,элиглустат
+A16AX11,sodium benzoate,бензоат натрия
+A16AX12,triethylenetetramine,триэтилентетрамин
+A16AX13,uridine triacetate,
+A16AX14,migalastat,
+A16AX15,telotristat,
+A16AX18,lumasiran,
+B01AA01,dicumarol,дикумарин
+B01AA02,phenindione,
+B01AA03,warfarin,варфарин
+B01AA04,phenprocoumon,
+B01AA07,acenocoumarol,
+B01AA08,ethyl biscoumacetate,
+B01AA09,clorindione,
+B01AA10,diphenadione,ратиндан
+B01AA11,tioclomarol,
+B01AA12,fluindione,
+B01AB01,heparin,гепарин
+B01AB02,Antithrombin-III,
+B01AB04,dalteparin,далтепарин натрия
+B01AB05,enoxaparin sodium,lobenox
+B01AB06,nadroparin,
+B01AB07,parnaparin,
+B01AB08,reviparin,
+B01AB09,danaparoid,
+B01AB10,tinzaparin,
+B01AB11,sulodexide,
+B01AB12,bemiparin,бемипарин натрия
+B01AC01,ditazole,
+B01AC02,cloricromen,
+B01AC03,picotamide,
+B01AC04,clopidogrel,клопидогрел
+B01AC05,ticlopidine,
+B01AC06,aspirin,ацетилсалициловая кислота
+B01AC07,dipyridamole,дипиридамол
+B01AC08,carbaspirin calcium,
+B01AC09,prostacyclin,простациклин
+B01AC10,indobufen,
+B01AC11,iloprost,
+B01AC13,abciximab,
+B01AC15,aloxiprin,
+B01AC16,eptifibatide,эптифибатид
+B01AC17,tirofiban,тирофибан
+B01AC18,triflusal,
+B01AC19,beraprost,
+B01AC21,treprostinil,
+B01AC22,prasugrel,прасугрель
+B01AC23,cilostazol,плетал
+B01AC24,ticagrelor,
+B01AC25,cangrelor,кангрелор
+B01AC26,vorapaxar,
+B01AC27,selexipag,
+B01AD01,streptokinase,стрептокиназа
+B01AD02,alteplase,альтеплаза
+B01AD03,anistreplase,
+B01AD04,"Plasminogen activator, urokinase",урокиназный активатор плазминогена
+B01AD05,fibrinolysin,фибринолизин
+B01AD06,Brinase,
+B01AD07,reteplase,
+B01AD08,Saruplase,
+B01AD09,ancrod,
+B01AD10,drotrecogin alfa,
+B01AD11,tenecteplase,тенектеплаза
+B01AD12,protein c concentrate (human),
+B01AE01,desirudin,
+B01AE02,lepirudin,
+B01AE03,argatroban,
+B01AE04,melagatran,
+B01AE05,ximelagatran,
+B01AE06,bivalirudin,
+B01AE07,dabigatran etexilate,
+B01AF01,rivaroxaban,ривароксабан
+B01AF02,apixaban,апиксабан
+B01AF03,edoxaban,
+B01AX01,defibrotide,
+B01AX04,dermatan sulfate,дерматансульфат
+B01AX05,fondaparinux,фондапаринукс
+B01AX07,caplacizumab,каплацизумаб
+B02AA01,aminocaproic acid,аминокапроновая кислота
+B02AA02,tranexamic acid,транексамовая кислота
+B02AA03,aminomethylbenzoic acid,
+B02AB01,aprotinin,апротинин
+B02AB02,Respreeza,
+B02AB04,camostat,камостат
+B02BA01,(E)-phytonadione,филлохинон
+B02BA02,menadione,менадион
+B02BB01,human fibrinogen,
+B02BC01,absorbable gelatin sponge,
+B02BC02,oxidized cellulose,
+B02BC03,tetragalacturonic acid hydroxymethylester,
+B02BC05,adrenalone,
+B02BC06,"Coagulation factor II, thrombin",тромбин
+B02BC07,collagen,коллаген
+B02BC08,calcium alginate,альгинат кальция
+B02BC09,epinephrine,адреналин
+B02BD02,moroctocog alfa,
+B02BD04,coagulation factor IX,
+B02BD05,coagulation factor VII,фактор свёртывания крови vii
+B02BD07,factor XIII,фактор xiii
+B02BD08,factor VIIa [extracellular region],
+B02BD09,coagulation factor ix recombinant human,
+B02BD10,Von Willebrand factor,фактор фон виллебранда
+B02BD11,catridecacog,
+B02BD13,coagulation factor X,фактор свёртывания крови x
+B02BD14,susoctocog alfa,
+B02BD30,"Coagulation factor II, thrombin",тромбин
+B02BX01,ethamsylate,этамзилат
+B02BX02,carbazochrome,
+B02BX03,batroxobin,
+B02BX04,romiplostim,ромиплостим
+B02BX05,eltrombopag,
+B02BX06,emicizumab,
+B02BX07,lusutrombopag,
+B02BX08,avatrombopag,
+B02BX09,fostamatinib,фостаматиниб
+B03AA01,ferrous glycine sulfate,
+B03AA02,iron(II) fumarate,iron(ii) fumarate
+B03AA03,iron(II) gluconate,железа глюконат
+B03AA04,iron(II) carbonate,карбонат железа(ii)
+B03AA05,ferrous chloride,хлорид железа(ii)
+B03AA06,ferrous succinate,
+B03AA07,iron(II) sulfate,сульфат железа(ii)
+B03AA08,ferrous tartrate,
+B03AA09,ferrous aspartate,
+B03AA10,ferrous ascorbate,
+B03AA11,iron(II) iodide,иодид железа(ii)
+B03AB01,iron(III) citrate,цитрат железа(iii)
+B03AB02,iron sucrose,
+B03AB04,iron(III) hydroxide,гидроксид железа(iii)
+B03AB05,ferric oxide polymaltose complexes,
+B03AB06,tetraferric tricitrate decahydrate,
+B03AB10,ferric maltol,
+B03AD02,iron(II) fumarate,iron(ii) fumarate
+B03AD03,iron(II) sulfate,сульфат железа(ii)
+B03AE10,hematogen,гематоген
+B03BA01,cyanocobalamin,цианокобаламин
+B03BA03,hydroxocobalamin,гидроксокобаламин
+B03BA04,cobamamide,кобамамид
+B03BA05,methylcobalamin,метилкобаламин
+B03BB01,folic acid,фолиевая кислота
+B03XA01,epoetin beta,
+B03XA02,darbepoetin alfa,
+B03XA03,Methoxy polyethylene glycol-epoetin beta,
+B03XA04,peginesatide,
+B03XA05,roxadustat,
+B05AA01,human serum albumin,
+B05AA03,Perftoran,перфторан
+B05AA05,dextran-40,реополиглюкин
+B05AA06,gelatin,желатин
+B05AA07,hydroxyethyl starch,гидроксиэтилкрахмал
+B05AA10,Hemopure,
+B05AX01,red blood cell,эритроциты
+B05AX02,platelet,тромбоцит
+B05AX03,blood plasma,плазма крови
+B05BA01,amino acid,аминокислота
+B05BA02,Kabiven,кабивен
+B05BA03,intravenous sugar solution,
+B05BA04,protein hydrolysates,
+B05BB01,Ringer's lactate solution,
+B05BC01,D-(-)-mannitol,маннит
+B05BC02,carbamide,
+B05CA01,cetylpyridinium,
+B05CA02,chlorhexidine,хлоргексидин
+B05CA03,nitrofurazone,нитрофурал
+B05CA04,sulfamethizole,
+B05CA05,taurolidine,
+B05CA06,mandelic acid,миндальная кислота
+B05CA07,noxytiolin,
+B05CA08,ethacridine lactate,
+B05CA09,neomycin,неомицин
+B05CB01,sodium chloride,хлорид натрия
+B05CB03,magnesium citrate,цитрат магния
+B05CB04,sodium bicarbonate,гидрокарбонат натрия
+B05CX01,glucose,глюкоза
+B05CX02,D-sorbitol,сорбит
+B05CX03,glycine,глицин
+B05CX04,D-(-)-mannitol,маннит
+B05XA01,potassium chloride,хлорид калия
+B05XA02,sodium bicarbonate,гидрокарбонат натрия
+B05XA03,sodium chloride,хлорид натрия
+B05XA04,carbachol,карбахол
+B05XA05,magnesium sulfate,сульфат магния
+B05XA07,calcium chloride,хлорид кальция
+B05XA08,sodium acetate,ацетат натрия
+B05XA09,sodium phosphates,натрия фосфаты
+B05XA10,magnesium phosphate,
+B05XA11,magnesium chloride,хлорид магния
+B05XA12,zinc chloride,хлорид цинка
+B05XA13,hydrochloric acid,соляная кислота
+B05XA14,Glycophos(tm),
+B05XA15,potassium DL-lactate,лактат калия
+B05XA17,potassium acetate,ацетат калия
+B05XB01,arginine hydrochloride,
+B05XB02,alanyl glutamine,
+B05XB03,lysine,лизин
+B06AA03,hyaluronidase (ovine),
+B06AA04,chymotrypsin,химотрипсин
+B06AA07,trypsin,трипсин
+B06AA10,deoxyribonuclease,стрептодорназа
+B06AB01,hematin,
+B06AC01,Serpin family G member 1,
+B06AC02,icatibant,инкатибант
+B06AC03,ecallantide,
+B06AC04,conestat alfa,
+B06AC05,lanadelumab,
+B06AX02,betibeglogene autotemcel,
+B06AX05,exagamglogene autotemcel,эксагамглоген аутотемцел
+C01AA01,acetyldigitoxin,
+C01AA02,acetyldigitoxin,
+C01AA04,digitoxin,дигитоксин
+C01AA05,digoxin,дигоксин
+C01AA06,lanatoside C,
+C01AA07,deslanoside,
+C01AA08,metildigoxin,
+C01AB01,proscillaridin,
+C01AC01,ouabain,уабаин
+C01AC03,cymarin,
+C01AX02,peruvoside,
+C01BA01,quinidine,хинидин
+C01BA02,procainamide,прокаинамид
+C01BA03,disopyramide,
+C01BA04,(−)-sparteine,пахикарпин
+C01BA05,ajmaline,аймалин
+C01BA08,prajmaline,
+C01BA12,Lorajmine,
+C01BA13,hydroquinidine,
+C01BB01,lidocaine,лидокаин
+C01BB02,mexiletine,
+C01BB03,tocainide,
+C01BB04,aprindine,
+C01BC03,propafenone,пропафенон
+C01BC04,flecainide,флекаинид
+C01BC07,lorcainide,
+C01BC08,encainide,
+C01BC09,ethacizine,диэтиламинопропионилэтоксикарбониламинофенотиазин
+C01BD01,amiodarone,амиодарон
+C01BD02,bretylium,
+C01BD03,bunaftine,
+C01BD04,dofetilide,
+C01BD05,ibutilide,
+C01BD06,tedisamil,
+C01BD07,dronedarone,
+C01BG01,moricizine,
+C01BG07,cifenline,
+C01BG11,vernakalant,
+C01CA01,etilefrine,этафедрин
+C01CA02,isoprenaline,изопреналин
+C01CA03,norepinephrine,норадреналин
+C01CA04,dopamine,дофамин
+C01CA05,norfenefrine,норфенефрин
+C01CA06,phenylephrine,фенилэфрин
+C01CA07,dobutamine,добутамин
+C01CA08,oxedrine,синефрин
+C01CA09,metaraminol,
+C01CA10,methoxamine,
+C01CA11,mephentermine,
+C01CA12,dimetofrine,
+C01CA13,prenalterol,
+C01CA14,dopexamine,
+C01CA15,(+/-)-gepefrine,
+C01CA16,ibopamine,
+C01CA17,midodrine,мидодрин
+C01CA18,octopamine,октопамин
+C01CA19,fenoldopam,
+C01CA21,cafedrine,
+C01CA22,arbutamine,
+C01CA23,theodrenaline,
+C01CA24,epinephrine,адреналин
+C01CA25,amezinium metilsulfate,
+C01CA26,(−)-ephedrine,(−)-эфедрин
+C01CA27,droxidopa,
+C01CE01,inamrinone,
+C01CE02,milrinone,
+C01CE03,enoximone,
+C01CE04,bucladesine,
+C01CX06,angiotensin amide,
+C01CX07,xamoterol,
+C01CX08,levosimendan,левосимендан
+C01CX09,angiotensin II,
+C01DA02,nitroglycerin,нитроглицерин
+C01DA05,pentaerythritol tetranitrate,пентаэритриттетранитрат
+C01DA07,propatyl nitrate,
+C01DA08,isosorbide dinitrate,изосорбида динитрат
+C01DA09,trolnitrate,
+C01DA13,erythrityl tetranitrate,
+C01DA14,isosorbide mononitrate,изосорбида мононитрат
+C01DA38,tenitramine,
+C01DB01,flosequinan,
+C01DX01,itramin tosylate,
+C01DX02,prenylamine,прениламин
+C01DX03,oxyfedrine,
+C01DX04,benziodarone,
+C01DX05,chromonar,
+C01DX06,hexobendine,
+C01DX07,etafenone,
+C01DX08,heptaminol,
+C01DX09,imolamine,
+C01DX10,dilazep,
+C01DX11,trapidil,
+C01DX12,molsidomine,
+C01DX13,efloxate,
+C01DX14,cinepazet,
+C01DX15,cloridarol,
+C01DX16,nicorandil,никорандил
+C01DX18,linsidomine,
+C01DX19,nesiritide,
+C01DX21,serelaxin,
+C01EA01,alprostadil,алпростадил
+C01EB02,camphor,камфора
+C01EB03,indomethacin,индометацин
+C01EB05,creatinolfosfate,
+C01EB06,phosphocreatine,креатинфосфорная кислота
+C01EB07,"beta-fructose 1,6-bisphosphate","фруктозо-1,6-дифосфат"
+C01EB09,ubidecarenone,кофермент q
+C01EB10,adenosine,аденозин
+C01EB11,tiracizine,
+C01EB13,acadesine,
+C01EB15,trimetazidine,триметазидин
+C01EB16,ibuprofen,ибупрофен
+C01EB17,ivabradine,ивабрадин
+C01EB18,ranolazine,
+C01EB21,Regadenoson,
+C01EB22,meldonium,мельдоний
+C01EB23,tiazotic acid,
+C02AA01,rescinnamine,
+C02AA02,reserpine,резерпин
+C02AA05,deserpidine,дезерпидин
+C02AA06,methoserpidine,
+C02AA07,bietaserpine,
+C02AB01,methyldopa,метилдопа
+C02AC01,clonidine,клонидин
+C02AC02,guanfacine,гуанфацин
+C02AC04,tolonidine,
+C02AC05,moxonidine,моксонидин
+C02AC06,rilmenidine,рилменидин
+C02BA01,trimethaphan camsylate,
+C02BB01,mecamylamine,
+C02CA01,prazosin,празозин
+C02CA02,indoramin,
+C02CA03,trimazosin,
+C02CA04,doxazosin,доксазозин
+C02CA06,urapidil,урапидил
+C02CC01,bethanidine,
+C02CC02,guanethidine,гуанетидин
+C02CC03,guanoxan,
+C02CC04,debrisoquin,
+C02CC05,guanoclor,
+C02CC06,guanazodine,
+C02CC07,guanoxabenz,
+C02DA01,diazoxide,диазоксид
+C02DB01,dihydralazine,
+C02DB02,hydralazine,гидралазин
+C02DB03,endralazine,
+C02DB04,cadralazine,
+C02DC01,minoxidil,миноксидил
+C02DD01,nitroprusside,нитропруссид натрия
+C02DG01,pinacidil,пинацидил
+C02KB01,metirosine,
+C02KC01,pargyline,
+C02KD01,ketanserin,кетансерин
+C02KX01,bosentan,
+C02KX02,ambrisentan,
+C02KX03,sitaxentan,
+C02KX04,macitentan,
+C02KX05,riociguat,
+C03AA01,bendroflumethiazide,
+C03AA02,hydroflumethiazide,
+C03AA03,hydrochlorothiazide,гидрохлоротиазид
+C03AA04,chlorothiazide,
+C03AA05,polythiazide,
+C03AA06,trichlormethiazide,
+C03AA07,cyclopenthiazide,
+C03AA08,methyclothiazide,
+C03AA09,cyclothiazide,
+C03AA13,mebutizide,
+C03BA02,quinethazone,
+C03BA03,"(2RS,6RS)-clopamide",
+C03BA04,chlorthalidone,хлорталидон
+C03BA05,mefruside,
+C03BA07,clofenamide,
+C03BA08,metolazone,
+C03BA09,meticrane,
+C03BA10,xipamide,
+C03BA11,indapamide,индапамид
+C03BA12,clorexolone,
+C03BA13,fenquizone,
+C03BC01,mersalyl,
+C03BD01,theobromine,теобромин
+C03BX03,cicletanine,
+C03CA01,furosemide,фуросемид
+C03CA02,bumetanide,буметанид
+C03CA03,piretanide,
+C03CA04,torasemide,
+C03CC01,ethacrynic acid,этакриновая кислота
+C03CC02,ticrynafen,
+C03CD01,muzolimine,
+C03CX01,etozoline,
+C03DA01,spironolactone,спиронолактон
+C03DA02,potassium canrenoate,
+C03DA03,canrenone,
+C03DA04,eplerenone,
+C03DB01,amiloride,амилорид
+C03DB02,triamterene,
+C03EB01,Co-amilofruse,
+C03XA01,tolvaptan,
+C03XA02,conivaptan,
+C04AA01,isoxsuprine,
+C04AA02,nylidrin,
+C04AA31,bamethan,
+C04AB01,phentolamine,фентоламин
+C04AB02,tolazoline,бендазол
+C04AC01,nicotinic acid,никотиновая кислота
+C04AC02,nicotinyl alcohol,
+C04AC03,inositol niacinate,
+C04AC07,ciclonicate,
+C04AD01,pentifylline,
+C04AD02,Xantinol nicotinate,
+C04AD03,pentoxifylline,пентоксифиллин
+C04AD04,etofylline nicotinate,
+C04AE01,ergoloid mesylate,дигидроэрготоксин
+C04AE02,nicergoline,ницерголин
+C04AE04,dihydroergocristine,
+C04AF01,kallidinogenase,
+C04AX01,cyclandelate,
+C04AX02,phenoxybenzamine,
+C04AX07,vincamine,винкамин
+C04AX10,moxisylyte,
+C04AX11,bencyclane,
+C04AX17,vinburnine,
+C04AX19,2-(octylamino)-1-[4-(propan-2-ylthio)phenyl]-1-propanol,
+C04AX20,buflomedil,
+C04AX21,nafronyl,
+C04AX23,butalamine,
+C04AX24,Visnadine,
+C04AX26,Cetiedil,
+C04AX27,cinepazide,
+C04AX28,ifenprodil,
+C04AX30,azapetine,
+C04AX32,fasudil,фасудил
+C05AA01,cortisol,кортизол
+C05AA04,prednisolone,преднизолон
+C05AA05,betamethasone,бетаметазон
+C05AA06,fluorometholone,
+C05AA08,fluocortolone,
+C05AA09,dexamethasone,дексаметазон
+C05AA10,fluocinolone acetonide,флуоцинолона ацетонид
+C05AA11,fluocinonide,
+C05AA12,triamcinolone,триамцинолон
+C05AD01,lidocaine,лидокаин
+C05AD02,tetracaine,тетракаин
+C05AD03,benzocaine,бензокаин
+C05AD04,dibucaine,
+C05AD05,procaine,прокаин
+C05AD06,oxethazaine,
+C05AD07,pramoxine,
+C05AE01,nitroglycerin,нитроглицерин
+C05AE02,isosorbide dinitrate,изосорбида динитрат
+C05AE03,diltiazem,дилтиазем
+C05AX05,tribenoside,
+C05BA02,Sodium apolate,
+C05BA03,heparin,гепарин
+C05BA04,Pentosan polysulfate sodium,
+C05BB01,(Z)-ethanolamine oleate,
+C05BB02,polidocanol,синтанол
+C05BB03,invert sugar,инвертный сахар
+C05BB04,myristyl sulfate,миристилсульфат
+C05BB05,phenol,фенол
+C05BX01,calcium dobesilate,кальция добезилат
+C05CA01,rutin,рутозид
+C05CA02,monoxerutin,
+C05CA03,diosmin,диосмин
+C05CA04,Troxerutin,троксерутин
+C05CA05,hidrosmin,
+C05CX01,tribenoside,
+C05CX02,naftazone,
+C05CX03,conker,
+C07AA01,alprenolol,алпренолол
+C07AA02,oxprenolol,окспренолол
+C07AA03,pindolol,пиндолол
+C07AA05,propranolol,пропранолол
+C07AA06,(−)-timolol,тимолол
+C07AA07,sotalol,соталол
+C07AA12,nadolol,надолол
+C07AA14,mepindolol,
+C07AA15,carteolol,
+C07AA16,tertatolol,
+C07AA17,bopindolol,бопиндолол
+C07AA19,bupranolol,
+C07AA23,penbutolol,
+C07AA27,cloranolol,
+C07AB01,practolol,
+C07AB02,metoprolol,метопролол
+C07AB03,atenolol,атенолол
+C07AB04,acebutolol,ацебутолол
+C07AB05,betaxolol,бетаксолол
+C07AB06,bevantolol,
+C07AB07,bisoprolol,бисопролол
+C07AB08,celiprolol,
+C07AB09,esmolol,
+C07AB10,epanolol,
+C07AB11,esatenolol,
+C07AB12,nebivolol,небиволол
+C07AB13,talinolol,талинолол
+C07AB14,landiolol,
+C07AG01,labetalol,лабеталол
+C07AG02,carvedilol,карведилол
+C08CA01,amlodipine,амлодипин
+C08CA02,felodipine,
+C08CA03,isradipine,
+C08CA04,nicardipine,
+C08CA05,nifedipine,нифедипин
+C08CA06,nimodipine,нимодипин
+C08CA07,nisoldipine,
+C08CA08,nitrendipine,дитирозин
+C08CA09,lacidipine,
+C08CA10,nilvadipine,
+C08CA11,manidipine,
+C08CA12,barnidipine,
+C08CA13,lercanidipine,
+C08CA14,cilnidipine,
+C08CA15,benidipine,
+C08CA16,clevidipine,
+C08CX01,mibefradil,мибефрадил
+C08DA01,verapamil,верапамил
+C08DA02,gallopamil,
+C08DB01,diltiazem,дилтиазем
+C08EA01,fendiline,
+C08EA02,bepridil,
+C08EX01,lidoflazine,
+C08EX02,perhexiline,
+C09AA01,captopril,каптоприл
+C09AA02,enalapril,эналаприл
+C09AA03,lisinopril,лизиноприл
+C09AA04,perindopril,периндоприл
+C09AA05,ramipril,рамиприл
+C09AA06,quinapril,
+C09AA07,benazepril,
+C09AA08,cilazapril,
+C09AA09,fosinopril,фозиноприл
+C09AA10,trandolapril,
+C09AA11,spirapril,
+C09AA12,delapril,
+C09AA13,moexipril,моэксиприл
+C09AA14,temocapril,
+C09AA15,zofenopril,
+C09AA16,imidapril,
+C09BB03,lisinopril/amlodipine,
+C09BB04,amlodipine / perindopril,
+C09BB10,trandolapril/verapamil,
+C09CA01,losartan,лозартан
+C09CA02,eprosartan,
+C09CA03,valsartan,вальсартан
+C09CA04,irbesartan,
+C09CA05,tasosartan,
+C09CA06,candesartan,кандесартан
+C09CA07,telmisartan,телмисартан
+C09CA08,olmesartan,behicar
+C09CA09,azilsartan medoxomil,
+C09CA10,fimasartan,
+C09DB01,amlodipine/valsartan,
+C09DB02,Azor,
+C09DB04,telmisartan / amlodipine,
+C09DX01,amlodipine / valsartan / hydrochlorothiazide,
+C09DX04,sacubitril/valsartan,
+C09XA01,remikiren,
+C09XA02,aliskiren,
+C09XA52,aliskiren / hydrochlorothiazide,
+C09XA53,aliskiren/amlodipine,
+C09XA54,aliskiren/amlodipine/hydrochlorothiazide,
+C10AA01,simvastatin,симвастатин
+C10AA02,lovastatin,ловастатин
+C10AA03,pravastatin,правастатин
+C10AA04,fluvastatin,
+C10AA05,atorvastatin,аторвастатин
+C10AA06,cerivastatin,
+C10AA07,rosuvastatin,розувастатин
+C10AA08,pitavastatin,
+C10AB01,clofibrate,
+C10AB02,bezafibrate,
+C10AB03,aluminium clofibrate,
+C10AB04,gemfibrozil,гемфиброзил
+C10AB05,fenofibrate,фенофибрат
+C10AB06,simfibrate,
+C10AB07,ronifibrate,
+C10AB08,ciprofibrate,
+C10AB09,etofibrate,
+C10AB10,clofibride,
+C10AB11,choline fenofibrate,
+C10AC01,colestyramine,колестирамин
+C10AC02,colestipol,
+C10AC03,Colextran,
+C10AC04,colesevelam,
+C10AD01,niceritrol,
+C10AD02,nicotinic acid,никотиновая кислота
+C10AD03,nicofuranose,
+C10AD04,Aluminium nicotinate,
+C10AD05,nicotinyl alcohol,
+C10AD06,acipimox,
+C10AX01,dextrothyroxine,
+C10AX02,probucol,
+C10AX03,tiadenol,
+C10AX05,meglutol,
+C10AX06,omega-3 fatty acid,омега-3-ненасыщенные жирные кислоты
+C10AX07,Magnesium pyridoxal 5-phosphate glutamate,
+C10AX08,Policosanol,поликозанол
+C10AX09,ezetimibe,эзетимиб
+C10AX10,glybera,
+C10AX11,mipomersen parent acid,
+C10AX12,lomitapide,
+C10AX13,evolocumab,эволокумаб
+C10AX14,alirocumab,алирокумаб
+C10AX16,inclisiran,инклисиран
+C10BA02,ezetimibe / simvastatin,
+C10BA04,fenofibrate / simvastatin,
+C10BA05,ezetimibe/atorvastatin,
+C10BX03,amlodipine / atorvastatin,
+C10BX11,"atorvastatin, amlodipine and perindopril",
+D01AA01,nystatin,нистатин
+D01AA02,natamycin,натамицин
+D01AA03,Hachimycin,
+D01AA04,pecilocin,
+D01AA06,mepartricin,мепартрицин
+D01AA07,pyrrolnitrin,
+D01AA08,griseofulvin,гризеофульвин
+D01AC01,clotrimazole,клотримазол
+D01AC02,miconazole,
+D01AC03,econazole,
+D01AC04,chlormidazole,
+D01AC05,isoconazole,
+D01AC06,thiabendazole,тиабендазол
+D01AC07,tioconazole,
+D01AC08,ketoconazole,кетоконазол
+D01AC09,sulconazole,
+D01AC10,bifonazole,бифоназол
+D01AC11,oxiconazole,
+D01AC12,fenticonazole,
+D01AC13,omoconazole,
+D01AC14,sertaconazole,сертаконазол
+D01AC15,fluconazole,флуконазол
+D01AC16,flutrimazole,
+D01AC17,eberconazole,
+D01AC18,luliconazole,
+D01AC19,efinaconazole,
+D01AE01,bromochlorosalicylanilide,
+D01AE02,crystal violet,кристаллический фиолетовый
+D01AE03,"2,4,6-tribromo-m-cresol",
+D01AE04,undecylenic acid,ундециленовая кислота
+D01AE05,polynoxylin,полиноксилин
+D01AE07,chlorphenesin,
+D01AE08,ticlatone,
+D01AE09,sulbentine,
+D01AE11,haloprogin,
+D01AE12,salicylic acid,салициловая кислота
+D01AE13,selenium disulfide,дисульфид селена
+D01AE14,ciclopirox,циклопирокс
+D01AE15,terbinafine,тербинафин
+D01AE16,amorolfine,аморолфин
+D01AE17,diamthazole,
+D01AE18,tolnaftate,
+D01AE19,tolciclate,
+D01AE21,5-fluorocytosine,
+D01AE22,naftifine,naftin
+D01AE23,butenafine,
+D01AE24,tavaborole,
+D01BA01,griseofulvin,гризеофульвин
+D01BA02,terbinafine,тербинафин
+D02AE01,urea,мочевина
+D02BA01,4-aminobenzoic acid,пара-аминобензойная кислота
+D02BA02,octinoxate,
+D02BB01,β-carotene,β-каротин
+D02BB02,afamelanotide,
+D03AX01,cadexomer iodine,
+D03AX02,dextranomer,
+D03AX03,panthenol,
+D03AX04,calcium pantothenate,
+D03AX05,Hyaluronan sodium,гиалуронат натрия
+D03AX06,becaplermin,бекаплермин
+D03AX09,Crilanomer,
+D03AX10,enoxolone,
+D03AX11,sodium chlorite,хлорит натрия
+D03AX12,trolamine,триэтаноламин
+D03AX13,Betulae cortex,
+D03BA01,trypsin,трипсин
+D03BA02,collagenase clostridium histolyticum,
+D03BA03,bromelain,бромелаин
+D04AA01,thonzylamine,
+D04AA02,pyrilamine,
+D04AA03,thenalidine,
+D04AA04,tripelennamine,
+D04AA09,chloropyramine,хлоропирамин
+D04AA10,promethazine,прометазин
+D04AA12,tolpropamine,
+D04AA13,dimethindene,fenistil
+D04AA14,clemastine,клемастин
+D04AA15,bamipine,
+D04AA16,pheniramine,
+D04AA22,isothipendyl,
+D04AA32,diphenhydramine,дифенгидрамин
+D04AA34,chlorphenoxamine,
+D04AB01,lidocaine,лидокаин
+D04AB02,dibucaine,
+D04AB03,oxybuprocaine,
+D04AB04,benzocaine,бензокаин
+D04AB05,dimethisoquin,
+D04AB06,tetracaine,тетракаин
+D04AB07,pramoxine,
+D04AX01,(E/Z)-doxepin,доксепин
+D05AC01,anthralin,
+D05AD01,trioxsalen,
+D05AD02,methoxsalen,
+D05AX01,fumaric acid,фумаровая кислота
+D05AX02,calcipotriol,
+D05AX03,calcitriol,кальцитриол
+D05AX04,tacalcitol,
+D05AX05,tazarotene,
+D05BA01,trioxsalen,
+D05BA02,methoxsalen,
+D05BA03,bergapten,бергаптен
+D05BB01,etretinate,
+D05BB02,acitretin,
+D06AA01,demeclocycline,
+D06AA02,chlortetracycline,хлортетрациклин
+D06AA03,oxytetracycline,окситетрациклин
+D06AA04,tetracycline,тетрациклин
+D06AX01,fusidic acid,фузидовая кислота
+D06AX02,chloramphenicol,хлорамфеникол
+D06AX04,neomycin,неомицин
+D06AX05,bacitracin a,бацитрацин
+D06AX07,gentamicin,гентамицин
+D06AX08,tyrothricin,
+D06AX09,mupirocin,мупироцин
+D06AX10,virginiamycin group,
+D06AX11,rifaximin,рифаксимин
+D06AX12,amikacin,амикацин
+D06AX13,retapamulin,ретапамулин
+D06AX14,ozenoxacin,
+D06BA01,silver sulfadiazine,эбермин
+D06BA02,sulfathiazole,
+D06BA03,mafenide,
+D06BA04,sulfamethizole,
+D06BA05,sulfanilamide,сульфаниламид
+D06BA06,sulfamerazine,
+D06BB01,idoxuridine,идоксуридин
+D06BB02,tromantadine,тромантадин
+D06BB03,aciclovir,ацикловир
+D06BB04,podofilox,подофиллотоксин
+D06BB05,inosine,инозин
+D06BB06,penciclovir,пенцикловир
+D06BB07,lysozyme family,лизоцим
+D06BB08,ibacitabine,
+D06BB09,edoxudine,
+D06BB10,imiquimod,
+D06BB11,docosanol,докозанол-1
+D06BB12,sinecatechins,
+D06BX01,metronidazole,метронидазол
+D06BX02,ingenol mebutate,
+D07AA01,methylprednisolone,метилпреднизолон
+D07AA02,cortisol,кортизол
+D07AA03,prednisolone,преднизолон
+D07AB01,clobetasone,
+D07AB02,hydrocortisone butyrate,
+D07AB03,flumetasone,
+D07AB04,fluocortin,
+D07AB05,fluperolone,
+D07AB06,fluorometholone,
+D07AB07,fluprednidene,
+D07AB08,desonide,
+D07AB09,triamcinolone,триамцинолон
+D07AB10,alclometasone,
+D07AB11,hydrocortisone buteprate,
+D07AB19,dexamethasone,дексаметазон
+D07AB21,clocortolone,
+D07AC01,betamethasone,бетаметазон
+D07AC02,fluclorolone,
+D07AC03,desoximetasone,
+D07AC04,fluocinolone acetonide,флуоцинолона ацетонид
+D07AC05,fluocortolone,
+D07AC06,diflucortolone,
+D07AC07,flurandrenolide,
+D07AC08,fluocinonide,
+D07AC09,budesonide,будесонид
+D07AC10,diflorasone,
+D07AC11,amcinonide,
+D07AC12,halometasone,
+D07AC13,mometasone,
+D07AC14,methylprednisolone aceponate,
+D07AC15,beclomethasone dipropionate,беклометазона дипропионат
+D07AC16,hydrocortisone aceponate,
+D07AC17,fluticasone,флутиказон
+D07AC18,prednicarbate,предникарбат
+D07AC19,difluprednate,
+D07AC21,halobetasol propionate,
+D07AD01,clobetasol,клобетазол
+D07AD02,halcinonide,
+D07XA01,cortisol,кортизол
+D07XA02,prednisolone,преднизолон
+D07XB01,flumetasone,
+D07XB02,triamcinolone,триамцинолон
+D07XB03,fluprednidene,
+D07XB04,fluorometholone,
+D07XB05,dexamethasone,дексаметазон
+D07XC01,betamethasone,бетаметазон
+D07XC02,desoximetasone,
+D07XC03,mometasone,
+D07XC04,diflucortolone,
+D07XC05,fluocortolone,
+D08AA01,ethacridine lactate,
+D08AA02,aminoacridines,
+D08AA03,Euflavine,
+D08AC01,dibrompropamidine,
+D08AC02,chlorhexidine,хлоргексидин
+D08AC03,propamidine,
+D08AC04,hexamidine,
+D08AC05,Polyhexanide,
+D08AE01,hexachlorophene,
+D08AE02,policresulen,
+D08AE03,phenol,фенол
+D08AE04,triclosan,триклозан
+D08AE05,chloroxylenol,хлороксиленол
+D08AE06,2-phenylphenol,2-фенилфенол
+D08AF01,nitrofurazone,нитрофурал
+D08AG02,povidone-iodine,повидон-йод
+D08AG03,iodine in medicine,
+D08AG04,diiodohydroxypropane,
+D08AH01,dequalinium,
+D08AH02,chlorquinaldol,хлорхинальдол
+D08AH03,oxyquinoline,8-оксихинолин
+D08AH30,clioquinol,виоформ
+D08AJ01,benzalkonium chloride,
+D08AJ02,cetrimonium,
+D08AJ03,cetylpyridinium,
+D08AJ04,cetrimide,
+D08AJ05,benzoxonium chloride,
+D08AJ06,didecyldimonium chloride,дидецилдиметиламония хлорид
+D08AJ08,benzethonium chloride,
+D08AJ10,decamethoxin hydrochloride,декаметилендиметилментоксикарбонилметиламмония дихлорид
+D08AK01,ammoniatedmercuric chloride,амидохлорид ртути
+D08AK02,phenylmercuric borate,
+D08AK03,mercuric chloride,хлорид ртути(ii)
+D08AK04,merbromin,меркурохром
+D08AK05,Mercury,mercury
+D08AK06,thiomersal,мертиолят
+D08AK30,mercury(II) iodide,иодид ртути(ii)
+D08AL01,silver nitrate,нитрат серебра(i)
+D08AL30,medical uses of silver,
+D08AX01,hydrogen peroxide solution,раствор перекиси водорода
+D08AX02,eosin,эозин
+D08AX03,propyl alcohol,пропиловый спирт
+D08AX04,chloramine T,
+D08AX05,isopropyl alcohol,изопропиловый спирт
+D08AX06,potassium permanganate,перманганат калия
+D08AX07,sodium hypochlorite,гипохлорит натрия
+D08AX08,ethanol,этанол
+D09AA01,framycetin,фрамицетин
+D09AA02,fusidic acid,фузидовая кислота
+D09AA03,nitrofurazone,нитрофурал
+D09AA04,phenylmercuric nitrate,
+D09AA05,benzododecinium(1+),
+D09AA06,triclosan,триклозан
+D09AA07,cetylpyridinium,
+D09AA08,aluminium chlorohydrate,гидроксохлорид алюминия
+D09AA09,povidone-iodine,повидон-йод
+D09AA10,clioquinol,виоформ
+D09AA11,benzalkonium chloride,
+D09AA12,chlorhexidine,хлоргексидин
+D09AA13,iodoform,иодоформ
+D10AA01,fluorometholone,
+D10AA02,methylprednisolone,метилпреднизолон
+D10AA03,dexamethasone,дексаметазон
+D10AB01,bithionol,
+D10AB02,sulfur,
+D10AB03,tioxolone,
+D10AB05,mesulfen,
+D10AD01,tretinoin,третиноин
+D10AD02,retinol,ретинол
+D10AD03,adapalene,
+D10AD04,isotretinoin,изотретиноин
+D10AD05,motretinide,
+D10AD06,trifarotene,трифаротен
+D10AE01,benzoyl peroxide,бензоилпероксид
+D10AF01,clindamycin,клиндамицин
+D10AF02,erythromycin,эритромицин
+D10AF03,chloramphenicol,хлорамфеникол
+D10AF04,meclocycline,
+D10AF05,nadifloxacin,надифлоксацин
+D10AF06,sulfacetamide,сульфацетамид
+D10AX01,aluminum chloride,хлорид алюминия
+D10AX02,resorcin,резорцин
+D10AX03,azelaic acid,азелаиновая кислота
+D10AX04,aluminium oxide,оксид алюминия
+D10AX05,dapsone,дапсон
+D10BA01,isotretinoin,изотретиноин
+D10BX01,ichtasol,
+D11AC01,cetrimide,
+D11AC02,cadmium compound,
+D11AC03,selenium compounds,соединения селена
+D11AC06,povidone-iodine,повидон-йод
+D11AC08,sulfur compound,соединения серы
+D11AC09,biphenamine,
+D11AE01,methandrostenolone,метандиенон
+D11AH01,tacrolimus,такролимус
+D11AH02,pimecrolimus,пимекролимус
+D11AH03,cromoglicic acid,кромоглициевая кислота
+D11AH04,alitretinoin,
+D11AH05,dupilumab,дупилумаб
+D11AH06,crisaborole,
+D11AX01,minoxidil,миноксидил
+D11AX02,gamolenic acid,γ-линоленовая кислота
+D11AX03,calcium gluconate,глюконат кальция
+D11AX04,Lithium succinate,
+D11AX05,magnesium sulfate,сульфат магния
+D11AX06,mequinol,
+D11AX08,tiratricol,
+D11AX09,oxaceprol,
+D11AX10,finasteride,финастерид
+D11AX11,hydroquinone,гидрохинон
+D11AX12,pyrithione zinc,цинк пиритион
+D11AX13,monobenzone,монобензон
+D11AX16,eflornithine,
+D11AX18,Diclofenac,диклофенак
+D11AX21,brimonidine,бримонидин
+D11AX22,ivermectin,ивермектин
+D11AX24,deoxycholic acid,дезоксихолевая кислота
+D11AX25,hydrogen peroxide solution,раствор перекиси водорода
+D11AX27,oxymetazoline,оксиметазолин
+G01AA01,nystatin,нистатин
+G01AA02,natamycin,натамицин
+G01AA03,amphotericin B,амфотерицин b
+G01AA04,candicidin,
+G01AA05,chloramphenicol,хлорамфеникол
+G01AA06,Hachimycin,
+G01AA07,oxytetracycline,окситетрациклин
+G01AA09,mepartricin,мепартрицин
+G01AA10,clindamycin,клиндамицин
+G01AA11,pentamycin,
+G01AB01,3-acetylamino-4-hydroxyphenyl arsonic acid,
+G01AC01,iodoquinol,
+G01AC02,clioquinol,виоформ
+G01AC03,chlorquinaldol,хлорхинальдол
+G01AC05,dequalinium chloride,хлорид деквалиния
+G01AC06,broxyquinoline,
+G01AC30,oxyquinoline,8-оксихинолин
+G01AD01,lactic acid,молочная кислота
+G01AD02,acetic acid,уксусная кислота
+G01AD03,vitamin C,витамин c
+G01AE01,sulfatolamide,
+G01AF01,metronidazole,метронидазол
+G01AF02,clotrimazole,клотримазол
+G01AF04,miconazole,
+G01AF05,econazole,
+G01AF06,ornidazole,
+G01AF07,isoconazole,
+G01AF08,tioconazole,
+G01AF11,ketoconazole,кетоконазол
+G01AF12,fenticonazole,
+G01AF13,azanidazole,
+G01AF14,propenidazole,
+G01AF15,butoconazole,
+G01AF16,omoconazole,
+G01AF17,oxiconazole,
+G01AF18,flutrimazole,
+G01AF19,sertaconazole,сертаконазол
+G01AG02,terconazole,
+G01AX01,chlordantoin,
+G01AX03,policresulen,
+G01AX05,Nifuratel,
+G01AX06,furazolidone,фуразолидон
+G01AX09,crystal violet,кристаллический фиолетовый
+G01AX11,povidone-iodine,повидон-йод
+G01AX12,ciclopirox,циклопирокс
+G01AX13,Protiofate,
+G01AX14,Lactobacillus,лактобациллы
+G01AX15,copper usnate,
+G01AX16,hexetidine,гексорал
+G01AX17,dapivirine,
+G02AB01,methylergonovine,метилэргометрин
+G02AB02,ergot alkaloids,
+G02AB03,ergometrine,эргометрин
+G02AD01,prostaglandin F2α,
+G02AD02,prostaglandin E2,
+G02AD03,gemeprost,гемепрост
+G02AD04,carboprost,
+G02AD05,sulprostone,
+G02AD06,misoprostol,мизопростол
+G02BA02,copper IUD,
+G02BB01,ethinylestradiol/etonogestrel,
+G02CA01,ritodrine,
+G02CA02,nylidrin,
+G02CA03,fenoterol,фенотерол
+G02CB01,bromocriptine,бромокриптин
+G02CB02,lisuride,лизергол
+G02CB03,cabergoline,каберголин
+G02CB04,Quinagolide,
+G02CB05,metergoline,
+G02CB06,terguride,
+G02CC01,ibuprofen,ибупрофен
+G02CC02,naproxen,напроксен
+G02CC03,benzydamine,бензидамин
+G02CC04,flunoxaprofen,
+G02CX01,atosiban,атозибан
+G02CX02,flibanserin,флибансерин
+G03AA05,ethinylestradiol/norethisterone,
+G03AA07,ethinylestradiol/levonorgestrel,
+G03AA10,gestodene and ethinylestradiol,
+G03AA12,drospirenone and ethinylestradiol,
+G03AA13,ethinylestradiol/norelgestromin,
+G03AB03,ethinylestradiol/levonorgestrel,
+G03AB05,desogestrel and ethinylestradiol,
+G03AB06,gestodene and ethinylestradiol,
+G03AC01,norethisterone,норэтистерон
+G03AC02,lynestrenol,
+G03AC03,levonorgestrel,левоноргестрел
+G03AC04,quingestanol,
+G03AC05,megestrol acetate,мегестрол ацетат
+G03AC06,medroxyprogesterone,медроксипрогестерон
+G03AC07,norgestrienone,
+G03AC08,etonogestrel,
+G03AC09,desogestrel,
+G03AC10,drospirenone,
+G03AD01,levonorgestrel,левоноргестрел
+G03AD02,ulipristal,
+G03BA01,fluoxymesterone,
+G03BA02,methyltestosterone,метилтестостерон
+G03BA03,testosterone,тестостерон
+G03BB01,mesterolone,местеролон
+G03BB02,androstanolone,
+G03CA01,ethinylestradiol,этинилэстрадиол
+G03CA03,17β-estradiol,эстрадиол
+G03CA04,estriol,эстриол
+G03CA06,chlorotrianisene,
+G03CA07,estrone,эстрон
+G03CA09,promestriene,
+G03CA57,conjugated estrogens,cульфат эстрона
+G03CB01,"dienestrol (E,E-isomer)",
+G03CB02,diethylstilbestrol,диэтилстильбестрол
+G03CB03,methallenestril,
+G03CB04,moxestrol,
+G03CC02,"dienestrol (E,E-isomer)",
+G03CC03,methallenestril,
+G03CC04,estrone,эстрон
+G03CC05,diethylstilbestrol,диэтилстильбестрол
+G03CC06,estriol,эстриол
+G03CC07,bazedoxifene/conjugated estrogens,
+G03CX01,tibolone,
+G03DA01,gestonorone,
+G03DA02,medroxyprogesterone,медроксипрогестерон
+G03DA03,17α-hydroxyprogesterone,17-гидроксипрогестерон
+G03DA04,progesterone,прогестерон
+G03DB01,dydrogesterone,дидрогестерон
+G03DB02,megestrol acetate,мегестрол ацетат
+G03DB03,medrogestone,
+G03DB04,nomegestrol,
+G03DB05,demegestone,
+G03DB06,chlormadinone acetate,
+G03DB07,promegestone,
+G03DB08,dienogest,диеногест
+G03DC01,allylestrenol,
+G03DC02,norethisterone,норэтистерон
+G03DC03,lynestrenol,
+G03DC04,ethisterone,
+G03DC06,ethynodiol diacetate,
+G03DC31,normethandrone,
+G03EA03,prasterone enantate,
+G03EK01,methyltestosterone,метилтестостерон
+G03FA10,norgestrel and estrogen,
+G03FB08,estradiol/dydrogesterone,
+G03GA01,chorionic gonadotropin,хорионический гонадотропин
+G03GA02,menotropin,
+G03GA04,urofollitropin,урофоллитропин
+G03GA05,follitropin alpha,
+G03GA06,follitropin beta,
+G03GA07,lutropin alfa,
+G03GA08,chorionic gonadotropin,хорионический гонадотропин
+G03GA09,corifollitropin alfa,
+G03GB01,cyclofenil,
+G03GB02,clomifene,клостилбегит
+G03GB03,epimestrol,
+G03HA01,cyproterone,cyproterone
+G03HB01,ethinylestradiol/cyproterone acetate,
+G03XA01,danazol,даназол
+G03XA02,gestrinone,гестринон
+G03XB01,mifepristone,мифепристон
+G03XB02,ulipristal acetate,улипристала ацетат
+G03XC01,raloxifene,
+G03XC02,bazedoxifene,
+G03XC03,lasofoxifene,
+G03XC04,ormeloxifene,
+G03XC05,ospemifene,
+G03XX01,prasterone,
+G04BA01,ammonium chloride,хлорид аммония
+G04BA03,calcium chloride,хлорид кальция
+G04BD01,emepronium bromide,
+G04BD02,flavoxate,
+G04BD03,meladrazine,
+G04BD04,oxybutynin,оксибутинин
+G04BD05,terodiline,
+G04BD06,propiverine,
+G04BD07,tolterodine,
+G04BD08,solifenacin succinate,солифенацин
+G04BD09,trospium,
+G04BD10,darifenacin,
+G04BD11,fesoterodine,фезотеродин
+G04BD12,mirabegron,
+G04BD13,desfesoterodine,
+G04BE01,alprostadil,алпростадил
+G04BE02,papaverine,папаверин
+G04BE03,sildenafil,силденафил
+G04BE04,yohimbine,иохимбин
+G04BE06,moxisylyte,
+G04BE07,apomorphine,апоморфин
+G04BE08,tadalafil,тадалафил
+G04BE09,vardenafil,варденафил
+G04BE10,avanafil,аванафил
+G04BE11,udenafil,уденафил
+G04BE52,papazole,папазол
+G04BX01,magnesium hydroxide,гидроксид магния
+G04BX03,acetohydroxamic acid,
+G04BX06,phenazopyridine,феназопиридин
+G04BX10,succinimide,сукцинимид
+G04BX11,collagen,коллаген
+G04BX12,phenyl salicylate,
+G04BX13,dimethyl sulfoxide,диметилсульфоксид
+G04BX14,dapoxetine,dapoxetine
+G04BX15,Pentosan polysulfate sodium,
+G04BX16,tiopronin,
+G04CA01,alfuzosin,алфузозин
+G04CA02,tamsulosin,тамсулозин
+G04CA03,terazosin,
+G04CA04,silodosin,silodix
+G04CA52,dutasteride / tamsulosin,
+G04CB01,finasteride,финастерид
+G04CB02,dutasteride,avodart
+G04CX03,mepartricin,мепартрицин
+G04CX04,fexapotide,
+H01AA01,corticotropin,адренокортикотропный гормон
+H01AA02,cosyntropin,тетракозактид
+H01AB01,thyrotropin alfa,
+H01AC01,somatropin recombinant,
+H01AC02,somatrem,
+H01AC03,mecasermin,
+H01AC04,sermorelin,
+H01AC05,mecasermin rinfabate,
+H01AC06,tesamorelin,тезаморелин
+H01AX01,pegvisomant,
+H01BA01,arginine vasopressin,антидиуретический гормон
+H01BA02,desmopressin,десмопрессин
+H01BA03,Lypressin,
+H01BA04,terlipressin,терлипрессин
+H01BA05,ornipressin,
+H01BB01,demoxytocin,
+H01BB02,oxytocin,окситоцин
+H01BB03,carbetocin,карбетоцин
+H01CA01,gonadorelin,
+H01CA02,nafarelin,
+H01CB01,somatostatin,
+H01CB02,octreotide,октреотид
+H01CB03,lanreotide,
+H01CB04,vapreotide,
+H01CB05,pasireotide,
+H01CC01,Ganirelix,
+H01CC02,cetrorelix,
+H02AA01,aldosterone,альдостерон
+H02AA02,fludrocortisone,флудрокортизон
+H02AA03,deoxycorticosterone,дезоксикортикостерон
+H02AB01,betamethasone,бетаметазон
+H02AB02,dexamethasone,дексаметазон
+H02AB03,fluocortolone,
+H02AB04,methylprednisolone,метилпреднизолон
+H02AB05,paramethasone,
+H02AB06,prednisolone,преднизолон
+H02AB07,prednisone,преднизон
+H02AB08,triamcinolone,триамцинолон
+H02AB09,cortisol,кортизол
+H02AB10,cortisone,кортизон
+H02AB11,prednylidene,
+H02AB12,rimexolone,
+H02AB13,deflazacort,
+H02AB14,cloprednol,
+H02AB15,meprednisone,
+H02AB17,cortivazol,
+H02CA01,trilostane,
+H03AA01,levothyroxine sodium,
+H03AA02,liothyronine sodium,
+H03AA04,tiratricol,
+H03BA01,methylthiouracil,
+H03BA02,propylthiouracil,
+H03BA03,benzylthiouracil,
+H03BB01,carbimazole,
+H03BB02,methimazole,methimazole
+H03BC01,potassium perchlorate,перхлорат калия
+H03BX01,diiodo-L-tyrosine,
+H03BX02,dibromotyrosine,
+H04AA01,glucagon,глюкагон
+H05AA02,teriparatide,
+H05AA03,Preotact,
+H05BA01,salmon calcitonin,
+H05BA04,elcatonin,
+H05BX01,cinacalcet,
+H05BX02,paricalcitol,
+H05BX03,doxercalciferol,
+H05BX04,etelcalcetide,
+J01AA01,demeclocycline,
+J01AA02,doxycycline,доксициклин
+J01AA03,chlortetracycline,хлортетрациклин
+J01AA04,lymecycline,
+J01AA05,methacycline,
+J01AA06,oxytetracycline,окситетрациклин
+J01AA07,tetracycline,тетрациклин
+J01AA08,minocycline,миноциклин
+J01AA09,rolitetracycline,
+J01AA10,penimepicycline,
+J01AA11,clomocycline,
+J01AA12,tigecycline,
+J01AA13,eravacycline,eravacycline
+J01AA14,sarecycline,сарециклин
+J01AA15,omadacycline,omadacycline
+J01BA01,chloramphenicol,хлорамфеникол
+J01BA02,thiamphenicol,
+J01CA01,ampicillin,ампициллин
+J01CA02,pivampicillin,
+J01CA03,carbenicillin,
+J01CA04,amoxicillin,амоксициллин
+J01CA05,carbenicillin indanyl sodium,
+J01CA06,bacampicillin,
+J01CA07,epicillin,
+J01CA08,amdinocillin pivoxil,пивмециллинам
+J01CA09,azlocillin,
+J01CA10,mezlocillin,
+J01CA11,amdinocillin,
+J01CA12,piperacillin,
+J01CA13,ticarcillin,
+J01CA14,metampicillin,
+J01CA15,talampicillin,
+J01CA16,sulbenicillin,
+J01CA17,temocillin,
+J01CA18,hetacillin,
+J01CA19,aspoxicillin,аспоксициллин
+J01CE01,benzylpenicillin,бензатина бензилпенициллин
+J01CE02,penicillin v,феноксиметилпенициллин
+J01CE03,propicillin,
+J01CE04,azidocillin,
+J01CE05,(2RS)-pheneticillin,
+J01CE06,penamecillin,
+J01CE07,clometocillin,
+J01CE08,benzathine benzylpenicillin,бензатина бензилпенициллин
+J01CE09,penicillin G procaine,
+J01CE10,penicillin v benzathine,
+J01CF01,dicloxacillin,
+J01CF02,cloxacillin,
+J01CF03,methicillin,метициллин
+J01CF04,oxacillin,оксациллин
+J01CF05,flucloxacillin,стафюлекс
+J01CF06,nafcillin,
+J01CG01,sulbactam,
+J01CG02,tazobactam,тазобактам
+J01CR04,sultamicillin,
+J01CR50,benzathine benzylpenicillin/procaine benzylpenicillin,
+J01DB01,cephalexin,цефалексин
+J01DB02,cephaloridine,
+J01DB03,cephalothin,
+J01DB04,cefazolin,цефазолин
+J01DB05,cefadroxil,
+J01DB06,cefazedone,
+J01DB07,cefatrizine,
+J01DB08,cefapirin,
+J01DB09,cephradine,
+J01DB10,cephacetrile,
+J01DB11,cefroxadine,
+J01DB12,ceftezole,
+J01DC01,cefoxitin,цефокситин
+J01DC02,cefuroxime,цефуроксим
+J01DC03,cefamandole,
+J01DC04,cefaclor,
+J01DC05,Cefotetan,
+J01DC06,cefonicid,
+J01DC07,cefotiam,
+J01DC08,loracarbef,
+J01DC09,cefmetazole,
+J01DC10,(E)-cefprozil,
+J01DC11,ceforanide,
+J01DC12,cefminox,
+J01DC13,Cefbuperazone,
+J01DC14,flomoxef,
+J01DD01,cefotaxime,цефотаксим
+J01DD02,ceftazidime,цефтазидим
+J01DD03,cefsulodin,
+J01DD04,ceftriaxone,цефтриаксон
+J01DD05,cefmenoxime,
+J01DD06,latamoxef,
+J01DD07,ceftizoxime,
+J01DD08,cefixime,цефиксим
+J01DD09,cefodizime,
+J01DD10,cefetamet,
+J01DD11,cefpiramide,цефпирамид
+J01DD12,cefoperazone,
+J01DD13,cefpodoxime,
+J01DD14,ceftibuten,
+J01DD15,cefdinir,цефдинир
+J01DD16,cefditoren,
+J01DD17,cefcapene,
+J01DD18,cefteram,
+J01DD52,ceftazidime/avibactam,цефтазидим/авибактам
+J01DE01,cefepime,цефепим
+J01DE02,cefpirome,цефпиром
+J01DE03,cefozopran,
+J01DF01,aztreonam,азтреонам
+J01DF02,carumonam,
+J01DH02,meropenem,меропенем
+J01DH03,ertapenem,
+J01DH04,doripenem,
+J01DH05,biapenem,
+J01DH06,tebipenem pivoxil,
+J01DH51,imipenem/cilastatin,imipenem
+J01DH52,meropenem/vaborbactam,меропенем/ваборбактам
+J01DH55,panipenem/betamipron,
+J01DH56,imipenem/cilastatin/relebactam,
+J01DI01,ceftobiprole medocaril sodium,
+J01DI02,ceftaroline fosamil,цефтаролин
+J01DI03,faropenem,
+J01EA01,trimethoprim,триметоприм
+J01EA02,Brodimoprim,
+J01EA03,iclaprim,
+J01EB01,sulfisomidine,
+J01EB02,sulfamethizole,
+J01EB03,sulfamethazine,
+J01EB04,sulfapyridine,сульфапиридин
+J01EB05,sulfisoxazole,
+J01EB06,sulfanilamide,сульфаниламид
+J01EB07,sulfathiazole,
+J01EB08,sulfathiourea,
+J01EC01,sulfamethoxazole,
+J01EC02,sulfadiazine,сульфадиазин натрий
+J01EC03,sulfamoxole,
+J01ED01,sulfadimethoxine,сульфадиметоксин
+J01ED02,sulfalene,
+J01ED03,sulfametomidine,
+J01ED04,sulphamethoxydiazine,
+J01ED05,sulfamethoxypyridazine,
+J01ED06,Sulfaperin,
+J01ED07,sulfamerazine,
+J01ED08,sulfaphenazole,
+J01ED09,sulfamazone,
+J01EE01,sulfamethoxazole/trimethoprim,ко-тримоксазол
+J01EE02,trimethoprim/sulfadiazine,
+J01FA01,erythromycin,эритромицин
+J01FA02,spiramycin,спирамицин
+J01FA03,midecamycin,мидекамицин
+J01FA05,oleandomycin,олеандомицин
+J01FA06,roxithromycin,рокситромицин
+J01FA07,josamycin,джозамицин
+J01FA08,troleandomycin,
+J01FA09,clarithromycin,кларитромицин
+J01FA10,azithromycin,азитромицин
+J01FA11,midecamycin acetate,
+J01FA12,rokitamycin,
+J01FA13,dirithromycin,диритромицин
+J01FA14,flurithromycin,
+J01FA15,telithromycin,телитромицин
+J01FA16,Solithromycin,
+J01FF01,clindamycin,клиндамицин
+J01FF02,lincomycin,линкомицин
+J01FG01,pristinamycin,
+J01FG02,quinupristin/dalfopristin,
+J01GA01,streptomycin,стрептомицин
+J01GA02,Streptoduocin,
+J01GB01,tobramycin,тобрамицин
+J01GB03,gentamicin,гентамицин
+J01GB04,kanamycin,канамицин
+J01GB05,neomycin,неомицин
+J01GB06,amikacin,амикацин
+J01GB07,netilmicin,
+J01GB08,sisomicin,
+J01GB09,dibekacin,
+J01GB10,ribostamycin,
+J01GB11,isepamicin,
+J01GB12,arbekacin,
+J01GB13,kanamycin B,
+J01MA01,ofloxacin,офлоксацин
+J01MA02,ciprofloxacin,ципрофлоксацин
+J01MA03,pefloxacin,пефлоксацин
+J01MA04,enoxacin,
+J01MA05,temafloxacin,
+J01MA06,norfloxacin,норфлоксацин
+J01MA07,lomefloxacin,ломефлоксацин
+J01MA08,fleroxacin,
+J01MA09,sparfloxacin,спарфлоксацин
+J01MA10,rufloxacin,
+J01MA11,grepafloxacin,
+J01MA12,levofloxacin,левофлоксацин
+J01MA13,trovafloxacin,тровафлоксацин
+J01MA14,moxifloxacin,моксифлоксацин
+J01MA15,gemifloxacin,гемифлоксацин
+J01MA16,gatifloxacin,
+J01MA17,prulifloxacin,
+J01MA18,pazufloxacin,
+J01MA19,garenoxacin,
+J01MA21,sitafloxacin,
+J01MA22,tosufloxacin,
+J01MA23,delafloxacin,делафлоксацин
+J01MA25,lascufloxacin,
+J01MB01,rosoxacin,
+J01MB02,nalidixic acid,налидиксовая кислота
+J01MB03,piromidic acid,
+J01MB04,pipemidic acid,пипемидовая кислота
+J01MB05,oxolinic acid,оксолиновая кислота
+J01MB06,cinoxacin,
+J01MB07,flumequine,
+J01MB08,nemonoxacin,
+J01XA01,vancomycin,ванкомицин
+J01XA02,teicoplanin,
+J01XA03,telavancin,
+J01XA04,dalbavancin,далбаванцин
+J01XA05,oritavancin,оритаванцин
+J01XB01,colistin,колистин
+J01XB02,polymyxin B,полимиксин b
+J01XC01,fusidic acid,фузидовая кислота
+J01XD01,metronidazole,метронидазол
+J01XD02,tinidazole,тинидазол
+J01XD03,ornidazole,
+J01XE01,nitrofurantoin,нитрофурантоин
+J01XE02,nifurtoinol,
+J01XE03,furagin,
+J01XX01,fosfomycin,фосфомицин
+J01XX02,xibornol,
+J01XX03,clofoctol,
+J01XX04,spectinomycin,
+J01XX05,methenamine,гексаметилентетрамин
+J01XX06,mandelic acid,миндальная кислота
+J01XX07,nitroxoline,нитроксолин
+J01XX08,linezolid,линезолид
+J01XX09,daptomycin,даптомицин
+J01XX10,bacitracin a,бацитрацин
+J01XX11,tedizolid,тедизолид
+J02AA01,amphotericin B,амфотерицин b
+J02AA02,Hachimycin,
+J02AB01,miconazole,
+J02AB02,ketoconazole,кетоконазол
+J02AC01,fluconazole,флуконазол
+J02AC02,itraconazole,итраконазол
+J02AC03,voriconazole,вориконазол
+J02AC04,posaconazole,позаконазол
+J02AC05,isavuconazole,
+J02AX01,5-fluorocytosine,
+J02AX04,caspofungin,
+J02AX05,micafungin,микафунгин
+J02AX06,anidulafungin,
+J04AA01,4-aminosalicylic acid,пара-аминосалициловая кислота
+J04AB01,cycloserine,циклосерин
+J04AB02,rifampicin,рифампицин
+J04AB03,rifamycin,рифамицин
+J04AB04,rifabutin,рифабутин
+J04AB05,rifapentine,
+J04AB30,capreomycin,капреомицин
+J04AC01,isoniazid,изониазид
+J04AD01,protionamide,протионамид
+J04AD02,Thiocarlide,
+J04AD03,ethionamide,этионамид
+J04AK01,pyrazinamide,пиразинамид
+J04AK02,ethambutol,этамбутол
+J04AK03,terizidone,теризидон
+J04AK04,morinamide,
+J04AK05,bedaquiline,бедаквилин
+J04AK06,delamanid,
+J04AK07,thioacetazone,
+J04AM02,isoniazid/rifampicin,
+J04AM03,ethambutol/isoniazid,
+J04AM05,isoniazid/pyrazinamide/rifampicin,
+J04AM06,ethambutol/isoniazid/pyrazinamide/rifampicin,
+J04AM07,ethambutol/isoniazid/rifampicin,
+J04BA01,clofazimine,клофазимин
+J04BA02,dapsone,дапсон
+J04BA03,sulfoxone sodium,
+J05AA01,metisazone,метисазон
+J05AB01,aciclovir,ацикловир
+J05AB02,idoxuridine,идоксуридин
+J05AB03,vidarabine,видарабин
+J05AB04,ribavirin,рибавирин
+J05AB06,ganciclovir,ганцикловир
+J05AB09,famciclovir,фамцикловир
+J05AB11,valacyclovir,валацикловир
+J05AB12,cidofovir,
+J05AB13,penciclovir,пенцикловир
+J05AB14,valganciclovir,
+J05AB15,brivudine,
+J05AB16,remdesivir,ремдесивир
+J05AC02,rimantadine,римантадин
+J05AC03,tromantadine,тромантадин
+J05AD01,foscarnet,фоскарнет
+J05AD02,phosphonoacetic acid,
+J05AE01,saquinavir,саквинавир
+J05AE02,indinavir,
+J05AE03,ritonavir,ритонавир
+J05AE04,nelfinavir,нельфинавир
+J05AE05,amprenavir,ампренавир
+J05AE07,fosamprenavir,фосампреновир
+J05AE08,atazanavir,атазанавир
+J05AE09,tipranavir,типранавир
+J05AE10,darunavir,дарунавир
+J05AE11,telaprevir,телапревир
+J05AE12,boceprevir,boceprevir
+J05AE14,simeprevir,
+J05AF01,zidovudine,зидовудин
+J05AF02,didanosine,
+J05AF03,zalcitabine,
+J05AF04,stavudine,ставудин
+J05AF05,lamivudine,ламивудин
+J05AF06,abacavir,абакавир
+J05AF07,tenofovir disoproxil,тенофовир
+J05AF08,adefovir dipivoxil,
+J05AF09,emtricitabine,эмтрицитабин
+J05AF10,entecavir,
+J05AF11,telbivudine,
+J05AF12,clevudine,
+J05AF13,tenofovir alafenamide,тенофовир алафенамид
+J05AG01,nevirapine,невирапин
+J05AG02,delavirdine,делавирдин
+J05AG03,efavirenz,эфавиренз
+J05AG04,etravirine,этравирин
+J05AG05,rilpivirine,рилпивирин
+J05AG06,doravirine,доравирин
+J05AH01,zanamivir,занамивир
+J05AH02,oseltamivir,осельтамивир
+J05AH03,peramivir,перамивир
+J05AP01,ribavirin,рибавирин
+J05AP02,telaprevir,телапревир
+J05AP03,boceprevir,boceprevir
+J05AP04,faldaprevir,
+J05AP05,simeprevir,
+J05AP06,asunaprevir,асунапревир
+J05AP07,daclatasvir,даклатасвир
+J05AP08,sofosbuvir,софосбувир
+J05AP09,dasabuvir,дасабувир
+J05AP51,ledipasvir/sofosbuvir,
+J05AP53,ombitasvir/paritaprevir/ritonavir,
+J05AP54,elbasvir/grazoprevir,
+J05AP55,sofosbuvir/velpatasvir,велпатасвир/софосбувир
+J05AP56,sofosbuvir / velpatasvir / voxilaprevir,
+J05AP57,glecaprevir/pibrentasvir,
+J05AR01,lamivudine/zidovudine,ламивудин/зидовудин
+J05AR02,abacavir/lamivudine,
+J05AR03,tenofovir/emtricitabine,тенофовир/эмтрицитабин
+J05AR04,abacavir/lamivudine/zidovudine,абакавир/ламивудин/зидовудин
+J05AR05,lamivudine/nevirapine/zidovudine,
+J05AR07,lamivudine/nevirapine/stavudine,
+J05AR09,elvitegravir/cobicistat/emtricitabine/tenofovir disoproxil,элвитегравир/кобицистат/эмтрицитабин/тенофовир
+J05AR10,lopinavir/ritonavir,лопинавир/ритонавир
+J05AR13,abacavir/dolutegravir/lamivudine,абакавир/долутегравир/ламивудин
+J05AR14,darunavir / cobicistat,
+J05AR15,atazanavir / cobicistat,
+J05AR16,lamivudine / raltegravir,
+J05AR17,emtricitabine / tenofovir alafenamide,
+J05AR18,elvitegravir / cobicistat / emtricitabine / tenofovir alafenamide,
+J05AR19,emtricitabine / rilpivirine / tenofovir alafenamide,
+J05AR21,dolutegravir / rilpivirine,
+J05AR23,atazanavir/ritonavir,
+J05AX01,moroxydine,
+J05AX02,Lysozyme,лизоцим
+J05AX05,inosine pranobex,инозин пранобекс
+J05AX06,pleconaril,
+J05AX07,enfuvirtide,энфувиртид
+J05AX08,raltegravir,ралтегравир
+J05AX09,maraviroc,маравирок
+J05AX10,maribavir,
+J05AX11,elvitegravir,элвитегравир
+J05AX12,dolutegravir,долутегравир
+J05AX13,umifenovir,умифеновир
+J05AX14,daclatasvir,даклатасвир
+J05AX15,sofosbuvir,софосбувир
+J05AX17,enisamium iodide,энисамия йодид
+J05AX18,letermovir,
+J05AX19,tilorone,тилорон
+J05AX23,ibalizumab,ибализумаб
+J05AX27,favipiravir,фавипиравир
+J05AX65,ledipasvir/sofosbuvir,
+J06AA01,diphtheria antitoxin,
+J06AA02,anti-tetanus immunoglobulin,
+J06AA03,antivenom,
+J06AA04,Botulinum antitoxin,
+J06AA06,rabies immunoglobulin or antiserum,антирабический иммуноглобулин
+J06BA01,antibody injection,введение антител
+J06BA02,immunoglobulin G,immunoglobulin g
+J06BB02,anti-tetanus immunoglobulin,
+J06BB04,hepatitis B immune globulin,иммуноглобулин человека против гепатита b
+J06BB05,rabies immunoglobulin or antiserum,антирабический иммуноглобулин
+J06BB16,palivizumab,
+J06BB17,Motavizumab,
+J06BB18,raxibacumab,
+J06BB21,bezlotoxumab,безлотоксумаб
+J06BB22,obiltoxaximab,
+J06BC01,Nebacumab,
+J06BD04,MAb114,ансувимаб
+J07AE01,cholera vaccine,вакцина от холеры
+J07AE02,cholera vaccine,вакцина от холеры
+J07AG01,Hib vaccine,вакцина против гемофильной инфекции типа b
+J07AH01,meningococcal vaccine,менингококковая вакцина
+J07AH02,meningococcal vaccine,менингококковая вакцина
+J07AH03,meningococcal vaccine,менингококковая вакцина
+J07AH04,meningococcal vaccine,менингококковая вакцина
+J07AH05,meningococcal vaccine,менингококковая вакцина
+J07AH06,meningococcal vaccine,менингококковая вакцина
+J07AH07,meningococcal vaccine,менингококковая вакцина
+J07AH08,meningococcal vaccine,менингококковая вакцина
+J07AH09,meningococcal vaccine,менингококковая вакцина
+J07AK01,plague vaccine,
+J07AL01,pneumococcal polysaccharide vaccine,
+J07AM01,tetanus vaccine,вакцина против столбняка
+J07AN01,BCG vaccine,бцж
+J07AP01,typhoid vaccine,
+J07AP02,typhoid vaccine,
+J07AP04,typhoid vaccine,
+J07BA01,tick-borne encephalitis vaccine,
+J07BA02,Japanese encephalitis vaccine,
+J07BA03,Japanese encephalitis vaccine,
+J07BB02,Influvac,инфлювак
+J07BB03,live attenuated influenza vaccine,
+J07BC01,Hepatitis B vaccine,вакцина против вируса гепатита b
+J07BC02,hepatitis A vaccine,вакцина против гепатита a
+J07BD01,measles vaccine,вакцина против кори
+J07BD52,MMR vaccine,mmr vaccine
+J07BD54,ProQuad,
+J07BF01,polio vaccine,вакцина против полиомиелита
+J07BF03,polio vaccine,вакцина против полиомиелита
+J07BG01,rabies vaccine,вакцина против вируса бешенства
+J07BL01,yellow fever vaccine,вакцина против желтой лихорадки
+J07BM01,Gardasil,гардасил
+J07BM02,Cervarix,церварикс
+J07BM03,Gardasil 9,
+J07BN02,Gam-COVID-Vac,гам-ковид-вак
+J07BX01,smallpox vaccine,вакцина против оспы
+J07BX03,mRNA-1273 vaccine,mrna-1273
+J07CA01,"vaccine against diphtheria, tetanus, and poliomyelitis",
+J07CA02,DTaP-IPV vaccine,
+J07CA09,INFANRIX HEXA,
+J07CA10,Hepatyrix,гепатирикс
+J07CA12,DTaP-IPV-HepB vaccine,
+L01AA01,cyclophosphamide,циклофосфамид
+L01AA02,chlorambucil,хлорамбуцил
+L01AA03,melphalan,мелфалан
+L01AA05,mechlorethamine,мехлоретамин
+L01AA06,ifosfamide,ифосфамид
+L01AA07,trofosfamide,трофосфамид
+L01AA08,prednimustine,преднимустин
+L01AA09,bendamustine,бендамустин
+L01AB01,busulfan,бусульфан
+L01AB02,treosulfan,треосульфан
+L01AB03,mannosulfan,манносульфан
+L01AC01,thiotepa,
+L01AC02,triaziquone,
+L01AC03,carboquone,
+L01AD01,carmustine,кармустин
+L01AD02,lomustine,ломустин
+L01AD03,semustine,семустин
+L01AD04,α-streptozocin,стрептозотоцин
+L01AD05,fotemustine,фотемустин
+L01AD06,nimustine,нимустин
+L01AD07,ranimustine,ранимустин
+L01AD08,uracil mustard,урамустин
+L01AG01,etoglucid,
+L01AX01,mitobronitol,
+L01AX02,pipobroman,
+L01AX03,temozolomide,темозоломид
+L01AX04,dacarbazine,дакарбазин
+L01BA01,methotrexate,метотрексат
+L01BA03,raltitrexed,
+L01BA04,pemetrexed,пеметрексед
+L01BA05,pralatrexate,
+L01BB02,mercaptopurine,меркаптопурин
+L01BB03,6-thioguanine,тиогуанин
+L01BB04,cladribine,кладрибин
+L01BB05,fludarabine phosphate,флударабин
+L01BB06,clofarabine,
+L01BB07,nelarabine,неларабин
+L01BC01,cytarabine,цитарабин
+L01BC02,fluorouracil,фторурацил
+L01BC03,tegafur,тегафур
+L01BC04,carmofur,
+L01BC05,gemcitabine,гемцитабин
+L01BC06,capecitabine,капецитабин
+L01BC07,azacitidine,азацитидин
+L01BC08,decitabine,
+L01BC09,floxuridine,
+L01CA01,vinblastine,винбластин
+L01CA02,vincristine,винкристин
+L01CA03,vindesine,виндесин
+L01CA04,vinorelbine,винорелбин
+L01CA05,vinflunine,
+L01CA06,vintafolide,
+L01CB01,etoposide,этопозид
+L01CB02,teniposide,тенипозид
+L01CC01,demecolcine,
+L01CD01,paclitaxel,паклитаксел
+L01CD02,docetaxel,доцетаксел
+L01CD03,paclitaxel poliglumex,
+L01CD04,cabazitaxel,
+L01CX01,trabectedin,
+L01DA01,dactinomycin,дактиномицин
+L01DB01,doxorubicin,доксорубицин
+L01DB02,daunorubicin,даунорубицин
+L01DB03,epirubicin,эпирубицин
+L01DB04,aclarubicin,
+L01DB05,Zorubicin,
+L01DB06,idarubicin,идарубицин
+L01DB07,mitoxantrone,митоксантрон
+L01DB08,"5,12-Naphthacenedione, 10-[[3-amino-2,3,6-trideoxy-4-O-(tetrahydro-2H-pyran-2-yl)-α-L-lyxo-hexopyranosyl]oxy]-7,8,9,10-tetrahydro-6,8,11-trihydroxy-8-(hydroxyacetyl)-1-methoxy-, [8S-[8α,10α(R*)]]-",
+L01DB09,valrubicin,
+L01DB10,amrubicin,
+L01DB11,pixantrone,
+L01DC01,bleomycin,блеомицин
+L01DC02,plicamycin,
+L01DC03,mitomycins,митомицин
+L01DC04,ixabepilone,
+L01XA01,cisplatin,цисплатин
+L01XA02,carboplatin,карбоплатин
+L01XA03,oxaliplatin,оксалиплатин
+L01XA04,satraplatin,сатраплатин
+L01XA05,polyplatillen,
+L01XB01,procarbazine,прокарбазин
+L01XC01,edrecolomab,
+L01XC02,rituximab,ритуксимаб
+L01XC03,trastuzumab,трастузумаб
+L01XC05,gemtuzumab ozogamicin,гемтузумаб озогамицин
+L01XC06,cetuximab,цетуксимаб
+L01XC07,bevacizumab,бевацизумаб
+L01XC08,panitumumab,панитумумаб
+L01XC09,catumaxomab,
+L01XC10,ofatumumab,офатумумаб
+L01XC11,ipilimumab,ипилимумаб
+L01XC12,brentuximab vedotin,брентуксимаб ведотин
+L01XC13,pertuzumab,пертузумаб
+L01XC14,ado-trastuzumab emtansine,трастузумаб эмтанзин
+L01XC15,obinutuzumab,обинутузумаб
+L01XC16,dinutuximab,динутуксимаб
+L01XC17,nivolumab,ниволумаб
+L01XC18,pembrolizumab,пембролизумаб
+L01XC19,blinatumomab,блинатумомаб
+L01XC21,ramucirumab,ramucirumab
+L01XC22,necitumumab,нецитумумаб
+L01XC23,elotuzumab,элотузумаб
+L01XC24,daratumumab,даратумумаб
+L01XC25,mogamulizumab,
+L01XC26,inotuzumab ozogamicin,инотузумаб озогамицин
+L01XC27,olaratumab,
+L01XC28,durvalumab,дурвалумаб
+L01XC29,MABp1,
+L01XC31,avelumab,
+L01XC32,atezolizumab,атезолизумаб
+L01XD01,porfimer sodium,
+L01XD03,methyl aminolevulinate,
+L01XD04,aminolevulinic acid,аминолевулиновая кислота
+L01XD05,temoporfin,
+L01XD06,efaproxiral,
+L01XD07,padeliporfin,
+L01XE01,imatinib,иматиниб
+L01XE02,gefitinib,гефитиниб
+L01XE03,erlotinib,
+L01XE04,sunitinib,сунитиниб
+L01XE05,sorafenib,сорафениб
+L01XE06,dasatinib,дазатиниб
+L01XE07,lapatinib,лапатиниб
+L01XE08,nilotinib,нилотиниб
+L01XE09,temsirolimus,темсиролимус
+L01XE10,everolimus,эверолимус
+L01XE11,pazopanib,
+L01XE12,vandetanib,
+L01XE13,afatinib,
+L01XE14,bosutinib,
+L01XE15,vemurafenib,вемурафениб
+L01XE16,crizotinib,
+L01XE17,axitinib,
+L01XE18,ruxolitinib,
+L01XE19,ridaforolimus,
+L01XE21,regorafenib,регорафениб
+L01XE22,masitinib,
+L01XE23,dabrafenib,дабрафениб
+L01XE24,ponatinib,
+L01XE25,trametinib,
+L01XE26,cabozantinib,
+L01XE27,ibrutinib,ибрутиниб
+L01XE28,ceritinib,
+L01XE29,lenvatinib,
+L01XE31,nintedanib,нинтеданиб
+L01XE32,cediranib,
+L01XE33,palbociclib,палбоциклиб
+L01XE34,tivozanib,
+L01XE35,osimertinib,
+L01XE36,alectinib,алектиниб
+L01XE37,rociletinib,
+L01XE38,cobimetinib,
+L01XE39,midostaurin,
+L01XE40,olmutinib,
+L01XE41,binimetinib,
+L01XE42,ribociclib,
+L01XE43,AP-26113,
+L01XE44,lorlatinib,
+L01XE45,neratinib,
+L01XE46,encorafenib,
+L01XE47,dacomitinib,
+L01XE48,icotinib,икотиниб
+L01XE50,abemaciclib,абемациклиб
+L01XX01,amsacrine,
+L01XX02,Asparaginase,аспарагиназа
+L01XX03,altretamine,алтретамин
+L01XX05,hydroxycarbamide,гидроксикарбамид
+L01XX07,lonidamine,лонидамин
+L01XX08,pentostatin,
+L01XX09,miltefosine,милтефозин
+L01XX10,masoprocol,
+L01XX11,estramustine,эстрамустин
+L01XX14,tretinoin,третиноин
+L01XX16,mitoguazone,
+L01XX17,topotecan,топотекан
+L01XX18,tiazofurin,
+L01XX19,irinotecan,иринотекан
+L01XX22,alitretinoin,
+L01XX23,mitotane,митотан
+L01XX24,pegaspargase,
+L01XX25,bexarotene,бексаротен
+L01XX27,arsenic trioxide,оксид мышьяка(iii)
+L01XX29,denileukin diftitox,
+L01XX32,bortezomib,бортезомиб
+L01XX33,celecoxib,целекоксиб
+L01XX35,anagrelide,анагрелид
+L01XX36,oblimersen sodium,
+L01XX38,vorinostat,вориностат
+L01XX39,romidepsin,
+L01XX40,homoharringtonine,
+L01XX41,eribulin,
+L01XX42,panobinostat,панобиностат
+L01XX43,vismodegib,
+L01XX44,aflibercept,афлиберцепт
+L01XX45,carfilzomib,
+L01XX46,olaparib,
+L01XX47,idelalisib,иделалиcиб
+L01XX48,sonidegib,
+L01XX49,belinostat,белиностат
+L01XX50,ixazomib,
+L01XX51,talimogene laherparepvec,
+L01XX52,venetoclax,венетоклакс
+L01XX53,vosaroxin,
+L01XX54,niraparib,
+L01XX55,rucaparib,
+L01XX57,aplidin,плитидепсин
+L01XX58,epacadostat,
+L01XX59,enasidenib,
+L01XX60,talazoparib,
+L01XX61,copanlisib,
+L01XX63,glasdegib,
+L01XX80,imetelstat,
+L01XY01,daunorubicin/cytarabine,
+L02AA01,diethylstilbestrol,диэтилстильбестрол
+L02AA02,polyestradiol phosphate,
+L02AA03,ethinylestradiol,этинилэстрадиол
+L02AB01,megestrol,
+L02AB02,medroxyprogesterone,медроксипрогестерон
+L02AB03,gestonorone,
+L02AE01,buserelin,
+L02AE02,leuprolide,лейпрорелин
+L02AE03,goserelin,
+L02AE04,triptorelin,трипторелин
+L02AE05,histrelin,
+L02BA01,tamoxifen,тамоксифен
+L02BA02,(Z)-Toremifene,торемифен
+L02BA03,fulvestrant,фулвестрант
+L02BB01,flutamide,флутамид
+L02BB02,nilutamide,нилутамид
+L02BB03,bicalutamide,бикалутамид
+L02BB04,enzalutamide,
+L02BB05,apalutamide,апалутамид
+L02BG01,aminoglutethimide,
+L02BG02,formestane,
+L02BG03,anastrozole,анастрозол
+L02BG04,letrozole,летрозол
+L02BG05,vorozole,
+L02BG06,exemestane,exemestan
+L02BX01,abarelix,
+L02BX02,degarelix,фирмагон
+L02BX03,abiraterone,
+L03AA02,filgrastim,филграстим
+L03AA03,molgramostim,
+L03AA09,sargramostim,
+L03AA10,lenograstim,
+L03AA12,ancestim,
+L03AA13,pegfilgrastim,
+L03AA14,lipegfilgrastim,
+L03AA15,balugrastim,
+L03AA16,empegfilgrastim,
+L03AA17,pegteograstim,
+L03AB01,interferon alfa,
+L03AB03,interferon gamma-1b,
+L03AB04,"interferon Alfa-2a, recombinant",
+L03AB05,"interferon Alfa-2b, Recombinant",интерферон альфа-2b
+L03AB06,interferon alfa-n1,
+L03AB07,interferon beta-1a,интерферон бета-1a
+L03AB08,interferon beta-1b,бетаферон
+L03AB09,interferon alfacon-1,
+L03AB10,peginterferon alfa-2b,
+L03AB11,peginterferon alfa-2a,пегилированный интерферон альфа-2а
+L03AB13,peginterferon beta-1a,
+L03AB15,ropeginterferon alfa-2b,
+L03AC01,aldesleukin,
+L03AC02,oprelvekin,
+L03AX01,lentinan,
+L03AX02,roquinimex,
+L03AX03,BCG vaccine,бцж
+L03AX05,pidotimod,пидотимод
+L03AX07,Polyinosinic:polycytidylic acid,
+L03AX08,Poly ICLC,
+L03AX09,thymopentin,
+L03AX11,tasonermin,
+L03AX13,glatiramer acetate,копаксон
+L03AX14,histamine dihydrochloride,
+L03AX15,mifamurtide,
+L03AX16,plerixafor,
+L03AX17,sipuleucel-T,sipuleucel-t
+L03AX18,cridanimod,акридонуксусная кислота
+L04AA02,muromonab,
+L04AA06,mycophenolic acid,
+L04AA10,sirolimus,сиролимус
+L04AA13,leflunomide,лефлуномид
+L04AA15,alefacept,
+L04AA18,everolimus,эверолимус
+L04AA19,gusperimus,
+L04AA21,efalizumab,
+L04AA22,abetimus,
+L04AA23,natalizumab,тисабри
+L04AA24,abatacept,orencia
+L04AA25,eculizumab,экулизумаб
+L04AA26,belimumab,белимумаб
+L04AA27,fingolimod,финголимод
+L04AA28,belatacept,
+L04AA29,tofacitinib,тофацитиниб
+L04AA31,teriflunomide,терифлуномид
+L04AA32,apremilast,апремиласт
+L04AA33,vedolizumab,vedolizumab
+L04AA34,alemtuzumab,алемтузумаб
+L04AA35,begelomab,
+L04AA36,ocrelizumab,окрелизумаб
+L04AA37,baricitinib,барицитиниб
+L04AA38,ozanimod,
+L04AA39,emapalumab,
+L04AA40,cladribine,кладрибин
+L04AB01,etanercept,этанерцепт
+L04AB02,infliximab,инфликсимаб
+L04AB03,afelimomab,
+L04AB04,adalimumab,адалимумаб
+L04AB05,certolizumab pegol,цертолизумаб пегол
+L04AB06,golimumab,голимумаб
+L04AC01,daclizumab,даклизумаб
+L04AC02,basiliximab,базиликсимаб
+L04AC03,anakinra,анакинра
+L04AC04,rilonacept,
+L04AC05,ustekinumab,устекинумаб
+L04AC06,mepolizumab,меполизумаб
+L04AC07,tocilizumab,тоцилизумаб
+L04AC08,canakinumab,канакинумаб
+L04AC09,briakinumab,бриакинумаб
+L04AC10,secukinumab,секукинумаб
+L04AC11,siltuximab,siltuximab
+L04AC12,brodalumab,бродалумаб
+L04AC13,ixekizumab,иксекизумаб
+L04AC14,sarilumab,сарилумаб
+L04AC15,sirukumab,
+L04AC16,guselkumab,гуселькумаб
+L04AC17,tildrakizumab,тилдракизумаб
+L04AD01,cyclosporine,циклоспорин
+L04AD02,tacrolimus,такролимус
+L04AD03,voclosporin,
+L04AF08,Ritlecitinib,
+L04AX01,azathioprine,азатиоприн
+L04AX02,thalidomide,талидомид
+L04AX03,methotrexate,метотрексат
+L04AX04,lenalidomide,леналидомид
+L04AX05,pirfenidone,
+L04AX06,pomalidomide,помалидомид
+L04AX07,dimethyl fumarate,диметилфумарат
+M01AA01,phenylbutazone,фенилбутазон
+M01AA02,mofebutazone,
+M01AA03,oxyphenbutazone,
+M01AA05,clofezone,
+M01AA06,kebuzone,
+M01AB01,indomethacin,индометацин
+M01AB02,sulindac,сулиндак
+M01AB03,tolmetin,толметин
+M01AB04,zomepirac,зомепирак
+M01AB05,Diclofenac,диклофенак
+M01AB06,alclofenac,
+M01AB07,bumadizone,
+M01AB08,etodolac,этодолак
+M01AB09,lonazolac,
+M01AB10,fentiazac,
+M01AB11,acemetacin,ацеметацин
+M01AB12,difenpiramide,
+M01AB13,oxametacin,
+M01AB14,proglumetacin,
+M01AB15,ketorolac,кеторолак
+M01AB16,aceclofenac,ацеклофенак
+M01AB17,bufexamac,буфексамак
+M01AB55,diclofenac/misoprostol,
+M01AC01,piroxicam,пироксикам
+M01AC02,tenoxicam,теноксикам
+M01AC04,droxicam,
+M01AC05,lornoxicam,лорноксикам
+M01AC06,meloxicam,мелоксикам
+M01AE01,ibuprofen,ибупрофен
+M01AE02,naproxen,напроксен
+M01AE03,ketoprofen,кетопрофен
+M01AE04,fenoprofen,фенопрофен
+M01AE05,fenbufen,
+M01AE06,benoxaprofen,
+M01AE07,suprofen,
+M01AE08,pirprofen,
+M01AE09,flurbiprofen,флурбипрофен
+M01AE10,indoprofen,
+M01AE11,tiaprofenic acid,
+M01AE12,oxaprozin,оксапрозин
+M01AE13,ibuproxam,
+M01AE14,dexibuprofen,
+M01AE15,flunoxaprofen,
+M01AE16,alminoprofen,
+M01AE17,dexketoprofen,декскетопрофен
+M01AE18,naproxcinod,
+M01AE52,esomeprazole / naproxen,
+M01AG01,mefenamic acid,мефенамовая кислота
+M01AG02,tolfenamic acid,толфенамовая кислота
+M01AG03,flufenamic acid,
+M01AG04,meclofenamic acid,
+M01AH01,celecoxib,целекоксиб
+M01AH02,rofecoxib,рофекоксиб
+M01AH03,valdecoxib,валдекоксиб
+M01AH04,parecoxib,парекоксиб
+M01AH05,etoricoxib,arcoxia
+M01AH06,lumiracoxib,лумиракоксиб
+M01AX01,nabumetone,набуметон
+M01AX02,niflumic acid,нифлумовая кислота
+M01AX04,azapropazone,
+M01AX05,D-glucosamine,глюкозамин
+M01AX07,benzydamine,бензидамин
+M01AX12,Polysulfated glycosaminoglycan,
+M01AX13,proquazone,
+M01AX14,orgotein,
+M01AX17,nimesulide,нимесулид
+M01AX18,feprazone,
+M01AX21,diacerein,диацереин
+M01AX22,morniflumate,
+M01AX23,tenidap,
+M01AX24,oxaceprol,
+M01AX25,chondroitin sulfate,хондроитина сульфат
+M01CA03,oxycinchophen,
+M01CB01,gold monosodium thiomalate,натрия ауротиомалат
+M01CB02,sodium aurothiosulfate,дитиосульфатоаурат(i) натрия
+M01CB03,auranofin,ауранофин
+M01CB04,aurothioglucose,ауротиоглюкоза
+M01CB05,aurotioprol,ауротиопрол
+M01CC01,D-penicillamine,пеницилламин
+M01CC02,Bucillamine,
+M02AA01,phenylbutazone,фенилбутазон
+M02AA02,mofebutazone,
+M02AA03,clofezone,
+M02AA04,oxyphenbutazone,
+M02AA05,benzydamine,бензидамин
+M02AA06,etofenamate,
+M02AA07,piroxicam,пироксикам
+M02AA08,felbinac,
+M02AA09,bufexamac,буфексамак
+M02AA10,ketoprofen,кетопрофен
+M02AA11,bendazac,
+M02AA12,naproxen,напроксен
+M02AA13,ibuprofen,ибупрофен
+M02AA14,fentiazac,
+M02AA15,Diclofenac,диклофенак
+M02AA16,feprazone,
+M02AA17,niflumic acid,нифлумовая кислота
+M02AA18,meclofenamic acid,
+M02AA19,flurbiprofen,флурбипрофен
+M02AA21,tolmetin,толметин
+M02AA22,suxibuzone,
+M02AA23,indomethacin,индометацин
+M02AA24,nifenazone,
+M02AA25,aceclofenac,ацеклофенак
+M02AA26,nimesulide,нимесулид
+M02AA27,dexketoprofen,декскетопрофен
+M02AA28,piketoprofen,
+M02AB01,capsaicin,капсаицин
+M02AB02,zucapsaicin,
+M02AX02,tolazoline,бендазол
+M02AX03,dimethyl sulfoxide,диметилсульфоксид
+M02AX05,idrocilamide,
+M02AX06,tolperisone,толперизон
+M03AA01,alcuronium chloride,
+M03AA02,tubocurarine,тубокурарина хлорид
+M03AA04,metocurine,
+M03AB01,succinylcholine,сукцинилхолин
+M03AC01,pancuronium (cation),панкуроний
+M03AC02,gallamine triethiodide,
+M03AC03,vecuronium,векурония
+M03AC04,atracurium besylate,атракурия безилат
+M03AC05,hexafluronium bromide,
+M03AC06,pipecuronium bromide,пипекуроний
+M03AC07,doxacurium chloride,
+M03AC08,fazadinium bromide,
+M03AC09,rocuronium,рокуроний
+M03AC10,mivacurium,мивакурия хлорид
+M03AX01,botulinum toxin group,ботулотоксин
+M03BA01,phenprobamate,
+M03BA02,carisoprodol,карисопродол
+M03BA03,methocarbamol,метокарбамол
+M03BA04,styramate,
+M03BA05,febarbamate,
+M03BB02,chlormezanone,
+M03BB03,chlorzoxazone,
+M03BC01,orphenadrine,
+M03BX01,baclofen,баклофен
+M03BX02,tizanidine,тизанидин
+M03BX03,pridinol,
+M03BX04,tolperisone,толперизон
+M03BX05,thiocolchicoside,
+M03BX06,mephenesin,
+M03BX07,tetrazepam,tetrazepam
+M03BX08,cyclobenzaprine,циклобензаприн
+M03BX09,eperisone,
+M03BX30,fenyramidol,
+M03CA01,dantrolene,дантролен
+M04AA01,allopurinol,аллопуринол
+M04AA02,tisopurine,
+M04AA03,febuxostat,
+M04AB01,probenecid,
+M04AB02,sulfinpyrazone,сульфинпиразон
+M04AB03,benzbromarone,
+M04AB04,isobromindione,
+M04AB05,lesinurad,
+M04AC01,(−)-colchicine,колхицин
+M04AC02,cinchophen,
+M04AX01,uricase,
+M04AX02,pegloticase,
+M05BA01,etidronic acid,оксиэтилидендифосфоновая кислота
+M05BA02,clodronic acid,клодроновая кислота
+M05BA03,pamidronic acid,памидроновая кислота
+M05BA04,alendronic acid,
+M05BA05,tiludronic acid,тилудроновая кислота
+M05BA06,ibandronic acid,ибандроновая кислота
+M05BA07,risedronic acid,
+M05BA08,zoledronic acid,золедроновая кислота
+M05BC01,dibotermin alfa,
+M05BC02,eptotermin alfa,
+M05BX01,ipriflavone,
+M05BX02,aluminium chlorohydrate,гидроксохлорид алюминия
+M05BX03,strontium ranelate,
+M05BX04,denosumab,denosumab
+M05BX05,Burosumab,
+M05BX06,Romosozumab,ромосозумаб
+M09AA01,hydroquinine,
+M09AB01,chymopapain,
+M09AB02,collagenase clostridium histolyticum,
+M09AB03,bromelain,бромелаин
+M09AX01,Hyaluronan sodium,гиалуронат натрия
+M09AX02,autologous cultured chondrocytes,
+M09AX03,ataluren,аталурен
+M09AX04,Drisapersen,
+M09AX06,eteplirsen,этеплирсен
+M09AX07,nusinersen,нусинерсен
+M09AX15,Delandistrogene moxeparvovec,
+N01AA01,diethyl ether,диэтиловый эфир
+N01AA02,divinyl ether,
+N01AB01,halothane,галотан
+N01AB02,chloroform,хлороформ
+N01AB04,enflurane,энфлуран
+N01AB05,trichloroethene,трихлорэтилен
+N01AB06,isoflurane,изофлуран
+N01AB07,desflurane,десфлуран
+N01AB08,sevoflurane,севофлуран
+N01AF01,methohexital,метогекситал
+N01AF02,hexobarbital,гексобарбитал
+N01AF03,thiopental,(±)-тиопентал
+N01AG01,enibomal,
+N01AH01,fentanyl,фентанил
+N01AH02,alfentanil,алфентанил
+N01AH03,sufentanil,суфентанил
+N01AH04,phenoperidine,
+N01AH05,anileridine,анилэридин
+N01AH06,remifentanil,ремифентанил
+N01AX03,ketamine,кетамин
+N01AX04,propanidid,пропанидид
+N01AX05,alfaxalone,
+N01AX07,etomidate,этомидат
+N01AX10,propofol,пропофол
+N01AX11,sodium oxybate,оксибутират натрия
+N01AX13,nitrous oxide,оксид азота(i)
+N01AX14,esketamine,эскетамин
+N01AX15,xenon,ксенон
+N01BA01,metabutethamine,
+N01BA02,procaine,прокаин
+N01BA03,tetracaine,тетракаин
+N01BA04,chloroprocaine,хлорпрокаин
+N01BA05,benzocaine,бензокаин
+N01BB01,bupivacaine-(RS),бупивакаин
+N01BB02,lidocaine,лидокаин
+N01BB03,mepivacaine,мепивакаин
+N01BB04,prilocaine,прилокаин
+N01BB05,butanilicaine,
+N01BB06,dibucaine,
+N01BB07,etidocaine,
+N01BB08,articaine,ультракаин
+N01BB09,ropivacaine,s-ропивакаин
+N01BB10,levobupivacaine,левобупивакаин
+N01BC01,cocaine,кокаин
+N01BX01,chloroethane,хлорэтан
+N01BX02,dyclonine,
+N01BX03,phenol,фенол
+N01BX04,capsaicin,капсаицин
+N02AA01,morphine,морфин
+N02AA02,opium,опиум
+N02AA03,hydromorphone,гидроморфон
+N02AA04,nicomorphine,
+N02AA05,oxycodone,оксикодон
+N02AA08,dihydrocodeine,дигидрокодеин
+N02AA10,papaveretum,омнопон
+N02AB01,ketobemidone,кетобемидон
+N02AB02,pethidine,петидин
+N02AB03,fentanyl,фентанил
+N02AC01,dextromoramide,декстроморамид
+N02AC03,piritramide,пиритрамид
+N02AC04,dextropropoxyphene,декстропропоксифен
+N02AC05,bezitramide,безитрамид
+N02AD01,pentazocine,пентазоцин
+N02AD02,phenazocine,
+N02AE01,buprenorphine,бупренорфин
+N02AF01,butorphanol,буторфанол
+N02AF02,nalbuphine,налбуфин
+N02AJ06,Co-codamol,co-codamol
+N02AJ17,Oxycodone/paracetamol,оксикодон/парацетамол
+N02AJ18,oxycodone/aspirin,
+N02AJ19,oxycodone/ibuprofen,
+N02AX01,tilidine,тилидин
+N02AX02,tramadol,трамадол
+N02AX03,dezocine,
+N02AX05,meptazinol,мептазинол
+N02AX06,tapentadol,тапентадол
+N02BA01,aspirin,ацетилсалициловая кислота
+N02BA02,aspirin aluminum,
+N02BA03,choline salicylate,холина салицилат
+N02BA04,sodium salicylate,натрия салицилат
+N02BA05,salicylamide,салициламид
+N02BA06,salsalate,
+N02BA07,ethenzamide,
+N02BA08,morpholine salicylate,
+N02BA09,dipyrocetyl,
+N02BA10,benorilate,
+N02BA11,diflunisal,дифлунисал
+N02BA12,potassium salicylate,
+N02BA14,guacetisal,
+N02BA15,carbaspirin calcium,
+N02BA16,imidazole salicylate,
+N02BB01,antipyrine,феназон
+N02BB02,metamizole sodium,метамизол натрия
+N02BB03,aminophenazone,аминофеназон
+N02BB04,propyphenazone,пропифеназон
+N02BB05,nifenazone,
+N02BB72,Tempalgin,темпалгин
+N02BE01,paracetamol,парацетамол
+N02BE03,phenacetin,фенацетин
+N02BE04,bucetin,
+N02BE05,propacetamol,
+N02BF01,gabapentin,габапентин
+N02BF02,pregabalin,прегабалин
+N02BG02,rimazolium,
+N02BG03,glafenine,
+N02BG04,floctafenine,
+N02BG05,viminol,
+N02BG06,nefopam,нефопам
+N02BG07,flupirtine,флупиртин
+N02BG08,ziconotide,зиконотид
+N02BG09,methoxyflurane,метоксифлуран
+N02BG10,JWH-018,jwh-018
+N02CA01,dihydroergotamine,дигидроэрготамин
+N02CA02,ergotamine,эрготамин
+N02CA04,methysergide,метисергид
+N02CA07,lisuride,лизергол
+N02CB01,flumedroxone,
+N02CC01,sumatriptan,суматриптан
+N02CC02,naratriptan,наратриптан
+N02CC03,zolmitriptan,
+N02CC04,rizatriptan,rizatriptan
+N02CC05,almotriptan,
+N02CC06,eletriptan,
+N02CC07,frovatriptan,
+N02CD02,galcanezumab,
+N02CX01,pizotyline,
+N02CX02,clonidine,клонидин
+N02CX03,iprazochrome,
+N02CX05,fonazine mesylate,
+N02CX06,oxetorone,
+N02CX07,erenumab,
+N03AA01,mephobarbital,
+N03AA02,phenobarbital,фенобарбитал
+N03AA03,primidone,примидон
+N03AA04,barbexaclone,
+N03AA30,metharbital,
+N03AB01,ethotoin,этотоин
+N03AB02,phenytoin,фенитоин
+N03AB03,neocitrullamon,
+N03AB04,mephenytoin,
+N03AB05,fosphenytoin,
+N03AC01,paramethadione,
+N03AC02,trimethadione,триметадион
+N03AC03,ethadione,
+N03AD01,ethosuximide,этосуксимид
+N03AD02,phensuximide,
+N03AD03,methsuximide,
+N03AE01,clonazepam,клоназепам
+N03AF01,carbamazepin,карбамазепин
+N03AF02,oxcarbazepine,окскарбазепин
+N03AF03,rufinamide,
+N03AF04,eslicarbazepine,
+N03AG01,valproic acid,вальпроевая кислота
+N03AG02,Valpromide,валпромид
+N03AG03,γ-aminobutyric acid,гамма-аминомасляная кислота
+N03AG04,vigabatrin,вигабатрин
+N03AG05,progabide,
+N03AG06,tiagabine,тиагабин
+N03AX03,sulthiame,
+N03AX07,phenacemide,
+N03AX09,lamotrigine,ламотриджин
+N03AX10,felbamate,фелбамат
+N03AX11,topiramate,топирамат
+N03AX13,pheneturide,
+N03AX14,etiracetam,леветирацетам
+N03AX15,zonisamide,зонисамид
+N03AX17,stiripentol,
+N03AX18,lacosamide,
+N03AX19,carisbamate,
+N03AX21,ezogabine,
+N03AX22,perampanel,
+N03AX23,brivaracetam,
+N03AX24,cannabidiol,каннабидиол
+N03AX30,beclamide,бекламид
+N04AA01,trihexyphenidyl,тригексифенидил
+N04AA02,biperiden,бипериден
+N04AA03,methixene,
+N04AA04,procyclidine,
+N04AA05,profenamine,
+N04AA08,dexetimide,дексетимид
+N04AA09,phenglutarimide,
+N04AA11,bornaprine,
+N04AA12,tropatepine,
+N04AB01,etanautine,
+N04AB02,orphenadrine,
+N04AC01,benzatropine,бензтропин
+N04AC30,etybenzatropine,
+N04BA01,levodopa,леводопа
+N04BA04,melevodopa,
+N04BB01,amantadine,амантадин
+N04BC01,bromocriptine,бромокриптин
+N04BC02,pergolide,перголид
+N04BC04,ropinirol,ропинирол
+N04BC05,pramipexole,прамипексол
+N04BC06,cabergoline,каберголин
+N04BC07,apomorphine,апоморфин
+N04BC08,piribedil,
+N04BC09,rotigotine,
+N04BD01,deprenyl,депренил
+N04BD02,rasagiline,разагилин
+N04BD03,safinamide,сафинамид
+N04BX01,tolcapone,
+N04BX02,entacapone,
+N04BX03,budipine,будипин
+N04BX04,opicapone,
+N05AA01,chlorpromazine,хлорпромазин
+N05AA02,levomepromazine,левомепромазин
+N05AA03,promazine,промазин
+N05AA04,acepromazine,ацепромазин
+N05AA05,triflupromazine,трифлупромазин
+N05AA06,cyamemazine,
+N05AA07,chlorproethazine,
+N05AB01,dixyrazine,
+N05AB02,fluphenazine,флуфеназин
+N05AB03,perphenazine,перфеназин
+N05AB04,prochlorperazine,прохлорперазин
+N05AB05,thiopropazate,
+N05AB06,trifluoperazine,трифлуоперазин
+N05AB07,acetophenazine,ацетофеназин
+N05AB08,thioproperazine,тиопроперазин
+N05AB09,butaperazine,
+N05AB10,perazine,
+N05AC01,periciazine,перициазин
+N05AC02,thioridazine,тиоридазин
+N05AC03,mesoridazine,месоридазин
+N05AC04,pipotiazine,пипотиазин
+N05AD01,haloperidol,галоперидол
+N05AD02,trifluperidol,трифлуперидол
+N05AD03,melperone,melperon
+N05AD04,moperone,моперон
+N05AD05,pipamperone,пипамперон
+N05AD06,bromperidol,
+N05AD07,benperidol,бенперидол
+N05AD08,droperidol,дроперидол
+N05AD09,fluanisone,
+N05AE01,oxypertine,
+N05AE02,molindone,mолиндон
+N05AE03,sertindole,сертиндол
+N05AE04,ziprasidone,зипрасидон
+N05AE05,lurasidone,луразидон
+N05AF01,(Z)-flupentixol,(z)-флупентиксол
+N05AF02,clopenthixol,
+N05AF03,"(E)-chlorprothixene (Z according to WHO INN RL 40, conflated wikidata)",хлорпротиксен
+N05AF04,(Z)-thiothixene,тиотиксен
+N05AF05,zuclopenthixol,зуклопентиксол
+N05AG01,fluspirilene,флуспирилен
+N05AG02,pimozide,пимозид
+N05AG03,penfluridol,пенфлуридол
+N05AH01,loxapine,локсапин
+N05AH02,clozapine,клозапин
+N05AH03,olanzapine,оланзапин
+N05AH04,quetiapine,кветиапин
+N05AH05,asenapine,азенапин
+N05AH06,clotiapine,клотиапин
+N05AL01,sulpiride,сульпирид
+N05AL02,sultopride,сультоприд
+N05AL03,tiapride,тиаприд
+N05AL04,remoxipride,
+N05AL05,amisulpride,амисульприд
+N05AL06,veralipride,
+N05AL07,levosulpiride,левосульпирид
+N05AN01,lithium,препараты лития
+N05AX07,prothipendyl,
+N05AX08,risperidone,рисперидон
+N05AX10,mosapramine,
+N05AX11,zotepine,зотепин
+N05AX12,aripiprazole,арипипразол
+N05AX13,paliperidone,палиперидон
+N05AX14,iloperidone,илоперидон
+N05AX15,cariprazine,карипразин
+N05AX16,brexpiprazole,брекспипразол
+N05AX17,pimavanserin,пимавансерин
+N05BA01,diazepam,диазепам
+N05BA02,chlordiazepoxide,хлордиазепоксид
+N05BA03,medazepam,медазепам
+N05BA04,oxazepam,оксазепам
+N05BA05,clorazepic acid,клоразепат
+N05BA06,lorazepam,лоразепам
+N05BA07,adinazolam,
+N05BA08,bromazepam,bromezepam
+N05BA09,clobazam,клобазам
+N05BA10,ketazolam,
+N05BA11,prazepam,
+N05BA12,alprazolam,алпразолам
+N05BA13,halazepam,
+N05BA14,pinazepam,
+N05BA15,camazepam,
+N05BA16,nordazepam,
+N05BA17,fludiazepam,
+N05BA18,ethyl loflazepate,этил лофлазепат
+N05BA19,etizolam,
+N05BA21,clotiazepam,
+N05BA22,cloxazolam,
+N05BA23,tofisopam,тофизопам
+N05BA24,bentazepam,
+N05BB01,hydroxyzine,гидроксизин
+N05BB02,captodiame,
+N05BC01,meprobamate,мепробамат
+N05BC03,emylcamate,
+N05BC04,mebutamate,
+N05BD01,benzoctamine,
+N05BE01,buspirone,буспирон
+N05BX01,mephenoxalone,
+N05BX02,gedocarnil,
+N05BX03,etifoxine,этифоксин
+N05BX04,fabomotizole,фабомитозол
+N05BX05,lavender oil,лавандовое масло
+N05CA01,pentobarbital,пентобарбитал
+N05CA02,amobarbital,амобарбитал
+N05CA03,butethal,
+N05CA04,barbital,барбитал
+N05CA05,aprobarbital,
+N05CA06,secobarbital,
+N05CA07,talbutal,
+N05CA08,vinylbital,
+N05CA09,vinbarbital,
+N05CA10,cyclobarbital,циклобарбитал
+N05CA11,heptabarbital,
+N05CA12,reposal,
+N05CA15,methohexital,метогекситал
+N05CA16,hexobarbital,гексобарбитал
+N05CA19,thiopental,(±)-тиопентал
+N05CA20,ethallobarbital,
+N05CA21,allobarbital,аллобарбитал
+N05CA22,proxibarbal,
+N05CC01,chloral hydrate,хлоральгидрат
+N05CC02,chlorhexadol,
+N05CC03,acetylglycinamide chloral hydrate,
+N05CC04,dichloralphenazone,
+N05CC05,paraldehyde,паральдегид
+N05CD01,flurazepam,
+N05CD02,nitrazepam,нитразепам
+N05CD03,flunitrazepam,флунитразепам
+N05CD04,estazolam,
+N05CD05,triazolam,триазолам
+N05CD06,lormetazepam,
+N05CD07,temazepam,темазепам
+N05CD08,midazolam,мидазолам
+N05CD09,brotizolam,
+N05CD10,quazepam,квазепам
+N05CD11,loprazolam,
+N05CD12,doxefazepam,
+N05CD13,cinolazepam,
+N05CE01,glutethimide,
+N05CE02,methyprylon,
+N05CE03,pyrithyldione,
+N05CF01,zopiclone,зопиклон
+N05CF02,zolpidem,золпидем
+N05CF03,zaleplon,залеплон
+N05CF04,eszopiclone,эсзопиклон
+N05CH01,melatonin,мелатонин
+N05CH02,ramelteon,рамелтеон
+N05CH03,tasimelteon,
+N05CM01,methaqualone,метаквалон
+N05CM02,clomethiazole,геминейрин
+N05CM03,bromisoval,бромизовал
+N05CM04,carbromal,
+N05CM05,L-scopolamine,скополамин
+N05CM06,propiomazine,
+N05CM07,triclofos,
+N05CM08,ethchlorvynol,этихлорвинол
+N05CM10,hexapropymate,
+N05CM11,bromide,бромиды
+N05CM12,apronal,
+N05CM15,meparfynol,метилпентинол
+N05CM16,niaprazine,
+N05CM18,dexmedetomidine,дексмедетомидин
+N05CM19,suvorexant,суворексант
+N06AA01,desipramine,дезипрамин
+N06AA02,imipramine,имипрамин
+N06AA03,imipraminoxide,
+N06AA04,clomipramine,кломипрамин
+N06AA05,opipramol,опипрамол
+N06AA06,trimipramine,тримипрамин
+N06AA07,lofepramine,
+N06AA08,dibenzepin,
+N06AA09,amitriptyline,амитриптилин
+N06AA10,nortriptyline,нортриптилин
+N06AA11,protriptyline,
+N06AA12,cidoxepin,доксепин
+N06AA13,iprindole,
+N06AA14,melitracen,
+N06AA15,butriptyline,
+N06AA16,(Z)-dothiepin,
+N06AA17,amoxapine,
+N06AA18,dimetacrine,
+N06AA19,amineptine hydrochloride,аминептин
+N06AA21,maprotiline,мапротилин
+N06AA23,quinupramine,
+N06AB02,zimelidine,зимелидин
+N06AB03,fluoxetine,флуоксетин
+N06AB04,citalopram,циталопрам
+N06AB05,paroxetine,пароксетин
+N06AB06,sertraline,сертралин
+N06AB07,alaproclate,
+N06AB08,fluvoxamine,флувоксамин
+N06AB09,etoperidone,
+N06AB10,escitalopram,эсциталопрам
+N06AF01,isocarboxazid,изокарбоксазид
+N06AF02,nialamide,ниаламид
+N06AF03,phenelzine,фенелзин
+N06AF04,tranylcypromine,транилципромин
+N06AF05,iproniazid,ипрониазид
+N06AF06,iproclozide,
+N06AG02,moclobemide,моклобемид
+N06AG03,toloxatone,
+N06AX01,5-HTP,5-гидрокситриптофан
+N06AX02,tryptophan,триптофан
+N06AX03,mianserin,миансерин
+N06AX04,nomifensine,номифензин
+N06AX05,trazodone,тразодон
+N06AX06,nefazodone,
+N06AX07,minaprine,
+N06AX08,bifemelane,бифемелан
+N06AX09,viloxazine,вилоксазин
+N06AX10,oxaflozane,
+N06AX11,mirtazapine,миртазапин
+N06AX12,bupropion,бупропион
+N06AX13,medifoxamine,
+N06AX14,tianeptine,тианептин
+N06AX15,pivagabine,
+N06AX16,venlafaxine,венлафаксин
+N06AX17,milnacipran,милнаципран
+N06AX18,"(RS,RS)-reboxetine",ребоксетин
+N06AX19,gepirone,
+N06AX21,duloxetine,дулоксетин
+N06AX22,agomelatine,агомелатин
+N06AX23,desvenlafaxine,десвенлафаксин
+N06AX24,vilazodone,вилазодон
+N06AX25,Hypericum perforatum,зверобой продырявленный
+N06AX26,vortioxetine,вортиоксетин
+N06BA01,amphetamine,амфетамин
+N06BA02,dextroamphetamine,дексамфетамин
+N06BA03,D-methamphetamine,метамфетамин
+N06BA04,methylphenidate,метилфенидат
+N06BA05,pemoline,пемолин
+N06BA06,fencamfamin,
+N06BA07,modafinil,модафинил
+N06BA08,fenozolone,
+N06BA09,atomoxetine,атомоксетин
+N06BA10,fenethylline,фенетиллин
+N06BA11,dexmethylphenidate,дексметилфенидат
+N06BA12,lisdexamfetamine,лиздексамфетамин
+N06BA13,armodafinil,армодафинил
+N06BC01,caffeine,кофеин
+N06BC02,propentofylline,
+N06BX01,meclofenoxate,меклофеноксат
+N06BX02,pyritinol,пиритинол
+N06BX03,piracetam,пирацетам
+N06BX04,deanol,диметиламиноэтанол
+N06BX05,fipexide,
+N06BX06,citicoline,цитиколин
+N06BX07,oxiracetam,
+N06BX08,pirisudanol,
+N06BX09,linopirdine,
+N06BX10,nizofenone,
+N06BX11,aniracetam,анирацетам
+N06BX12,acetylcarnitine,
+N06BX13,idebenone,идебенон
+N06BX14,prolintane,
+N06BX15,pipradrol,пипрадрол
+N06BX16,pramiracetam,прамирацетам
+N06BX17,adrafinil,
+N06BX18,vinpocetine,винпоцетин
+N06BX21,Mebicar,мебикар
+N06BX22,phenibut,аминофенилмасляная кислота
+N06DA01,tacrine,такрин
+N06DA02,donepezil,донепезил
+N06DA03,rivastigmine,ривастигмин
+N06DA04,galantamine,галантамин
+N06DA05,ipidacrine,ипидакрин
+N06DA52,memantine / donepezil,
+N06DX01,memantine,мемантин
+N06DX02,bilobalide,
+N07AA01,neostigmine,неостигмин
+N07AA02,pyridostigmine,пиридостигмина бромид
+N07AA03,distigmine bromide,дистигмина бромид
+N07AA30,ambenonium,амбенония хлорид
+N07AB01,carbachol,карбахол
+N07AB02,bethanechol,
+N07AX01,pilocarpine,пилокарпин
+N07AX02,sn-glycero-3-phosphocholine,alpha-gpc
+N07AX03,cevimeline,
+N07BA01,nicotine,никотин
+N07BA03,varenicline,варениклин
+N07BA04,cytisine,цитизин
+N07BB01,disulfiram,дисульфирам
+N07BB02,calcium cyanamide,цианамид кальция
+N07BB03,acamprosate,акампросат
+N07BB04,naltrexone,налтрексон
+N07BB05,nalmefene,налмефен
+N07BC01,buprenorphine,бупренорфин
+N07BC02,methadone,метадон
+N07BC03,levomethadyl acetate,левацетилметадол
+N07BC04,lofexidine,
+N07BC05,levomethadone,
+N07BC06,heroin,героин
+N07CA01,betahistine,бетагистин
+N07CA02,cinnarizine,циннаризин
+N07CA03,flunarizine,
+N07CA04,acetylleucine,
+N07XX01,tirilazad,
+N07XX02,riluzole,рилузол
+N07XX03,xaliproden,
+N07XX04,sodium oxybate,оксибутират натрия
+N07XX05,amifampridine,
+N07XX06,tetrabenazine,тетрабеназин
+N07XX07,dalfampridine,
+N07XX08,tafamidis,
+N07XX09,dimethyl fumarate,диметилфумарат
+N07XX10,laquinimod,
+N07XX11,pitolisant,питолизант
+N07XX12,patisiran,патисиран
+N07XX13,valbenazine,валбеназин
+N07XX14,edaravone,1-фенил-3-метил-5-пиразолон
+N07XX21,eplontersen,
+P01AA01,broxyquinoline,
+P01AA02,clioquinol,виоформ
+P01AA04,chlorquinaldol,хлорхинальдол
+P01AA05,tilbroquinol,
+P01AB01,metronidazole,метронидазол
+P01AB02,tinidazole,тинидазол
+P01AB03,ornidazole,
+P01AB04,azanidazole,
+P01AB05,propenidazole,
+P01AB06,nimorazole,
+P01AB07,secnidazole,секнидазол
+P01AC01,diloxanide furoate,
+P01AC02,clefamide,
+P01AC03,etofamide,
+P01AC04,teclozan,
+P01AR01,arsthinol,
+P01AR02,difetarsone,
+P01AR03,Glycobiarsol,
+P01AX01,chiniofon,
+P01AX02,emetine,эметин
+P01AX04,phanquone,
+P01AX05,quinacrine,мепакрин
+P01AX06,atovaquone,атовакуон
+P01AX07,trimetrexate,
+P01AX08,tenonitrozole,
+P01AX09,Dehydroemetine,
+P01AX10,fumagillin,
+P01AX11,nitazoxanide,
+P01BA01,chloroquine,хлорохин
+P01BA02,hydroxychloroquine,гидроксихлорохин
+P01BA03,primaquine,
+P01BA06,amodiaquine,
+P01BB01,proguanil,
+P01BC01,quinine,хинин
+P01BC02,mefloquine,мефлохин
+P01BD01,pyrimethamine,пириметамин
+P01BE01,artemisinin,артемизинин
+P01BE02,artemether,artemether
+P01BE03,artesunate,артесунат
+P01BE04,(1RS)-artemotil,
+P01BE05,dihydroartemisinin,
+P01BF01,artemether/lumefantrine,
+P01BF02,artesunate/mefloquine,
+P01BF03,artesunate/amodiaquine,
+P01BF05,dihydroartemisinin/piperaquine,
+P01BF06,artesunate/pyronaridine,
+P01BX01,halofantrine,
+P01CA02,benznidazole,бензнидазол
+P01CA03,fexinidazole,
+P01CB01,meglumine antimoniate,
+P01CB02,sodium stibogluconate,
+P01CC01,nifurtimox,нифуртимокс
+P01CC02,nitrofurazone,нитрофурал
+P01CD01,melarsoprol,меларсопрол
+P01CD02,3-acetylamino-4-hydroxyphenyl arsonic acid,
+P01CX01,pentamidine isethionate,
+P01CX03,eflornithine,
+P02BA01,praziquantel,празиквантел
+P02BA02,oxamniquine,
+P02BB01,metrifonate,хлорофос
+P02BX01,bithionol,
+P02BX02,niridazole,
+P02BX03,stibophen anhydrous,
+P02BX04,triclabendazole,триклабендазол
+P02CA01,mebendazole,мебендазол
+P02CA02,thiabendazole,тиабендазол
+P02CA03,albendazol,альбендазол
+P02CA04,cyclobendazole,
+P02CA05,flubendazole,
+P02CA06,fenbendazole,
+P02CB01,piperazine,пиперазин
+P02CB02,diethylcarbamazine,
+P02CC01,pyrantel,пирантел
+P02CE01,levamisole,левамизол
+P02CF01,ivermectin,ивермектин
+P02CX01,pyrvinium (cation),
+P02CX02,bephenium,
+P02DA01,niclosamide,никлозамид
+P02DX01,desaspidin,
+P02DX02,dichlorophen,
+P03AA01,dixanthogen,
+P03AA02,potassium polysulfide,
+P03AA03,mesulfen,
+P03AA04,disulfiram,дисульфирам
+P03AA05,thiram,тетраметилтиурамдисульфид
+P03AB01,DDT,ддт
+P03AB02,lindane,
+P03AC02,Bioallethrin,
+P03AC03,phenothrin,
+P03AC04,permethrin,перметрин
+P03AX01,benzyl benzoate,бензилбензоат
+P03AX03,malathion,карбофос
+P03AX04,Quassia,квассия
+P03AX05,polydimethylsiloxane,полидиметилсилоксан
+P03AX06,benzyl alcohol,бензиловый спирт
+P03BA01,cyfluthrin,
+P03BA02,cypermethrin,циперметрин
+P03BA03,deltamethrin,дельтаметрин
+P03BA04,tetramethrin,
+P03BX01,diethyltoluamide,диэтилтолуамид
+P03BX02,dimethyl phthalate,диметилфталат
+P03BX03,dibutyl phthalate,дибутилфталат
+P03BX04,dibutyl succinate,
+P03BX05,dimethyl carbate,
+P03BX06,etohexadiol,
+R01AA02,cyclopentamine,
+R01AA03,(−)-ephedrine,(−)-эфедрин
+R01AA04,phenylephrine,фенилэфрин
+R01AA05,oxymetazoline,оксиметазолин
+R01AA06,tetrahydrozoline,тетризолин
+R01AA07,xylometazoline,ксилометазолин
+R01AA08,naphazoline,нафазолин
+R01AA09,tramazoline,
+R01AA10,metizoline,
+R01AA11,2-heptylamine,
+R01AA12,fenoxazoline,
+R01AA13,tymazoline,
+R01AA14,epinephrine,адреналин
+R01AA15,indanazoline,
+R01AB01,phenylephrine,фенилэфрин
+R01AB02,naphazoline,нафазолин
+R01AB03,tetrahydrozoline,тетризолин
+R01AB05,(−)-ephedrine,(−)-эфедрин
+R01AB06,xylometazoline,ксилометазолин
+R01AB07,oxymetazoline,оксиметазолин
+R01AB08,2-heptylamine,
+R01AC01,cromoglicic acid,кромоглициевая кислота
+R01AC02,levocabastine,
+R01AC03,azelastine,азеластин
+R01AC04,antazoline,
+R01AC05,spaglumic acid,
+R01AC06,thonzylamine,
+R01AC07,nedocromil,
+R01AC08,olopatadine,
+R01AD01,beclomethasone dipropionate,беклометазона дипропионат
+R01AD02,prednisolone,преднизолон
+R01AD03,dexamethasone,дексаметазон
+R01AD04,flunisolide,
+R01AD05,budesonide,будесонид
+R01AD06,betamethasone,бетаметазон
+R01AD07,tixocortol,
+R01AD08,fluticasone,флутиказон
+R01AD09,mometasone furoate,мометазон
+R01AD11,triamcinolone,триамцинолон
+R01AD12,fluticasone furoate,
+R01AD13,ciclesonide,циклесонид
+R01AX01,calcium hexamine thiocyanate,
+R01AX02,retinol,ретинол
+R01AX03,ipratropium bromide,ипратропия бромид
+R01AX05,ritiometan,
+R01AX06,mupirocin,мупироцин
+R01AX07,hexamidine,
+R01AX08,framycetin,фрамицетин
+R01AX09,Hyaluronan sodium,гиалуронат натрия
+R01BA01,norephedrine,фенилпропаноламин
+R01BA02,pseudoephedrine,(+)-псевдоэфедрин
+R01BA03,phenylephrine,фенилэфрин
+R02AA01,ambazone,амбазон
+R02AA02,dequalinium chloride,хлорид деквалиния
+R02AA03,dichlorobenzyl alcohol,
+R02AA05,chlorhexidine,хлоргексидин
+R02AA06,cetylpyridinium,
+R02AA09,benzethonium,
+R02AA10,myristalkonium,
+R02AA11,chlorquinaldol,хлорхинальдол
+R02AA12,4-hexylresorcinol,гексилрезорцин
+R02AA13,acriflavine,
+R02AA14,oxyquinoline,8-оксихинолин
+R02AA15,povidone-iodine,повидон-йод
+R02AA17,cetrimonium,
+R02AA18,hexamidine,
+R02AA19,phenol,фенол
+R02AA21,octenidine,
+R02AB01,neomycin,неомицин
+R02AB02,tyrothricin,
+R02AB03,fusafungine,фузафунгин
+R02AB04,bacitracin a,бацитрацин
+R02AB30,gramicidin D,грамицидин
+R02AD01,benzocaine,бензокаин
+R02AD02,lidocaine,лидокаин
+R02AD03,cocaine,кокаин
+R02AD04,dyclonine,
+R02AX01,flurbiprofen,флурбипрофен
+R02AX02,ibuprofen,ибупрофен
+R02AX03,benzydamine,бензидамин
+R03AA01,epinephrine,адреналин
+R03AB02,isoprenaline,изопреналин
+R03AB03,metaproterenol,орципреналин
+R03AC02,salbutamol,сальбутамол
+R03AC03,terbutaline,тербуталин
+R03AC04,fenoterol,фенотерол
+R03AC05,rimiterol,
+R03AC06,hexoprenaline,гексопреналин
+R03AC07,isoetarine,
+R03AC08,pirbuterol,
+R03AC09,tretoquinol,
+R03AC10,carbuterol,
+R03AC11,tulobuterol,
+R03AC12,salmeterol,сальметерол
+R03AC13,formoterol,формотерол
+R03AC14,clenbuterol,кленбутерол
+R03AC15,reproterol,
+R03AC16,procaterol,
+R03AC17,bitolterol,
+R03AC18,indacaterol,
+R03AC19,olodaterol,
+R03AK04,ipratropium bromide/salbutamol,
+R03AK06,fluticasone/salmeterol,
+R03AK07,budesonide/formoterol,
+R03AK09,mometasone/formoterol,
+R03AK10,fluticasone furoate/vilanterol,
+R03AK12,budesonide / salmeterol,
+R03AL03,umeclidinium bromide/vilanterol,
+R03AL04,indacaterol/glycopyrrolate,
+R03AL09,Beclometasone/formoterol/glycopyrronium,
+R03BA01,beclomethasone dipropionate,беклометазона дипропионат
+R03BA02,budesonide,будесонид
+R03BA03,flunisolide,
+R03BA04,betamethasone,бетаметазон
+R03BA05,fluticasone,флутиказон
+R03BA06,triamcinolone,триамцинолон
+R03BA07,mometasone furoate,мометазон
+R03BA08,ciclesonide,циклесонид
+R03BA09,fluticasone furoate,
+R03BB01,ipratropium bromide,ипратропия бромид
+R03BB02,oxitropium bromide,
+R03BB04,tiotropium,тиотропия бромид
+R03BB05,aclidinium bromide,
+R03BB06,glycopyrrolate,
+R03BB07,umeclidinium bromide,
+R03BC01,cromoglicic acid,кромоглициевая кислота
+R03BC03,nedocromil,
+R03BX01,fenspiride,фенспирид
+R03CA02,(−)-ephedrine,(−)-эфедрин
+R03CB01,isoprenaline,изопреналин
+R03CB02,methoxyphenamine,
+R03CB03,metaproterenol,орципреналин
+R03CC02,salbutamol,сальбутамол
+R03CC03,terbutaline,тербуталин
+R03CC04,fenoterol,фенотерол
+R03CC05,hexoprenaline,гексопреналин
+R03CC06,isoetarine,
+R03CC07,pirbuterol,
+R03CC08,procaterol,
+R03CC09,tretoquinol,
+R03CC10,carbuterol,
+R03CC11,tulobuterol,
+R03CC12,bambuterol,
+R03CC13,clenbuterol,кленбутерол
+R03CC14,reproterol,
+R03DA01,dyphylline,
+R03DA02,oxtriphylline,
+R03DA03,proxyphylline,
+R03DA04,theophylline,теофиллин
+R03DA05,aminophylline,эуфиллин
+R03DA06,etamiphyllin,
+R03DA07,theobromine,теобромин
+R03DA08,bamifylline,
+R03DA09,acefylline piperazine,
+R03DA10,ambuphylline,
+R03DA11,doxofylline,
+R03DC01,zafirlukast,зафирлукаст
+R03DC02,pranlukast,
+R03DC03,montelukast,монтелукаст
+R03DC04,ibudilast,
+R03DX01,amlexanox,
+R03DX02,eprozinol,
+R03DX03,fenspiride,фенспирид
+R03DX05,omalizumab,омализумаб
+R03DX06,seratrodast,
+R03DX07,roflumilast,рофлумиласт
+R03DX08,reslizumab,реслизумаб
+R03DX09,mepolizumab,меполизумаб
+R03DX10,benralizumab,
+R03DX12,Depemokimab,
+R05CA01,tyloxapol,
+R05CA02,potassium iodide,иодид калия
+R05CA03,guaifenesin,гвайфенезин
+R05CA04,syrup of ipecac,
+R05CA05,althea root,корень алтея
+R05CA06,Polygala senega,polygala senega
+R05CA07,antimony pentasulfide,сульфид сурьмы(v)
+R05CA08,creosote,креозот
+R05CA09,4-guaiacolsulfonic acid,
+R05CA11,verbenone,
+R05CA13,eucalyptol,цинеол
+R05CB01,N-acetyl-L-cysteine,ацетилцистеин
+R05CB02,bromhexine,бромгексин
+R05CB03,L-carbocysteine,карбоцистеин
+R05CB04,eprazinone,
+R05CB05,mesna,
+R05CB06,ambroxol,амброксол
+R05CB07,sobrerol,
+R05CB08,domiodol,
+R05CB09,letosteine,
+R05CB11,stepronin,
+R05CB15,erdosteine,эрдостеин
+R05CB16,D-(-)-mannitol,маннит
+R05DA01,ethylmorphine,этилморфин
+R05DA03,hydrocodone,гидрокодон
+R05DA04,codeine,кодеин
+R05DA06,normethadone,
+R05DA07,noscapine,наркотин
+R05DA08,pholcodine,
+R05DA09,dextromethorphan,декстрометорфан
+R05DA10,thebacon,
+R05DA11,dimemorfan,
+R05DA12,acetyldihydrocodeine,
+R05DB01,benzonatate,бензонатат
+R05DB02,benproperine,benproperine
+R05DB03,clobutinol,
+R05DB04,isoaminile,
+R05DB05,pentoxyverine,
+R05DB07,oxolamine,
+R05DB09,oxeladin,окселадин
+R05DB10,chlophedianol,
+R05DB11,pipazethate,
+R05DB12,bibenzonium bromide,
+R05DB13,butamirate,бутамират
+R05DB14,fedrilate,
+R05DB15,zipeprol,
+R05DB16,dibunate,
+R05DB17,droxypropine,
+R05DB18,prenoxdiazine,преноксдиазин
+R05DB19,dropropizine,
+R05DB21,cloperastine,
+R05DB22,meprotixol,
+R05DB23,piperidione,
+R05DB24,tipepidine,
+R05DB25,morclofone,
+R05DB26,nepinalone,
+R05DB27,levodropropizine,леводропропизин
+R05DB28,dimethoxanate,
+R05DB29,gefapixant,
+R06AA01,bromodiphenhydramine,
+R06AA02,diphenhydramine,дифенгидрамин
+R06AA04,clemastine,клемастин
+R06AA06,chlorphenoxamine,
+R06AA07,diphenylpyraline,
+R06AA08,carbinoxamine,
+R06AA09,doxylamine,доксиламин
+R06AA10,trimethobenzamide,trimethobenzamide
+R06AB01,brompheniramine,
+R06AB02,dexchlorpheniramine,
+R06AB03,dimethindene,fenistil
+R06AB04,chlorpheniramine,хлорфенамин
+R06AB05,pheniramine,
+R06AB06,dexbrompheniramine,
+R06AB07,talastine,
+R06AC01,pyrilamine,
+R06AC02,histapyrrodine,
+R06AC03,chloropyramine,хлоропирамин
+R06AC04,tripelennamine,
+R06AC05,methapyrilene,
+R06AC06,thonzylamine,
+R06AD01,trimeprazine,алимемазин
+R06AD02,promethazine,прометазин
+R06AD03,thiethylperazine,тиэтилперазин
+R06AD04,methdilazine,
+R06AD05,promethazine hydroxyethyl,
+R06AD06,thiazinamium,
+R06AD07,mequitazine,
+R06AD08,oxomemazine,
+R06AD09,isothipendyl,
+R06AE01,buclizine,
+R06AE03,cyclizine,циклизин
+R06AE04,chlorcyclizine,
+R06AE05,meclizine,meclizine
+R06AE06,oxatomide,
+R06AE07,cetirizine,цетиризин
+R06AE09,levocetirizine,левоцетиризин
+R06AX01,bamipine,
+R06AX02,cyproheptadine,ципрогептадин
+R06AX03,thenalidine,
+R06AX04,phenindamine,
+R06AX05,antazoline,
+R06AX07,triprolidine,
+R06AX08,(EZ)-Pyrrobutamine,
+R06AX09,azatadine,
+R06AX11,astemizole,астемизол
+R06AX12,terfenadine,
+R06AX13,loratadine,лоратадин
+R06AX15,mebhydrolin,мебгидролин
+R06AX16,deptropine,
+R06AX17,ketotifen,кетотифен
+R06AX18,acrivastine,акривастин
+R06AX19,azelastine,азеластин
+R06AX21,tritoqualine,
+R06AX22,ebastine,эбастин
+R06AX23,pimethixene,
+R06AX24,epinastine,
+R06AX25,mizolastine,
+R06AX26,fexofenadine,фексофенадин
+R06AX27,desloratadine,дезлоратадин
+R06AX28,rupatadine,
+R06AX29,bilastine,биластин
+R06AX31,quifenadine,хифенадин
+R06AX32,sequifenadine,сехифенадин
+R07AA01,colfosceril palmitate,
+R07AB01,doxapram,
+R07AB02,nikethamide,никетамид
+R07AB03,pentetrazol,пентилентетразол
+R07AB04,ethamivan,
+R07AB05,bemegride,бемегрид
+R07AB06,prethcamide,
+R07AB07,almitrine,
+R07AB08,dimefline,
+R07AB09,mepixanox,
+R07AX01,nitric oxide,оксид азота(ii)
+R07AX02,ivacaftor,
+R07AX30,lumacaftor/ivacaftor,
+S01AA01,chloramphenicol,хлорамфеникол
+S01AA02,chlortetracycline,хлортетрациклин
+S01AA03,neomycin,неомицин
+S01AA04,oxytetracycline,окситетрациклин
+S01AA05,tyrothricin,
+S01AA07,framycetin,фрамицетин
+S01AA09,tetracycline,тетрациклин
+S01AA10,natamycin,натамицин
+S01AA11,gentamicin,гентамицин
+S01AA12,tobramycin,тобрамицин
+S01AA13,fusidic acid,фузидовая кислота
+S01AA14,benzylpenicillin,бензатина бензилпенициллин
+S01AA15,dihydrostreptomycin,
+S01AA16,rifamycin,рифамицин
+S01AA17,erythromycin,эритромицин
+S01AA18,polymyxin B,полимиксин b
+S01AA19,ampicillin,ампициллин
+S01AA21,amikacin,амикацин
+S01AA22,micronomicin,
+S01AA23,netilmicin,
+S01AA24,kanamycin,канамицин
+S01AA25,azidamfenicol,
+S01AA26,azithromycin,азитромицин
+S01AA27,cefuroxime,цефуроксим
+S01AB01,sulfamethizole,
+S01AB02,sulfisoxazole,
+S01AB03,sulfadicramide,
+S01AB04,sulfacetamide,сульфацетамид
+S01AB05,sulfaphenazole,
+S01AD01,idoxuridine,идоксуридин
+S01AD02,trifluridine,
+S01AD03,aciclovir,ацикловир
+S01AD05,interferon,интерферон
+S01AD06,vidarabine,видарабин
+S01AD07,famciclovir,фамцикловир
+S01AD08,fomivirsen sodium,
+S01AD09,ganciclovir,ганцикловир
+S01AE01,ofloxacin,офлоксацин
+S01AE02,norfloxacin,норфлоксацин
+S01AE03,ciprofloxacin,ципрофлоксацин
+S01AE04,lomefloxacin,ломефлоксацин
+S01AE05,levofloxacin,левофлоксацин
+S01AE06,gatifloxacin,
+S01AE07,moxifloxacin,моксифлоксацин
+S01AE08,Besifloxacin,
+S01AX01,mercury compound,соединение ртути
+S01AX02,silver compound,
+S01AX04,nitrofurazone,нитрофурал
+S01AX05,bibrocathol,
+S01AX06,resorcin,резорцин
+S01AX07,borax,тетраборат натрия
+S01AX08,hexamidine,
+S01AX09,chlorhexidine,хлоргексидин
+S01AX10,sodium propionate,пропионат натрия
+S01AX14,dibrompropamidine,
+S01AX15,propamidine,
+S01AX16,picloxydine,пиклоксидин
+S01AX18,povidone-iodine,повидон-йод
+S01BA01,dexamethasone,дексаметазон
+S01BA02,cortisol,кортизол
+S01BA03,cortisone,кортизон
+S01BA04,prednisolone,преднизолон
+S01BA05,triamcinolone,триамцинолон
+S01BA06,betamethasone,бетаметазон
+S01BA07,fluorometholone,
+S01BA08,medrysone,
+S01BA09,clobetasone,
+S01BA10,alclometasone,
+S01BA11,desonide,
+S01BA12,Formocortal,
+S01BA13,rimexolone,
+S01BA14,loteprednol etabonate,
+S01BA15,fluocinolone acetonide,флуоцинолона ацетонид
+S01BC01,indomethacin,индометацин
+S01BC02,oxyphenbutazone,
+S01BC03,Diclofenac,диклофенак
+S01BC04,flurbiprofen,флурбипрофен
+S01BC05,ketorolac,кеторолак
+S01BC06,piroxicam,пироксикам
+S01BC07,bendazac,
+S01BC08,salicylic acid,салициловая кислота
+S01BC09,pranoprofen,
+S01BC10,nepafenac,непафенак
+S01BC11,bromfenac,бромфенак
+S01CB01,dexamethasone,дексаметазон
+S01CB02,prednisolone,преднизолон
+S01CB03,cortisol,кортизол
+S01CB04,betamethasone,бетаметазон
+S01CB05,fluorometholone,
+S01EA01,epinephrine,адреналин
+S01EA02,dipivefrin,
+S01EA03,apraclonidine,
+S01EA04,clonidine,клонидин
+S01EA05,brimonidine,бримонидин
+S01EB01,pilocarpine,пилокарпин
+S01EB02,carbachol,карбахол
+S01EB03,echothiophate,
+S01EB04,demecarium,
+S01EB05,physostigmine,физостигмин
+S01EB06,neostigmine,неостигмин
+S01EB07,isoflurophate,диизопропилфторфосфат
+S01EB08,aceclidine,ацеклидин
+S01EB09,acetylcholine,ацетилхолин
+S01EB10,paraoxon,фосфакол
+S01EC01,acetazolamide,ацетазоламид
+S01EC02,dichlorphenamide,
+S01EC03,dorzolamide,дорзоламид
+S01EC04,brinzolamide,бринзоламид
+S01EC05,methazolamide,
+S01ED01,(−)-timolol,тимолол
+S01ED02,betaxolol,бетаксолол
+S01ED03,levobunolol,
+S01ED04,metipranolol,
+S01ED05,carteolol,
+S01ED06,befunolol,
+S01EE01,latanoprost,латанопрост
+S01EE02,unoprostone,
+S01EE03,bimatoprost,биматопрост
+S01EE04,travoprost,травопрост
+S01EE05,tafluprost,тафлупрост
+S01EX01,guanethidine,гуанетидин
+S01EX02,dapiprazole,
+S01EX05,netarsudil,нетарсудил
+S01EX06,omidenepag,
+S01FA01,atropine,атропин
+S01FA02,L-scopolamine,скополамин
+S01FA03,N-methylscopolamine(1+),
+S01FA04,cyclopentolate-(RS),циклопентолат
+S01FA05,homatropine,гоматропин
+S01FA06,tropicamide,тропикамид
+S01FB01,phenylephrine,фенилэфрин
+S01FB02,(−)-ephedrine,(−)-эфедрин
+S01FB03,ibopamine,
+S01FB51,ketorolac / phenylephrine,
+S01GA01,naphazoline,нафазолин
+S01GA02,tetrahydrozoline,тетризолин
+S01GA03,xylometazoline,ксилометазолин
+S01GA04,oxymetazoline,оксиметазолин
+S01GA05,phenylephrine,фенилэфрин
+S01GA06,oxedrine,синефрин
+S01GX01,cromoglicic acid,кромоглициевая кислота
+S01GX02,levocabastine,
+S01GX03,spaglumic acid,
+S01GX04,nedocromil,
+S01GX05,lodoxamide,
+S01GX06,emedastine,
+S01GX07,azelastine,азеластин
+S01GX08,ketotifen,кетотифен
+S01GX09,olopatadine,
+S01GX10,epinastine,
+S01GX11,alcaftadine,alcaftadine
+S01HA01,cocaine,кокаин
+S01HA02,oxybuprocaine,
+S01HA03,tetracaine,тетракаин
+S01HA04,proparacaine,
+S01HA05,procaine,прокаин
+S01HA06,dibucaine,
+S01HA07,lidocaine,лидокаин
+S01JA01,fluorescein,флуоресцеин
+S01KA01,Hyaluronan sodium,гиалуронат натрия
+S01KA02,hypromellose,метилоксипропилцеллюлоза
+S01KX01,chymotrypsin,химотрипсин
+S01LA01,verteporfin,
+S01LA02,anecortave,
+S01LA03,pegaptanib,
+S01LA04,ranibizumab,ранибизумаб
+S01LA05,aflibercept,афлиберцепт
+S01XA01,guaiazulene,гвайазулен
+S01XA02,retinol,ретинол
+S01XA04,potassium iodide,иодид калия
+S01XA05,edetate sodium,
+S01XA06,ethylmorphine,этилморфин
+S01XA07,alum,квасцы
+S01XA08,N-acetyl-L-cysteine,ацетилцистеин
+S01XA10,inosine,инозин
+S01XA11,nandrolone,нандролона деканоат
+S01XA12,panthenol,
+S01XA13,alteplase,альтеплаза
+S01XA14,heparin,гепарин
+S01XA15,vitamin C,витамин c
+S01XA18,cyclosporine,циклоспорин
+S01XA20,artificial tears,tearlose
+S01XA21,cysteamine,
+S01XA22,ocriplasmin,
+S01XA23,sirolimus,сиролимус
+S01XA24,cenegermin,ценегермин
+S01XA25,lifitegrast,lifitegrast
+S01XA26,riboflavin,рибофлавин
+S01XA32,avacincaptad pegol,
+S02AA01,chloramphenicol,хлорамфеникол
+S02AA02,nitrofurazone,нитрофурал
+S02AA03,orthoboric acid,борная кислота
+S02AA04,aluminium acetotartrate,
+S02AA05,clioquinol,виоформ
+S02AA06,hydrogen peroxide solution,раствор перекиси водорода
+S02AA07,neomycin,неомицин
+S02AA08,tetracycline,тетрациклин
+S02AA09,chlorhexidine,хлоргексидин
+S02AA10,acetic acid,уксусная кислота
+S02AA11,polymyxin B,полимиксин b
+S02AA12,rifamycin,рифамицин
+S02AA13,miconazole,
+S02AA14,gentamicin,гентамицин
+S02AA15,ciprofloxacin,ципрофлоксацин
+S02AA16,ofloxacin,офлоксацин
+S02BA01,cortisol,кортизол
+S02BA03,prednisolone,преднизолон
+S02BA06,dexamethasone,дексаметазон
+S02BA07,betamethasone,бетаметазон
+S02BA08,fluocinolone acetonide,флуоцинолона ацетонид
+S02CA03,acetic acid/hydrocortisone,
+S02DA01,lidocaine,лидокаин
+S02DA02,cocaine,кокаин
+S02DA03,antipyrine,феназон
+S02DA04,dibucaine,
+S03AA01,neomycin,неомицин
+S03AA02,tetracycline,тетрациклин
+S03AA03,polymyxin B,полимиксин b
+S03AA04,chlorhexidine,хлоргексидин
+S03AA05,hexamidine,
+S03AA06,gentamicin,гентамицин
+S03AA07,ciprofloxacin,ципрофлоксацин
+S03AA08,chloramphenicol,хлорамфеникол
+S03BA01,dexamethasone,дексаметазон
+S03BA02,prednisolone,преднизолон
+S03BA03,betamethasone,бетаметазон
+V01AA01,feather,перо
+V03AB01,Ipecacuanha,ipecacuanha
+V03AB02,Nalorphine,налорфин
+V03AB03,sodium calcium edetate,
+V03AB04,pralidoxime,пралидоксим
+V03AB05,prednisolone/promethazine,
+V03AB06,sodium thiosulfate,тиосульфат натрия
+V03AB08,sodium nitrite,нитрит натрия
+V03AB09,dimercaprol,димеркапрол
+V03AB13,obidoxime chloride,обидоксим
+V03AB14,protamine,протамины
+V03AB15,naloxone,налоксон
+V03AB16,ethanol,этанол
+V03AB17,methylene blue,метиленовый синий
+V03AB18,potassium permanganate,перманганат калия
+V03AB19,physostigmine,физостигмин
+V03AB20,cupric sulfate,сульфат меди(ii)
+V03AB21,potassium iodide,иодид калия
+V03AB22,n-pentyl nitrite,изоамилнитрит
+V03AB23,N-acetyl-L-cysteine,ацетилцистеин
+V03AB25,flumazenil,флумазенил
+V03AB26,L-methionine,
+V03AB27,4-dimethylaminophenol,4-диметиламинофенол
+V03AB29,cholinesterase,холинэстераза
+V03AB31,Prussian blue,берлинская лазурь
+V03AB32,glutathione,глутатион
+V03AB33,hydroxocobalamin,гидроксокобаламин
+V03AB34,fomepizole,4-метилпиразол
+V03AB35,sugammadex sodium,sugammadex
+V03AB36,phentolamine,фентоламин
+V03AB37,Idarucizumab,идаруцизумаб
+V03AB38,andexanet alfa,андекса
+V03AC01,deferoxamine,
+V03AC02,deferiprone,
+V03AC03,deferasirox,деферазирокс
+V03AE01,polystyrene sulfonate,
+V03AE02,sevelamer,
+V03AE03,lanthanum carbonate,карбонат лантана(iii)
+V03AE05,sucroferric oxyhydroxide,
+V03AE06,Colestilan,
+V03AE07,calcium acetate,ацетат кальция
+V03AE08,iron(III) citrate,цитрат железа(iii)
+V03AE09,patiromer,патиромер
+V03AE10,sodium zirconium cyclosilicate,циклосиликат циркония-натрия
+V03AF01,mesna,
+V03AF02,dexrazoxane,
+V03AF03,leucovorin calcium,
+V03AF04,levoleucovorin calcium,
+V03AF05,amifostine,
+V03AF06,Sodium folinate,динатрия фолинат
+V03AF07,rasburicase,
+V03AF08,palifermin,
+V03AF09,glucarpidase,
+V03AF10,levoleucovorin disodium,
+V03AG01,sodium cellulose phosphate,
+V03AH01,diazoxide,диазоксид
+V03AN01,oxygen,кислород
+V03AN02,carbon dioxide,оксид углерода(iv)
+V03AN03,helium,гелий
+V03AN04,nitrogen,азот
+V03AN05,medical air,
+V03AX02,nalfurafine,
+V03AX03,cobicistat,кобицистат
+V03AZ01,ethanol,этанол
+V04CA01,tolbutamide,
+V04CA02,glucose,глюкоза
+V04CC01,D-sorbitol,сорбит
+V04CC02,magnesium sulfate,сульфат магния
+V04CC03,sincalide,
+V04CC04,ceruletide,
+V04CD01,metyrapone,
+V04CD03,sermorelin,
+V04CD04,Corticorelin ovine triflutate,
+V04CD05,Somatorelin,
+V04CD06,macimorelin,
+V04CE01,galactose,галактоза
+V04CE02,sulfobromophthalein,бромсульфофталеин
+V04CF01,tuberculin,туберкулин
+V04CG02,betazole,
+V04CG03,histamine phosphate,
+V04CG04,pentagastrin,пентагастрин
+V04CG05,methylene blue,метиленовый синий
+V04CH02,indigotindisulfonate sodium,индигокармин
+V04CH03,phenolsulfonphthalein,феноловый красный
+V04CH04,alsactide,
+V04CH30,aminohippuric acid,
+V04CJ02,thyrotropin-releasing hormone,тиролиберин
+V04CK01,secretin,секретин
+V04CK02,cholecystokinin,холецистокинин
+V04CK03,bentiromide,
+V04CM01,gonadorelin,
+V04CX01,indocyanine green,
+V06DC01,glucose,глюкоза
+V06DC02,keto-D-fructose,фруктоза
+V08AA01,diatrizoic acid,
+V08AA02,metrizoic acid,
+V08AA03,iodamide,
+V08AA04,iothalamic acid,
+V08AA05,ioxitalamic acid,
+V08AA06,ioglicic acid,
+V08AA07,acetrizoic acid,
+V08AA08,iocarmic acid,
+V08AA09,methiodal sodium,
+V08AA10,diodone,
+V08AB01,metrizamide,
+V08AB02,iohexol,
+V08AB03,ioxaglic acid,
+V08AB04,iopamidol,
+V08AB05,iopromide,иопромид
+V08AB06,iotrolan,
+V08AB07,ioversol,
+V08AB08,iopentol,
+V08AB09,iodixanol,
+V08AB10,iomeprol,
+V08AB11,iobitridol,
+V08AB12,ioxilan,
+V08AC01,iodoxamic acid,
+V08AC02,iotroxic acid,
+V08AC03,ioglycamic acid,
+V08AC04,iodipamide,
+V08AC05,iobenzamic acid,
+V08AC06,iopanoic acid,
+V08AC07,iocetamic acid,
+V08AC08,Ipodate sodium,
+V08AC09,tyropanic acid,
+V08AC10,ipodate calcium,
+V08AD01,ethiodized oil,йодолипол
+V08AD02,iopydol,
+V08AD03,propyliodone,
+V08AD04,ethyl 10-(4-iodophenyl)undecanoate,
+V08CA01,gadopentetate dimeglumine,
+V08CA02,gadoteric acid,
+V08CA03,gadodiamide hydrate,гадодиамид
+V08CA04,gadoteridol,
+V08CA05,mangafodipir,мангафодипир
+V08CA06,gadoversetamide,
+V08CA07,ammonium ferric citrate,цитраты аммония-железа
+V08CA08,gadobenate dimeglumine,
+V08CA09,gadobutrol,
+V08CA10,gadoxetic acid,
+V08CA11,gadofosveset trisodium hydrate,
+V08CB01,ferumoxsil,
+V08CB03,iron oxide nanoparticle,
+V08CX01,perflubron,
+V08DA03,perfluoropentane,додекафторпентан
+V08DA05,sulfur hexafluoride,фторид серы(vi)
+V09AA01,technetium (99mTc) exametazime,
+V09AB03,ioflupane I-123,иофлупан (123i)
+V09AX04,flutemetamol F-18,flutemetamol (18f)
+V09AX05,florbetapir (18F),florbetapir (18f)
+V09AX06,florbetaben f-18,florbetaben
+V09BA02,technetium (99mTc) medronic acid,
+V09DA03,technetium tc-99m lidofenin,
+V09DA04,Technetium (99mTc) mebrofenin,
+V09EX01,krypton-81m,криптон-81m
+V09EX02,xenon-127,ксенон-127
+V09EX03,xenon-133,ксенон-133
+V09GA01,technetium Tc-99m sestamibi,
+V09GA02,technetium Tc-99m tetrofosmin,
+V09GB01,fibrinogen I-125,
+V09GX02,indium (111In) imciromab,
+V09HA04,technetium (99mTc) sulesomab,
+V09HX01,gallium citrate ga-67,
+V09IA04,Technetium (99mTc) votumumab,
+V09IA08,Technetium (99mTc) etarfolatide,
+V09IA09,technetium (99mTc) tilmanocept,
+V09IB02,indium (111In) satumomab pendetide,
+V09IB04,capromab,
+V09IX01,iobenguane I-123,
+V09IX02,iobenguane I-131,iobenguane (131i)
+V09IX04,fludeoxyglucose (18F),фтордезоксиглюкоза
+V09IX05,fluorodopa F-18,fluorodopa (18f)
+V09IX06,sodium fluoride,фторид натрия
+V09IX07,fluorocholine F-18,
+V09IX08,fluorocholine F-18,
+V09IX09,edotreotide gallium ga-68,
+V09IX10,O-(2-fluorethyl)-L-thyrosine,
+V09IX11,fluoroestradiol f-18,fluoroestradiol f-18
+V09IX12,fluciclovine-F18,fluciclovine (18f)
+V09XA02,iodocholesterol i-131,
+V10AX03,dysprosium,диспрозий
+V10AX06,colloidal gold,питьевое золото
+V10BX01,strontium chloride sr-89,
+V10BX02,samarium sm-153 lexidronam pentasodium,
+V10XA01,sodium iodide i-131,
+V10XA02,iobenguane I-131,iobenguane (131i)
+V10XA53,tositumomab,
+V10XX02,ibritumomab,
+V10XX03,radium ra-223 dichloride,
+V10XX04,dotatate lutenium Lu-177,lutetium lu 177 dotatate

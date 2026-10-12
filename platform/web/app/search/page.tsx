@@ -25,7 +25,7 @@ export default async function Search({ searchParams }: { searchParams: Promise<{
       list = await rows(db, `${MOLECULE_LIST_SQL}
         where ($1 = '' or m.inn ilike '%' || $1 || '%' or m.category ilike '%' || $1 || '%'
                or exists (select 1 from molecule_aliases a where a.molecule_id = m.id and a.alias like '%' || lower($1) || '%')
-               or exists (select 1 from registrations r where r.molecule_id = m.id and r.active and r.brand ilike '%' || $1 || '%'))
+               or exists (select 1 from registrations r where r.molecule_id = m.id and r.active and r.country = cm.country and r.brand ilike '%' || $1 || '%'))
           and ($2 = '' or m.category = $2)
           and ($3 = '' or ($3 = 'official' and cm.on_national_list) or ($3 = 'global' and cm.on_who_eml)
                or ($3 = 'unregistered' and cm.registrations = 0))

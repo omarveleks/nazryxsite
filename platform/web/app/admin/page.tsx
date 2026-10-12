@@ -42,7 +42,7 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
       (select count(*)::int from supplier_documents where expires_on < current_date + 60) as expiring,
       (select count(*)::int from registry_uploads where status in ('queued', 'running')) as running`);
     if (tab === 'data') {
-      out.history = await rows(db, `select r.id, r.kind, r.uploaded_at, r.finished_at, r.file_name, r.rows, r.status, r.error, u.email
+      out.history = await rows(db, `select r.id, r.kind, r.country, r.uploaded_at, r.finished_at, r.file_name, r.rows, r.status, r.error, u.email
                                     from registry_uploads r left join users u on u.id = r.uploaded_by order by r.id desc limit 15`);
       out.reminders = await rows(db, 'select sent_at from reminders_log order by sent_at desc limit 3');
       out.refs = await rows(db, 'select kind, name, uploaded_at from reference_files');
@@ -180,11 +180,15 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
             <h2>Upload new list</h2>
             {d.refs.length < 2 && <div className="err" role="alert">Upload the two reference lists below first. The registry upload needs them.</div>}
             <form action="/api/admin/upload" method="post" encType="multipart/form-data" className="stack">
-              <div className="drop"><label className="lbl" htmlFor="file">Registration list (.xls export)</label>
+              <div className="field"><label htmlFor="country">Country</label>
+                <select className="input" id="country" name="country" defaultValue="TZ">
+                  {[['TZ', 'Tanzania (registered products .xls)'], ['KZ', 'Kazakhstan (state register .xlsx)'], ['KG', 'Kyrgyzstan (register .xlsx)'],
+                    ['UZ', 'Uzbekistan (bulletin: registration certificates .xlsx)'], ['KE', 'Kenya (PPB register .xlsx)']].map(([k, l]) => <option key={k} value={k}>{l}</option>)}</select></div>
+              <div className="drop"><label className="lbl" htmlFor="file">Registration list (.xls or .xlsx export)</label>
                 <input id="file" name="file" type="file" accept=".xls,.xlsx,.html,.htm" required disabled={d.refs.length < 2} /></div>
               <button className="btn btn-blue" type="submit" disabled={d.refs.length < 2}>Upload registration list</button>
             </form>
-            <p className="note">After upload: validate, compare with the last list, update the database, recalculate rankings, merge duplicate distributors. A failed upload never changes live data.</p>
+            <p className="note">After upload: validate, compare with the last list for that country, update the database, recalculate rankings, merge duplicate distributors. A failed upload never changes live data. Kazakhstan, Kyrgyzstan, Uzbekistan and Kenya use their essential lists built in, and Russian names are put into English.</p>
             {c.running > 0 && <span className="pill blue">{c.running} job running or queued</span>}
             <form action={queueRecompute}><button className="btn btn-ghost btn-sm" type="submit">Recompute now (apply review decisions and new supplier offers)</button></form>
           </section>
@@ -221,9 +225,10 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
         <section className="card">
           <div className="card-h"><h2>Upload history</h2></div>
           <div className="tbl-wrap"><table className="tbl">
-            <thead><tr><th>Date</th><th>By</th><th>File</th><th className="r">Rows</th><th>Status</th></tr></thead>
+            <thead><tr><th>Date</th><th>Country</th><th>By</th><th>File</th><th className="r">Rows</th><th>Status</th></tr></thead>
             <tbody>{d.history.map((h: any) => (
               <tr key={h.id}><td>{fmtDate(h.uploaded_at)} <span className="tiny muted">{new Date(h.uploaded_at).toISOString().slice(11, 16)} UTC</span></td>
+                <td className="small">{h.country}</td>
                 <td className="small">{h.email ?? (h.kind === 'initial' ? 'Initial load' : 'System')}</td>
                 <td className="small">{h.kind === 'recompute' ? 'Recompute' : <a href={`/files/registry/${h.id}`}>{h.file_name}</a>}</td>
                 <td className="r num">{h.rows ?? '—'}</td>

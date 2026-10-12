@@ -107,7 +107,8 @@ def load_country_molecules(cur, data, key_to_id, ess, country):
 # ------------------------------------------------------------------ companies
 def upsert_companies(cur, data, upload_id):
     comp = data["companies"]
-    existing = {k: (i, m) for k, i, m in cur.execute("select cluster_key, id, merged_into from companies").fetchall()}
+    # Tanzania's companies only: other markets keep theirs under 'CC|key' (country_load.py) and are never merged from here
+    existing = {k: (i, m) for k, i, m in cur.execute("select cluster_key, id, merged_into from companies where cluster_key not like '%|%'").fetchall()}
     new_clusters = set(comp.cluster)
     cluster_to_id, added = {}, 0
     for r in comp.itertuples(index=False):

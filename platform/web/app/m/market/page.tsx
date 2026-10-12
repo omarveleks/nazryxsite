@@ -17,6 +17,7 @@ async function headline(db: Db, c: string, uid: string) {
   return one(db, `select
       (select count(*)::int from registrations where country = $1 and active) as products,
       (select count(distinct ltr_id)::int from registrations where country = $1 and active) as distributors,
+      (select count(distinct coalesce(ltr_id, registrant_id))::int from registrations where country = $1 and active) as companies,
       (select count(distinct molecule_id)::int from registrations where country = $1 and active) as molecules,
       (select count(*)::int from country_molecules where country = $1 and on_national_list and registrants = 0 and rankable) as open,
       (select count(distinct p.molecule_id)::int from mfr_products p join country_molecules cm on cm.molecule_id = p.molecule_id and cm.country = $1
@@ -52,7 +53,8 @@ export default async function MfrMarket({ searchParams }: { searchParams: Promis
         from registrations where country = $1 and active group by 1 order by n desc limit 8`, [market]);
     const years = await rows(db, `select reg_year as year, count(*)::int as n from registrations
         where country = $1 and active and reg_year between 2000 and extract(year from now())::int group by reg_year order by reg_year`, [market]);
-    const routes = await rows(db, 'select label, description, months_low, months_high from registration_routes order by sort');
+    // the routes table describes Tanzania; other markets show their requirements card instead
+    const routes = market === 'TZ' ? await rows(db, 'select label, description, months_low, months_high from registration_routes order by sort') : [];
     return { targets, market, reqs, h, cats, origin, years, routes };
   });
   const m = d.market;
@@ -67,7 +69,9 @@ export default async function MfrMarket({ searchParams }: { searchParams: Promis
       {d.h && (<>
         <div className="grid g4" data-tour="market">
           <div className="tile t-blue"><span className="k">Registered products</span><span className="v num">{d.h.products.toLocaleString('en')}</span></div>
-          <div className="tile t-mint"><span className="k">Distributors holding registrations</span><span className="v num">{d.h.distributors}</span></div>
+          {d.h.distributors > 0
+            ? <div className="tile t-mint"><span className="k">Distributors holding registrations</span><span className="v num">{d.h.distributors}</span></div>
+            : <div className="tile t-mint"><span className="k">Companies holding registrations</span><span className="v num">{d.h.companies.toLocaleString('en')}</span></div>}
           <div className="tile t-lav"><span className="k">Molecules on the market</span><span className="v num">{d.h.molecules}</span></div>
           <div className="tile t-peach"><span className="k"><OpeningIcon /> Essential medicines nobody registered</span><span className="v num">{d.h.open}</span></div>
         </div>
@@ -104,12 +108,12 @@ export default async function MfrMarket({ searchParams }: { searchParams: Promis
                   <div key={o.country} className="between small" style={{ padding: '6px 0', borderTop: '1px solid var(--line)' }}>
                     <span>{o.country}</span><span className="num">{o.n} · {Math.round((100 * o.n) / all)}%</span></div>)); })()}
               </section>
-              <section className="card stack">
+              {d.routes!.length > 0 && <section className="card stack">
                 <h2>Getting registered</h2>
                 {d.routes!.map((r) => (
                   <div key={r.label}><b>{r.label}</b>{r.months_low != null ? <span className="muted"> · about {r.months_low}–{r.months_high ?? r.months_low} months</span> : null}
                     <div className="note">{r.description}</div></div>))}
-              </section>
+              </section>}
             </div>
           </div>
           <section className="card">

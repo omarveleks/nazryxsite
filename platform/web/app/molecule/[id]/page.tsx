@@ -55,7 +55,7 @@ export default async function Molecule({ params, searchParams }: {
       where m2.id <> $1 and string_to_array(m2.canonical_key, ' ') @> string_to_array($2, ' ')
       order by cm.registrations desc limit 6`, [id, m.canonical_key, COUNTRY]);
     const forms = await rows(db, `select distinct dosage_form, strength from registrations where molecule_id = $1 and active
-                                  and dosage_form is not null order by 1 limit 12`, [id]);
+                                  and country = $2 and dosage_form is not null order by 1 limit 12`, [id, COUNTRY]);
     const prices = paid ? await rows(db, `select price_low, price_high, currency, unit, observed_at from market_prices
                                           where molecule_id = $1 and country = $2 and kind = 'observed' order by observed_at desc limit 6`, [id, COUNTRY]) : [];
     return { m, open, competitors, alternatives, combos, forms, prices, supply: m.supply };

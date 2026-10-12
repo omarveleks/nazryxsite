@@ -28,11 +28,12 @@ export default async function Partners({ searchParams }: { searchParams: Promise
     const cls = sp.class && cats.includes(sp.class) ? sp.class : null;
     const molecule = mine.find((x) => x.id === Number(sp.molecule)) ?? null;
     const sort = SORTS.some(([k]) => k === sp.sort) ? sp.sort! : cls ? 'class' : 'open';
+    const holders = hasData(market) ? Number((await one(db, 'select count(distinct ltr_id)::int as n from registrations where country = $1 and active', [market]))?.n ?? 0) : 0;
     const list = hasData(market) ? await rows(db, 'select * from partner_search($1, $2, $3, $4, $5, $6)',
       [market, cls, molecule?.id ?? null, false, Number(sp.min) || 0, sort]) : [];
     const products = await rows(db, `select p.id, coalesce(m.inn, p.name) as name from mfr_products p left join molecules m on m.id = p.molecule_id
                                      where p.user_id = $1 order by 2 limit 300`, [u.id]);
-    return { targets, market, cats, mine, cls, molecule, sort, list, products, status: prof?.status };
+    return { targets, market, cats, mine, cls, molecule, sort, list, products, holders, status: prof?.status };
   });
   const shown = d.molecule && sp.gap === '1' ? d.list.filter((p) => !p.carries) : d.list;
   const total = d.list[0]?.total ?? 0, mineN = d.list[0]?.mine ?? d.mine.length;
@@ -65,7 +66,12 @@ export default async function Partners({ searchParams }: { searchParams: Promise
         </form>
         <section className="card" data-tour="distributors">
           <div className="card-h"><h2>{total} distributors{d.cls ? ` in ${d.cls}` : ''}</h2></div>
-          {shown.length === 0 ? <Empty>No distributor matches these filters.</Empty> : (
+          {shown.length === 0 ? (d.holders === 0 ? (
+            <div className="stack" style={{ gap: 8 }}>
+              <p className="muted">{countryName(d.market)}&rsquo;s register does not show which distributor holds each product, so distributors are not listed
+                here. Our team knows the market and finds the right partner for you.</p>
+              <Link className="btn btn-blue btn-sm" href="/m/services/market_entry" style={{ alignSelf: 'flex-start' }}>Ask our team for distributors</Link>
+            </div>) : <Empty>No distributor matches these filters.</Empty>) : (
             <div>{shown.map((p, i) => (
               <div key={p.code} className="between" style={{ alignItems: 'flex-start', flexWrap: 'wrap', padding: '10px 0', borderTop: i ? '1px solid var(--line)' : undefined }}>
                 <div style={{ minWidth: 0, flex: '1 1 320px' }}>

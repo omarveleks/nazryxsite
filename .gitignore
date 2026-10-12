@@ -14,3 +14,8 @@ node_modules/
 !site/**/*.png
 # the public medicine list (Wikidata, CC0); see platform/ingest/catalog/README.md
 !platform/ingest/catalog/medicines.csv
+# ATC and Russian medicine names (Wikidata, CC0) and the essential lists of the other markets: public names and codes only
+!platform/ingest/catalog/atc_names.csv
+!platform/ingest/catalog/ru_names.csv
+!platform/ingest/catalog/lists/
+!platform/ingest/catalog/lists/eml_*.csv

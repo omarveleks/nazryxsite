@@ -52,7 +52,7 @@ export default async function Portfolio({ searchParams }: { searchParams: Promis
                                       from customer_suppliers s where s.user_id = $1 order by s.name`, [u.id]);
     const topPeers = paid ? await rows(db, `
         select c.id, c.display_name, count(distinct r.molecule_id)::int as shared from registrations r join companies c on c.id = r.ltr_id
-        where r.active and r.molecule_id in (select molecule_id from portfolio_items where user_id = $1)
+        where r.active and r.country = '${COUNTRY}' and r.molecule_id in (select molecule_id from portfolio_items where user_id = $1)
         group by c.id order by shared desc limit 5`, [u.id]) : [];
     // products sourced through Nazryx once a supplier is chosen: terms, dossier readiness and shipment, in one place
     const sourced = await rows(db, `

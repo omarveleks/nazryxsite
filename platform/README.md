@@ -180,6 +180,21 @@ confirming → production → import permit → shipped → arrived → sampling
 checklist and ETA. My portfolio → Supply and shipments brings all of it together per product. Suggested selling prices (Admin > Content) show on the
 molecule page for paid plans.
 
+## Markets beyond Tanzania: Kazakhstan, Kyrgyzstan, Uzbekistan, Kenya
+
+- Upload each register in Admin > Data updates and pick its country. Formats read: Kazakhstan state register (.xlsx,
+  Russian), Kyrgyzstan register (.xlsx), Uzbekistan bulletin "Registration certificates" (.xlsx, Russian; the older
+  four-sheet export also works), Kenya PPB register (.xlsx). `ingest/country_load.py` reads them; Tanzania keeps
+  `pipeline/build.py`. CLI: `python ingest_job.py --upload FILE --country KZ`.
+- Names are put into English: the ATC code first (`catalog/atc_names.csv`), then Russian names (`catalog/ru_names.csv`,
+  both Wikidata CC0), then salts and genitive endings, then transliteration and a close match to known molecules
+  (never across a prefix: esomeprazole stays apart from omeprazole). Spelling variants in a file merge first.
+- Essential lists ship with the worker (`catalog/lists/eml_<CC>.csv`) and set the openings and scores.
+- Companies are kept per market (`KZ|key`), so loading one market never merges or renames another's. Existing molecule
+  names are never overwritten. Kazakhstan and Kyrgyzstan registers do not publish holders, so the Distributors page
+  offers the team's help there; Kenya lists local technical representatives, Uzbekistan local holders.
+- Kazakhstan: a product is active until its certificate expires. Kenya's export covers registrations from Oct 2021 only.
+
 ## Regulatory library, competitor watch, uploads, WhatsApp (migration 024)
 
 - **Regulatory** (`/m/regulatory`): what a market requires for every product (route, dossier, GMP, labels, marking,

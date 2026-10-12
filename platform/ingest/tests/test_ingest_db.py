@@ -941,3 +941,65 @@ def test_catalogues_add_their_products(env):
     assert q("select status, added, matched from mfr_files where id = %s", ids[1])[0] == ("done", 1, 1)   # amoxicillin was already there
     assert q("select count(*) from mfr_products where user_id = %s", maker)[0][0] == 4
     assert catalogue.molecule_keyish("Amoxicillin 500mg Capsules BP") == "amoxicillin"
+
+
+def test_other_markets_load_beside_tanzania(env):
+    """Kazakhstan (Russian, ATC codes, no holders) and Kenya (English, local representatives) load through their own
+    readers: English names, their own companies, history on the next upload, and Tanzania stays as it was."""
+    import openpyxl
+    tmp, job = env["tmp"], env["job"]
+    tz_before = q("select count(*), count(distinct ltr_id) from registrations where country = 'TZ'")[0]
+    tz_companies = q("select count(*) from companies where cluster_key not like '%%|%%'")[0][0]
+
+    def kz_file(name, extra=()):
+        wb = openpyxl.Workbook()
+        ws = wb.active
+        ws.append(["№", "Рег. номер", "Торговое название", "Дата регистрации", "Дата истечение", "Производитель", "Страна", "МНН",
+                   "Лек. форма", "Формы отпуска", "Код АТХ", "Наименование кода АТХ", "ДРУ", "Адрес ДРУ"])
+        mols = [("амоксициллин", "J01CA04", "капсулы 500 мг"), ("азитромицина дигидрат", "J01FA10", "таблетки 500 мг"),
+                ("Нет данных", "J01FA10", "порошок для приготовления суспензии"), ("метформина гидрохлорид", "A10BA02", "таблетки 850 мг")]
+        for i in range(60):
+            inn, atc, form = mols[i % len(mols)]
+            ws.append([str(i + 1), f"РК-ЛС-5№{i:06d}", f"Бренд{i}", "01.02.2022", "01.02.2031" if i % 10 else "01.02.2020",
+                       f"Завод {i % 5} ООО", "ИНДИЯ" if i % 2 else "КАЗАХСТАН", inn, form, "По рецепту", atc, "", "", ""])
+        for j, (inn, atc) in enumerate(extra):
+            ws.append([str(100 + j), f"РК-ЛС-5№9{j:05d}", f"Новый{j}", "01.09.2026", "01.09.2031", "Новый завод АО", "ТУРЦИЯ", inn,
+                       "таблетки", "По рецепту", atc, "", "", ""])
+        wb.save(tmp / name)
+        return str(tmp / name)
+
+    first = job.run(job.create_job(kz_file("kz1.xlsx"), "upload", country="KZ"))
+    assert first["new_registrations"] == 0                       # the first load of a market is its baseline
+    names = dict(q("""select m.inn, cm.registrations from country_molecules cm join molecules m on m.id = cm.molecule_id
+                      where cm.country = 'KZ' and cm.registrations > 0"""))
+    assert {"Amoxicillin", "Azithromycin"} <= set(names) and any(n.startswith("Metformin") for n in names)   # an existing name is kept
+    assert names["Azithromycin"] == 27                            # 'Нет данных' rows named from their ATC code
+    assert q("select count(*) from registrations where country = 'KZ' and not active")[0][0] == 6        # expired certificates
+    assert q("select count(*) from companies where cluster_key like 'KZ|%%'")[0][0] == 5
+    assert q("select distinct manufacturing_country from registrations where country = 'KZ' order by 1") == [("INDIA",), ("KAZAKHSTAN",)]
+    second = job.run(job.create_job(kz_file("kz2.xlsx", extra=[("эзомепразол", "A02BC05")]), "upload", country="KZ"))
+    assert second["new_registrations"] == 1
+    assert q("""select m.inn from registration_history h join registrations r on r.id = h.registration_id
+                join molecules m on m.id = r.molecule_id where r.country = 'KZ' and h.change = 'added'""") == [("Esomeprazole",)]
+
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.append(["#", "Product Registration No", "Product Trade Name", "Inn Of Api", "Dosage Form Name", "Country of Origin", "Local Foreign",
+               "Mah Company Name", "Local Technical Representative", "↓ Date of Registration", "Date of Expiry"])
+    for i in range(60):
+        ws.append([str(i + 1), f"H2026/CTD{i:05d}", f"BRAND{i}", ["AMOXICILLIN TRIHYDRATE", "Ciprofloxacin Hydrochloride USP"][i % 2],
+                   "Tablet", "India", "Foreign", f"MAKER {i % 4} LTD", ["Alpha Kenya Ltd", "Beta Pharma Kenya"][i % 2], "46294.0", "48120.0"])
+    wb.save(tmp / "ke.xlsx")
+    job.run(job.create_job(str(tmp / "ke.xlsx"), "upload", country="KE"))
+    assert q("select count(distinct ltr_id) from registrations where country = 'KE'")[0][0] == 2
+    ke = dict(q("""select m.inn, cm.registrants from country_molecules cm join molecules m on m.id = cm.molecule_id
+                   where cm.country = 'KE' and cm.registrations > 0"""))
+    assert "Amoxicillin" in ke and "Ciprofloxacin" in ke
+    # Kenya's essential list is built in: openings appear even with only two molecules registered
+    assert q("select count(*) from country_molecules where country = 'KE' and on_national_list and registrations = 0")[0][0] > 100
+    # Tanzania untouched: its products, distributors and companies
+    assert q("select count(*), count(distinct ltr_id) from registrations where country = 'TZ'")[0] == tz_before
+    assert q("select count(*) from companies where cluster_key not like '%%|%%'")[0][0] == tz_companies
+    # one molecule across markets: amoxicillin is the same molecule in Tanzania, Kazakhstan and Kenya
+    assert q("""select count(distinct cm.country) from country_molecules cm join molecules m on m.id = cm.molecule_id
+                where m.canonical_key = 'amoxicillin' and cm.registrations > 0""")[0][0] == 3

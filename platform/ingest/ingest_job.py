@@ -65,8 +65,25 @@ def run(job_id):
             local = storage.materialize(cur, path, out)
             if not local:
                 raise ValueError(f"Uploaded file not found: {name}")
-            nemlit = storage.reference_file(cur, "national_list", NEMLIT, out)
             who = storage.reference_file(cur, "global_list", WHO, out)
+            if country != "TZ":   # Kazakhstan, Kyrgyzstan, Uzbekistan, Kenya: their own readers (country_load.py)
+                import country_load
+                from build import parse_who
+                empty = cur.execute("select not exists (select 1 from registrations where country = %s)", (country,)).fetchone()[0]
+                diff, summary = country_load.apply(conn, local, job_id, country, initial=(kind == "initial" or empty),
+                                                   who_keys=parse_who(who) if who else ())
+                prev = cur.execute("""select (summary->>'human_active')::int from registry_uploads where status = 'applied'
+                                      and country = %s order by finished_at desc limit 1""", (country,)).fetchone()
+                if prev and prev[0] and summary["human_active"] < MIN_RATIO * prev[0]:
+                    raise ValueError(f"Only {summary['human_active']} active products against {prev[0]} last time. "
+                                     "This looks like a partial export, so nothing was changed.")
+                cur.execute("""update registry_uploads set status = 'applied', finished_at = now(), rows = %s,
+                               diff = %s, summary = %s where id = %s""",
+                            (summary["registry_rows"], json.dumps(diff), json.dumps(summary), job_id))
+                conn.commit()
+                log.info("job %s (%s) applied: %s", job_id, country, diff)
+                return diff
+            nemlit = storage.reference_file(cur, "national_list", NEMLIT, out)
             if not nemlit or not who:
                 raise ValueError("Upload the essential medicines list and the global list text files on the admin page first.")
             aliases, separate, matches = team_decisions(cur)
@@ -117,11 +134,12 @@ if __name__ == "__main__":
     a.add_argument("--job", type=int)
     a.add_argument("--initial")
     a.add_argument("--upload")
+    a.add_argument("--country", default="TZ", help="TZ, KZ, KG, UZ or KE")
     x = a.parse_args()
     if x.initial:
-        print(json.dumps(run(create_job(x.initial, "initial")), indent=1))
+        print(json.dumps(run(create_job(x.initial, "initial", country=x.country)), indent=1))
     elif x.upload:
-        print(json.dumps(run(create_job(x.upload, "upload")), indent=1))
+        print(json.dumps(run(create_job(x.upload, "upload", country=x.country)), indent=1))
     elif x.job:
         print(json.dumps(run(x.job), indent=1))
     else:
