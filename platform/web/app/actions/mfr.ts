@@ -478,6 +478,10 @@ export async function setPrimaryMarket(f: FormData) {
   const market = str(f, 'market', 2), to = safeNext(str(f, 'return', 200), '/m');
   if (codes.includes(market)) {
     await withUser(u.id, (db) => db.query('update manufacturer_profiles set primary_market = $2 where user_id = $1', [u.id, market]));
+    // the market goes in the link too, so it shows even without a saved profile (the team)
+    const [path, hash] = to.split('#');
+    const clean = path.replace(/([?&])market=[A-Z]{2}&?/, '$1').replace(/[?&]$/, '');
+    redirect(`${clean}${clean.includes('?') ? '&' : '?'}market=${market}${hash ? `#${hash}` : ''}`);
   }
   redirect(to);
 }

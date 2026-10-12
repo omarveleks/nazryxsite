@@ -5,7 +5,9 @@ import { MFR_COUNTRIES, countryName, covers } from '@/lib/mfr';
 
 /** The manufacturer's target markets, in the order of the market list. */
 export function targetMarkets(targets?: string[] | null): string[] {
-  const t = MFR_COUNTRIES.map((x) => x.code).filter((c) => (targets ?? []).includes(c));
+  // no profile at all (the team looking at the manufacturer side): every market with data
+  if (targets == null) return MFR_COUNTRIES.filter((x) => x.core).map((x) => x.code);
+  const t = MFR_COUNTRIES.map((x) => x.code).filter((c) => targets.includes(c));
   return t.length ? t : ['TZ'];
 }
 /** The market a page shows: one named in the link, else the manufacturer's chosen market, else the first with data. */

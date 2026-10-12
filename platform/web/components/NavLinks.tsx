@@ -15,10 +15,17 @@ const MFR_NAV = [
 
 export default function NavLinks({ team, manufacturer }: { team: boolean; manufacturer?: boolean }) {
   const path = usePathname();
-  const base = manufacturer ? MFR_NAV : NAV;
+  // the team switches between the two sides of the portal; the menu follows the side it is on
+  const mfrView = manufacturer || (team && (path === '/m' || path.startsWith('/m/')));
+  const base = mfrView ? MFR_NAV : NAV;
   const items = team ? [...base, ['/admin', 'Admin'] as const] : base;
   return (
     <nav className="nav" aria-label="Main">
+      {team && (
+        <div className="row" style={{ gap: 4, marginBottom: 8 }} aria-label="View">
+          <Link href="/home" className={`pill ${!mfrView ? 'solid' : ''}`} style={{ fontSize: 12 }}>Distributor</Link>
+          <Link href="/m" className={`pill ${mfrView ? 'solid' : ''}`} style={{ fontSize: 12 }}>Manufacturer</Link>
+        </div>)}
       {items.map(([href, label]) => (
         <Link key={href} href={href} className={path === href || (href !== '/m' && path.startsWith(href + '/')) ? 'on' : ''}
           aria-current={path.startsWith(href) ? 'page' : undefined}>{label}</Link>

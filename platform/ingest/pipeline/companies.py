@@ -89,13 +89,14 @@ def cluster_names(names, known_aliases=None, keep_separate=None, threshold=THRES
     return name_to_cluster, display
 
 
-def possible_duplicates(cluster_keys, low=85, high=THRESHOLD):
-    """Pairs of clusters that are close but were not merged automatically: the team reviews these."""
+def possible_duplicates(cluster_keys, low=88, high=THRESHOLD):
+    """Pairs of clusters that are close but were not merged automatically: the team reviews these. Only names that start
+    the same way ('Sai Parenterals' and 'Swiss Parenterals' are two companies)."""
     keys = sorted(cluster_keys)
     out = []
     for i, a in enumerate(keys):
         for b in keys[i + 1:]:
-            if abs(len(a) - len(b)) > 6 or min(len(a), len(b)) < 4:
+            if abs(len(a) - len(b)) > 6 or min(len(a), len(b)) < 4 or a[:3] != b[:3]:
                 continue
             s = fuzz.token_sort_ratio(a, b)
             if low <= s < high or (s >= high and not same_company(a, b)):

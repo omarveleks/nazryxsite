@@ -265,9 +265,10 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
                     <form action={keepSeparate}><input type="hidden" name="a" value={p.a_key} /><input type="hidden" name="b" value={p.b_key} /><button className="btn btn-ghost btn-sm">Keep separate</button></form></div></td></tr>))}
               </tbody></table></div>)}
         </section>
-        <section className="card">
-          <div className="card-h"><h2>Essential molecules with no registration</h2><span className="note">On the official list, no single-ingredient product registered. These are real openings, not errors.
-            &ldquo;In combinations&rdquo; above 0 means it is sold only inside combination products. Map one only if the register uses another name for it.</span></div>
+        <details className="card">
+          <summary style={{ cursor: 'pointer' }}><b>Essential molecules nobody registered ({d.unmatched.length})</b>
+            <span className="note"> · openings, nothing to do. Open only to map one the register calls by another name.</span></summary>
+          <p className="note" style={{ marginTop: 8 }}>&ldquo;In combinations&rdquo; above 0 means it is sold only inside combination products.</p>
           <div className="tbl-wrap"><table className="tbl"><thead><tr><th>Molecule</th><th>Class</th><th>In combinations</th><th className="r">Map to registry molecule</th></tr></thead>
             <tbody>{d.unmatched.map((m: any) => (
               <tr key={m.id}><td>{m.inn}</td><td className="small">{m.category}</td><td className="num">{m.in_combinations}</td>
@@ -275,7 +276,7 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
                   <input className="input" name="to_name" placeholder="Exact molecule name" style={{ minHeight: 34, width: 200 }} aria-label={`Map ${m.inn} to`} />
                   <button className="btn btn-ghost btn-sm">Map</button></form></td></tr>))}
             </tbody></table></div>
-        </section>
+        </details>
         <div className="note row">Decisions apply on the next recompute or upload. <form action={queueRecompute}><button className="btn-link">Recompute now</button></form></div>
       </>)}
       {tab === 'claims' && (
