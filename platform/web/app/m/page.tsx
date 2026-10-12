@@ -8,7 +8,7 @@ import { chooseSample, tourGo } from '@/app/actions/mfr';
 import { requireUser } from '@/lib/auth';
 import { one, rows, withUser } from '@/lib/db';
 import { fmtDate } from '@/lib/format';
-import { HIGH_DEMAND, MFR_PLANS, OBLIGATION_KINDS, SERVICES, canUse, covers, tierIn, countryName, mfrProductsSql, reasons } from '@/lib/mfr';
+import { HIGH_DEMAND, MFR_PLANS, OBLIGATION_KINDS, SERVICES, canUse, covers, tierIn, countryName, mfrProductsSql, reasons, byMolecule } from '@/lib/mfr';
 
 export const metadata = { title: 'Home' };
 
@@ -40,8 +40,8 @@ export default async function MfrHome({ searchParams }: { searchParams: Promise<
         (select count(*)::int from mfr_files f where f.user_id = $1 and f.kind = 'gmp') as gmp
         from mfr_products p left join country_molecules cm on cm.molecule_id = p.molecule_id and cm.country = $2
         left join visible_gap_scores g on g.molecule_id = p.molecule_id and g.country = $2 where p.user_id = $1`, [u.id, focus]);
-    const first = await rows(db, `${mfrProductsSql(focus)} where p.user_id = $1 and cm.rankable and cm.on_national_list
-        order by g.score desc nulls last, cm.registrants, p.name limit $2`, [u.id, full ? 5 : 3]);
+    const first = byMolecule(await rows(db, `${mfrProductsSql(focus)} where p.user_id = $1 and cm.rankable and cm.on_national_list
+        order by g.score desc nulls last, cm.registrants, p.name limit 200`, [u.id])).slice(0, full ? 5 : 3);   // one row per molecule
     const watchMarkets = u.mfr_active ? inPlan : live;
     const watch = watchMarkets.length ? await rows(db, 'select * from my_market_watch($1, 90)', [watchMarkets]) : [];
     const engagements = await rows(db, `select id, kind, country, stage from engagements where user_id = $1 and status = 'open' order by updated_at desc limit 5`, [u.id]);
@@ -109,6 +109,7 @@ export default async function MfrHome({ searchParams }: { searchParams: Promise<
                   style={{ alignItems: 'flex-start', flexWrap: 'wrap', padding: '10px 0', borderTop: i ? '1px solid var(--line)' : undefined, textDecoration: 'none', color: 'inherit' }}>
                   <div style={{ minWidth: 0, flex: '1 1 300px' }}>
                     <span className="nm">{x.inn ?? x.name}</span>
+                    {x.variants && <div className="sub2">{x.packs > 1 ? `${x.packs} products · ` : ''}{x.variants}</div>}
                     <div className="sub2">{cap(reasons(x).join(' · '))}</div>
                     <div style={{ marginTop: 6 }}><Badges m={x} /></div>
                   </div>

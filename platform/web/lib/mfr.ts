@@ -224,3 +224,28 @@ export const LAUNCH_STAGES: [string, string][] = [
 /** The first-time manufacturer sign-up: one question per screen. The rest of the profile is filled in later (Home checklist). */
 export const WIZARD = ['company', 'markets', 'goals', 'help', 'timeline', 'scope', 'products', 'plan'] as const;
 export type WizardStep = (typeof WIZARD)[number];
+
+// ---------------------------------------------------------------- one row per molecule
+type Pack = { molecule_id: number | null; strength?: string | null; dosage_form?: string | null };
+const tidy = (s: string) => s.replace(/\s+/g, ' ').replace(/(\d)\s*(mg|mcg|µg|g|ml|iu|%)\b/gi, (_, n, u) => `${n} ${u.toLowerCase()}`).trim();
+
+/** Products folded to one row per molecule (the first, best-ranked row stands for it), with how many products it
+ *  covers and their forms and strengths: "Injection: 40 mg, 80 mg, 160 mg". Unmatched products stay one row each. */
+export function byMolecule<T extends Pack>(list: T[]): (T & { packs: number; variants: string })[] {
+  const groups = new Map<string, T[]>();
+  list.forEach((p, i) => {
+    const k = p.molecule_id != null ? `m${p.molecule_id}` : `p${i}`;
+    groups.set(k, [...(groups.get(k) ?? []), p]);
+  });
+  return [...groups.values()].map((g) => {
+    const forms = new Map<string, Set<string>>();
+    for (const p of g) {
+      const f = p.dosage_form ? tidy(p.dosage_form) : '';
+      const key = f ? f[0].toUpperCase() + f.slice(1).toLowerCase() : '';
+      if (!forms.has(key)) forms.set(key, new Set());
+      if (p.strength) forms.get(key)!.add(tidy(p.strength));
+    }
+    const variants = [...forms].map(([f, s]) => [f, [...s].join(', ')].filter(Boolean).join(': ')).filter(Boolean).join(' · ');
+    return { ...g[0], packs: g.length, variants };
+  });
+}

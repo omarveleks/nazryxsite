@@ -969,6 +969,16 @@ def test_catalogues_add_their_products(env):
                    "GLUCO 850 MG B/30 Tablets": "Metformin", "DIGO 0,25 MG Tablets": "Digoxin", "PARA 500 Soft Capsule": "Paracetamol",
                    "E CAPS 200 Soft Capsule": None}         # the brand stays the name; 'Vitamin E' is not guessed
     assert q("select added, matched from mfr_files where id = %s", fid)[0] == (6, 5)
+    assert q("select dosage_form from mfr_products where user_id = %s and name like 'PARA%%'", fr)[0][0] == "Soft Capsule"   # the form column
+    # a refresh fills missing forms on products already there and adds nothing back
+    with psycopg.connect(URL) as c:
+        c.execute("update mfr_products set dosage_form = null where user_id = %s", (fr,))
+        c.execute("delete from mfr_products where user_id = %s and name like 'CIPRO%%'", (fr,))
+        c.execute("update mfr_files set status = 'queued', refresh_only = true where id = %s", (fid,))
+        assert catalogue.run(c.cursor(), client=None) == 1
+        c.commit()
+    assert q("select count(*), count(dosage_form) from mfr_products where user_id = %s", fr)[0] == (5, 5)
+    assert q("select added, matched, refresh_only from mfr_files where id = %s", fid)[0] == (6, 5, False)
 
 
 def test_other_markets_load_beside_tanzania(env):

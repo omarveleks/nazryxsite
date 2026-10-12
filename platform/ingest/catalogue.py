@@ -105,7 +105,7 @@ def header_line(rows):
 
 
 def from_rows(rows):
-    """Products from one table: [(line, generic)]. The line is the product as the catalogue names it (brand, strength,
+    """Products from one table: [(line, generic, form)]. The line is the product as the catalogue names it (brand, strength,
     form); the generic is the generic-name column when there is one, else the line itself. Titles above the header and
     section headings inside the table (one filled cell) are skipped."""
     rows, at, header, gen_col, name_col, extra = _table(rows)
@@ -114,7 +114,8 @@ def from_rows(rows):
     if at is None:   # no header: the column with text in most rows
         width = max(len(r) for r in rows)
         col = max(range(width), key=lambda i: sum(bool(re.search(r"[A-Za-z]{3}", r[i] if i < len(r) else "")) for r in rows))
-        return [(r[col][:200], r[col]) for r in rows if col < len(r) and re.search(r"[A-Za-z]{3}", r[col])]
+        return [(r[col][:200], r[col], None) for r in rows if col < len(r) and re.search(r"[A-Za-z]{3}", r[col])]
+    form_col = next((i for i in extra if "form" in header[i]), None)
     out = []
     for r in rows[at + 1:]:
         if sum(bool(c) for c in r) < 2 or [c.lower() for c in r] == header:
@@ -127,7 +128,7 @@ def from_rows(rows):
             if p.lower() not in line.lower():
                 line += " " + p
         if re.search(r"[A-Za-z]{3}", line):
-            out.append((line[:200], generic or line))
+            out.append((line[:200], generic or line, get(form_col) or None))
             LEGACY[line[:200]] = " ".join(parts)[:200]
     return out
 
@@ -192,12 +193,12 @@ def products_from(name, data, client):
     if ext in ("xlsx", "xls", "csv", "txt"):
         sheets = excel_sheets(data) if ext in ("xlsx", "xls") else [csv_rows(data)]
         found = [p for rows in sheets for p in from_rows(rows)]
-        if any(line != generic for line, generic in found) or client is None:
-            out = Products(_with_parts(line, generic) for line, generic in found)
+        if any(line != generic for line, generic, _f in found) or client is None:
+            out = Products(_with_parts(line, generic, form=form) for line, generic, form in found)
             out.headers = {h for h in map(header_line, sheets) if h}
             return out
         text = "\n\n".join("\n".join("\t".join(_cell(c) for c in r) for r in rows) for rows in sheets)
-        fallback = [line for line, _ in found]
+        fallback = [line for line, _g, _f in found]
     elif ext == "docx":
         lines = docx_lines(data)
         text, fallback = "\n".join(lines), lines
@@ -286,9 +287,10 @@ class Generics:
         return None
 
 
-def add_products(cur, user_id, products, generics=None):
+def add_products(cur, user_id, products, generics=None, refresh_only=False):
     """Adds the products not yet in the list; a product already there but not matched (an earlier read) gets its
-    molecule now. Returns (products in the file, matched)."""
+    molecule now, and one already matched gets any missing form and strength. With refresh_only nothing is added.
+    Returns (products in the file, matched)."""
     added = matched = 0
     norm = lambda x: re.sub(r"\s+", " ", x).strip().lower()
     have = {norm(n): (pid, mol) for pid, n, mol in cur.execute("select id, name, molecule_id from mfr_products where user_id = %s",
@@ -300,6 +302,10 @@ def add_products(cur, user_id, products, generics=None):
         seen.add(norm(line))
         old = have.get(norm(line)) or have.get(norm(LEGACY.get(line, line)))
         if old and old[1]:
+            cur.execute("update mfr_products set strength = coalesce(strength, %s), dosage_form = coalesce(dosage_form, %s) where id = %s",
+                        ((strength or None) and strength[:40], (form or None) and form[:40], old[0]))
+            continue
+        if not old and refresh_only:
             continue
         if generics:
             mol = generics.molecule(cur, generic) or (generics.molecule(cur, line) if generic == line else None)
@@ -320,7 +326,7 @@ def add_products(cur, user_id, products, generics=None):
 
 def run(cur, client="auto"):
     """Read every queued catalogue. Returns how many were read."""
-    files = cur.execute("""select id, user_id, file_name, file_path from mfr_files
+    files = cur.execute("""select id, user_id, file_name, file_path, refresh_only from mfr_files
                            where kind = 'catalogue' and status = 'queued' order by id limit 5""").fetchall()
     if not files:
         return 0
@@ -334,7 +340,7 @@ def run(cur, client="auto"):
                 client = None
     done = 0
     generics = Generics(cur)
-    for fid, user_id, name, path in files:
+    for fid, user_id, name, path, refresh_only in files:
         cur.execute("savepoint cat")
         try:
             m = re.match(r"^db:([0-9a-f-]{36})$", path or "")
@@ -345,13 +351,14 @@ def run(cur, client="auto"):
                 cur.execute("insert into notifications (user_id, channel, subject, body) values (null, 'email', %s, %s)",
                             ("Catalogue to load by hand", f"{name}: this file needs the team to add its products."))
             else:
-                added, matched = add_products(cur, user_id, products, generics)
+                added, matched = add_products(cur, user_id, products, generics, refresh_only)
                 if getattr(products, "headers", None):   # a header row an earlier reader took for a product
                     cur.execute("delete from mfr_products where user_id = %s and molecule_id is null and lower(name) = any(%s)",
                                 (user_id, list(products.headers)))
-                cur.execute("update mfr_files set status = 'done', added = %s, matched = %s, error = null where id = %s",
-                            (added, matched, fid))
-                if added > matched:
+                cur.execute("""update mfr_files set status = 'done', refresh_only = false, error = null,
+                               added = case when %s then added else %s end, matched = case when %s then matched else %s end where id = %s""",
+                            (refresh_only, added, refresh_only, matched, fid))
+                if added > matched and not refresh_only:
                     cur.execute("insert into notifications (user_id, channel, subject, body) values (null, 'email', %s, %s)",
                                 ("Catalogue loaded: products to match", f"{name}: {added} products added, {added - matched} to match by hand."))
                 done += 1

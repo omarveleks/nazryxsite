@@ -7,7 +7,7 @@ import { hasData, loadLive, targetMarkets } from '@/components/MarketPicker';
 import { requireUser } from '@/lib/auth';
 import { one, rows, withUser } from '@/lib/db';
 import { fmtDate, registeredLine } from '@/lib/format';
-import { HIGH_DEMAND, canUse, countryName, covers, mfrProductsSql, reasons, tierIn } from '@/lib/mfr';
+import { HIGH_DEMAND, canUse, countryName, covers, mfrProductsSql, reasons, tierIn, byMolecule } from '@/lib/mfr';
 
 export const metadata = { title: 'Market read' };
 
@@ -33,7 +33,7 @@ export default async function MarketRead({ searchParams }: { searchParams: Promi
     return { p, market, h, products, partners, route };
   });
   const m = countryName(d.market);
-  const top = d.products.filter((p) => p.molecule_id && p.registrants != null).slice(0, 10);
+  const top = byMolecule(d.products.filter((p) => p.molecule_id && p.registrants != null)).slice(0, 10);
   const high = d.products.filter((p) => Number(p.demand ?? 0) >= HIGH_DEMAND).length;
   return (
     <div className="report">
@@ -50,7 +50,7 @@ export default async function MarketRead({ searchParams }: { searchParams: Promi
       <section className="card stack"><h2>2. Your portfolio against it</h2>
         <p>{high} of your {d.products.length} products are in high demand in {m}.</p>
         <table className="tbl"><thead><tr><th>Product</th><th>Competition</th><th>Why</th></tr></thead>
-          <tbody>{top.map((p) => <tr key={p.id}><td><b>{p.inn ?? p.name}</b></td><td className="small">{registeredLine(p.registrants, p.registrations)}</td>
+          <tbody>{top.map((p) => <tr key={p.id}><td><b>{p.inn ?? p.name}</b>{(p.packs > 1 || p.variants) && <div className="sub2">{p.packs > 1 ? `${p.packs} products` : ''}{p.packs > 1 && p.variants ? ' · ' : ''}{p.variants}</div>}</td><td className="small">{registeredLine(p.registrants, p.registrations)}</td>
             <td className="small">{(() => { const r = reasons(p).join(', '); return r.charAt(0).toUpperCase() + r.slice(1); })()}</td></tr>)}</tbody></table></section>
 
       {d.partners.length > 0 && (
