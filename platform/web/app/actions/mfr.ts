@@ -169,7 +169,7 @@ export async function choosePlan(f: FormData) {
       await db.query(`update manufacturer_profiles set suggested_plan = $2, chosen_plan = coalesce($3, chosen_plan), completed_at = coalesce(completed_at, now())
                       where user_id = $1`, [u.id, s.plan, chosen]);
       await db.query('update users set onboarded = true where id = $1', [u.id]);
-      if (firstTime) await db.query('update manufacturer_profiles set tour_step = 1 where user_id = $1', [u.id]);
+      if (firstTime) await db.query('update manufacturer_profiles set tour_step = -1 where user_id = $1', [u.id]);   // offer the tour on Home
       const markets = (p.target_countries ?? []).map(countryName).join(', ') || 'none';
       if (chosen) {
         await db.query('insert into plan_requests (user_id, wanted, note) values ($1, $2, $3)',
@@ -185,7 +185,7 @@ export async function choosePlan(f: FormData) {
     if (isRedirect(e)) throw e;
     back(from, { error: errText(e) });
   }
-  redirect(firstTime ? TOUR[0].path : chosen ? '/m/plan?requested=1' : '/m?welcome=1');
+  redirect(firstTime ? '/m?welcome=1' : chosen ? '/m/plan?requested=1' : '/m?welcome=1');
 }
 
 async function origin() {
@@ -203,7 +203,7 @@ export async function startCheckout(f: FormData) {
     // paying from the last sign-up screen finishes sign-up; the tour starts when they come back
     await withUser(u.id, async (db) => {
       await db.query('update users set onboarded = true where id = $1', [u.id]);
-      await db.query(`update manufacturer_profiles set tour_step = 1, completed_at = coalesce(completed_at, now()), chosen_plan = $2 where user_id = $1`, [u.id, plan]);
+      await db.query(`update manufacturer_profiles set tour_step = -1, completed_at = coalesce(completed_at, now()), chosen_plan = $2 where user_id = $1`, [u.id, plan]);
     });
   }
   if (u.mfr_tier >= tierOf(plan)) redirect('/m/plan');
@@ -419,7 +419,8 @@ export async function chooseSample(f: FormData) {
   redirect(`/m/products/${id}?sample=1`);
 }
 
-/** Move through the guided tour (step 1..n), or end it (step 0). Lands on the page the step explains. */
+/** Move through the guided tour (step 1..n), or end it (step 0). Lands on the page the step explains. Step -1 is the
+ *  welcome offer shown on Home right after sign-up. */
 export async function tourGo(f: FormData) {
   const u = await requireUser({ manufacturer: true });
   const step = int(f, 'step') ?? 0;

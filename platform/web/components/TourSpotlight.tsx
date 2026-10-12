@@ -4,19 +4,62 @@ import { createPortal } from 'react-dom';
 import { tourGo } from '@/app/actions/mfr';
 
 type Rect = { top: number; left: number; width: number; height: number };
-const PAD = 8;
+const PAD = 6;
+const EASE = 'cubic-bezier(.2, .7, .2, 1)';
+const veilBase: React.CSSProperties = {
+  position: 'fixed', background: 'rgba(20, 20, 19, 0.45)', backdropFilter: 'blur(3px)', WebkitBackdropFilter: 'blur(3px)', zIndex: 60,
+  transition: `top .45s ${EASE}, left .45s ${EASE}, width .45s ${EASE}, height .45s ${EASE}, opacity .35s ease`,
+};
+
+/** Fades in after `delay`, and out when the visitor moves on. */
+function useFade(delay: number) {
+  const [mounted, setMounted] = useState(false);
+  const [shown, setShown] = useState(false);
+  useEffect(() => { setMounted(true); const t = setTimeout(() => setShown(true), delay); return () => clearTimeout(t); }, [delay]);
+  return [shown, () => setShown(false), mounted] as const;
+}
+
+const Step = ({ step, label, cls, onGo }: { step: number; label: string; cls: string; onGo: () => void }) => (
+  <form action={tourGo} onSubmit={onGo}><input type="hidden" name="step" value={step} /><button className={cls} type="submit">{label}</button></form>);
+
+/** Right after sign-up, on Home: a pause, then the offer to take the tour or skip it. */
+export function TourIntro({ company }: { company?: string | null }) {
+  const [shown, hide, mounted] = useFade(1000);
+  if (!mounted) return null;
+  return createPortal(
+    <div role="dialog" aria-label="Take the tour" style={{ opacity: shown ? 1 : 0, transition: 'opacity .4s ease', pointerEvents: shown ? 'auto' : 'none' }}>
+      <div style={{ ...veilBase, inset: 0 }} />
+      <div className="card stack" style={{ position: 'fixed', zIndex: 62, left: '50%', top: '50%', width: 'min(440px, calc(100vw - 24px))', gap: 10,
+        transform: `translate(-50%, ${shown ? '-50%' : '-46%'})`, transition: `transform .45s ${EASE}`, borderColor: 'var(--blue)', borderWidth: 2 }}>
+        <span className="lbl">Welcome{company ? `, ${company}` : ''}</span>
+        <h2 style={{ fontSize: 24 }}>Take a two-minute tour?</h2>
+        <p className="muted">We show you each part of Nazryx where it lives: your products, the market, distributors, our services and your plan.
+          You can take it any time from Home.</p>
+        <div className="row">
+          <Step step={1} label="Take the tour" cls="btn btn-blue" onGo={hide} />
+          <Step step={0} label="Skip for now" cls="btn btn-ghost" onGo={hide} />
+        </div>
+      </div>
+    </div>,
+    document.body,
+  );
+}
 
 /** The guided tour: everything but the feature being explained is dimmed and blurred; a card next to it explains it,
  *  with Back, Next and End. The highlighted feature stays usable (for example, adding products). */
-export default function TourSpotlight({ step, total, target, title, text, tip, nextTitle }: {
-  step: number; total: number; target: string; title: string; text: string; tip?: string; nextTitle?: string;
+export default function TourSpotlight({ step, total, target, title, text, tip, nextTitle, fallback, fallbackText }: {
+  step: number; total: number; target: string; title: string; text: string; tip?: string; nextTitle?: string; fallback?: string; fallbackText?: string;
 }) {
   const [rect, setRect] = useState<Rect | null>(null);
+  const [usedFallback, setUsedFallback] = useState(false);
   const [view, setView] = useState({ w: 1280, h: 800 });
-  const [ready, setReady] = useState(false);
+  const [shown, hide, mounted] = useFade(250);
 
   useEffect(() => {
-    const el = document.querySelector<HTMLElement>(`[data-tour="${target}"]`);
+    // the feature itself, or (when it is not on the page yet, e.g. before any products) the fallback to highlight instead
+    const main = document.querySelector<HTMLElement>(`[data-tour="${target}"]`);
+    const el = main ?? (fallback ? document.querySelector<HTMLElement>(`[data-tour="${fallback}"]`) : null);
+    setUsedFallback(!main && Boolean(el));
     if (el) el.scrollIntoView({ block: 'center', behavior: 'smooth' });
     let raf = 0;
     const measure = () => {
@@ -28,44 +71,44 @@ export default function TourSpotlight({ step, total, target, title, text, tip, n
       });
     };
     measure();
-    setReady(true);
     window.addEventListener('scroll', measure, true);
     window.addEventListener('resize', measure);
     const t = setInterval(measure, 400);          // content above the target can still be loading
     return () => { window.removeEventListener('scroll', measure, true); window.removeEventListener('resize', measure); clearInterval(t); cancelAnimationFrame(raf); };
-  }, [target]);
+  }, [target, fallback]);
 
-  if (!ready) return null;
-  const veil: React.CSSProperties = { position: 'fixed', background: 'rgba(20, 20, 19, 0.45)', backdropFilter: 'blur(3px)', WebkitBackdropFilter: 'blur(3px)', zIndex: 60 };
+  if (!mounted) return null;
   const r = rect;
   const phone = view.w < 640;
   // the card goes below the highlighted feature when there is room, otherwise above; on phones it sits at the bottom
   const below = r ? r.top + r.height + 230 < view.h : true;
+  const W = Math.min(440, view.w - 24);
   const cardStyle: React.CSSProperties = phone || !r
-    ? { left: 12, right: 12, bottom: 12 }
-    : { left: Math.max(12, Math.min(r.left, view.w - 452)), width: 440, ...(below ? { top: r.top + r.height + 12 } : { bottom: view.h - r.top + 12 }) };
+    ? { left: (view.w - W) / 2, width: W, bottom: 16 }
+    : { left: Math.max(12, Math.min(r.left, view.w - W - 12)), width: W, ...(below ? { top: r.top + r.height + 12 } : { bottom: view.h - r.top + 12 }) };
   return createPortal(
-    <div role="dialog" aria-label={`Tour step ${step} of ${total}: ${title}`}>
+    <div role="dialog" aria-label={`Tour step ${step} of ${total}: ${title}`}
+      style={{ opacity: shown ? 1 : 0, transition: 'opacity .35s ease', pointerEvents: shown ? 'auto' : 'none' }}>
       {r ? (<>
-        <div style={{ ...veil, top: 0, left: 0, right: 0, height: Math.max(0, r.top) }} />
-        <div style={{ ...veil, top: r.top + r.height, left: 0, right: 0, bottom: 0 }} />
-        <div style={{ ...veil, top: r.top, left: 0, width: Math.max(0, r.left), height: r.height }} />
-        <div style={{ ...veil, top: r.top, left: r.left + r.width, right: 0, height: r.height }} />
+        <div style={{ ...veilBase, top: 0, left: 0, width: view.w, height: Math.max(0, r.top) }} />
+        <div style={{ ...veilBase, top: r.top + r.height, left: 0, width: view.w, height: Math.max(0, view.h - r.top - r.height) }} />
+        <div style={{ ...veilBase, top: r.top, left: 0, width: Math.max(0, r.left), height: r.height }} />
+        <div style={{ ...veilBase, top: r.top, left: r.left + r.width, width: Math.max(0, view.w - r.left - r.width), height: r.height }} />
         <div style={{ position: 'fixed', top: r.top, left: r.left, width: r.width, height: r.height, border: '2px solid var(--blue)',
-          borderRadius: 'var(--r-lg)', zIndex: 61, pointerEvents: 'none' }} />
-      </>) : <div style={{ ...veil, inset: 0 }} />}
-      <div className="card stack" style={{ position: 'fixed', zIndex: 62, gap: 8, borderColor: 'var(--blue)', borderWidth: 2, ...cardStyle }}>
+          borderRadius: 'var(--r-lg)', zIndex: 61, pointerEvents: 'none', transition: veilBase.transition }} />
+      </>) : <div style={{ ...veilBase, inset: 0, backdropFilter: 'none', WebkitBackdropFilter: 'none', background: 'rgba(20, 20, 19, 0.25)' }} />}
+      <div className="card stack" style={{ position: 'fixed', zIndex: 62, gap: 8, borderColor: 'var(--blue)', borderWidth: 2, ...cardStyle,
+        transform: shown ? 'none' : 'translateY(8px)', transition: `transform .45s ${EASE}, top .45s ${EASE}, left .45s ${EASE}, bottom .45s ${EASE}` }}>
         <div className="between small">
           <span className="lbl">Tour · {step} of {total}</span>
-          <form action={tourGo}><input type="hidden" name="step" value="0" /><button className="btn-link small" type="submit">End tour</button></form>
+          <Step step={0} label="End tour" cls="btn-link small" onGo={hide} />
         </div>
-        <div className="meter"><i style={{ width: `${(100 * step) / total}%` }} /></div>
+        <div className="meter"><i style={{ width: `${(100 * step) / total}%`, transition: `width .6s ${EASE}` }} /></div>
         <h2>{title}</h2>
-        <p className="muted">{text}{tip ? <> <b>{tip}</b></> : null}</p>
+        <p className="muted">{usedFallback && fallbackText ? fallbackText : <>{text}{tip ? <> <b>{tip}</b></> : null}</>}</p>
         <div className="row">
-          {step > 1 && <form action={tourGo}><input type="hidden" name="step" value={step - 1} /><button className="btn btn-ghost btn-sm" type="submit">← Back</button></form>}
-          <form action={tourGo}><input type="hidden" name="step" value={step === total ? 0 : step + 1} />
-            <button className="btn btn-blue btn-sm" type="submit">{step === total ? 'Finish the tour' : `Next: ${nextTitle} →`}</button></form>
+          {step > 1 && <Step step={step - 1} label="← Back" cls="btn btn-ghost btn-sm" onGo={hide} />}
+          <Step step={step === total ? 0 : step + 1} label={step === total ? 'Finish the tour' : `Next: ${nextTitle} →`} cls="btn btn-blue btn-sm" onGo={hide} />
         </div>
       </div>
     </div>,

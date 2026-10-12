@@ -205,7 +205,10 @@ await Promise.all([k.waitForURL(/q=plan/), k.click('button:has-text("Continue")'
 const planText = await k.locator('body').innerText();
 check(planText.includes('3 products added, 2 matched'), 'catalogue is matched to the market during sign-up');
 check(planText.includes('Suggested') && planText.includes('Complete Market Entry') && planText.includes('you want registration and sales handled for you'), 'sign-up ends with a suggested plan');
-await Promise.all([k.waitForURL(/\/m\/products/), k.locator('form:has(.pill:has-text("Suggested")) button[type=submit]').click()]);
+await Promise.all([k.waitForURL(/\/m\?welcome/), k.locator('form:has(.pill:has-text("Suggested")) button[type=submit]').click()]);
+await k.locator('button:has-text("Take the tour")').waitFor({ timeout: 15000 });   // offered after a short pause
+check(true, 'after sign-up, Home offers the tour or skip');
+await Promise.all([k.waitForURL(/\/m\/products/), k.click('button:has-text("Take the tour")')]);
 await k.locator('[role=dialog]:has-text("Tour · 1 of 8")').waitFor({ state: 'attached', timeout: 15000 });
 const tour = await k.locator('[role=dialog]').innerText();
 check(tour.includes('Add your products') && (await k.locator('[data-tour="add-products"]').count()) === 1, 'the guided tour starts after sign-up, spotlighting the feature');

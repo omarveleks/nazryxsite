@@ -1,14 +1,17 @@
 // The guided tour after sign-up: one stop per feature, each on the page it explains, spotlighting the element marked
 // data-tour="<target>". `path` may use {product}, the
 // manufacturer's first matched product.
-export const TOUR: { path: string; target: string; title: string; text: string; tip?: string }[] = [
+// When the main feature is not on the page yet (no products), the tour highlights `fallback` and says `fallbackText`.
+export const TOUR: { path: string; target: string; title: string; text: string; tip?: string; fallback?: string; fallbackText?: string }[] = [
   { path: '/m/products#add', target: 'add-products', title: 'Add your products',
     text: 'Search any medicine and add it, or open “Add many at once” and paste your whole list. Each product is matched to your markets in seconds.',
     tip: 'Add a few now, then press Next.' },
   { path: '/m/products', target: 'portfolio', title: 'Your portfolio at a glance',
-    text: 'The dashboard shows how many of your products are in high demand, how much competition each faces, and your strongest classes. Switch markets at the top.' },
+    text: 'The dashboard shows how many of your products are in high demand, how much competition each faces, and your strongest classes. Switch markets at the top.',
+    fallback: 'add-products', fallbackText: 'Your dashboard appears here as soon as you add a product. Add one now, then press Next.' },
   { path: '/m/products/{product}', target: 'product', title: 'One product in depth',
-    text: 'Why this market, how crowded it is, which distributors could take it on, the route to approval and the price we suggest. Add it to your launch tracker from here.' },
+    text: 'Why this market, how crowded it is, which distributors could take it on, the route to approval and the price we suggest. Add it to your launch tracker from here.',
+    fallback: 'add-products', fallbackText: 'Each product gets its own page: why this market, distributors, the route to approval and the price. Add a product here first to see one.' },
   { path: '/m/market', target: 'market', title: 'See the market',
     text: 'Each of your markets: its size, where the openings are by class, where registered products come from. Download a market read as a PDF from the top.' },
   { path: '/m/partners', target: 'distributors', title: 'Find distributors',
