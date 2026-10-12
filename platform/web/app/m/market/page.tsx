@@ -20,6 +20,7 @@ async function headline(db: Db, c: string, uid: string) {
       (select count(distinct coalesce(ltr_id, registrant_id))::int from registrations where country = $1 and active) as companies,
       (select count(distinct molecule_id)::int from registrations where country = $1 and active) as molecules,
       (select count(*)::int from country_molecules where country = $1 and on_national_list and registrants = 0 and rankable) as open,
+      (select count(distinct molecule_id)::int from mfr_products where user_id = $2 and molecule_id is not null) as mine,
       (select count(distinct p.molecule_id)::int from mfr_products p join country_molecules cm on cm.molecule_id = p.molecule_id and cm.country = $1
          where p.user_id = $2 and cm.registrations > 0) as mine_on_market,
       (select count(distinct p.molecule_id)::int from mfr_products p join visible_gap_scores g on g.molecule_id = p.molecule_id and g.country = $1
@@ -77,9 +78,14 @@ export default async function MfrMarket({ searchParams }: { searchParams: Promis
           <div className="tile t-peach"><span className="k"><OpeningIcon /> Essential medicines nobody registered</span><span className="v num">{d.h.open}</span></div>
         </div>
         <section className="card between" style={{ flexWrap: 'wrap', gap: 12 }}>
-          <span><b>Your catalogue here:</b> {d.h.mine_high} of your molecules are in high demand in {countryName(m)}, and {d.h.mine_on_market} are already
-            sold there.</span>
-          <Link className="btn btn-blue btn-sm" href={`/m/products?market=${m}`}>See your products</Link>
+          {d.h.mine > 0 ? <>
+            <span><b>Your catalogue here:</b> {d.h.mine_high} of your {d.h.mine} molecules are in high demand in {countryName(m)}, and {d.h.mine_on_market} are
+              already sold there.</span>
+            <Link className="btn btn-blue btn-sm" href={`/m/products?market=${m}`}>See your products</Link>
+          </> : <>
+            <span><b>Your catalogue here:</b> add your products and we show which are in demand in {countryName(m)} and which are already sold there.</span>
+            <Link className="btn btn-blue btn-sm" href="/m/products">Add your products</Link>
+          </>}
         </section>
         {d.reqs.length > 0 && (
           <section className="card stack" style={{ gap: 8 }}>

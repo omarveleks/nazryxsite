@@ -17,7 +17,6 @@ type Fact = { molecule_id: number; country: string; registrants: number; registr
   rankable: boolean; score: number | null; demand: number | null };
 const competition = (f?: Fact) => !f || (!f.registrations && !f.on_national_list) ? 'absent'
   : f.registrants === 0 ? 'open' : f.registrants <= 3 ? 'few' : f.registrants < 8 ? 'some' : 'crowded';
-const WATCH: Record<string, string> = { added: 'New competitor', removed: 'Competitor left', status: 'Registration lapsed', reactivated: 'Back on the market' };
 const COMP: Record<string, [string, string]> = {
   open: ['Nobody registered', 'peach'], few: ['1 to 3 competitors', 'mint'], some: ['4 to 7 competitors', 'blue'], crowded: ['8 or more competitors', ''],
   absent: ['Not on this market yet', ''],
@@ -46,10 +45,8 @@ export default async function MfrProducts({ searchParams }: { searchParams: Prom
     // competitor watch: the molecules followed, in the market shown, and what moved across all markets with data
     const watching = sp.tab === 'watch' && canUse(u.mfr_tier, 'competitors');
     const watched = watching && hasData(market) && covers(u, market) ? await rows(db, 'select * from my_competitor_summary($1)', [market]) : [];
-    const mine = dataMarkets(targets).filter((c) => covers(u, c));      // only the markets in the plan
-    const events = watching && mine.length ? await rows(db, 'select * from my_competitor_watch($1, 90)', [mine]) : [];
     const watchCount = Number((await one(db, 'select count(*)::int as n from watches where user_id = $1', [u.id]))?.n ?? 0);
-    return { targets, market, products, facts, launches, files, watched, events, watchCount };
+    return { targets, market, products, facts, launches, files, watched, watchCount };
   });
   const market = d.market;
   const analysis = canUse(tierIn(u, market), 'portfolio');
@@ -96,17 +93,21 @@ export default async function MfrProducts({ searchParams }: { searchParams: Prom
         ) : (<>
           <MarketPicker u={u} targets={d.targets} current={market} path="/m/products?tab=watch" />
           <section className="card stack">
-            <div className="card-h"><div><h2>Molecules you watch</h2><p className="note">Competitors in {countryName(market)} today and new ones in the last 90 days.
-              We alert you by email or WhatsApp when a new one is registered.</p></div>
+            <div className="card-h"><div><h2>Molecules you watch</h2><p className="note">Who sells each molecule in {countryName(market)} today, and what changed in the last 90 days.
+              We alert you by email or WhatsApp when a new competitor is registered.</p></div>
               {d.products.some((p) => p.molecule_id) && <form action={watchMolecule}><input type="hidden" name="all" value="1" />
                 <button className="btn btn-ghost btn-sm" type="submit">Watch all my products</button></form>}</div>
             {!hasData(market) ? <AgencyMarket code={market} /> : !covers(u, market) ? <PlanLock need="data" title={`Competitors in ${countryName(market)}`} u={u} market={market} /> : d.watched.length === 0 ? <Empty>You are not watching any molecule yet. Watch all your products, or add one below.</Empty> : (
               <div className="tbl-wrap"><table className="tbl">
-                <thead><tr><th>Molecule</th><th className="r">Competitors</th><th className="r">New, 90 days</th><th className="hide-m">Their products are made in</th><th /></tr></thead>
+                <thead><tr><th>Molecule</th><th className="r">Companies</th><th className="r">Products</th><th>Last 90 days</th><th className="hide-m">Made in</th><th /></tr></thead>
                 <tbody>{d.watched.map((w) => (
                   <tr key={w.molecule_id}><td><b>{w.molecule}</b><div className="sub2">{w.category ?? ''}</div></td>
                     <td className="r num">{w.competitors}</td>
-                    <td className="r">{w.new_90 ? <span className="pill peach num">+{w.new_90}</span> : <span className="muted">0</span>}</td>
+                    <td className="r num">{w.products}</td>
+                    <td className="small">{w.new_90 || w.gone_90 ? <>
+                      {w.new_90 > 0 && <span className="pill peach num">+{w.new_90} new</span>}{' '}
+                      {w.gone_90 > 0 && <span className="pill num">{w.gone_90} gone</span>}
+                      <div className="sub2">latest {fmtDate(w.last_move)}</div></> : <span className="muted">No change</span>}</td>
                     <td className="small hide-m">{w.made_in ?? '—'}</td>
                     <td className="r"><form action={unwatchMolecule}><input type="hidden" name="molecule_id" value={w.molecule_id} />
                       <input type="hidden" name="return" value={`/m/products?tab=watch&market=${market}`} />
@@ -116,15 +117,6 @@ export default async function MfrProducts({ searchParams }: { searchParams: Prom
               <input className="input" name="name" placeholder="Watch another molecule, e.g. by its generic name" aria-label="Molecule to watch" required style={{ flex: '1 1 220px' }} />
               <button className="btn btn-blue btn-sm" type="submit">Watch</button>
             </form>
-          </section>
-          <section className="card">
-            <div className="card-h"><div><h2>What competitors did</h2><p className="note">In the molecules you watch, all your markets, last 90 days.</p></div></div>
-            {d.events.length === 0 ? <Empty>Quiet: no competitor moves in the molecules you watch.</Empty> : (
-              <div>{d.events.map((w, i) => (
-                <div key={i} className="between small" style={{ padding: '10px 0', borderTop: i ? '1px solid var(--line)' : undefined, gap: 12 }}>
-                  <span><b>{WATCH[w.change] ?? w.change}</b> · {w.molecule} · {countryName(w.country)}{w.made_in ? <span className="muted"> · made in {w.made_in}</span> : null}</span>
-                  <span className="muted num" style={{ whiteSpace: 'nowrap' }}>{fmtDate(w.at)}</span>
-                </div>))}</div>)}
           </section>
         </>)
       ) : sp.tab === 'launches' ? (

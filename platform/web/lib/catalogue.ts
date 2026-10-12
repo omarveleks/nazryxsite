@@ -15,6 +15,22 @@ function splitRow(line: string, sep: string) {
   return out;
 }
 
+const GENERIC_HEADERS = ['dci', 'inn', 'generic', 'molecule', 'active', 'substance', 'composition'];
+const BRAND_HEADERS = ['trade', 'brand', 'product', 'name'];
+
+/** A table with both a generic-name column (DCI, INN) and a brand column is read by the worker, which matches the
+ *  generic names (including French and German spellings) and keeps the brand as the product name. */
+export function hasGenericColumn(text: string): boolean {
+  const lines = text.replace(/^\uFEFF/, '').split(/\r?\n/).filter((l) => l.trim()).slice(0, 15);
+  const sep = ['\t', ';', ','].find((s) => lines.slice(0, 5).every((l) => l.includes(s)));
+  if (!sep) return false;
+  return lines.some((l) => {
+    const h = splitRow(l, sep).map((x) => x.toLowerCase()).filter((x) => x && x.length < 40);
+    const g = h.findIndex((x) => GENERIC_HEADERS.some((k) => x.includes(k)));
+    return g >= 0 && h.some((x, i) => i !== g && BRAND_HEADERS.some((k) => x.includes(k)));
+  });
+}
+
 export function catalogueLines(text: string): string[] {
   const raw = text.replace(/^﻿/, '').split(/\r?\n/).filter((l) => l.trim());
   if (!raw.length) return [];

@@ -13,7 +13,7 @@ import { AGENCY_KINDS, APPROACHES, GOALS, LAUNCH_SCOPES, CERTIFICATIONS, COMPANY
 import { DOSSIER_ITEMS } from '@/lib/format';
 import { saveUpload } from '@/lib/uploads';
 import { TOUR } from '@/lib/tour';
-import { catalogueLines } from '@/lib/catalogue';
+import { catalogueLines, hasGenericColumn } from '@/lib/catalogue';
 
 const codes = MFR_COUNTRIES.map((c) => c.code);
 const pick = (f: FormData, k: string, allowed: readonly string[]) => [...new Set(f.getAll(k).map(String))].filter((v) => allowed.includes(v));
@@ -50,7 +50,8 @@ async function insertProducts(db: any, userId: string, text: string) {
 async function importCatalogue(userId: string, email: string, file: FormDataEntryValue | null) {
   const saved = await saveUpload(file, userId);
   if (!saved) return null;
-  const text = /\.(csv|txt)$/i.test(saved.name) && file && typeof file !== 'string' ? await file.text() : null;
+  const raw = /\.(csv|txt)$/i.test(saved.name) && file && typeof file !== 'string' ? await file.text() : null;
+  const text = raw !== null && !hasGenericColumn(raw) ? raw : null;   // generic and brand columns: the worker reads it
   return withUser(userId, async (db) => {
     if (text !== null) {
       const have = new Set((await db.query('select lower(name) as n from mfr_products where user_id = $1', [userId])).rows.map((x: { n: string }) => x.n));

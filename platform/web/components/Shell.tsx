@@ -51,7 +51,7 @@ export default function Shell({ user, title, sub, crumb, actions, children }: {
             {actions}
             {user.role !== 'team' && user.account_type !== 'manufacturer' && <Link className={`btn btn-sm ${user.list_count ? 'btn-blue' : 'btn-ghost'}`} href="/requests/list">
               Sourcing list{user.list_count ? ` · ${user.list_count}` : ''}</Link>}
-            {user.account_type !== 'manufacturer' && <CountryPicker user={user} />}
+            {user.account_type !== 'manufacturer' && <CountryPicker paid={user.plan === 'paid'} />}
             <Link className="avatar" href="/settings" title="Settings">{initials || 'You'}</Link>
           </div>
         </div>

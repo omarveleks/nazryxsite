@@ -113,6 +113,9 @@ await t.goto(B + '/admin'); await t.waitForLoadState('networkidle');
 await Promise.all([t.waitForURL(/\/m$/), t.click('nav a:has-text("Manufacturer")')]);
 const tm = await t.locator('nav').innerText();
 check(tm.includes('My products') && tm.includes('Regulatory') && (await t.locator('main').innerText()).includes('Register these first'), 'admin switches to the manufacturer side');
+await t.goto(B + '/m/market?market=TZ'); await t.waitForLoadState('networkidle');
+const mkt = await t.locator('main').innerText();
+check(!mkt.includes('Uganda') && mkt.includes('Add your products'), 'manufacturer market has one market switch and no empty catalogue line');
 await Promise.all([t.waitForURL(/\/home/), t.click('nav a:has-text("Distributor")')]);
 check((await t.locator('nav').innerText()).includes('Search'), 'and back to the distributor side');
 for (const tab of ['', '?tab=review', '?tab=claims', '?tab=requests', '?tab=documents', '?tab=manufacturers', '?tab=accounts', '?tab=content', '?tab=activity', '?tab=regulatory', '?tab=calls']) {

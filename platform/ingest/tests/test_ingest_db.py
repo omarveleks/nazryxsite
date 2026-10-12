@@ -840,8 +840,8 @@ def test_files_regulatory_competitor_watch_and_weekly_summary(env):
     assert q("select count(*) from notifications where user_id = %s", other)[0][0] == 0
     with app_conn(env) as a:
         as_user(a, maker)
-        s = a.execute("select molecule, competitors, new_90, made_in from my_competitor_summary('TZ')").fetchall()
-        assert s == [("Digoxin", 1, 1, "India")]
+        s = a.execute("select molecule, competitors, new_90, gone_90, last_move is not null, made_in from my_competitor_summary('TZ')").fetchall()
+        assert s == [("Digoxin", 1, 1, 0, True, "India")]
         assert a.execute("select change, made_in from my_competitor_watch(array['TZ'], 90)").fetchall() == [("added", "India")]
         a.rollback()
     # weekly summary: once a week, only with something to say
@@ -942,6 +942,34 @@ def test_catalogues_add_their_products(env):
     assert q("select count(*) from mfr_products where user_id = %s", maker)[0][0] == 4
     assert catalogue.molecule_keyish("Amoxicillin 500mg Capsules BP") == "amoxicillin"
 
+    # a French export: titles, a DCI column next to the brand, several sheets, section headings; read before by the old
+    # reader (brand names only, unmatched, and the header of the second sheet saved as a product)
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    for r in [["SOME PHARMA"], ["CATALOGUE DE PRODUITS EXPORT"], [], ["DCI", "TRADE NAME ", "FORM", "PRÉVISIONS VENTES AN 1"],
+              ["AMOXICILLINE TRIHYDRATE", "AMOXIL 500 MG B/12", "Capsules"], ["CIPROFLOXACINE", "CIPRO 250 MG B/10", "Tablets"],
+              ["OPHTALMOLOGIE  ◆  EYE CARE PRODUCTS"], ["Métformine", "GLUCO 850 MG B/30", "Tablets"], ["DIGOXIN", "DIGO 0,25 MG", "Tablets"]]:
+        ws.append(r)
+    ws2 = wb.create_sheet("Soft gel")
+    for r in [["SOFT GEL  ◆  2026"], ["DCI", "TRADE NAME ", "FORM"], ["PARACETAMOLE", "PARA 500", "Soft Capsule"], ["Vitamin E", "E CAPS 200", "Soft Capsule"]]:
+        ws2.append(r)
+    buf = _io.BytesIO()
+    wb.save(buf)
+    with psycopg.connect(URL) as c:
+        fr = c.execute("insert into users (email, password_hash, account_type, onboarded) values ('cat2@example.com', 'x', 'manufacturer', true) returning id").fetchone()[0]
+        for old in ("AMOXIL 500 MG B/12 Capsules", "TRADE NAME FORM"):
+            c.execute("insert into mfr_products (user_id, name) values (%s, %s)", (fr, old))
+        sid = c.execute("insert into stored_files (name, size, data) values ('cat.xlsx', %s, %s) returning id", (len(buf.getvalue()), buf.getvalue())).fetchone()[0]
+        fid = c.execute("""insert into mfr_files (user_id, kind, file_path, file_name, status) values (%s, 'catalogue', %s, 'cat.xlsx', 'queued')
+                           returning id""", (fr, f"db:{sid}")).fetchone()[0]
+        assert catalogue.run(c.cursor(), client=None) == 1
+        c.commit()
+    got = dict(q("""select p.name, split_part(m.inn, ' ', 1) from mfr_products p left join molecules m on m.id = p.molecule_id where p.user_id = %s""", fr))
+    assert got == {"AMOXIL 500 MG B/12 Capsules": "Amoxicillin", "CIPRO 250 MG B/10 Tablets": "Ciprofloxacin",
+                   "GLUCO 850 MG B/30 Tablets": "Metformin", "DIGO 0,25 MG Tablets": "Digoxin", "PARA 500 Soft Capsule": "Paracetamol",
+                   "E CAPS 200 Soft Capsule": None}         # the brand stays the name; 'Vitamin E' is not guessed
+    assert q("select added, matched from mfr_files where id = %s", fid)[0] == (6, 5)
+
 
 def test_other_markets_load_beside_tanzania(env):
     """Kazakhstan (Russian, ATC codes, no holders) and Kenya (English, local representatives) load through their own
@@ -1003,6 +1031,16 @@ def test_other_markets_load_beside_tanzania(env):
     # one molecule across markets: amoxicillin is the same molecule in Tanzania, Kazakhstan and Kenya
     assert q("""select count(distinct cm.country) from country_molecules cm join molecules m on m.id = cm.molecule_id
                 where m.canonical_key = 'amoxicillin' and cm.registrations > 0""")[0][0] == 3
+    # partners: Kazakhstan names no distributors, so its list is the companies holding registrations; Kenya lists distributors
+    team = q("select id from users where role = 'team' limit 1")[0][0]
+    with app_conn(env) as a:
+        as_user(a, team)
+        kz = a.execute("select by_holder, total, products from partner_search('KZ')").fetchall()
+        ke = a.execute("select by_holder, total from partner_search('KE')").fetchall()
+        assert kz and all(r[0] for r in kz) and kz[0][1] > 0
+        assert ke and not any(r[0] for r in ke) and ke[0][1] == 2
+        assert a.execute("select count(*) from partner_search('KZ', null, null, true)").fetchone()[0] < kz[0][1]   # local only
+        a.rollback()
 
 
 def test_pay_per_market_and_yearly_billing(env):

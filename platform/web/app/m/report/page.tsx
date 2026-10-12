@@ -25,6 +25,7 @@ export default async function MarketRead({ searchParams }: { searchParams: Promi
     const market = asked ?? targets.find((c) => hasData(c) && covers(u, c)) ?? targets.find(hasData) ?? 'TZ';
     const h = await one(db, `select (select count(*)::int from registrations where country = $1 and active) as products,
         (select count(distinct ltr_id)::int from registrations where country = $1 and active) as distributors,
+        (select count(distinct coalesce(ltr_id, registrant_id))::int from registrations where country = $1 and active) as companies,
         (select count(*)::int from country_molecules where country = $1 and on_national_list and registrants = 0 and rankable) as open`, [market]);
     const products = await rows(db, `${mfrProductsSql(market)} where p.user_id = $1 order by g.score desc nulls last, p.name`, [u.id]);
     const partners = canUse(tierIn(u, market), 'matching') ? await rows(db, `select code, products, open_to, top_classes from partner_search($1) limit 5`, [market]) : [];
@@ -44,7 +45,7 @@ export default async function MarketRead({ searchParams }: { searchParams: Promi
         <p className="muted" style={{ marginTop: 6 }}>Prepared for one manufacturer. Not for circulation.</p></div>
 
       <section className="card stack"><h2>1. The market</h2>
-        <p>{d.h?.products.toLocaleString('en')} registered products held by {d.h?.distributors} distributors. {d.h?.open} essential medicines have nobody registered.</p></section>
+        <p>{d.h?.products.toLocaleString('en')} registered products held by {d.h?.distributors ? `${d.h.distributors} distributors` : `${d.h?.companies} companies`}. {d.h?.open} essential medicines have nobody registered.</p></section>
 
       <section className="card stack"><h2>2. Your portfolio against it</h2>
         <p>{high} of your {d.products.length} products are in high demand in {m}.</p>
@@ -53,8 +54,8 @@ export default async function MarketRead({ searchParams }: { searchParams: Promi
             <td className="small">{(() => { const r = reasons(p).join(', '); return r.charAt(0).toUpperCase() + r.slice(1); })()}</td></tr>)}</tbody></table></section>
 
       {d.partners.length > 0 && (
-        <section className="card stack"><h2>3. Distributor shortlist</h2>
-          <table className="tbl"><tbody>{d.partners.map((x) => <tr key={x.code}><td><b>Distributor {x.code}</b><div className="sub2">Strongest in {x.top_classes}</div></td>
+        <section className="card stack"><h2>3. {d.h?.distributors ? 'Distributor' : 'Partner'} shortlist</h2>
+          <table className="tbl"><tbody>{d.partners.map((x) => <tr key={x.code}><td><b>{d.h?.distributors ? 'Distributor' : 'Company'} {x.code}</b><div className="sub2">Strongest in {x.top_classes}</div></td>
             <td className="r small">{x.products} products · open to {x.open_to} of yours</td></tr>)}</tbody></table>
           <p className="note">We make every introduction.</p></section>)}
 
