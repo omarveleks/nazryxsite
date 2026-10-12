@@ -193,7 +193,8 @@ molecule page for paid plans.
 - Companies are kept per market (`KZ|key`), so loading one market never merges or renames another's. Existing molecule
   names are never overwritten. Kazakhstan and Kyrgyzstan registers do not publish holders, so the Distributors page
   offers the team's help there; Kenya lists local technical representatives, Uzbekistan local holders.
-- Kazakhstan: a product is active until its certificate expires. Kenya's export covers registrations from Oct 2021 only.
+- Kazakhstan and Kenya: a product is active until its certificate expires (Kenya's registrations run five years, so its export
+  holds every product registered today).
 
 ## Regulatory library, competitor watch, uploads, WhatsApp (migration 024)
 
