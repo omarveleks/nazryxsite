@@ -7,6 +7,7 @@ import time
 
 from db import connect
 import billing
+import catalogue
 import digest
 import ingest_job
 import notify
@@ -32,6 +33,7 @@ def tick():
             pass  # recorded on the job row; keep the worker alive
     with connect() as conn:
         cur = conn.cursor()
+        catalogue.run(cur)            # catalogues (Excel, Word, PDF) into the manufacturer's products
         billing.process(cur)          # plans switched on or off, invoices and order confirmations
         digest.send_weekly(cur)       # the weekly summary for manufacturers (email and WhatsApp)
         notify.deliver_queued(cur)

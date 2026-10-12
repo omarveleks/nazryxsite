@@ -200,10 +200,10 @@ await Promise.all([k.waitForURL(/q=timeline/), k.click('button:has-text("Continu
 await Promise.all([k.waitForURL(/q=scope/), k.click('button[name=choice][value=now]')]);
 await Promise.all([k.waitForURL(/q=products/), k.click('button[name=choice][value="1_3"]')]);
 await k.fill('textarea[name=list]', 'Doxycycline 100mg capsules\nAmoxicillin 500mg capsules\nNot A Real Product');
-await k.setInputFiles('input[name=catalogue]', { name: 'catalogue.csv', mimeType: 'text/csv', buffer: Buffer.from('name\nDoxycycline 100mg capsules') });
+await k.setInputFiles('input[name=catalogue]', { name: 'catalogue.csv', mimeType: 'text/csv', buffer: Buffer.from('Product name,Strength\nDoxycycline,100mg capsules\nCiprofloxacin,250mg tablets') });
 await Promise.all([k.waitForURL(/q=plan/), k.click('button:has-text("Continue")')]);
 const planText = await k.locator('body').innerText();
-check(planText.includes('3 products added, 2 matched'), 'catalogue is matched to the market during sign-up');
+check(planText.includes('3 products added, 2 matched') && planText.includes('1 product added from catalogue.csv'), 'pasted list and catalogue file are both added during sign-up');
 check(planText.includes('Suggested') && planText.includes('Complete Market Entry') && planText.includes('you want registration and sales handled for you'), 'sign-up ends with a suggested plan');
 await Promise.all([k.waitForURL(/\/m\?welcome/), k.locator('form:has(.pill:has-text("Suggested")) button[type=submit]').click()]);
 await k.locator('button:has-text("Take the tour")').waitFor({ timeout: 15000 });   // offered after a short pause
@@ -257,9 +257,12 @@ await k.goto(B + '/m/products?tab=watch');
 check((await k.locator('main').innerText()).includes('Unlock with Basic Market Data'), 'competitor watch is locked without a plan');
 await k.goto(B + '/m/products'); await k.waitForLoadState('networkidle');
 await k.setInputFiles('#add input[name=file]', { name: 'our-catalogue.pdf', mimeType: 'application/pdf', buffer: Buffer.from('%PDF-1.4 cat') });
-await Promise.all([k.waitForURL(/uploaded=catalogue/), k.click('#add button:has-text("Upload")')]);
-check((await k.locator('main').innerText()).includes('Catalogue received') && (await k.locator('#files').innerText()).includes('our-catalogue.pdf'),
-  'add a product: upload a PDF catalogue');
+await Promise.all([k.waitForURL(/reading=1/), k.click('#add button:has-text("Upload")')]);
+check(await k.locator('text=Our team is adding its products').waitFor({ timeout: 20000 }).then(() => true, () => false)
+  && (await k.locator('#files').innerText()).includes('our-catalogue.pdf'), 'add a product: a PDF catalogue is read in the background (team fallback without a reader key)');
+await k.setInputFiles('#add input[name=file]', { name: 'more.csv', mimeType: 'text/csv', buffer: Buffer.from('Generic name;Form\nAtenolol 50mg;tablets\nMetformin 500mg;tablets') });
+await Promise.all([k.waitForURL(/added=2/), k.click('#add button:has-text("Upload")')]);
+check((await k.locator('main').innerText()).includes('Added 2 products'), 'a CSV catalogue adds its products at once');
 await k.selectOption('#files select[name=kind]', 'gmp');
 await k.setInputFiles('#files input[name=file]', { name: 'site-gmp.pdf', mimeType: 'application/pdf', buffer: Buffer.from('%PDF-1.4 gmp') });
 await Promise.all([k.waitForURL(/uploaded=gmp/), k.click('#files button:has-text("Upload")')]);

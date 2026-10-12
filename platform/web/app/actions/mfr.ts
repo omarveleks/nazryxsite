@@ -13,6 +13,7 @@ import { AGENCY_KINDS, APPROACHES, GOALS, LAUNCH_SCOPES, CERTIFICATIONS, COMPANY
 import { DOSSIER_ITEMS } from '@/lib/format';
 import { saveUpload } from '@/lib/uploads';
 import { TOUR } from '@/lib/tour';
+import { catalogueLines } from '@/lib/catalogue';
 
 const codes = MFR_COUNTRIES.map((c) => c.code);
 const pick = (f: FormData, k: string, allowed: readonly string[]) => [...new Set(f.getAll(k).map(String))].filter((v) => allowed.includes(v));
@@ -43,6 +44,30 @@ async function insertProducts(db: any, userId: string, text: string) {
   }
   return { added, matched };
 }
+
+/** A catalogue upload adds its products by itself: CSV and text at once, Excel, Word and PDF in the worker within a minute.
+ *  Returns what happened, for the message shown next. */
+async function importCatalogue(userId: string, email: string, file: FormDataEntryValue | null) {
+  const saved = await saveUpload(file, userId);
+  if (!saved) return null;
+  const text = /\.(csv|txt)$/i.test(saved.name) && file && typeof file !== 'string' ? await file.text() : null;
+  return withUser(userId, async (db) => {
+    if (text !== null) {
+      const have = new Set((await db.query('select lower(name) as n from mfr_products where user_id = $1', [userId])).rows.map((x: { n: string }) => x.n));
+      const r = await insertProducts(db, userId, catalogueLines(text).filter((l) => !have.has(l.toLowerCase())).join('\n'));
+      await db.query(`insert into mfr_files (user_id, kind, file_path, file_name, status, added, matched) values ($1, 'catalogue', $2, $3, 'done', $4, $5)`,
+        [userId, saved.path, saved.name, r.added, r.matched]);
+      if (r.added > r.matched) await teamNote(db, 'Catalogue loaded: products to match', `${email}: ${r.added} products added from ${saved.name}, ${r.added - r.matched} to match.`);
+      return { name: saved.name, reading: false, ...r };
+    }
+    await db.query(`insert into mfr_files (user_id, kind, file_path, file_name, status) values ($1, 'catalogue', $2, $3, 'queued')`, [userId, saved.path, saved.name]);
+    await db.query("select pg_notify('ingest', 'catalogue')");
+    return { name: saved.name, reading: true, added: 0, matched: 0 };
+  });
+}
+const catalogueNote = (c: { name: string; reading: boolean; added: number; matched: number } | null) => !c ? ''
+  : c.reading ? `Reading ${c.name}: your products appear in a minute.`
+  : `${c.added} ${c.added === 1 ? 'product' : 'products'} added from ${c.name}, ${c.matched} matched to the market.`;
 
 /** Manufacturer onboarding, one step at a time, and later profile edits. Steps: company, manufacturing, markets,
  *  catalogue, needs, then the suggested plan. New profiles wait for the team's approval. */
@@ -88,12 +113,8 @@ export async function saveMfrStep(f: FormData) {
     });
     if (step === 4) {
       // a catalogue file (Excel, PDF ...) for the team to load, alongside or instead of the pasted list
-      const saved = await saveUpload(f.get('catalogue'), u.id);
-      if (saved) {
-        await withUser(u.id, (db) => db.query('update manufacturer_profiles set catalogue_path = $2, catalogue_name = $3 where user_id = $1',
-          [u.id, saved.path, saved.name]));
-        note = `${note} ${saved.name} uploaded; our team loads it for you.`.trim();
-      }
+      const c = await importCatalogue(u.id, u.email, f.get('catalogue'));
+      if (c) note = `${note} ${catalogueNote(c)}`.trim();
     }
   } catch (e) {
     if (isRedirect(e)) throw e;
@@ -140,12 +161,8 @@ export async function saveWizard(f: FormData) {
       await db.query('update manufacturer_profiles set step = greatest(step, $2) where user_id = $1', [u.id, i + 2]);
     });
     if (q === 'products') {
-      const saved = await saveUpload(f.get('catalogue'), u.id);
-      if (saved) {
-        await withUser(u.id, (db) => db.query('update manufacturer_profiles set catalogue_path = $2, catalogue_name = $3 where user_id = $1',
-          [u.id, saved.path, saved.name]));
-        note = `${note} ${saved.name} uploaded; our team loads it for you.`.trim();
-      }
+      const c = await importCatalogue(u.id, u.email, f.get('catalogue'));
+      if (c) note = `${note} ${catalogueNote(c)}`.trim();
     }
   } catch (e) {
     if (isRedirect(e)) throw e;
@@ -467,13 +484,24 @@ export async function uploadMfrFile(f: FormData) {
   const to = safeNext(str(f, 'return', 200), '/m/products#files');
   const path = to.split('#')[0], hash = to.includes('#') ? `#${to.split('#')[1]}` : '';
   if (!MFR_FILE_KINDS[kind]) back(path, { error: 'Pick what the file is.' });
+  if (kind === 'catalogue') {
+    let c: Awaited<ReturnType<typeof importCatalogue>> = null;
+    try {
+      c = await importCatalogue(u.id, u.email, f.get('file'));
+    } catch (e) {
+      if (isRedirect(e)) throw e;
+      back(path, { error: errText(e) });
+    }
+    if (!c) back(path, { error: 'Choose a file.' });
+    redirect(c!.reading ? '/m/products?reading=1#add' : `/m/products?added=${c!.added}&matched=${c!.matched}`);
+  }
   try {
     const saved = await saveUpload(f.get('file'), u.id);
     if (!saved) back(path, { error: 'Choose a file.' });
     await withUser(u.id, async (db) => {
       await db.query('insert into mfr_files (user_id, kind, file_path, file_name, note) values ($1, $2, $3, $4, $5)',
         [u.id, kind, saved!.path, saved!.name, str(f, 'note', 300) || null]);
-      await teamNote(db, kind === 'catalogue' ? 'Catalogue uploaded: load the products' : `${MFR_FILE_KINDS[kind]} uploaded`,
+      await teamNote(db, `${MFR_FILE_KINDS[kind]} uploaded`,
         `${u.email} uploaded ${saved!.name}.${kind === 'gmp' ? ' Check it for the Verified badge.' : ''}`);
     });
   } catch (e) {

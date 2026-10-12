@@ -193,7 +193,11 @@ molecule page for paid plans.
 - **Competitor watch** (My products > Competitor watch, Basic Market Data and up): follow any molecule, see competitors
   today, new ones in 90 days and where their products are made. A new registration sends an alert by email and WhatsApp.
   Companies stay anonymous on the manufacturer side, in the portal and in alerts.
-- **Uploads** on My products: a catalogue (PDF, Excel, Word, CSV) the team loads, and the starter pack (GMP, CPP, CoA,
+- **Catalogues add their products by themselves** (migration 025): CSV and text at once; Excel, Word and PDF in the worker
+  (`ingest/catalogue.py`) within a minute while the page refreshes itself. With `ANTHROPIC_API_KEY`, Claude reads any
+  layout, PDFs included; without it, Excel and Word are read by their columns and lines and a PDF goes to the team.
+  Products already in the list are not added twice; unmatched ones go to the team.
+- **Uploads** on My products: a catalogue (PDF, Excel, Word, CSV), and the starter pack (GMP, CPP, CoA,
   labels). A checked GMP certificate earns the Verified badge, shown in the sidebar, on Home and on market reads.
 - **WhatsApp**: `ingest/notify.py` sends through the WhatsApp Business Cloud API when `WHATSAPP_TOKEN` and
   `WHATSAPP_PHONE_ID` are set on the worker (`WHATSAPP_TEMPLATE` for messages outside the 24-hour window); otherwise

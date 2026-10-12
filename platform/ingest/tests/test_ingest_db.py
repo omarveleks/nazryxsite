@@ -4,6 +4,7 @@ Needs a Postgres server. Set TEST_DATABASE_URL_ADMIN to a superuser/owner URL wh
 and recreated, e.g. postgresql://nazryx:pw@localhost:5432/nazryx_test. Skipped when not set.
 """
 import importlib
+import json
 import os
 import uuid
 
@@ -890,3 +891,53 @@ def test_reg_extract_drafts_from_a_document(env):
     assert reg_extract.run(client=Client()) == 1
     assert q("select status, found from reg_documents where id = %s", did)[0] == ("done", 1)
     assert q("select status, title from reg_requirements where document_id = %s", did)[0] == ("draft", "Data Matrix")
+
+
+def test_catalogues_add_their_products(env):
+    import io as _io
+    import openpyxl
+    import catalogue
+    with psycopg.connect(URL) as c:
+        maker = c.execute("insert into users (email, password_hash, account_type, onboarded) values ('cat1@example.com', 'x', 'manufacturer', true) returning id").fetchone()[0]
+        wb = openpyxl.Workbook()
+        ws = wb.active
+        for r in [["Our products 2026"], ["Product name", "Strength", "Dosage form", "Price"], ["Amoxicillin", "500 mg", "Capsules", "1.20"],
+                  ["Atenolol", "50 mg", "Tablets", "0.80"], [None, None, None, None], ["Zzzunknownium", "5 mg", "Tablets", "2"]]:
+            ws.append(r)
+        buf = _io.BytesIO()
+        wb.save(buf)
+        ids = []
+        for name, data in [("list.xlsx", buf.getvalue()), ("brochure.pdf", b"%PDF-1.4 x")]:
+            fid = c.execute("insert into stored_files (name, size, data) values (%s, %s, %s) returning id", (name, len(data), data)).fetchone()[0]
+            ids.append(c.execute("""insert into mfr_files (user_id, kind, file_path, file_name, status) values (%s, 'catalogue', %s, %s, 'queued')
+                                    returning id""", (maker, f"db:{fid}", name)).fetchone()[0])
+        # without an Anthropic credential: Excel is read by its columns, a PDF goes to the team
+        assert catalogue.run(c.cursor(), client=None) == 1
+        c.commit()
+    status = dict(q("select file_name, status from mfr_files where user_id = %s", maker))
+    assert status == {"list.xlsx": "done", "brochure.pdf": "manual"}
+    assert q("select added, matched from mfr_files where id = %s", ids[0])[0] == (3, 2)
+    names = sorted(r[0] for r in q("select name from mfr_products where user_id = %s", maker))
+    assert names[0].startswith("Amoxicillin 500 mg") and len(names) == 3            # the title row and the empty row are skipped
+
+    # with Claude: the PDF is read into products; a second read adds no duplicates
+    class Block:
+        type = "text"
+        text = json.dumps({"products": [{"generic": "Ciprofloxacin", "strength": "250 mg", "form": "Tablets", "line": "Ciprofloxacin 250 mg tablets"},
+                                        {"generic": "Amoxicillin", "strength": "500 mg", "form": "Capsules", "line": "Amoxicillin 500 mg Capsules"}]})
+
+    class Client:
+        class beta:
+            class messages:
+                @staticmethod
+                def create(**kw):
+                    assert kw["messages"][0]["content"][0]["type"] == "document"
+                    return type("R", (), {"stop_reason": "end_turn", "content": [Block()]})()
+
+    with psycopg.connect(URL) as c:
+        c.execute("update mfr_files set status = 'queued' where id = %s", (ids[1],))
+        assert catalogue.run(c.cursor(), client=Client()) == 1
+        c.commit()
+    assert q("select status, added, matched from mfr_files where id = %s", ids[1])[0] == ("done", 1, 1)   # amoxicillin was already there
+    assert q("select count(*) from mfr_products where user_id = %s", maker)[0][0] == 4
+    assert catalogue.molecule_keyish("Amoxicillin 500mg Capsules BP") == "amoxicillin"

@@ -2,6 +2,7 @@ import Link from 'next/link';
 import Shell from '@/components/Shell';
 import MarketPicker, { AgencyMarket, dataMarkets, hasData, loadLive, pickMarket, targetMarkets } from '@/components/MarketPicker';
 import MedicineSearch from '@/components/MedicineSearch';
+import AutoRefresh from '@/components/AutoRefresh';
 import { Bar, Empty, Flash, LockIcon, PlanLock, Tabs } from '@/components/ui';
 import { DemandIcon } from '@/components/Icons';
 import { addMfrProducts, deleteMfrFile, saveLaunch, unwatchMolecule, uploadMfrFile, watchMolecule } from '@/app/actions/mfr';
@@ -23,7 +24,7 @@ const COMP: Record<string, [string, string]> = {
 };
 
 // The manufacturer's catalogue against its markets: a portfolio dashboard on top, then every product.
-export default async function MfrProducts({ searchParams }: { searchParams: Promise<{ added?: string; matched?: string; error?: string; market?: string; tab?: string; saved?: string; uploaded?: string; removed?: string }> }) {
+export default async function MfrProducts({ searchParams }: { searchParams: Promise<{ added?: string; matched?: string; error?: string; market?: string; tab?: string; saved?: string; uploaded?: string; removed?: string; reading?: string }> }) {
   const sp = await searchParams;
   const u = await requireUser({ manufacturer: true });
   const analysis = canUse(u.mfr_tier, 'portfolio');
@@ -41,7 +42,7 @@ export default async function MfrProducts({ searchParams }: { searchParams: Prom
     const launches = await rows(db, `select l.id, l.country, l.stage, l.updated_at, coalesce(m.inn, p.name) as name, p.id as product_id
         from launches l join mfr_products p on p.id = l.product_id left join molecules m on m.id = p.molecule_id
         where l.user_id = $1 order by l.updated_at desc`, [u.id]);
-    const files = await rows(db, 'select id, kind, file_name, created_at from mfr_files where user_id = $1 order by created_at desc', [u.id]);
+    const files = await rows(db, 'select id, kind, file_name, created_at, status, added, matched, error from mfr_files where user_id = $1 order by created_at desc', [u.id]);
     const market = pickMarket(sp.market, targets, prof?.primary_market);
     // competitor watch: the molecules followed, in the market shown, and what moved across all markets with data
     const watching = sp.tab === 'watch' && canUse(u.mfr_tier, 'competitors');
@@ -51,6 +52,8 @@ export default async function MfrProducts({ searchParams }: { searchParams: Prom
     return { targets, market, products, facts, launches, files, watched, events, watchCount };
   });
   const market = d.market;
+  const reading = d.files.filter((x) => x.kind === 'catalogue' && (x.status === 'queued' || x.status === 'reading'));
+  const lastCat = d.files.find((x) => x.kind === 'catalogue');
   const fact = (mol: number | null, c: string) => d.facts.find((f) => f.molecule_id === mol && f.country === c);
   const focus = hasData(market) ? market : null;      // the market the dashboard reads
 
@@ -73,8 +76,12 @@ export default async function MfrProducts({ searchParams }: { searchParams: Prom
     <Shell user={u} title="My products" sub={`Your catalogue against ${countryName(market)}`}
       actions={<a className="btn btn-blue btn-sm" href="/m/products#add">Add a product</a>}>
       <Flash sp={sp} />
-      {sp.uploaded && <div className="ok" role="status">{sp.uploaded === 'catalogue' ? 'Catalogue received. Our team adds every product from it, usually within one working day.'
-        : sp.uploaded === 'gmp' ? 'GMP certificate received. Our team checks it for your Verified badge.' : 'Document received.'}</div>}
+      {reading.length > 0 && (<div className="ok row" role="status" style={{ gap: 10 }}><AutoRefresh />
+        <span className="spin" aria-hidden="true" />Reading {reading.map((x) => x.file_name).join(', ')}. Your products appear here in a minute; no need to wait on this page.</div>)}
+      {sp.reading && reading.length === 0 && lastCat?.status === 'done' && <div className="ok" role="status">Added {lastCat.added} products from {lastCat.file_name}; {lastCat.matched} matched to a molecule we track.
+        {lastCat.added > lastCat.matched ? ' Our team matches the rest.' : ''}</div>}
+      {sp.reading && reading.length === 0 && lastCat && lastCat.status !== 'done' && <div className="ok" role="status">We could not read {lastCat.file_name} by ourselves. Our team is adding its products, usually within one working day.</div>}
+      {sp.uploaded && <div className="ok" role="status">{sp.uploaded === 'gmp' ? 'GMP certificate received. Our team checks it for your Verified badge.' : 'Document received.'}</div>}
       {sp.added && <div className="ok" role="status">Added {sp.added} products; {sp.matched} matched to a molecule we track.
         {Number(sp.added) > Number(sp.matched) ? ' Our team matches the rest.' : ''}</div>}
       <Tabs current={sp.tab === 'launches' || sp.tab === 'watch' ? sp.tab : 'portfolio'} items={[
@@ -196,7 +203,7 @@ export default async function MfrProducts({ searchParams }: { searchParams: Prom
         <div style={{ maxWidth: 560 }}><MedicineSearch /></div>
         <form action={uploadMfrFile} className="row" style={{ maxWidth: 560, padding: '10px 12px', border: '1px dashed var(--line)', borderRadius: 12 }}>
           <input type="hidden" name="kind" value="catalogue" /><input type="hidden" name="return" value="/m/products#add" />
-          <span className="small" style={{ flex: '1 1 100%' }}><b>Or upload your catalogue</b> as PDF, Excel, Word or CSV. We add every product for you.</span>
+          <span className="small" style={{ flex: '1 1 100%' }}><b>Or upload your catalogue</b> as PDF, Excel, Word or CSV. Every product is added for you in a minute.</span>
           <input name="file" type="file" required aria-label="Catalogue file" accept=".pdf,.xls,.xlsx,.csv,.doc,.docx,.txt" style={{ flex: '1 1 200px', minWidth: 0 }} />
           <button className="btn btn-ghost btn-sm" type="submit">Upload</button>
         </form>
@@ -214,7 +221,8 @@ export default async function MfrProducts({ searchParams }: { searchParams: Prom
           certificate of analysis, labels. Full dossiers only when we review one for you. A checked GMP certificate earns your Verified badge.</p></div></div>
         {d.files.length > 0 && (
           <div className="tbl-wrap"><table className="tbl"><tbody>{d.files.map((x) => (
-            <tr key={x.id}><td><a href={`/files/mfile/${x.id}`}><b>{x.file_name}</b></a><div className="sub2">{MFR_FILE_KINDS[x.kind]} · {fmtDate(x.created_at)}</div></td>
+            <tr key={x.id}><td><a href={`/files/mfile/${x.id}`}><b>{x.file_name}</b></a><div className="sub2">{MFR_FILE_KINDS[x.kind]} · {fmtDate(x.created_at)}{x.kind === 'catalogue' ? ` · ${
+                x.status === 'done' ? `${x.added} products added` : x.status === 'queued' || x.status === 'reading' ? 'reading now' : x.status ? 'our team is adding the products' : ''}` : ''}</div></td>
               <td className="r"><form action={deleteMfrFile}><input type="hidden" name="file_id" value={x.id} />
                 <button className="btn-link small" type="submit">Remove</button></form></td></tr>))}</tbody></table></div>)}
         <form action={uploadMfrFile} className="row" style={{ maxWidth: 640 }}>
