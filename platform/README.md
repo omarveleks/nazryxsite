@@ -180,6 +180,15 @@ confirming → production → import permit → shipped → arrived → sampling
 checklist and ETA. My portfolio → Supply and shipments brings all of it together per product. Suggested selling prices (Admin > Content) show on the
 molecule page for paid plans.
 
+## Book a call (migration 027)
+
+- `/m/call`: manufacturers pick a day and a slot (shown in their own time zone) and say what the call is about; one
+  click books it. One booking per slot, enforced by the database; others only see that a time is taken. Confirmation
+  by email and WhatsApp, a reminder the day before (worker), the next call on Home, cancel any time.
+- Admin > Calls (permission "Manufacturers"): the team's time zone, call length, how far ahead and the minimum notice,
+  weekly hours (default Monday to Friday 10:00 to 17:00), and every booked call with its meeting link (the customer is
+  told when it is added) and status. Set your time zone there first: it starts as UTC.
+
 ## Pay per market, yearly billing (migration 026)
 
 - A plan includes one market (chosen on the plans page, else the market they work on); each extra market costs the

@@ -36,6 +36,7 @@ def tick():
         catalogue.run(cur)            # catalogues (Excel, Word, PDF) into the manufacturer's products
         billing.process(cur)          # plans switched on or off, invoices and order confirmations
         digest.send_weekly(cur)       # the weekly summary for manufacturers (email and WhatsApp)
+        digest.call_reminders(cur)    # the day before a booked call
         notify.deliver_queued(cur)
         for (code,) in cur.execute("select code from countries where enabled").fetchall():
             reminder.check_and_remind(cur, code)

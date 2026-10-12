@@ -60,3 +60,18 @@ def send_weekly(cur, limit=200):
     if sent:
         log.info("queued %s weekly summaries", sent)
     return sent
+
+
+def call_reminders(cur):
+    """A reminder the day before each booked call, to the customer (email and WhatsApp) and the team. Once per call."""
+    calls = cur.execute("""update call_bookings set reminded_at = now()
+                           where status = 'booked' and reminded_at is null and starts_at between now() and now() + interval '24 hours'
+                           returning id, user_id, starts_at, meeting_link""").fetchall()
+    for _id, user_id, starts_at, link in calls:
+        when = starts_at.strftime("%d %b, %H:%M UTC")
+        body = f"Your call with Nazryx is on {when}." + (f" Join here: {link}" if link else " We send the meeting link before the call.")
+        cur.execute("""insert into notifications (user_id, channel, subject, body)
+                       values (%s, 'email', 'Your call with Nazryx tomorrow', %s), (%s, 'whatsapp', 'Your call with Nazryx', %s),
+                              (null, 'email', 'Call within 24 hours', %s)""",
+                    (user_id, body, user_id, body, f"Call on {when}{'' if link else ': add the meeting link in Admin > Calls'}."))
+    return len(calls)

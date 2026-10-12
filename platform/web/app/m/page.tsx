@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import Shell from '@/components/Shell';
+import LocalTime from '@/components/LocalTime';
 import { ManagedBadge, hasData, loadLive, pickMarket, targetMarkets } from '@/components/MarketPicker';
 import { DemandIcon, VerifiedIcon } from '@/components/Icons';
 import { Badges, Empty, Flash, PlanLock, StagePill } from '@/components/ui';
@@ -46,9 +47,12 @@ export default async function MfrHome({ searchParams }: { searchParams: Promise<
     const engagements = await rows(db, `select id, kind, country, stage from engagements where user_id = $1 and status = 'open' order by updated_at desc limit 5`, [u.id]);
     const deadlines = await rows(db, `select o.kind, o.due_date, o.country, p.name from obligations o left join mfr_products p on p.id = o.product_id
         where o.user_id = $1 and not o.done order by o.due_date limit 5`, [u.id]);
+    const call = await one(db, `select starts_at, meeting_link from call_bookings where user_id = $1 and status = 'booked' and starts_at > now()
+                                order by starts_at limit 1`, [u.id]);
+    const zone = (await one(db, 'select timezone from call_settings where id = 1'))?.timezone ?? 'UTC';
     const products = profile?.sample_product_id ? [] : await rows(db, `select p.id, coalesce(m.inn, p.name) as name from mfr_products p
         left join molecules m on m.id = p.molecule_id where p.user_id = $1 and p.molecule_id is not null order by 2 limit 200`, [u.id]);
-    return { profile, targets, focus, full, counts, first, watch, engagements, deadlines, products };
+    return { profile, targets, focus, full, counts, first, watch, engagements, deadlines, products, call, zone };
   });
   const p = d.profile;
   const full = d.full;
@@ -136,6 +140,13 @@ export default async function MfrHome({ searchParams }: { searchParams: Promise<
                 <Link className="btn btn-blue btn-sm" href="/m/plan" style={{ alignSelf: 'flex-start' }}>See plans</Link></>}
           </section>
 
+          <section className="card stack" style={{ gap: 8 }}>
+            <h2>Talk to our team</h2>
+            {d.call ? (<p className="small">Your call: <b><LocalTime iso={new Date(d.call.starts_at).toISOString()} zone={d.zone} /></b>
+                {d.call.meeting_link ? <> · <a href={d.call.meeting_link} target="_blank" rel="noopener noreferrer">Join</a></> : null}</p>)
+              : <p className="small muted">A short call about your markets, products or plan, at a time that suits you.</p>}
+            <Link className="btn btn-ghost btn-sm" href="/m/call" style={{ alignSelf: 'flex-start' }}>{d.call ? 'See or change' : 'Book a call'}</Link>
+          </section>
           {!u.whatsapp && (
             <section className="card stack" style={{ gap: 8 }}>
               <h2>Updates on WhatsApp</h2>

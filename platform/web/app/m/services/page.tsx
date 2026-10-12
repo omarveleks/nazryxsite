@@ -54,7 +54,8 @@ export default async function Services({ searchParams }: { searchParams: Promise
     <Link href={href} className={`choice ${on ? 'on' : ''}`} style={{ textDecoration: 'none', color: 'inherit', borderColor: on ? 'var(--blue)' : undefined }}>{children}</Link>);
 
   return (
-    <Shell user={u} title="Services" sub="Tell us what you want. We point you to the right help.">
+    <Shell user={u} title="Services" sub="Tell us what you want. We point you to the right help."
+      actions={<Link className="btn btn-ghost btn-sm" href="/m/call">Book a call</Link>}>
       <Flash sp={sp} />
       <section className="card stack" id="want" data-tour="services">
         <div className="between"><h2>What do you want?</h2>{goal && <Link className="btn-link small" href="/m/services#want">Start again</Link>}</div>

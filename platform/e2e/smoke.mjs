@@ -109,7 +109,7 @@ const secret = (await t.locator('code').first().innerText()).replace(/\s+/g, '')
 await t.fill('input[name=code]', totp(secret));
 await Promise.all([t.waitForURL(/on=1/), t.click('button:has-text("Turn on")')]);
 check(true, 'team turns on two-step sign-in');
-for (const tab of ['', '?tab=review', '?tab=claims', '?tab=requests', '?tab=documents', '?tab=manufacturers', '?tab=accounts', '?tab=content', '?tab=activity', '?tab=regulatory']) {
+for (const tab of ['', '?tab=review', '?tab=claims', '?tab=requests', '?tab=documents', '?tab=manufacturers', '?tab=accounts', '?tab=content', '?tab=activity', '?tab=regulatory', '?tab=calls']) {
   const r = await t.goto(B + '/admin' + tab); check(r.status() === 200, `admin ${tab || 'data updates'}`);
 }
 await t.goto(B + '/admin?tab=claims'); await t.waitForLoadState('networkidle');   // let the page finish loading before clicking
@@ -353,6 +353,14 @@ await Promise.all([t.waitForURL(/saved=1/), t.locator('form:has(select[name=revi
 await k.goto(B + `/m/engagements/${engId}`);
 const ke = await k.locator('main').innerText();
 check(ke.includes('Accepted') && ke.includes('1 of 1 accepted'), 'team review shows in the dossier room');
+await k.goto(B + '/m/call'); await k.waitForLoadState('networkidle');
+await k.selectOption('#topic', 'plan'); await k.fill('#note', 'Smoke: adding Kazakhstan');
+await Promise.all([k.waitForURL(/booked=1/), k.locator('button[name=starts_at]').first().click()]);
+check((await k.locator('main').innerText()).includes('Your calls'), 'book a call: pick a time, it shows under your calls');
+await t.goto(B + '/admin?tab=calls');
+check((await t.locator('main').innerText()).includes('Smoke Generics'), 'the team sees the booked call in Admin');
+await k.goto(B + '/m');
+check((await k.locator('main').innerText()).includes('Your call:'), 'the next call shows on Home');
 await c.goto(B + '/m'); check(c.url().includes('/home'), 'distributors are kept out of the manufacturer area');
 
 // 4. phone width: no sideways scrolling
@@ -367,7 +375,7 @@ for (const path of ['/home', '/search?q=amox', '/market', '/market/whitespace', 
 const mk = await page(375);
 await mk.goto(B + '/signup?mode=signin&as=manufacturer'); await mk.fill('#email', kmail); await mk.fill('#password', 'smoke-password-123');
 await Promise.all([mk.waitForURL(/\/m(\?|$)/), mk.click('button[type=submit]')]);
-for (const path of ['/m', '/m/products', '/m/products?tab=watch', '/m/regulatory', '/m/market']) {
+for (const path of ['/m', '/m/products', '/m/products?tab=watch', '/m/regulatory', '/m/market', '/m/call', '/m/plan']) {
   await mk.goto(B + path);
   check(await mk.evaluate(() => document.documentElement.scrollWidth) <= 380, `no sideways scroll at 375px on ${path}`);
 }

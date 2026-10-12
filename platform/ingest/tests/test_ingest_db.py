@@ -1042,3 +1042,37 @@ def test_pay_per_market_and_yearly_billing(env):
         as_user(a, maker)
         assert a.execute("select mfr_tier_in('KE')").fetchone()[0] == 0
         a.rollback()
+
+
+def test_book_a_call(env):
+    """One booking per slot, customers see taken times but not who took them, only the team adds links; a reminder once."""
+    import digest
+    with psycopg.connect(URL) as c:
+        a_id = c.execute("insert into users (email, password_hash, account_type, onboarded) values ('call1@example.com', 'x', 'manufacturer', true) returning id").fetchone()[0]
+        b_id = c.execute("insert into users (email, password_hash, account_type, onboarded) values ('call2@example.com', 'x', 'manufacturer', true) returning id").fetchone()[0]
+        team = c.execute("insert into users (email, password_hash, role) values ('callt@example.com', 'x', 'team') returning id").fetchone()[0]
+        slot = c.execute("select date_trunc('hour', now()) + interval '20 hours'").fetchone()[0]
+        c.commit()
+    with app_conn(env) as a:
+        as_user(a, a_id)
+        a.execute("insert into call_bookings (user_id, starts_at, topic) values (%s, %s, 'plan')", (a_id, slot))
+        a.commit()
+        as_user(a, b_id)
+        assert a.execute("select count(*) from call_bookings").fetchone()[0] == 0                    # not someone else's call
+        assert a.execute("select count(*) from taken_call_slots(now(), now() + interval '2 days')").fetchone()[0] == 1
+        with pytest.raises(psycopg.errors.UniqueViolation):                                        # one booking per slot
+            a.execute("insert into call_bookings (user_id, starts_at, topic) values (%s, %s, 'plan')", (b_id, slot))
+        a.rollback()
+        as_user(a, a_id)
+        with pytest.raises((psycopg.errors.RaiseException, psycopg.errors.InsufficientPrivilege)):  # customers only cancel
+            a.execute("update call_bookings set meeting_link = 'https://x.example' where user_id = %s", (a_id,))
+        a.rollback()
+        as_user(a, team)
+        a.execute("update call_bookings set meeting_link = 'https://meet.example/abc' where user_id = %s", (a_id,))
+        a.commit()
+    with psycopg.connect(URL) as c:
+        assert digest.call_reminders(c.cursor()) == 1
+        assert digest.call_reminders(c.cursor()) == 0
+        c.commit()
+    body = q("select body from notifications where user_id = %s and channel = 'whatsapp' order by id desc limit 1", a_id)[0][0]
+    assert "https://meet.example/abc" in body

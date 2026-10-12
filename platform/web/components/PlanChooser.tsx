@@ -34,7 +34,8 @@ export default function PlanChooser({ p, prices, products, from, want, interval 
   const base = from === 'onboarding' ? '/m/onboarding?q=plan' : `/m/plan?${want ? `want=${want}&` : ''}`;
   const link = (o: { billing?: string; market?: string }) =>
     `${base}${base.endsWith('?') || base.endsWith('&') ? '' : '&'}billing=${o.billing ?? interval}&market=${o.market ?? included}`;
-  const paidMarkets: string[] = p.paid_markets ?? [];
+  // no markets recorded: a plan from before markets were priced, which covers every market chosen
+  const paidMarkets: string[] = (p.paid_markets ?? []).length ? p.paid_markets : targets;
   const card = stripeReady();
   const s = suggestPlan(p);
   const active: PlanKey | null = p.active_plan ?? null;

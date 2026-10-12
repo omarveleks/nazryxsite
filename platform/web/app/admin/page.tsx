@@ -12,6 +12,7 @@ import { answerQuestion, reviewManufacturer, grantCredits, keepSeparate, saveRou
 import { StagePill } from '@/components/ui';
 import { deleteAccountDoc, deleteSupplierDoc, savePlanPrices, uploadAccountDoc, uploadSupplierDoc } from '@/app/actions/docs';
 import RegulatoryTab from './RegulatoryTab';
+import CallsTab from './CallsTab';
 import { ACCOUNT_DOC_KINDS, SUPPLIER_DOC_KINDS, daysLeft } from '@/lib/docs';
 
 export const metadata = { title: 'Admin' };
@@ -157,6 +158,7 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
     { key: 'manufacturers', label: `Manufacturers (${c.mfr_open})`, href: '/admin?tab=manufacturers' },
     { key: 'documents', label: `Documents${c.expiring ? ` (${c.expiring})` : ''}`, href: '/admin?tab=documents' },
     { key: 'regulatory', label: 'Regulatory', href: '/admin?tab=regulatory' },
+    { key: 'calls', label: 'Calls', href: '/admin?tab=calls' },
     { key: 'accounts', label: `Accounts${c.plan_requests ? ` (${c.plan_requests})` : ''}`, href: '/admin?tab=accounts' },
     { key: 'content', label: 'Content', href: '/admin?tab=content' },
     { key: 'activity', label: 'Activity', href: '/admin?tab=activity' },
@@ -445,6 +447,7 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
         </section>
       </>)}
       {tab === 'regulatory' && <RegulatoryTab userId={u.id} country={sp.rc} />}
+      {tab === 'calls' && <CallsTab userId={u.id} />}
       {tab === 'none' && <section className="card"><p className="muted">Your account has no Admin areas yet. Ask an owner to give you access.</p></section>}
       {tab === 'team' && (<>
         <section className="card stack">
