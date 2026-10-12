@@ -176,6 +176,19 @@ export const NEEDS_PLAN: Record<string, PlanKey> = {
   matching: 'access', pricing: 'access', pathway: 'access', dossier_review: 'access',
   partner_intro: 'entry', market_entry: 'entry', forecast: 'entry', competitors: 'data', requirements: 'access',
 };
+/** Is this market in the manufacturer's plan? Complete Market Entry and the team cover every market; a plan covers the
+ *  markets bought with it and every extra market added since. Without a plan, nothing is covered (the free teasers show). */
+export function covers(u: { role: string; mfr_active: string | null; mfr_markets?: string[] }, market: string) {
+  if (u.role === 'team' || u.mfr_active === 'entry') return true;
+  if (!u.mfr_active) return false;
+  const m = u.mfr_markets ?? [];
+  return m.length === 0 || m.includes(market);   // no markets recorded: a plan from before markets were priced covers all
+}
+/** The plan tier that applies to one market: the plan's tier where the market is covered, else nothing. */
+export const tierIn = (u: { role: string; mfr_active: string | null; mfr_tier: number; mfr_markets?: string[] }, market: string) =>
+  covers(u, market) ? u.mfr_tier : 0;
+/** Annual billing: ten months for twelve. */
+export const yearly = (monthly: number) => monthly * 10;
 export const canUse = (tier: number, feature: string) => !NEEDS_PLAN[feature] || tier >= TIER[NEEDS_PLAN[feature]];
 
 /** WHO ATC main groups, to name a class for products we cannot match to a tracked molecule. */

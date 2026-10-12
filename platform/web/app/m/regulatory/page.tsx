@@ -4,7 +4,7 @@ import MarketPicker, { AgencyMarket, hasData, loadLive, pickMarket, targetMarket
 import { Empty, PlanLock } from '@/components/ui';
 import { requireUser } from '@/lib/auth';
 import { one, rows, withUser } from '@/lib/db';
-import { canUse, countryName, productClass } from '@/lib/mfr';
+import { canUse, tierIn, countryName, productClass } from '@/lib/mfr';
 import { REQ_SQL, byTopic, forProduct, type Requirement } from '@/lib/regulatory';
 
 export const metadata = { title: 'Regulatory' };
@@ -29,13 +29,13 @@ export default async function MfrRegulatory({ searchParams }: { searchParams: Pr
   const reqs: Requirement[] = d.reqs;
   const perProduct = d.products.map((p) => ({ ...p, cls: productClass(p), extra: forProduct(reqs, { ...p, category: productClass(p) }) as Requirement[] }));
   const withExtra = perProduct.filter((p) => p.extra.length > 0);
-  const open = canUse(u.mfr_tier, 'requirements');
+  const open = canUse(tierIn(u, m), 'requirements');
   const focus = sp.product ? perProduct.find((p) => String(p.id) === sp.product) : undefined;
 
   return (
     <Shell user={u} title="Regulatory" sub={`${countryName(m)}: what it takes to register, and to stay registered`}
       actions={<Link className="btn btn-blue btn-sm" href="/m/services/dossier_review">Check my dossier</Link>}>
-      <MarketPicker targets={d.targets} current={m} path="/m/regulatory" />
+      <MarketPicker u={u} targets={d.targets} current={m} path="/m/regulatory" />
 
       {d.reqs.length === 0 ? (hasData(m) ? <Empty>Our regulatory team is writing up {countryName(m)}. Ask us anything in the meantime.</Empty> : <AgencyMarket code={m} />) : (<>
         <div className="grid g3">
@@ -49,7 +49,7 @@ export default async function MfrRegulatory({ searchParams }: { searchParams: Pr
         <section className="card stack">
           <div className="card-h"><div><h2>For your products</h2><p className="note">What applies on top of the market&rsquo;s general requirements, product by product.</p></div></div>
           {perProduct.length === 0 ? <Empty>Add your products and their own requirements show up here.</Empty> : !open && d.sample == null ? (
-            <PlanLock need="access" title={`${withExtra.length} of your products have their own requirements`}>
+            <PlanLock need="access" title={`${withExtra.length} of your products have their own requirements`} u={u} market={m}>
               Bioequivalence, sterile products, controlled medicines, biologicals: what each of your products needs in {countryName(m)}.
             </PlanLock>
           ) : (
@@ -61,7 +61,7 @@ export default async function MfrRegulatory({ searchParams }: { searchParams: Pr
                   <tr key={p.id} id={`p${p.id}`} style={focus?.id === p.id ? { background: 'var(--pastel-blue)' } : undefined}>
                     <td style={{ width: '34%' }}><Link href={`/m/products/${p.id}?market=${m}`}><b>{p.inn ?? p.name}</b></Link>
                       <div className="sub2">{[p.inn ? p.name : null, p.cls].filter(Boolean).join(' · ')}</div></td>
-                    <td>{!shown ? <PlanLock compact need="access" title="Locked" />
+                    <td>{!shown ? <PlanLock compact need="access" title="Locked" u={u} market={m} />
                       : p.extra.length === 0 ? <span className="muted small">Only the general requirements</span> : (
                         <details open={focus?.id === p.id}>
                           <summary className="row" style={{ gap: 6, cursor: 'pointer' }}>{p.extra.map((r: Requirement) => <span key={r.id} className="pill peach">{r.title}</span>)}</summary>

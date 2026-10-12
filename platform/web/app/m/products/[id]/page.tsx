@@ -8,7 +8,7 @@ import { requireUser } from '@/lib/auth';
 import { one, rows, withUser } from '@/lib/db';
 import { BE_STATUS, beSuggestion, levelLabel, registeredLine } from '@/lib/format';
 import { REQ_SQL, forProduct, type Requirement } from '@/lib/regulatory';
-import { AGENCY_KINDS, LAUNCH_STAGES, MFR_PLANS, NEEDS_PLAN, SERVICES, canUse, countryName, mfrProductsSql, productClass, reasons } from '@/lib/mfr';
+import { AGENCY_KINDS, LAUNCH_STAGES, MFR_PLANS, NEEDS_PLAN, SERVICES, canUse, tierIn, countryName, mfrProductsSql, productClass, reasons } from '@/lib/mfr';
 
 export const metadata = { title: 'Product' };
 
@@ -23,9 +23,9 @@ export default async function MfrProduct({ params, searchParams }: { params: Pro
     const prof = await one(db, 'select target_countries, sample_product_id, primary_market from manufacturer_profiles where user_id = $1', [u.id]);
     // the free full read opens every section for one product
     const sampled = prof?.sample_product_id === id;
-    const t = sampled ? 3 : u.mfr_tier;
     const targets = targetMarkets(prof?.target_countries);
     const market = pickMarket(sp.market, targets, prof?.primary_market);
+    const t = sampled ? 3 : tierIn(u, market);
     const focus = hasData(market) ? market : targets.find(hasData) ?? 'TZ';
     const p = await one(db, `${mfrProductsSql(focus)} where p.id = $1 and p.user_id = $2`, [id, u.id]);
     if (!p) return null;
@@ -60,7 +60,7 @@ export default async function MfrProduct({ params, searchParams }: { params: Pro
       <Flash sp={sp} />
       {d.sampled && <div className="ok" role="status">Your free full read: every section of this product is open.</div>}
       {sp.added && <div className="ok" role="status">Added. {p.molecule_id ? 'Here is how it fits your markets.' : 'Our team is matching it to the market.'}</div>}
-      <MarketPicker targets={d.targets} current={market} path={`/m/products/${id}`} />
+      <MarketPicker u={u} targets={d.targets} current={market} path={`/m/products/${id}`} />
       <div className="split">
         <div className="stack">
           {!p.molecule_id ? (
@@ -78,7 +78,7 @@ export default async function MfrProduct({ params, searchParams }: { params: Pro
                     <tr><td>Registered products made in</td><td className="r">{d.origin.length ? d.origin.map((o) => `${o.country} ${o.n}`).join(', ') : 'Nowhere yet'}</td></tr>
                     <tr><td>Made by factories in {countryName(market)}</td><td className="r">{Number(p.local_made) > 0 ? `${p.local_made} products` : 'None'}</td></tr>
                     <tr><td>Registrations lapsed or cancelled</td><td className="r">{d.lapsed}</td></tr>
-                  </>) : <tr><td colSpan={2}><PlanLock compact need="data" title="Where competitors make it, and lapsed registrations" /></td></tr>}
+                  </>) : <tr><td colSpan={2}><PlanLock compact need="data" title="Where competitors make it, and lapsed registrations" u={u} market={market} /></td></tr>}
                 </tbody></table>)}
               {p.registrants != null && <p className="note">In short: {reasons(p).join(', ')}.</p>}
             </section>
@@ -88,24 +88,24 @@ export default async function MfrProduct({ params, searchParams }: { params: Pro
                 <p><b className="num">{d.open}</b> distributors are strong in {p.category ?? 'this class'} and do not carry {p.inn} yet.</p>
                 <Link className="btn btn-ghost btn-sm" href={`/m/partners?market=${market}&class=${encodeURIComponent(p.category ?? '')}&molecule=${p.molecule_id}&gap=1`}
                   style={{ alignSelf: 'flex-start' }}>See them</Link></>)
-                : <PlanLock need="access" title="Distributor matching for this product">Which distributors are strong in this class and do not carry it yet, ready for an introduction.</PlanLock>}
+                : <PlanLock need="access" title="Distributor matching for this product" u={u} market={market}>Which distributors are strong in this class and do not carry it yet, ready for an introduction.</PlanLock>}
             </section>
             <section className="card stack">
               <h2>Pathway to approval</h2>
               {'route' in d && d.route ? <p><b>{d.route.label}</b>{d.route.months_low != null ? `: about ${d.route.months_low}–${d.route.months_high ?? d.route.months_low} months` : ''}. <span className="muted">{d.route.description}</span></p>
-                : <PlanLock need="access" title="Route and timeline">The registration route for this product, what it needs and how long it takes.</PlanLock>}
+                : <PlanLock need="access" title="Route and timeline" u={u} market={market}>The registration route for this product, what it needs and how long it takes.</PlanLock>}
               <p className="muted">{p.be_study ? 'You have a bioequivalence study.' : be ? `${BE_STATUS[be]}.` : 'Whether a bioequivalence study is needed: we confirm it when we check your dossier.'}</p>
             </section>
             <section className="card stack">
               <h2>Suggested selling price</h2>
-              {!canUse(d.t, 'pricing') ? <PlanLock need="access" title="Pricing analysis">The price band we suggest for this product in {countryName(market)}.</PlanLock>
+              {!canUse(d.t, 'pricing') ? <PlanLock need="access" title="Pricing analysis" u={u} market={market}>The price band we suggest for this product in {countryName(market)}.</PlanLock>
                 : 'price' in d && d.price ? <p><b>{d.price.currency} {Number(d.price.price_low).toFixed(2)}–{Number(d.price.price_high).toFixed(2)}</b> per {d.price.unit}{d.price.note ? ` · ${d.price.note}` : ''}</p>
                 : <p className="note">Our team is setting it. Ask for a price check and we answer within 24 hours.</p>}
             </section>
           </>)}
           <section className="card stack">
             <div className="card-h"><h2>Requirements in {countryName(market)}</h2><Link className="btn-link" href={`/m/regulatory?market=${market}&product=${id}#p${id}`}>All requirements</Link></div>
-            {!canUse(d.t, 'requirements') ? <PlanLock need="access" title="What this product needs">Bioequivalence, sterile, controlled or biological: the steps this product needs on top of the market&rsquo;s general requirements.</PlanLock>
+            {!canUse(d.t, 'requirements') ? <PlanLock need="access" title="What this product needs" u={u} market={market}>Bioequivalence, sterile, controlled or biological: the steps this product needs on top of the market&rsquo;s general requirements.</PlanLock>
               : d.reqs.length === 0 ? <p className="muted">Only the market&rsquo;s general requirements apply.</p>
               : d.reqs.map((r) => <div key={r.id}><b>{r.title}</b> <span className="pill peach">{r.topic}</span><div className="small muted">{r.body}</div></div>)}
           </section>

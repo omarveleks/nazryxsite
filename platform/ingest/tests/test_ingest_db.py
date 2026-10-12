@@ -1003,3 +1003,42 @@ def test_other_markets_load_beside_tanzania(env):
     # one molecule across markets: amoxicillin is the same molecule in Tanzania, Kazakhstan and Kenya
     assert q("""select count(distinct cm.country) from country_molecules cm join molecules m on m.id = cm.molecule_id
                 where m.canonical_key = 'amoxicillin' and cm.registrations > 0""")[0][0] == 3
+
+
+def test_pay_per_market_and_yearly_billing(env):
+    """A plan covers the market bought with it; an extra market is its own small subscription; data follows the markets."""
+    import billing
+    with psycopg.connect(URL) as c:
+        maker = c.execute("insert into users (email, password_hash, account_type, onboarded) values ('ppm@example.com', 'x', 'manufacturer', true) returning id").fetchone()[0]
+        c.execute("insert into manufacturer_profiles (user_id, company_name, target_countries, primary_market) values (%s, 'Markets Pharma', '{TZ,KE}', 'TZ')", (maker,))
+        c.commit()
+    with app_conn(env) as a:   # the webhook records the yearly plan with Tanzania, then an extra market (Kenya), monthly-priced x10
+        a.execute("""insert into payment_events (stripe_event_id, kind, user_id, plan, amount_cents, stripe_customer, stripe_subscription, markets, billing_interval)
+                     values ('evt_m1', 'checkout_completed', %s, 'access', 999000, 'cus_m', 'sub_plan', '{TZ}', 'year'),
+                            ('evt_m2', 'checkout_completed', %s, 'market', 49000, 'cus_m', 'sub_ke', '{KE}', 'year'),
+                            ('evt_m3', 'invoice_paid', %s, 'market', 49000, 'cus_m', 'sub_ke', null, 'year')""", (maker, maker, maker))
+        a.commit()
+        as_user(a, maker)
+        with pytest.raises((psycopg.errors.RaiseException, psycopg.errors.InsufficientPrivilege)):   # a customer cannot add markets to their own plan
+            a.execute("update manufacturer_profiles set paid_markets = '{TZ,KE,KZ}' where user_id = %s", (maker,))
+        a.rollback()
+    with psycopg.connect(URL) as c:
+        assert billing.process(c.cursor()) == 3
+        c.commit()
+    plan, markets, interval = q("select active_plan, paid_markets, billing_interval from manufacturer_profiles where user_id = %s", maker)[0]
+    assert plan == "access" and sorted(markets) == ["KE", "TZ"] and interval == "year"
+    docs = [r[0] for r in q("select title from account_documents where user_id = %s order by id", maker)]
+    assert "Order confirmation: Extra market: Kenya" in docs and any(d.startswith("Invoice NZX-") for d in docs)
+    with app_conn(env) as a:
+        as_user(a, maker)
+        assert a.execute("select mfr_tier_in('TZ'), mfr_tier_in('KE'), mfr_tier_in('KZ')").fetchone() == (2, 2, 0)
+        a.rollback()
+    with psycopg.connect(URL) as c:   # cancelling Kenya leaves the plan and Tanzania
+        c.execute("insert into payment_events (stripe_event_id, kind, stripe_subscription) values ('evt_m4', 'subscription_ended', 'sub_ke')")
+        billing.process(c.cursor())
+        c.commit()
+    assert q("select active_plan, paid_markets from manufacturer_profiles where user_id = %s", maker)[0] == ("access", ["TZ"])
+    with app_conn(env) as a:
+        as_user(a, maker)
+        assert a.execute("select mfr_tier_in('KE')").fetchone()[0] == 0
+        a.rollback()

@@ -17,22 +17,25 @@ async function call(path: string, params: Record<string, string>) {
   return j;
 }
 
-/** A Checkout page for a monthly subscription to one plan. Returns the URL to send the customer to. */
-export async function checkoutUrl(o: { userId: string; email: string; plan: string; planName: string; amountUsd: number; origin: string; customer?: string | null }) {
+/** A Checkout page for a subscription: a plan with its included market, or one extra market. Monthly, or yearly at
+ *  ten months' price. Returns the URL to send the customer to. */
+export async function checkoutUrl(o: { userId: string; email: string; plan: string; planName: string; amountUsd: number; origin: string;
+  customer?: string | null; interval?: 'month' | 'year'; markets?: string[]; back?: string }) {
+  const interval = o.interval === 'year' ? 'year' : 'month';
+  const meta: Record<string, string> = { plan: o.plan, user_id: o.userId, interval, markets: (o.markets ?? []).join(',') };
   const p: Record<string, string> = {
     mode: 'subscription',
     client_reference_id: o.userId,
-    'metadata[plan]': o.plan, 'metadata[user_id]': o.userId,
-    'subscription_data[metadata][plan]': o.plan, 'subscription_data[metadata][user_id]': o.userId,
     'line_items[0][quantity]': '1',
     'line_items[0][price_data][currency]': 'usd',
     'line_items[0][price_data][unit_amount]': String(Math.round(o.amountUsd * 100)),
-    'line_items[0][price_data][recurring][interval]': 'month',
+    'line_items[0][price_data][recurring][interval]': interval,
     'line_items[0][price_data][product_data][name]': `Nazryx ${o.planName}`,
-    success_url: `${o.origin}/m/plan?paid=1`,
-    cancel_url: `${o.origin}/m/plan?want=${o.plan}`,
+    success_url: `${o.origin}${o.plan === 'market' ? (o.back ?? '/m/market') : '/m/plan'}${(o.back ?? '').includes('?') ? '&' : '?'}paid=1`,
+    cancel_url: `${o.origin}${o.back ?? `/m/plan?want=${o.plan}`}`,
     allow_promotion_codes: 'true',
   };
+  for (const [k, v] of Object.entries(meta)) { p[`metadata[${k}]`] = v; p[`subscription_data[metadata][${k}]`] = v; }
   if (o.customer) p.customer = o.customer; else p.customer_email = o.email;
   return (await call('checkout/sessions', p)).url as string;
 }

@@ -9,7 +9,7 @@ import { dbMessage, one, withUser } from '@/lib/db';
 import { back, int, str } from '@/lib/forms';
 import { findMolecule } from '@/lib/match';
 import { AGENCY_KINDS, APPROACHES, GOALS, LAUNCH_SCOPES, CERTIFICATIONS, COMPANY_SIZES, CONTACT_ROLES, DOSAGE_FORMS, MFR_COUNTRIES, MFR_PLANS, NEEDS,
-  SERVICES, THERAPEUTIC_AREAS, TIMELINES, NEEDS_PLAN, LAUNCH_STAGES, MFR_FILE_KINDS, WIZARD, type WizardStep, canUse, countryName, suggestPlan, tierOf, type PlanKey } from '@/lib/mfr';
+  SERVICES, THERAPEUTIC_AREAS, TIMELINES, NEEDS_PLAN, LAUNCH_STAGES, MFR_FILE_KINDS, WIZARD, type WizardStep, canUse, countryName, covers, suggestPlan, tierOf, yearly, type PlanKey } from '@/lib/mfr';
 import { DOSSIER_ITEMS } from '@/lib/format';
 import { saveUpload } from '@/lib/uploads';
 import { TOUR } from '@/lib/tour';
@@ -225,14 +225,20 @@ export async function startCheckout(f: FormData) {
   }
   if (u.mfr_tier >= tierOf(plan)) redirect('/m/plan');
   if (!stripeReady()) return choosePlan(f);
+  const interval = str(f, 'interval', 5) === 'year' ? 'year' : 'month';
   const d = await withUser(u.id, async (db) => ({
     price: await one(db, 'select amount_usd from plan_prices where key = $1', [`mfr_${plan}`]),
-    p: await one(db, 'select stripe_customer from manufacturer_profiles where user_id = $1', [u.id]),
+    p: await one(db, 'select stripe_customer, primary_market, target_countries from manufacturer_profiles where user_id = $1', [u.id]),
   }));
   if (!d.price?.amount_usd) return choosePlan(f);
+  // the plan includes one market: the one chosen on the plan page, else the market they work on now
+  const chosen = str(f, 'market', 2);
+  const targets: string[] = d.p?.target_countries ?? [];
+  const market = targets.includes(chosen) ? chosen : d.p?.primary_market && targets.includes(d.p.primary_market) ? d.p.primary_market : targets[0] ?? 'TZ';
   let url = '';
   try {
-    url = await checkoutUrl({ userId: u.id, email: u.email, plan, planName: MFR_PLANS[plan].name, amountUsd: d.price.amount_usd,
+    url = await checkoutUrl({ userId: u.id, email: u.email, plan, planName: `${MFR_PLANS[plan].name} (${countryName(market)})`,
+      amountUsd: interval === 'year' ? yearly(d.price.amount_usd) : d.price.amount_usd, interval, markets: [market],
       origin: await origin(), customer: d.p?.stripe_customer });
   } catch (e) {
     back('/m/plan', { error: `Card payment could not start: ${(e as Error).message}. Try again, or ask us to invoice you.` });
@@ -545,4 +551,38 @@ export async function unwatchMolecule(f: FormData) {
   const to = safeNext(str(f, 'return', 200), '/m/products?tab=watch');
   await withUser(u.id, (db) => db.query('delete from watches where user_id = $1 and molecule_id = $2', [u.id, int(f, 'molecule_id')]));
   back(to, { saved: '1' });
+}
+
+/** Add a market to the plan, from the market switch. By card: a small subscription for that market, at the plan's billing
+ *  interval ($49 a month, or ten months a year). Invoiced plans: a request the team turns on. */
+export async function addMarket(f: FormData) {
+  const u = await requireUser({ manufacturer: true });
+  const market = str(f, 'market', 2);
+  const to = safeNext(str(f, 'return', 200), `/m/market?market=${market}`);
+  if (!codes.includes(market)) back(to, { error: 'Pick a market.' });
+  if (!u.mfr_active) redirect(`/m/plan?want=data&market=${market}`);
+  if (covers(u, market)) redirect(to);
+  const d = await withUser(u.id, async (db) => ({
+    price: await one(db, "select amount_usd from plan_prices where key = 'mfr_market'"),
+    p: await one(db, 'select stripe_customer, stripe_subscription, billing_interval from manufacturer_profiles where user_id = $1', [u.id]),
+  }));
+  const monthly = Number(d.price?.amount_usd ?? 49);
+  if (stripeReady() && d.p?.stripe_subscription) {
+    const interval = d.p.billing_interval === 'year' ? 'year' : 'month';
+    let url = '';
+    try {
+      url = await checkoutUrl({ userId: u.id, email: u.email, plan: 'market', planName: `extra market: ${countryName(market)}`,
+        amountUsd: interval === 'year' ? yearly(monthly) : monthly, interval, markets: [market], origin: await origin(),
+        customer: d.p.stripe_customer, back: to });
+    } catch (e) {
+      back(to, { error: `Card payment could not start: ${(e as Error).message}. Try again, or ask us to add it.` });
+    }
+    redirect(url);
+  }
+  await withUser(u.id, async (db) => {
+    await db.query(`insert into plan_requests (user_id, wanted, note) values ($1, $2, $3)`,
+      [u.id, `market:${market}`, `Add ${countryName(market)} to the plan ($${monthly} a month)`]);
+    await teamNote(db, `Add a market: ${countryName(market)}`, `${u.email} asked to add ${countryName(market)} to their plan.`);
+  });
+  back(to, { saved: 'market' });
 }

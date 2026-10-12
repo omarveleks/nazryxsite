@@ -249,6 +249,9 @@ await k.goto(B + '/m');
 check((await k.locator('main').innerText()).includes('Market watch'), 'market watch on the home page');
 await k.goto(B + '/m/plan?want=access');
 check((await k.locator('main').innerText()).includes('To unlock that') && (await k.locator('main').innerText()).includes('Compare the plans'), 'upgrade flow names the plan that unlocks it');
+await k.goto(B + '/m/plan?billing=year');
+const yearText = await k.locator('main').innerText();
+check(yearText.includes('$1,990') && yearText.includes('/ year') && /included · each extra market \$490 a year/.test(yearText), 'plans: yearly billing at ten months, one market included, extra markets priced');
 await k.goto(B + '/m/regulatory');
 const regFree = await k.locator('main').innerText();
 check(regFree.includes('Regulator and route') && regFree.includes('Local technical representative') && regFree.includes('Unlock with Complete Market Access'),

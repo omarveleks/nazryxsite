@@ -2,6 +2,7 @@ import Link from 'next/link';
 import type { ReactNode } from 'react';
 import { GLOBAL_LIST, LEVELS, OFFICIAL_SHORT, PIPELINE, STAGE_INFO } from '@/lib/format';
 import { toggleList } from '@/app/actions/app';
+import { TIER, countryName, covers } from '@/lib/mfr';
 
 export function Locked({ title, children, cta = 'Upgrade' }: { title: string; children?: ReactNode; cta?: string }) {
   return (
@@ -17,9 +18,23 @@ export function Locked({ title, children, cta = 'Upgrade' }: { title: string; ch
 export { LockIcon } from './Icons';
 import { LockIcon } from './Icons';
 
-/** A feature the manufacturer's plan does not include: what it is, which plan unlocks it, and the way there. */
-export function PlanLock({ need, title, children, compact }: { need: 'data' | 'access' | 'entry'; title: string; children?: ReactNode; compact?: boolean }) {
+/** A feature the manufacturer's plan does not include: what it is, which plan unlocks it, and the way there. When the plan
+ *  has the feature but not this market (pass the user and the market), the way there is adding the market instead. */
+export function PlanLock({ need, title, children, compact, u, market }: { need: 'data' | 'access' | 'entry'; title: string; children?: ReactNode;
+  compact?: boolean; u?: { role: string; mfr_active: string | null; mfr_tier: number; mfr_markets?: string[] }; market?: string | null }) {
   const name = { data: 'Basic Market Data', access: 'Complete Market Access', entry: 'Complete Market Entry' }[need];
+  if (u && market && u.mfr_active && !covers(u, market) && u.mfr_tier >= TIER[need]) {
+    const href = `/m/add-market?market=${market}`;
+    if (compact) return <Link className="pill lav" href={href} title={`${countryName(market)} is not in your plan yet`}><LockIcon /> {title}</Link>;
+    return (
+      <div className="locked">
+        <span className="pill lav"><LockIcon /> Not in your plan yet</span>
+        <b>{title}</b>
+        {children && <span className="note">{children}</span>}
+        <Link className="btn btn-blue btn-sm" href={href}>Add {countryName(market)} to your plan</Link>
+      </div>
+    );
+  }
   if (compact) return <Link className="pill lav" href={`/m/plan?want=${need}`} title={`Included in ${name}. Click to see how to unlock it.`}><LockIcon /> {title}</Link>;
   return (
     <div className="locked">

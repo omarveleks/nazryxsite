@@ -56,15 +56,28 @@ def next_number(cur, when):
     return f"NZX-{when.year}-{n:04d}"
 
 
-def order_confirmation(cur, user_id, plan, amount_cents, paid_by_card, when):
+def country_names(cur, codes):
+    if not codes:
+        return []
+    names = dict(cur.execute("select code, name from countries where code = any(%s)", (list(codes),)).fetchall())
+    return [names.get(c, c) for c in codes]
+
+
+def order_confirmation(cur, user_id, plan, amount_cents, paid_by_card, when, markets=None, interval="month"):
     c = customer(cur, user_id)
-    name, includes = PLANS[plan]
+    if plan == "market":
+        name, includes = f"Extra market: {', '.join(country_names(cur, markets))}", ["Everything in your plan, for this market too"]
+    else:
+        name, includes = PLANS[plan]
+        if markets and plan != "entry":
+            includes = includes + [f"Markets: {', '.join(country_names(cur, markets))}"]
     items = "".join(f"<li>{html.escape(i)}</li>" for i in includes)
+    per = " per year" if interval == "year" else " per month"
     body = f"""<h1>Order confirmation</h1><p class="muted">{when:%d %B %Y}</p>
 <table><tr><td>For</td><td class="r">{html.escape(c['company'])}<br><span class="muted">{html.escape(c['email'])}</span></td></tr>
 <tr><td>Plan</td><td class="r"><b>{html.escape(name)}</b></td></tr>
-<tr><td>Price</td><td class="r">{money(amount_cents)}{' per month' if amount_cents else ''}</td></tr>
-<tr><td>Billing</td><td class="r">{'Monthly, by card' if paid_by_card else 'Invoiced by Nazryx'}</td></tr>
+<tr><td>Price</td><td class="r">{money(amount_cents)}{per if amount_cents else ''}</td></tr>
+<tr><td>Billing</td><td class="r">{('Annual' if interval == 'year' else 'Monthly') + (', by card' if paid_by_card else ', invoiced by Nazryx')}</td></tr>
 <tr><td>Starts</td><td class="r">{when:%d %B %Y}</td></tr></table>
 <div class="box"><b>What is included</b><ul>{items}</ul></div>
 <p class="muted">Government and regulator fees are paid by you, at cost. Questions about this order: {CONTACT}.</p>"""
@@ -72,9 +85,10 @@ def order_confirmation(cur, user_id, plan, amount_cents, paid_by_card, when):
     return store_document(cur, user_id, "agreement", title, f"Order confirmation {name} {when:%Y-%m-%d}.html", page(title, body))
 
 
-def invoice(cur, user_id, plan, amount_cents, currency, paid, when):
+def invoice(cur, user_id, plan, amount_cents, currency, paid, when, markets=None):
     c = customer(cur, user_id)
-    name = PLANS.get(plan, (plan or "Nazryx services",))[0]
+    name = (f"Extra market: {', '.join(country_names(cur, markets))}" if plan == "market"
+            else PLANS.get(plan, (plan or "Nazryx services",))[0])
     number = next_number(cur, when)
     due = None if paid else when + timedelta(days=14)
     status = "Paid by card" if paid else f"Due by {due:%d %B %Y}"
@@ -95,16 +109,42 @@ def notify(cur, user_id, subject, body):
     cur.execute("insert into notifications (user_id, channel, subject, body) values (%s, 'email', %s, %s)", (user_id, subject, body))
 
 
+def set_markets(cur, user_id):
+    """The markets a plan covers: those bought with the plan (kept in paid_markets) plus every active extra market."""
+    cur.execute("""update manufacturer_profiles p set paid_markets = (
+                     select coalesce(array_agg(distinct m order by m), '{}') from (
+                       select unnest(p.paid_markets) as m
+                       union select country from market_subscriptions s where s.user_id = p.user_id and s.active) x)
+                   where p.user_id = %s""", (user_id,))
+
+
 def apply(cur, ev):
-    eid, kind, user_id, plan, amount, currency, customer_id, sub = ev
+    eid, kind, user_id, plan, amount, currency, customer_id, sub, markets, interval = ev
     now = datetime.now(timezone.utc)
-    if kind == "checkout_completed":
+    interval = interval or "month"
+    if kind == "checkout_completed" and plan == "market":
+        country = (markets or [None])[0]
+        cur.execute("""insert into market_subscriptions (user_id, country, stripe_subscription) values (%s, %s, %s)
+                       on conflict (stripe_subscription) do update set active = true, ended_at = null""", (user_id, country, sub))
+        cur.execute("update manufacturer_profiles set paid_markets = array_append(paid_markets, %s) where user_id = %s and not (%s = any(paid_markets))",
+                    (country, user_id, country))
+        order_confirmation(cur, user_id, plan, amount, True, now, [country], interval)
+        notify(cur, user_id, "Market added", f"{', '.join(country_names(cur, [country]))} is now in your plan.")
+    elif kind == "checkout_completed":
         cur.execute("""update manufacturer_profiles set active_plan = %s, active_since = now(), stripe_customer = %s,
-                       stripe_subscription = %s where user_id = %s""", (plan, customer_id, sub, user_id))
+                       stripe_subscription = %s, billing_interval = %s,
+                       paid_markets = case when cardinality(%s::text[]) > 0 then %s::text[]
+                                           when primary_market is not null then array[primary_market] else target_countries[1:1] end
+                       where user_id = %s""", (plan, customer_id, sub, interval, markets or [], markets or [], user_id))
+        set_markets(cur, user_id)
         cur.execute("update plan_requests set status = 'done' where user_id = %s and status = 'open' and wanted like 'mfr:%%'", (user_id,))
-        order_confirmation(cur, user_id, plan, amount, True, now)
+        order_confirmation(cur, user_id, plan, amount, True, now, markets, interval)
         notify(cur, user_id, "Your plan is active", f"{PLANS[plan][0]} is active. Everything it includes is unlocked.")
     elif kind == "invoice_paid":
+        ms = cur.execute("select user_id, country from market_subscriptions where stripe_subscription = %s", (sub,)).fetchone()
+        if ms:
+            invoice(cur, ms[0], "market", amount, currency or "usd", True, now, [ms[1]])
+            return
         if not plan:
             row = cur.execute("select active_plan from manufacturer_profiles where stripe_subscription = %s", (sub,)).fetchone()
             plan = row[0] if row else None
@@ -114,18 +154,33 @@ def apply(cur, ev):
         if user_id:
             invoice(cur, user_id, plan, amount, currency or "usd", True, now)
     elif kind == "subscription_ended":
-        row = cur.execute("""update manufacturer_profiles set active_plan = null, active_since = null, stripe_subscription = null
-                             where stripe_subscription = %s returning user_id""", (sub,)).fetchone()
+        ms = cur.execute("""update market_subscriptions set active = false, ended_at = now() where stripe_subscription = %s
+                            returning user_id, country""", (sub,)).fetchone()
+        if ms:
+            cur.execute("update manufacturer_profiles set paid_markets = array_remove(paid_markets, %s) where user_id = %s", (ms[1], ms[0]))
+            notify(cur, ms[0], "Market removed", f"{', '.join(country_names(cur, [ms[1]]))} has left your plan. Its data locks again; your products stay.")
+            return
+        row = cur.execute("""update manufacturer_profiles set active_plan = null, active_since = null, stripe_subscription = null,
+                             paid_markets = '{}' where stripe_subscription = %s returning user_id""", (sub,)).fetchone()
         if row:
             notify(cur, row[0], "Your plan has ended", "Your subscription has ended. Your data stays; locked screens open again when you resubscribe.")
+    elif kind == "markets_changed":
+        cur.execute("update manufacturer_profiles set paid_markets = %s where user_id = %s", (markets or [], user_id))
+        set_markets(cur, user_id)
     elif kind == "manual_activation":
-        order_confirmation(cur, user_id, plan, amount, False, now)
+        if markets:
+            cur.execute("update manufacturer_profiles set paid_markets = %s, billing_interval = %s where user_id = %s", (markets, interval, user_id))
+        else:
+            cur.execute("""update manufacturer_profiles set paid_markets = target_countries, billing_interval = %s
+                           where user_id = %s and cardinality(paid_markets) = 0""", (interval, user_id))
+        order_confirmation(cur, user_id, plan, amount, False, now, markets, interval)
         invoice(cur, user_id, plan, amount, currency or "usd", False, now)
 
 
 def process(cur):
     """Apply every unprocessed payment event, oldest first. A failing event is marked with its error and skipped."""
-    events = cur.execute("""select id, kind, user_id, plan, amount_cents, currency, stripe_customer, stripe_subscription
+    events = cur.execute("""select id, kind, user_id, plan, amount_cents, currency, stripe_customer, stripe_subscription,
+                                   markets, billing_interval
                             from payment_events where processed_at is null and error is null order by id limit 50""").fetchall()
     for ev in events:
         try:

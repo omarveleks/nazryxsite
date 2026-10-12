@@ -6,7 +6,7 @@ import { PlanLock } from '@/components/ui';
 import { OpeningIcon } from '@/components/Icons';
 import { requireUser } from '@/lib/auth';
 import { one, rows, withUser } from '@/lib/db';
-import { HIGH_DEMAND, canUse, countryName } from '@/lib/mfr';
+import { HIGH_DEMAND, canUse, countryName, tierIn } from '@/lib/mfr';
 import { REQ_SQL, type Requirement } from '@/lib/regulatory';
 
 export const metadata = { title: 'Market' };
@@ -31,7 +31,6 @@ async function headline(db: Db, c: string, uid: string) {
 export default async function MfrMarket({ searchParams }: { searchParams: Promise<{ market?: string }> }) {
   const sp = await searchParams;
   const u = await requireUser({ manufacturer: true });
-  const full = canUse(u.mfr_tier, 'market');
   const d = await withUser(u.id, async (db) => {
     const p = await one(db, 'select target_countries, primary_market from manufacturer_profiles where user_id = $1', [u.id]);
     await loadLive(db);
@@ -40,6 +39,7 @@ export default async function MfrMarket({ searchParams }: { searchParams: Promis
     const reqs = (await rows(db, REQ_SQL, [market]) as Requirement[]).filter((r) => r.applies === 'all');
     if (!hasData(market)) return { targets, market, reqs };
     const h = await headline(db, market, u.id);
+    const full = canUse(tierIn(u, market), 'market');
     if (!full) return { targets, market, reqs, h };
     const cats = await rows(db, `
       select m.category, count(*)::int as molecules, sum(cm.registrations)::int as products, round(avg(cm.registrants), 1)::float as per_molecule,
@@ -58,11 +58,12 @@ export default async function MfrMarket({ searchParams }: { searchParams: Promis
     return { targets, market, reqs, h, cats, origin, years, routes };
   });
   const m = d.market;
+  const full = canUse(tierIn(u, m), 'market');
   return (
     <Shell user={u} title="Market" sub={hasData(m) ? `${countryName(m)}: size, openings and competition` : `${countryName(m)}: managed by Nazryx`}
-      actions={hasData(m) ? (canUse(u.mfr_tier, 'market_read') ? <Link className="btn btn-ghost btn-sm" href={`/m/report?market=${m}`}>Download market read</Link>
-        : <PlanLock compact need="data" title="Market read (PDF)" />) : undefined}>
-      <MarketPicker targets={d.targets} current={m} path="/m/market" />
+      actions={hasData(m) ? (canUse(tierIn(u, m), 'market_read') ? <Link className="btn btn-ghost btn-sm" href={`/m/report?market=${m}`}>Download market read</Link>
+        : <PlanLock compact need="data" title="Market read (PDF)" u={u} market={m} />) : undefined}>
+      <MarketPicker u={u} targets={d.targets} current={m} path="/m/market" />
 
       {!hasData(m) && <AgencyMarket code={m} />}
 
@@ -87,7 +88,7 @@ export default async function MfrMarket({ searchParams }: { searchParams: Promis
               <div key={r.id} className="small"><span className="lbl">{r.topic}</span><div><b>{r.title}</b></div><div className="muted">{r.body}</div></div>))}</div>
           </section>)}
         {!full ? (
-          <PlanLock need="data" title={`The full ${countryName(m)} market`}>
+          <PlanLock need="data" title={`The full ${countryName(m)} market`} u={u} market={m}>
             Every therapeutic class with its competition and openings, where registered products are made, how fast new registrations arrive,
             and the registration routes and timelines.
           </PlanLock>

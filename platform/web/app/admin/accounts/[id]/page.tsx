@@ -7,7 +7,7 @@ import { requireTeam } from '@/lib/auth';
 import { one, rows, withUser } from '@/lib/db';
 import { ACCOUNT_DOC_KINDS } from '@/lib/docs';
 import { fmtDate } from '@/lib/format';
-import { APPROACHES, GOALS, LAUNCH_SCOPES, MFR_FILE_KINDS, MFR_PLANS, NEEDS, PLAN_ORDER, SERVICES, TIMELINES, countryName, suggestPlan } from '@/lib/mfr';
+import { APPROACHES, GOALS, LAUNCH_SCOPES, MFR_COUNTRIES, MFR_FILE_KINDS, MFR_PLANS, NEEDS, PLAN_ORDER, SERVICES, TIMELINES, countryName, suggestPlan } from '@/lib/mfr';
 
 export const metadata = { title: 'Account' };
 
@@ -104,8 +104,16 @@ export default async function AdminAccount({ params, searchParams }: { params: P
                 <input type="hidden" name="user_id" value={id} />
                 <select className="input" name="plan" defaultValue={p.active_plan ?? ''} aria-label="Active plan" style={{ flex: '1 1 200px' }}>
                   <option value="">No plan</option>{PLAN_ORDER.map((k) => <option key={k} value={k}>{MFR_PLANS[k].name}</option>)}</select>
-                <input className="input" name="amount_usd" inputMode="numeric" placeholder="USD per month" aria-label="Price in US dollars per month" style={{ flex: '0 1 140px' }} />
+                <input className="input" name="amount_usd" inputMode="numeric" placeholder="USD per period" aria-label="Price in US dollars per billing period" style={{ flex: '0 1 140px' }} />
+                <select className="input" name="interval" defaultValue={p.billing_interval ?? 'month'} aria-label="Billing" style={{ flex: '0 1 130px' }}>
+                  <option value="month">Monthly</option><option value="year">Yearly</option></select>
                 <button className="btn btn-blue btn-sm" type="submit">Save</button>
+                <fieldset className="row small" style={{ gap: 10, flexBasis: '100%', border: 0, padding: 0, margin: 0 }}>
+                  <legend className="lbl" style={{ marginBottom: 4 }}>Markets in the plan (Complete Market Entry covers all)</legend>
+                  {MFR_COUNTRIES.map((c) => <label key={c.code} className="row" style={{ gap: 4 }}>
+                    <input type="checkbox" name="markets" value={c.code} defaultChecked={(p.paid_markets ?? []).includes(c.code)
+                      || (!(p.paid_markets ?? []).length && (p.target_countries ?? []).includes(c.code))} /> {c.name}</label>)}
+                </fieldset>
                 <label className="row small" style={{ gap: 6, flexBasis: '100%' }}><input type="checkbox" name="documents" defaultChecked /> Issue the order confirmation and invoice</label>
               </form>
               <p className="note">Card subscriptions switch on by themselves. Use this for invoiced plans and Complete Market Entry. Leave the price

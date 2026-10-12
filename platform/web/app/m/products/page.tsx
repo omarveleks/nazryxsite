@@ -8,7 +8,7 @@ import { DemandIcon } from '@/components/Icons';
 import { addMfrProducts, deleteMfrFile, saveLaunch, unwatchMolecule, uploadMfrFile, watchMolecule } from '@/app/actions/mfr';
 import { requireUser } from '@/lib/auth';
 import { one, rows, withUser } from '@/lib/db';
-import { HIGH_DEMAND, LAUNCH_STAGES, MFR_FILE_KINDS, canUse, countryName, productClass } from '@/lib/mfr';
+import { HIGH_DEMAND, LAUNCH_STAGES, MFR_FILE_KINDS, canUse, countryName, covers, productClass, tierIn } from '@/lib/mfr';
 import { fmtDate } from '@/lib/format';
 
 export const metadata = { title: 'My products' };
@@ -27,7 +27,6 @@ const COMP: Record<string, [string, string]> = {
 export default async function MfrProducts({ searchParams }: { searchParams: Promise<{ added?: string; matched?: string; error?: string; market?: string; tab?: string; saved?: string; uploaded?: string; removed?: string; reading?: string }> }) {
   const sp = await searchParams;
   const u = await requireUser({ manufacturer: true });
-  const analysis = canUse(u.mfr_tier, 'portfolio');
   const d = await withUser(u.id, async (db) => {
     await loadLive(db);
     const prof = await one(db, 'select target_countries, primary_market from manufacturer_profiles where user_id = $1', [u.id]);
@@ -46,12 +45,14 @@ export default async function MfrProducts({ searchParams }: { searchParams: Prom
     const market = pickMarket(sp.market, targets, prof?.primary_market);
     // competitor watch: the molecules followed, in the market shown, and what moved across all markets with data
     const watching = sp.tab === 'watch' && canUse(u.mfr_tier, 'competitors');
-    const watched = watching && hasData(market) ? await rows(db, 'select * from my_competitor_summary($1)', [market]) : [];
-    const events = watching && dataMarkets(targets).length ? await rows(db, 'select * from my_competitor_watch($1, 90)', [dataMarkets(targets)]) : [];
+    const watched = watching && hasData(market) && covers(u, market) ? await rows(db, 'select * from my_competitor_summary($1)', [market]) : [];
+    const mine = dataMarkets(targets).filter((c) => covers(u, c));      // only the markets in the plan
+    const events = watching && mine.length ? await rows(db, 'select * from my_competitor_watch($1, 90)', [mine]) : [];
     const watchCount = Number((await one(db, 'select count(*)::int as n from watches where user_id = $1', [u.id]))?.n ?? 0);
     return { targets, market, products, facts, launches, files, watched, events, watchCount };
   });
   const market = d.market;
+  const analysis = canUse(tierIn(u, market), 'portfolio');
   const reading = d.files.filter((x) => x.kind === 'catalogue' && (x.status === 'queued' || x.status === 'reading'));
   const lastCat = d.files.find((x) => x.kind === 'catalogue');
   const fact = (mol: number | null, c: string) => d.facts.find((f) => f.molecule_id === mol && f.country === c);
@@ -93,13 +94,13 @@ export default async function MfrProducts({ searchParams }: { searchParams: Prom
           <PlanLock need="data" title="Competitor watch">Follow any molecule. See every new competitor in your markets, where their product is made,
             and get an alert by email or WhatsApp the week it is registered.</PlanLock>
         ) : (<>
-          <MarketPicker targets={d.targets} current={market} path="/m/products?tab=watch" />
+          <MarketPicker u={u} targets={d.targets} current={market} path="/m/products?tab=watch" />
           <section className="card stack">
             <div className="card-h"><div><h2>Molecules you watch</h2><p className="note">Competitors in {countryName(market)} today and new ones in the last 90 days.
               We alert you by email or WhatsApp when a new one is registered.</p></div>
               {d.products.some((p) => p.molecule_id) && <form action={watchMolecule}><input type="hidden" name="all" value="1" />
                 <button className="btn btn-ghost btn-sm" type="submit">Watch all my products</button></form>}</div>
-            {!hasData(market) ? <AgencyMarket code={market} /> : d.watched.length === 0 ? <Empty>You are not watching any molecule yet. Watch all your products, or add one below.</Empty> : (
+            {!hasData(market) ? <AgencyMarket code={market} /> : !covers(u, market) ? <PlanLock need="data" title={`Competitors in ${countryName(market)}`} u={u} market={market} /> : d.watched.length === 0 ? <Empty>You are not watching any molecule yet. Watch all your products, or add one below.</Empty> : (
               <div className="tbl-wrap"><table className="tbl">
                 <thead><tr><th>Molecule</th><th className="r">Competitors</th><th className="r">New, 90 days</th><th className="hide-m">Their products are made in</th><th /></tr></thead>
                 <tbody>{d.watched.map((w) => (
@@ -146,7 +147,7 @@ export default async function MfrProducts({ searchParams }: { searchParams: Prom
               </div>))}</div>)}
         </section>
       ) : (<>
-      <MarketPicker targets={d.targets} current={market} path="/m/products" />
+      <MarketPicker u={u} targets={d.targets} current={market} path="/m/products" />
 
       {!hasData(market) ? <AgencyMarket code={market} /> : n > 0 && (<>
         <div className="grid g4" data-tour="portfolio">
@@ -158,7 +159,7 @@ export default async function MfrProducts({ searchParams }: { searchParams: Prom
             <div className="tile t-blue"><span className="k">Average competitors</span><span className="v num">{avg}</span><span className="small">per product already on the market</span></div>
             <div className="tile t-mint"><span className="k">Top class</span><span className="v" style={{ fontSize: 20, lineHeight: 1.2 }}>{top?.cls ?? '—'}</span>
               <span className="small">{top ? `${top.n} of your products` : ''}</span></div>
-          </>) : <div style={{ gridColumn: 'span 2' }}><PlanLock need="data" title="Your portfolio analysis">Competition and depth for every product, your strongest classes, and where you are open.</PlanLock></div>}
+          </>) : <div style={{ gridColumn: 'span 2' }}><PlanLock need="data" title="Your portfolio analysis" u={u} market={market}>Competition and depth for every product, your strongest classes, and where you are open.</PlanLock></div>}
         </div>
         {analysis && (
           <div className="grid g2">

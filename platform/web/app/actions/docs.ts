@@ -6,7 +6,7 @@ import { back, int, str } from '@/lib/forms';
 import { ACCOUNT_DOC_KINDS, ENGAGEMENT_DOC_ITEMS, SUPPLIER_DOC_KINDS, TEAM_REQUEST_KINDS, requestDocLabel } from '@/lib/docs';
 import { DOSSIER_ITEMS, SHIPMENT_DOCS } from '@/lib/format';
 import { saveUpload } from '@/lib/uploads';
-import { MFR_PLANS, PLAN_ORDER, type PlanKey } from '@/lib/mfr';
+import { MFR_COUNTRIES, MFR_PLANS, PLAN_ORDER, type PlanKey } from '@/lib/mfr';
 
 // Team document uploads everywhere: requests, engagements, customer accounts and suppliers. Every action re-checks
 // the team role here and in the database (RLS). Internal files are never visible to customers.
@@ -183,6 +183,12 @@ export async function savePlanPrices(f: FormData) {
                         on conflict (key) do update set amount_usd = excluded.amount_usd, note = excluded.note, updated_at = now()`,
           [`mfr_${k}`, amount, str(f, `note_mfr_${k}`, 200) || null]);
       }
+      const market = int(f, 'amount_mfr_market');
+      if (market != null) {
+        if (market <= 0 || market > 100000) throw new Error('Use a monthly price in whole US dollars.');
+        await db.query(`insert into plan_prices (key, amount_usd, updated_at) values ('mfr_market', $1, now())
+                        on conflict (key) do update set amount_usd = excluded.amount_usd, updated_at = now()`, [market]);
+      }
     });
   } catch (e) {
     back('/admin?tab=content', { error: e instanceof Error && !('code' in e) ? e.message : dbMessage(e) });
@@ -200,16 +206,21 @@ export async function setMfrPlan(f: FormData) {
   if (plan && !(PLAN_ORDER as string[]).includes(plan)) back(to, { error: 'Unknown plan.' });
   try {
     await withUser(u.id, async (db) => {
-      await db.query(`update manufacturer_profiles set active_plan = $2, active_since = case when $2::text is null then null else now() end
-                      where user_id = $1`, [uid, plan || null]);
+      // the markets in the plan and the billing interval, as the team agreed them
+      const markets = [...new Set(f.getAll('markets').map(String))].filter((c) => MFR_COUNTRIES.some((x) => x.code === c));
+      const interval = str(f, 'interval', 5) === 'year' ? 'year' : 'month';
+      await db.query(`update manufacturer_profiles set active_plan = $2, active_since = case when $2::text is null then null else now() end,
+                      paid_markets = case when $2::text is null then '{}' else $3::text[] end, billing_interval = $4
+                      where user_id = $1`, [uid, plan || null, markets, interval]);
+      if (plan) await db.query("update plan_requests set status = 'done' where user_id = $1 and status = 'open' and wanted like 'market:%'", [uid]);
       if (plan) {
         await db.query("update plan_requests set status = 'done' where user_id = $1 and status = 'open' and wanted like 'mfr:%'", [uid]);
         await tellUser(db, uid, 'Your plan is active', `${MFR_PLANS[plan as PlanKey].name} is now active. Everything it includes is unlocked.`, '/m/plan');
         // the worker issues the order confirmation and the invoice (amount from the form, else the list price)
         const amount = int(f, 'amount_usd') ?? (await one(db, 'select amount_usd from plan_prices where key = $1', [`mfr_${plan}`]))?.amount_usd ?? null;
         if (f.get('documents') === 'on') {
-          await db.query(`insert into payment_events (kind, user_id, plan, amount_cents) values ('manual_activation', $1, $2, $3)`,
-            [uid, plan, amount != null ? amount * 100 : null]);
+          await db.query(`insert into payment_events (kind, user_id, plan, amount_cents, markets, billing_interval)
+                          values ('manual_activation', $1, $2, $3, $4, $5)`, [uid, plan, amount != null ? amount * 100 : null, markets, interval]);
         }
       }
     });

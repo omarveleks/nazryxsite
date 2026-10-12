@@ -7,7 +7,7 @@ import { chooseSample, tourGo } from '@/app/actions/mfr';
 import { requireUser } from '@/lib/auth';
 import { one, rows, withUser } from '@/lib/db';
 import { fmtDate } from '@/lib/format';
-import { HIGH_DEMAND, MFR_PLANS, OBLIGATION_KINDS, SERVICES, canUse, countryName, mfrProductsSql, reasons } from '@/lib/mfr';
+import { HIGH_DEMAND, MFR_PLANS, OBLIGATION_KINDS, SERVICES, canUse, covers, tierIn, countryName, mfrProductsSql, reasons } from '@/lib/mfr';
 
 export const metadata = { title: 'Home' };
 
@@ -19,7 +19,7 @@ const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 export default async function MfrHome({ searchParams }: { searchParams: Promise<{ welcome?: string; error?: string }> }) {
   const sp = await searchParams;
   const u = await requireUser({ manufacturer: true });
-  const full = canUse(u.mfr_tier, 'portfolio'), watchAll = canUse(u.mfr_tier, 'watch');
+  const watchAll = canUse(u.mfr_tier, 'watch');
   const d = await withUser(u.id, async (db) => {
     await loadLive(db);
     const profile = await one(db, `select company_name, status, target_countries, suggested_plan, chosen_plan, active_plan, verified_at, sample_product_id, primary_market,
@@ -28,7 +28,10 @@ export default async function MfrHome({ searchParams }: { searchParams: Promise<
     const targets = targetMarkets(profile?.target_countries);
     const live = targets.filter(hasData);
     const chosen = pickMarket(undefined, targets, profile?.primary_market);
-    const focus = hasData(chosen) ? chosen : live[0] ?? 'TZ';
+    // Home reads a market in the plan: the chosen one if it is, else the first that is
+    const inPlan = live.filter((c) => covers(u, c));
+    const focus = hasData(chosen) && (!u.mfr_active || covers(u, chosen)) ? chosen : inPlan[0] ?? (hasData(chosen) ? chosen : live[0] ?? 'TZ');
+    const full = canUse(tierIn(u, focus), 'portfolio');
     const counts = await one(db, `select count(*)::int as products, count(p.molecule_id)::int as matched,
         count(*) filter (where g.demand >= ${HIGH_DEMAND})::int as high,
         count(*) filter (where cm.registrants <= 3 and (cm.registrations > 0 or cm.on_national_list))::int as few,
@@ -38,15 +41,17 @@ export default async function MfrHome({ searchParams }: { searchParams: Promise<
         left join visible_gap_scores g on g.molecule_id = p.molecule_id and g.country = $2 where p.user_id = $1`, [u.id, focus]);
     const first = await rows(db, `${mfrProductsSql(focus)} where p.user_id = $1 and cm.rankable and cm.on_national_list
         order by g.score desc nulls last, cm.registrants, p.name limit $2`, [u.id, full ? 5 : 3]);
-    const watch = live.length ? await rows(db, 'select * from my_market_watch($1, 90)', [live]) : [];
+    const watchMarkets = u.mfr_active ? inPlan : live;
+    const watch = watchMarkets.length ? await rows(db, 'select * from my_market_watch($1, 90)', [watchMarkets]) : [];
     const engagements = await rows(db, `select id, kind, country, stage from engagements where user_id = $1 and status = 'open' order by updated_at desc limit 5`, [u.id]);
     const deadlines = await rows(db, `select o.kind, o.due_date, o.country, p.name from obligations o left join mfr_products p on p.id = o.product_id
         where o.user_id = $1 and not o.done order by o.due_date limit 5`, [u.id]);
     const products = profile?.sample_product_id ? [] : await rows(db, `select p.id, coalesce(m.inn, p.name) as name from mfr_products p
         left join molecules m on m.id = p.molecule_id where p.user_id = $1 and p.molecule_id is not null order by 2 limit 200`, [u.id]);
-    return { profile, targets, focus, counts, first, watch, engagements, deadlines, products };
+    return { profile, targets, focus, full, counts, first, watch, engagements, deadlines, products };
   });
   const p = d.profile;
+  const full = d.full;
   const shownWatch = watchAll ? d.watch.slice(0, 8) : d.watch.slice(0, 2);
   // getting set up: the few things that make the portal useful, ticked off as they are done
   const setup: [boolean, string, string][] = [

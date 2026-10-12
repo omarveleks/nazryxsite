@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { setPrimaryMarket } from '@/app/actions/mfr';
-import { VerifiedIcon } from './Icons';
-import { MFR_COUNTRIES, countryName } from '@/lib/mfr';
+import { LockIcon, VerifiedIcon } from './Icons';
+import { MFR_COUNTRIES, countryName, covers } from '@/lib/mfr';
 
 /** The manufacturer's target markets, in the order of the market list. */
 export function targetMarkets(targets?: string[] | null): string[] {
@@ -28,15 +28,19 @@ export const hasData = (c: string) => LIVE.has(c);
 export const dataMarkets = (targets: string[]) => targets.filter(hasData);
 
 /** Switch the market shown across the portal. Only there for manufacturers with more than one market. */
-export default function MarketPicker({ targets, current, path }: { targets: string[]; current: string; path: string }) {
+export default function MarketPicker({ targets, current, path, u }: { targets: string[]; current: string; path: string;
+  u?: { role: string; mfr_active: string | null; mfr_markets?: string[] } }) {
   if (targets.length < 2) return null;
+  // with a plan, markets outside it carry a lock: opening one offers to add it
+  const outside = (m: string) => Boolean(u?.mfr_active) && hasData(m) && !covers(u!, m);
   return (
     <form action={setPrimaryMarket} className="row" aria-label="Market" style={{ gap: 6 }}>
       <input type="hidden" name="return" value={path} />
       <span className="lbl" style={{ marginRight: 4 }}>Market</span>
       {targets.map((m) => (
         <button key={m} type="submit" name="market" value={m} className={`pill ${m === current ? 'solid' : ''}`} aria-pressed={m === current}
-          style={{ cursor: 'pointer', font: 'inherit', fontSize: 12 }}>{countryName(m)}</button>))}
+          style={{ cursor: 'pointer', font: 'inherit', fontSize: 12 }} title={outside(m) ? 'Not in your plan yet' : undefined}>
+          {outside(m) && <LockIcon />}{outside(m) ? ' ' : ''}{countryName(m)}</button>))}
     </form>
   );
 }

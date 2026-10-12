@@ -11,7 +11,7 @@ export const metadata = { title: 'Your company' };
 
 // Manufacturer onboarding in six steps (company, manufacturing, markets, catalogue, needs, suggested plan), and the
 // profile editor later from Settings. The team approves new profiles before partner introductions.
-export default async function MfrOnboarding({ searchParams }: { searchParams: Promise<{ error?: string; step?: string; saved?: string; note?: string; q?: string }> }) {
+export default async function MfrOnboarding({ searchParams }: { searchParams: Promise<{ error?: string; step?: string; saved?: string; note?: string; q?: string; billing?: string; market?: string }> }) {
   const sp = await searchParams;
   const u = await requireUser({ allowOnboarding: true, manufacturer: true });
   const d = await withUser(u.id, async (db) => ({
@@ -27,7 +27,8 @@ export default async function MfrOnboarding({ searchParams }: { searchParams: Pr
     const reachedQ = p ? Math.min(p.step, WIZARD.length) : 1;
     const asked = WIZARD.indexOf(sp.q as WizardStep);
     const q = WIZARD[asked >= 0 && asked < reachedQ ? asked : reachedQ - 1];
-    return <MfrWizard q={q} p={p} products={d.products} prices={d.prices} error={sp.error} note={sp.note} />;
+    return <MfrWizard q={q} p={p} products={d.products} prices={d.prices} error={sp.error} note={sp.note}
+      interval={sp.billing === 'year' ? 'year' : 'month'} market={sp.market} />;
   }
   const reached = p ? (editing ? 6 : Math.min(p.step, 6)) : 1;
   const step = Math.min(Math.max(Number(sp.step) || reached, 1), reached);
@@ -152,7 +153,8 @@ export default async function MfrOnboarding({ searchParams }: { searchParams: Pr
           <Buttons />
         </form>)}
 
-      {step === 6 && p && <PlanChooser p={p} prices={d.prices} products={d.products} from={editing ? 'plan' : 'onboarding'} />}
+      {step === 6 && p && <PlanChooser p={p} prices={d.prices} products={d.products} from={editing ? 'plan' : 'onboarding'}
+        interval={sp.billing === 'year' ? 'year' : 'month'} market={sp.market} />}
     </div>
   );
 }

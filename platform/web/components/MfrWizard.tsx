@@ -16,8 +16,8 @@ const TITLES: Record<WizardStep, [string, string]> = {
 };
 
 /** First-time manufacturer sign-up: one question per screen, a progress bar, single choices advance on a click. */
-export default function MfrWizard({ q, p, products, prices, error, note }: {
-  q: WizardStep; p: any; products: number; prices: PlanPrices; error?: string; note?: string;
+export default function MfrWizard({ q, p, products, prices, error, note, interval, market }: {
+  q: WizardStep; p: any; products: number; prices: PlanPrices; error?: string; note?: string; interval?: 'month' | 'year'; market?: string;
 }) {
   const i = WIZARD.indexOf(q), n = WIZARD.length;
   const [title, sub] = TITLES[q];
@@ -47,7 +47,7 @@ export default function MfrWizard({ q, p, products, prices, error, note }: {
       {error && <div className="err" role="alert">{error}</div>}
       {note && <div className="ok" role="status">{note}</div>}
 
-      {q === 'plan' ? <PlanChooser p={p} prices={prices} products={products} from="onboarding" /> : (
+      {q === 'plan' ? <PlanChooser p={p} prices={prices} products={products} from="onboarding" interval={interval} market={market} /> : (
         <form action={saveWizard} className="stack">
           <input type="hidden" name="q" value={q} />
           {q === 'company' && (<>

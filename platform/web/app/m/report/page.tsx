@@ -7,7 +7,7 @@ import { hasData, loadLive, targetMarkets } from '@/components/MarketPicker';
 import { requireUser } from '@/lib/auth';
 import { one, rows, withUser } from '@/lib/db';
 import { fmtDate, registeredLine } from '@/lib/format';
-import { HIGH_DEMAND, canUse, countryName, mfrProductsSql, reasons } from '@/lib/mfr';
+import { HIGH_DEMAND, canUse, countryName, covers, mfrProductsSql, reasons, tierIn } from '@/lib/mfr';
 
 export const metadata = { title: 'Market read' };
 
@@ -16,17 +16,19 @@ export default async function MarketRead({ searchParams }: { searchParams: Promi
   const sp = await searchParams;
   const u = await requireUser({ manufacturer: true });
   if (!canUse(u.mfr_tier, 'market_read')) redirect('/m/plan?want=data');
+  const asked = sp.market && hasData(sp.market) ? sp.market : null;
+  if (asked && !canUse(tierIn(u, asked), 'market_read')) redirect(`/m/add-market?market=${asked}`);
   const d = await withUser(u.id, async (db) => {
     await loadLive(db);
     const p = await one(db, 'select company_name, target_countries, verified_at from manufacturer_profiles where user_id = $1', [u.id]);
     const targets = targetMarkets(p?.target_countries);
-    const market = sp.market && hasData(sp.market) ? sp.market : targets.find(hasData) ?? 'TZ';
+    const market = asked ?? targets.find((c) => hasData(c) && covers(u, c)) ?? targets.find(hasData) ?? 'TZ';
     const h = await one(db, `select (select count(*)::int from registrations where country = $1 and active) as products,
         (select count(distinct ltr_id)::int from registrations where country = $1 and active) as distributors,
         (select count(*)::int from country_molecules where country = $1 and on_national_list and registrants = 0 and rankable) as open`, [market]);
     const products = await rows(db, `${mfrProductsSql(market)} where p.user_id = $1 order by g.score desc nulls last, p.name`, [u.id]);
-    const partners = canUse(u.mfr_tier, 'matching') ? await rows(db, `select code, products, open_to, top_classes from partner_search($1) limit 5`, [market]) : [];
-    const route = canUse(u.mfr_tier, 'pathway') ? await rows(db, 'select label, months_low, months_high from registration_routes where months_low is not null order by sort') : [];
+    const partners = canUse(tierIn(u, market), 'matching') ? await rows(db, `select code, products, open_to, top_classes from partner_search($1) limit 5`, [market]) : [];
+    const route = canUse(tierIn(u, market), 'pathway') ? await rows(db, 'select label, months_low, months_high from registration_routes where months_low is not null order by sort') : [];
     return { p, market, h, products, partners, route };
   });
   const m = countryName(d.market);

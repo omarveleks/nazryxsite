@@ -17,6 +17,7 @@ export type User = {
   company_name: string | null; claim_status: string | null; list_count: number; account_type: 'distributor' | 'manufacturer';
   mfr_plan: string | null; mfr_plan_chosen: boolean; mfr_active: string | null; mfr_tier: number;
   team_owner: boolean; team_permissions: string[]; tour_step: number | null; mfr_verified: boolean;
+  mfr_markets: string[]; mfr_interval: string;
 };
 
 export const sha = (s: string) => createHash('sha256').update(s).digest('hex');
@@ -59,7 +60,7 @@ export const getUser = cache(async (): Promise<User | null> => {
            u.owner_id, u.language, u.whatsapp, u.notify_email, u.notify_whatsapp,
            coalesce(c.display_name, cl.company_name) as company_name, cl.status as claim_status,
            (select count(*)::int from sourcing_list l where l.user_id = u.id) as list_count, u.account_type,
-           mp.chosen_plan is not null as mfr_plan_chosen, coalesce(mp.chosen_plan, mp.suggested_plan) as mfr_plan, mp.active_plan as mfr_active, mp.tour_step, mp.verified_at is not null as mfr_verified,
+           mp.chosen_plan is not null as mfr_plan_chosen, coalesce(mp.chosen_plan, mp.suggested_plan) as mfr_plan, mp.active_plan as mfr_active, mp.tour_step, mp.verified_at is not null as mfr_verified, coalesce(mp.paid_markets, '{}') as mfr_markets, coalesce(mp.billing_interval, 'month') as mfr_interval,
            case when u.role = 'team' then 3 else coalesce(case mp.active_plan when 'data' then 1 when 'access' then 2 when 'entry' then 3 end, 0) end as mfr_tier
     from users u
     left join companies c on c.id = u.company_id

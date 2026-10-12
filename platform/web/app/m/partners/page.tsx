@@ -6,7 +6,7 @@ import { requestIntro } from '@/app/actions/mfr';
 import { requireUser } from '@/lib/auth';
 import { one, rows, withUser } from '@/lib/db';
 import { categories } from '@/lib/queries';
-import { canUse, countryName } from '@/lib/mfr';
+import { canUse, countryName, tierIn } from '@/lib/mfr';
 
 export const metadata = { title: 'Distributors' };
 
@@ -17,7 +17,6 @@ const SORTS: [string, string][] = [['open', 'Sort: most open to you'], ['size', 
 export default async function Partners({ searchParams }: { searchParams: Promise<Record<string, string | undefined>> }) {
   const sp = await searchParams;
   const u = await requireUser({ manufacturer: true });
-  const lists = canUse(u.mfr_tier, 'distributors'), matching = canUse(u.mfr_tier, 'matching'), intro = canUse(u.mfr_tier, 'partner_intro');
   const d = await withUser(u.id, async (db) => {
     await loadLive(db);
     const prof = await one(db, 'select target_countries, status, primary_market from manufacturer_profiles where user_id = $1', [u.id]);
@@ -35,6 +34,8 @@ export default async function Partners({ searchParams }: { searchParams: Promise
                                      where p.user_id = $1 order by 2 limit 300`, [u.id]);
     return { targets, market, cats, mine, cls, molecule, sort, list, products, holders, status: prof?.status };
   });
+  const t = tierIn(u, d.market);
+  const lists = canUse(t, 'distributors'), matching = canUse(t, 'matching'), intro = canUse(t, 'partner_intro');
   const shown = d.molecule && sp.gap === '1' ? d.list.filter((p) => !p.carries) : d.list;
   const total = d.list[0]?.total ?? 0, mineN = d.list[0]?.mine ?? d.mine.length;
   const filtered = Boolean(d.cls || d.molecule || Number(sp.min));
@@ -42,7 +43,7 @@ export default async function Partners({ searchParams }: { searchParams: Promise
     <Shell user={u} title="Distributors" sub={`Who could carry your products in ${countryName(d.market)}`}
       actions={intro ? <Link className="btn btn-blue btn-sm" href="/m/partners/intro">Ask us to find distributors</Link> : undefined}>
       <Flash sp={sp} />
-      <MarketPicker targets={d.targets} current={d.market} path="/m/partners" />
+      <MarketPicker u={u} targets={d.targets} current={d.market} path="/m/partners" />
       {!hasData(d.market) ? <AgencyMarket code={d.market} /> : (<>
         <form method="get" className="card tight stack" style={{ gap: 10 }}>
           <input type="hidden" name="market" value={d.market} />
@@ -80,7 +81,7 @@ export default async function Partners({ searchParams }: { searchParams: Promise
                   {p.top_classes && <div className="sub2">Strongest in {p.top_classes}</div>}
                   <div className="row" style={{ gap: 6, marginTop: 6 }}>
                     {mineN > 0 && (matching ? <span className={`pill ${p.open_to > 0 ? 'mint' : ''}`}>Open to {p.open_to} of your {mineN} molecules</span>
-                      : <PlanLock compact need="access" title="Open to how many of your molecules" />)}
+                      : <PlanLock compact need="access" title="Open to how many of your molecules" u={u} market={d.market} />)}
                     {d.molecule && <span className={`pill ${p.carries ? '' : 'blue'}`}>{p.carries ? `Already carries ${d.molecule.inn}` : `Does not carry ${d.molecule.inn}`}</span>}
                   </div>
                 </div>
@@ -88,7 +89,7 @@ export default async function Partners({ searchParams }: { searchParams: Promise
                   : <Link className="btn btn-blue btn-sm" href={`/m/partners/intro?code=${p.code}`}>Request introduction</Link>}
               </div>))}</div>)}
           {!lists && total > shown.length && (
-            <div style={{ marginTop: 12 }}><PlanLock need="access" title={`${total - shown.length} more distributors`}>
+            <div style={{ marginTop: 12 }}><PlanLock need="access" title={`${total - shown.length} more distributors`} u={u} market={d.market}>
               Every distributor in {countryName(d.market)}, with how many of your molecules each does not carry yet.</PlanLock></div>)}
         </section>
         <p className="note">Introductions are part of market entry: we contact the distributor, present your product and help agree terms.</p>

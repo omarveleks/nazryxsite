@@ -180,6 +180,17 @@ confirming → production → import permit → shipped → arrived → sampling
 checklist and ETA. My portfolio → Supply and shipments brings all of it together per product. Suggested selling prices (Admin > Content) show on the
 molecule page for paid plans.
 
+## Pay per market, yearly billing (migration 026)
+
+- A plan includes one market (chosen on the plans page, else the market they work on); each extra market costs the
+  `mfr_market` price (Admin > Content, $49 a month by default). Yearly billing is ten months for twelve, for the plan and
+  its markets. Complete Market Entry covers every market.
+- Markets outside the plan carry a lock in the market switch; their locked screens offer "Add {market} to your plan",
+  which opens `/m/add-market`: by card, a small Stripe subscription for that market (cancel one market without touching
+  the plan); invoiced plans become a request the team turns on in Admin > Accounts (market checkboxes and billing).
+- The database enforces it too: `mfr_tier_in(country)` sets how many distributors `partner_search` returns per market.
+  A plan with no markets recorded (from before markets were priced) covers every market.
+
 ## Markets beyond Tanzania: Kazakhstan, Kyrgyzstan, Uzbekistan, Kenya
 
 - Upload each register in Admin > Data updates and pick its country. Formats read: Kazakhstan state register (.xlsx,

@@ -566,6 +566,12 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
                     <input className="input" name={`note_${k}`} defaultValue={cur?.note ?? ''} placeholder="Note shown under the price (optional)" aria-label={`${label}: note`} style={{ flex: '1 1 220px' }} />
                   </div>);
               })}
+              <div className="row">
+                <b style={{ flex: '0 1 220px' }}>Each extra market</b>
+                <input className="input" name="amount_mfr_market" defaultValue={d.prices.find((x: any) => x.key === 'mfr_market')?.amount_usd ?? ''} placeholder="USD per month"
+                  inputMode="numeric" aria-label="Each extra market: US dollars per month" style={{ flex: '0 1 220px' }} />
+                <span className="note" style={{ flex: '1 1 220px' }}>A plan includes one market. Yearly billing is ten months for twelve.</span>
+              </div>
               <button className="btn btn-blue btn-sm" type="submit" style={{ alignSelf: 'flex-start' }}>Save prices</button>
             </form>
           </section>
