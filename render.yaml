@@ -64,7 +64,13 @@ services:
         sync: false
       - key: TEAM_ALERT_EMAILS
         sync: false
-      - key: ANTHROPIC_API_KEY
+      - key: ANTHROPIC_API_KEY      # also reads the regulatory documents uploaded in Admin > Regulatory
+        sync: false
+      - key: WHATSAPP_TOKEN         # WhatsApp Business Cloud API: weekly summaries and competitor alerts
+        sync: false
+      - key: WHATSAPP_PHONE_ID
+        sync: false
+      - key: WHATSAPP_TEMPLATE      # an approved template with one body variable (needed outside the 24-hour window)
         sync: false
       - key: SENTRY_DSN
         sync: false

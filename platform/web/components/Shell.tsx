@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import TourBar from './TourBar';
 import { MFR_PLANS } from '@/lib/mfr';
+import { VerifiedIcon } from './Icons';
 import type { ReactNode } from 'react';
 import type { User } from '@/lib/auth';
 import Brand from './Brand';
@@ -23,6 +24,7 @@ export default function Shell({ user, title, sub, crumb, actions, children }: {
             <span className="hide-m">{user.mfr_active ? 'Active' : user.mfr_plan_chosen
               ? `${MFR_PLANS[user.mfr_plan as keyof typeof MFR_PLANS]?.name} requested` : 'Some screens are locked'}</span>
             <Link className="btn-link hide-m" href="/m/plan">{user.mfr_active ? 'Your plan' : 'See plans'}</Link>
+            {user.mfr_verified && <span className="pill blue hide-m" style={{ alignSelf: 'flex-start' }}><VerifiedIcon /> Verified manufacturer</span>}
           </div>
         ) : (
         <div className="plan-box">

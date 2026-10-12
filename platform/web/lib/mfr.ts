@@ -174,7 +174,7 @@ export const tierOf = (plan?: string | null) => TIER[plan ?? ''] ?? 0;
 export const NEEDS_PLAN: Record<string, PlanKey> = {
   market: 'data', portfolio: 'data', watch: 'data', market_read: 'data', distributors: 'access',
   matching: 'access', pricing: 'access', pathway: 'access', dossier_review: 'access',
-  partner_intro: 'entry', market_entry: 'entry', forecast: 'entry',
+  partner_intro: 'entry', market_entry: 'entry', forecast: 'entry', competitors: 'data', requirements: 'access',
 };
 export const canUse = (tier: number, feature: string) => !NEEDS_PLAN[feature] || tier >= TIER[NEEDS_PLAN[feature]];
 
@@ -192,6 +192,12 @@ export const SERVICE_NEEDS: Record<string, string[]> = {
   market_entry: ['Your product list with strengths and forms', 'Your GMP and certification pack', 'One person we can ask questions of'],
   dossier_review: ['The dossier, or its index to start', 'GMP certificate and CPP', 'Stability data for climatic zone IVb, if you have it'],
   post_registration: ['Your registration certificates', 'Renewal dates if you know them', 'Planned changes to the product or site'],
+};
+
+/** What a manufacturer can upload from My products: a catalogue, and the small starter pack the team checks first. */
+export const MFR_FILE_KINDS: Record<string, string> = {
+  catalogue: 'Product catalogue or list', gmp: 'GMP certificate', cpp: 'CPP (certificate of pharmaceutical product)',
+  coa: 'Certificate of analysis', label: 'Labels and leaflets', other: 'Other',
 };
 
 /** High demand: the demand measure behind the ranking (official essential list, how widely it is used, WHO list) at 0.8 or more. */

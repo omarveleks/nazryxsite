@@ -3,10 +3,11 @@ import { notFound } from 'next/navigation';
 import Shell from '@/components/Shell';
 import MarketPicker, { AgencyMarket, hasData, loadLive, pickMarket, targetMarkets } from '@/components/MarketPicker';
 import { Badges, Empty, Flash, LockIcon, PlanLock } from '@/components/ui';
-import { deleteMfrProduct, saveLaunch, updateProductChecks } from '@/app/actions/mfr';
+import { deleteMfrProduct, saveLaunch, unwatchMolecule, updateProductChecks, watchMolecule } from '@/app/actions/mfr';
 import { requireUser } from '@/lib/auth';
 import { one, rows, withUser } from '@/lib/db';
 import { BE_STATUS, beSuggestion, levelLabel, registeredLine } from '@/lib/format';
+import { REQ_SQL, forProduct, type Requirement } from '@/lib/regulatory';
 import { AGENCY_KINDS, LAUNCH_STAGES, MFR_PLANS, NEEDS_PLAN, SERVICES, canUse, countryName, mfrProductsSql, productClass, reasons } from '@/lib/mfr';
 
 export const metadata = { title: 'Product' };
@@ -29,7 +30,9 @@ export default async function MfrProduct({ params, searchParams }: { params: Pro
     const p = await one(db, `${mfrProductsSql(focus)} where p.id = $1 and p.user_id = $2`, [id, u.id]);
     if (!p) return null;
     const launches = await rows(db, 'select id, country, stage from launches where product_id = $1 and user_id = $2', [id, u.id]);
-    const base = { p, targets, market, t, sampled, launches };
+    const reqs = forProduct(await rows(db, REQ_SQL, [market]) as Requirement[], { ...p, category: productClass(p) });
+    const watched = p.molecule_id ? Boolean(await one(db, 'select 1 as x from watches where user_id = $1 and molecule_id = $2', [u.id, p.molecule_id])) : false;
+    const base = { p, targets, market, t, sampled, launches, reqs, watched };
     if (!p.molecule_id) return base;
     if (!hasData(market)) return base;
     const origin = canUse(t, 'market') ? await rows(db, `select initcap(lower(coalesce(manufacturing_country, 'not stated'))) as country, count(*)::int as n
@@ -101,6 +104,12 @@ export default async function MfrProduct({ params, searchParams }: { params: Pro
             </section>
           </>)}
           <section className="card stack">
+            <div className="card-h"><h2>Requirements in {countryName(market)}</h2><Link className="btn-link" href={`/m/regulatory?market=${market}&product=${id}#p${id}`}>All requirements</Link></div>
+            {!canUse(d.t, 'requirements') ? <PlanLock need="access" title="What this product needs">Bioequivalence, sterile, controlled or biological: the steps this product needs on top of the market&rsquo;s general requirements.</PlanLock>
+              : d.reqs.length === 0 ? <p className="muted">Only the market&rsquo;s general requirements apply.</p>
+              : d.reqs.map((r) => <div key={r.id}><b>{r.title}</b> <span className="pill peach">{r.topic}</span><div className="small muted">{r.body}</div></div>)}
+          </section>
+          <section className="card stack">
             <h2>Your dossier for this product</h2>
             <p className="note">Tell us what you have. It sets the likely route; we check the documents themselves before filing.</p>
             <form action={updateProductChecks} className="stack" style={{ gap: 8 }}>
@@ -125,6 +134,16 @@ export default async function MfrProduct({ params, searchParams }: { params: Pro
                 </Link>);
             })}
           </section>
+          {p.molecule_id && (
+            <section className="card stack">
+              <h2>Competitor watch</h2>
+              {!canUse(u.mfr_tier, 'competitors') ? <PlanLock compact need="data" title="Alert me to new competitors" />
+                : <form action={d.watched ? unwatchMolecule : watchMolecule} className="between" style={{ gap: 10 }}>
+                  <input type="hidden" name="molecule_id" value={p.molecule_id} /><input type="hidden" name="return" value={`/m/products/${id}`} />
+                  <span className="small">{d.watched ? 'Watching: you hear the week a new competitor is registered.' : 'Hear the week a new competitor is registered.'}</span>
+                  <button className={`btn btn-sm ${d.watched ? 'btn-ghost' : 'btn-blue'}`} type="submit">{d.watched ? 'Stop' : 'Watch'}</button>
+                </form>}
+            </section>)}
           <section className="card stack">
             <h2>Launch tracker</h2>
             {d.launches.length > 0 && <div className="stack" style={{ gap: 6 }}>{d.launches.map((l) => (

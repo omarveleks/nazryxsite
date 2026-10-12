@@ -109,7 +109,7 @@ const secret = (await t.locator('code').first().innerText()).replace(/\s+/g, '')
 await t.fill('input[name=code]', totp(secret));
 await Promise.all([t.waitForURL(/on=1/), t.click('button:has-text("Turn on")')]);
 check(true, 'team turns on two-step sign-in');
-for (const tab of ['', '?tab=review', '?tab=claims', '?tab=requests', '?tab=documents', '?tab=manufacturers', '?tab=accounts', '?tab=content', '?tab=activity']) {
+for (const tab of ['', '?tab=review', '?tab=claims', '?tab=requests', '?tab=documents', '?tab=manufacturers', '?tab=accounts', '?tab=content', '?tab=activity', '?tab=regulatory']) {
   const r = await t.goto(B + '/admin' + tab); check(r.status() === 200, `admin ${tab || 'data updates'}`);
 }
 await t.goto(B + '/admin?tab=claims'); await t.waitForLoadState('networkidle');   // let the page finish loading before clicking
@@ -249,6 +249,22 @@ await k.goto(B + '/m');
 check((await k.locator('main').innerText()).includes('Market watch'), 'market watch on the home page');
 await k.goto(B + '/m/plan?want=access');
 check((await k.locator('main').innerText()).includes('To unlock that') && (await k.locator('main').innerText()).includes('Compare the plans'), 'upgrade flow names the plan that unlocks it');
+await k.goto(B + '/m/regulatory');
+const regFree = await k.locator('main').innerText();
+check(regFree.includes('Regulator and route') && regFree.includes('Local technical representative') && regFree.includes('Unlock with Complete Market Access'),
+  'regulatory page: every requirement for the market, per-product requirements locked');
+await k.goto(B + '/m/products?tab=watch');
+check((await k.locator('main').innerText()).includes('Unlock with Basic Market Data'), 'competitor watch is locked without a plan');
+await k.goto(B + '/m/products'); await k.waitForLoadState('networkidle');
+await k.setInputFiles('#add input[name=file]', { name: 'our-catalogue.pdf', mimeType: 'application/pdf', buffer: Buffer.from('%PDF-1.4 cat') });
+await Promise.all([k.waitForURL(/uploaded=catalogue/), k.click('#add button:has-text("Upload")')]);
+check((await k.locator('main').innerText()).includes('Catalogue received') && (await k.locator('#files').innerText()).includes('our-catalogue.pdf'),
+  'add a product: upload a PDF catalogue');
+await k.selectOption('#files select[name=kind]', 'gmp');
+await k.setInputFiles('#files input[name=file]', { name: 'site-gmp.pdf', mimeType: 'application/pdf', buffer: Buffer.from('%PDF-1.4 gmp') });
+await Promise.all([k.waitForURL(/uploaded=gmp/), k.click('#files button:has-text("Upload")')]);
+await k.goto(B + '/m');
+check((await k.locator('main').innerText()).includes('We are checking your GMP certificate'), 'GMP upload starts the Verified badge check');
 
 // the team approves the company and switches the plan on; everything opens
 await t.goto(B + '/admin?tab=manufacturers'); await t.waitForLoadState('networkidle');
@@ -275,6 +291,26 @@ await k.locator('a b', { hasText: 'Doxycycline' }).first().click(); await k.wait
 await Promise.all([k.waitForURL(/saved=1/), k.click('button:has-text("Add to the tracker")')]);
 await k.goto(B + '/m/products?tab=launches');
 check((await k.locator('main').innerText()).includes('Doxycycline'), 'launch tracker');
+await k.goto(B + '/m/products?tab=watch'); await k.waitForLoadState('networkidle');
+await Promise.all([k.waitForURL(/saved=1/), k.click('button:has-text("Watch all my products")')]);
+const watchTab = await k.locator('main').innerText();
+check(watchTab.includes('Molecules you watch') && watchTab.includes('Doxycycline') && !watchTab.includes('Alpha Pharma'), 'competitor watch: follow your molecules, companies stay anonymous');
+await t.goto(B + '/admin?tab=regulatory&rc=TZ'); await t.waitForLoadState('networkidle');
+await t.setInputFiles('form:has(input[name=file][multiple]) input[name=file]', { name: 'tz-guideline.txt', mimeType: 'text/plain', buffer: Buffer.from('Labels in English.') });
+await Promise.all([t.waitForURL(/saved=1/), t.click('button:has-text("Upload to Tanzania")')]);
+check((await t.locator('main').innerText()).includes('tz-guideline'), 'team uploads regulatory documents for a country');
+const addReq = t.locator('form:has(button:has-text("Add to Tanzania"))');
+await addReq.locator('select[name=applies]').selectOption('molecule'); await addReq.locator('input[name=match]').fill('doxycycline');
+await addReq.locator('input[name=title]').fill('Smoke molecule rule'); await addReq.locator('textarea[name=body]').fill('A rule only for this molecule.');
+await Promise.all([t.waitForURL(/saved=1/), addReq.locator('button').click()]);
+await k.goto(B + '/m/regulatory?market=TZ');
+const regPaid = await k.locator('main').innerText();
+check(regPaid.includes('Smoke molecule rule') && regPaid.includes('Bioequivalence'), 'regulatory page: requirements for each product, set by the team');
+await t.goto(acctUrl); await t.waitForLoadState('networkidle');
+check((await t.locator('#mfiles').innerText()).includes('site-gmp.pdf'), 'team sees the manufacturer GMP upload');
+await Promise.all([t.waitForURL(/saved=1/), t.click('button:has-text("Mark verified")')]);
+await k.goto(B + '/m/report?market=TZ');
+check((await k.locator('body').innerText()).includes('Verified manufacturer'), 'verified badge on the market read');
 await k.goto(B + '/m/report?market=TZ');
 check((await k.locator('body').innerText()).includes('Your portfolio against it'), 'market read to download');
 await k.goto(B + '/m/market?market=TZ');
@@ -320,6 +356,14 @@ for (const path of ['/home', '/search?q=amox', '/market', '/market/whitespace', 
   await m.goto(B + path);
   const w = await m.evaluate(() => document.documentElement.scrollWidth);
   check(w <= 380, `no sideways scroll at 375px on ${path}`);
+}
+
+const mk = await page(375);
+await mk.goto(B + '/signup?mode=signin&as=manufacturer'); await mk.fill('#email', kmail); await mk.fill('#password', 'smoke-password-123');
+await Promise.all([mk.waitForURL(/\/m(\?|$)/), mk.click('button[type=submit]')]);
+for (const path of ['/m', '/m/products', '/m/products?tab=watch', '/m/regulatory', '/m/market']) {
+  await mk.goto(B + path);
+  check(await mk.evaluate(() => document.documentElement.scrollWidth) <= 380, `no sideways scroll at 375px on ${path}`);
 }
 
 const m2 = await page(375);

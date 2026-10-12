@@ -1,11 +1,15 @@
-"""Notification hooks. Email and WhatsApp are STUBBED: messages are written to the `notifications` outbox and logged.
+"""Notification hooks. Every message is written to the `notifications` outbox.
 
-To go live, implement send_email / send_whatsapp with your provider (e.g. SMTP or an email API; the WhatsApp
-Business Cloud API) and set the matching environment variables. Secrets stay in the deployment environment,
-never in the repository.
+Email goes out over SMTP when EMAIL_PROVIDER=smtp and SMTP_HOST are set. WhatsApp goes out through the WhatsApp Business
+Cloud API when WHATSAPP_TOKEN and WHATSAPP_PHONE_ID are set; WHATSAPP_TEMPLATE names an approved message template with one
+body variable (WhatsApp only allows free text inside 24 hours of the customer's last message). Without them both channels
+are logged as stubbed. Secrets stay in the deployment environment, never in the repository.
 """
+import json
 import logging
 import os
+import re
+import urllib.request
 
 log = logging.getLogger("notify")
 
@@ -29,10 +33,33 @@ def send_email(to, subject, body):
     return "stubbed"
 
 
+def whatsapp_payload(to, body, template=None, lang="en"):
+    """The Cloud API message: a template with the text as its one variable, or plain text. Template variables may not
+    contain line breaks, tabs or long runs of spaces."""
+    number = re.sub(r"\D", "", to or "")
+    if template:
+        text = re.sub(r"\s+", " ", body).strip()[:1000]
+        return {"messaging_product": "whatsapp", "to": number, "type": "template",
+                "template": {"name": template, "language": {"code": lang},
+                             "components": [{"type": "body", "parameters": [{"type": "text", "text": text}]}]}}
+    return {"messaging_product": "whatsapp", "to": number, "type": "text", "text": {"body": body[:4000]}}
+
+
 def send_whatsapp(to, body):
-    # Stub: wire the WhatsApp Business API here (WHATSAPP_TOKEN, WHATSAPP_PHONE_ID).
-    log.info("[whatsapp stub] to=%s body=%s", to, body[:80])
-    return "stubbed"
+    token, phone_id = os.environ.get("WHATSAPP_TOKEN"), os.environ.get("WHATSAPP_PHONE_ID")
+    if not (token and phone_id and re.sub(r"\D", "", to or "")):
+        log.info("[whatsapp stub] to=%s body=%s", to, body[:80])
+        return "stubbed"
+    payload = whatsapp_payload(to, body, os.environ.get("WHATSAPP_TEMPLATE"), os.environ.get("WHATSAPP_TEMPLATE_LANG", "en"))
+    version = os.environ.get("WHATSAPP_API_VERSION", "v21.0")
+    req = urllib.request.Request(f"https://graph.facebook.com/{version}/{phone_id}/messages", data=json.dumps(payload).encode(),
+                                 headers={"Authorization": f"Bearer {token}", "Content-Type": "application/json"}, method="POST")
+    try:
+        with urllib.request.urlopen(req, timeout=20) as r:
+            return "sent" if 200 <= r.status < 300 else "failed"
+    except Exception as e:  # never log the token; the status code and message are enough
+        log.warning("whatsapp send failed: %s", getattr(e, "code", type(e).__name__))
+        return "failed"
 
 
 def team_recipients(cur):
@@ -51,16 +78,17 @@ def notify_team(cur, subject, body):
     status = "stubbed"
     for e in emails:
         status = send_email(e, subject, body)
+    wa_status = "stubbed"
     for p in phones:
-        send_whatsapp(p, f"{subject}: {body}")
+        wa_status = send_whatsapp(p, f"{subject}: {body}")
     cur.execute("insert into notifications (user_id, channel, subject, body, status, sent_at) values (null, 'email', %s, %s, %s, now())",
                 (subject, body, status))
-    cur.execute("insert into notifications (user_id, channel, subject, body, status, sent_at) values (null, 'whatsapp', %s, %s, 'stubbed', now())",
-                (subject, body))
+    cur.execute("insert into notifications (user_id, channel, subject, body, status, sent_at) values (null, 'whatsapp', %s, %s, %s, now())",
+                (subject, body, wa_status))
 
 
 def deliver_queued(cur):
-    """Send queued customer notifications (written by the web app) through the stubbed providers."""
+    """Send queued notifications (written by the web app and the worker) through the providers."""
     rows = cur.execute("""select n.id, n.channel, n.subject, n.body, u.email, u.whatsapp, u.notify_email, u.notify_whatsapp
                           from notifications n left join users u on u.id = n.user_id
                           where n.status = 'queued' order by n.id limit 200""").fetchall()
@@ -73,6 +101,6 @@ def deliver_queued(cur):
         elif ch == "email" and n_email:
             status = send_email(email, subj or "Nazryx", body)
         elif ch == "whatsapp" and n_wa and wa:
-            status = send_whatsapp(wa, body)
+            status = send_whatsapp(wa, f"{subj}: {body}" if subj else body)
         cur.execute("update notifications set status = %s, sent_at = now() where id = %s", (status, nid))
     return len(rows)

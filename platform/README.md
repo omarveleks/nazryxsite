@@ -180,6 +180,25 @@ confirming → production → import permit → shipped → arrived → sampling
 checklist and ETA. My portfolio → Supply and shipments brings all of it together per product. Suggested selling prices (Admin > Content) show on the
 molecule page for paid plans.
 
+## Regulatory library, competitor watch, uploads, WhatsApp (migration 024)
+
+- **Regulatory** (`/m/regulatory`): what a market requires for every product (route, dossier, GMP, labels, marking,
+  samples, representative, after approval) and, on Complete Market Access, the extra steps for each of the manufacturer's
+  products (bioequivalence for oral solids, sterile products, controlled medicines, vaccines, insulins, single molecules).
+  A short "What this market requires" card sits on the Market page; each product page lists its own requirements.
+- **Admin > Regulatory** (team permission "Regulatory library"): upload regulatory documents for any of the nine
+  countries, many at once. With `ANTHROPIC_API_KEY` on the worker, each PDF, Word, text or image file is read
+  (`ingest/reg_extract.py`) into draft requirements; the team edits and publishes them. Customers never see the documents.
+  Starting requirements for TZ, KE, KZ, KG and UZ ship with the migration and are editable.
+- **Competitor watch** (My products > Competitor watch, Basic Market Data and up): follow any molecule, see competitors
+  today, new ones in 90 days and where their products are made. A new registration sends an alert by email and WhatsApp.
+  Companies stay anonymous on the manufacturer side, in the portal and in alerts.
+- **Uploads** on My products: a catalogue (PDF, Excel, Word, CSV) the team loads, and the starter pack (GMP, CPP, CoA,
+  labels). A checked GMP certificate earns the Verified badge, shown in the sidebar, on Home and on market reads.
+- **WhatsApp**: `ingest/notify.py` sends through the WhatsApp Business Cloud API when `WHATSAPP_TOKEN` and
+  `WHATSAPP_PHONE_ID` are set on the worker (`WHATSAPP_TEMPLATE` for messages outside the 24-hour window); otherwise
+  logged as stubbed. `ingest/digest.py` queues a weekly summary per manufacturer, only when there is something to say.
+
 ## Manufacturer sign-up and guided tour (migration 021)
 
 - **Sign-up** is one question per screen with a progress bar (`components/MfrWizard.tsx`): company, markets, what they want,

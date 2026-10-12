@@ -32,7 +32,8 @@ export default async function MfrHome({ searchParams }: { searchParams: Promise<
     const counts = await one(db, `select count(*)::int as products, count(p.molecule_id)::int as matched,
         count(*) filter (where g.demand >= ${HIGH_DEMAND})::int as high,
         count(*) filter (where cm.registrants <= 3 and (cm.registrations > 0 or cm.on_national_list))::int as few,
-        (select count(*)::int from launches l where l.user_id = $1) as launches
+        (select count(*)::int from launches l where l.user_id = $1) as launches,
+        (select count(*)::int from mfr_files f where f.user_id = $1 and f.kind = 'gmp') as gmp
         from mfr_products p left join country_molecules cm on cm.molecule_id = p.molecule_id and cm.country = $2
         left join visible_gap_scores g on g.molecule_id = p.molecule_id and g.country = $2 where p.user_id = $1`, [u.id, focus]);
     const first = await rows(db, `${mfrProductsSql(focus)} where p.user_id = $1 and cm.rankable and cm.on_national_list
@@ -54,6 +55,7 @@ export default async function MfrHome({ searchParams }: { searchParams: Promise<
     [Boolean(p?.sample_product_id) || u.mfr_tier >= 2, 'Open one product in full, free', '#free-read'],
     [Number(d.counts?.launches) > 0, 'Put a product on your launch tracker', '/m/products'],
     [Boolean(p?.chosen_plan || p?.active_plan), 'Pick your plan', '/m/plan'],
+    [Boolean(p?.verified_at) || Number(d.counts?.gmp) > 0, 'Upload your GMP certificate for the Verified badge', '/m/products#files'],
   ];
   const doneN = setup.filter(([ok]) => ok).length;
   return (
@@ -129,6 +131,17 @@ export default async function MfrHome({ searchParams }: { searchParams: Promise<
                 <Link className="btn btn-blue btn-sm" href="/m/plan" style={{ alignSelf: 'flex-start' }}>See plans</Link></>}
           </section>
 
+          {!u.whatsapp && (
+            <section className="card stack" style={{ gap: 8 }}>
+              <h2>Updates on WhatsApp</h2>
+              <p className="small muted">A short weekly summary, new competitors in the molecules you watch, and news on your projects.</p>
+              <Link className="btn btn-ghost btn-sm" href="/settings" style={{ alignSelf: 'flex-start' }}>Add your WhatsApp number</Link>
+            </section>)}
+          {!p?.verified_at && Number(d.counts?.gmp) > 0 && (
+            <section className="card stack" style={{ gap: 6 }}>
+              <span className="pill lav" style={{ alignSelf: 'flex-start' }}><VerifiedIcon /> Verified badge</span>
+              <p className="small muted">We are checking your GMP certificate. Once checked, the Verified manufacturer badge shows on your account and your market reads.</p>
+            </section>)}
           {!p?.sample_product_id && u.mfr_tier < 2 && d.products.length > 0 && (
             <section className="card stack" id="free-read">
               <h2>One product, fully open</h2>

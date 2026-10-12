@@ -786,3 +786,107 @@ def test_team_members_and_permissions(env):
         assert a.execute("select app_is_team()").fetchone()[0] is False  # removed: no longer team
         assert a.execute("select count(*) from auth_find_user('mem@example.com')").fetchone()[0] == 0   # and cannot sign in
         a.rollback()
+
+
+def test_files_regulatory_competitor_watch_and_weekly_summary(env):
+    import digest
+    import notify
+    import reg_extract
+    tmp, job = env["tmp"], env["job"]
+    with psycopg.connect(URL) as c:
+        maker = c.execute("insert into users (email, password_hash, account_type, onboarded, whatsapp, notify_whatsapp) values ('cw1@example.com', 'x', 'manufacturer', true, '+255 700 000 001', true) returning id").fetchone()[0]
+        other = c.execute("insert into users (email, password_hash, account_type, onboarded) values ('cw2@example.com', 'x', 'manufacturer', true) returning id").fetchone()[0]
+        team = c.execute("insert into users (email, password_hash, role) values ('cwt@example.com', 'x', 'team') returning id").fetchone()[0]
+        c.execute("""insert into manufacturer_profiles (user_id, company_name, target_countries, active_plan, completed_at)
+                     values (%s, 'Watch Pharma', '{TZ}', 'data', now() - interval '8 days'), (%s, 'Other', '{TZ}', null, now())""", (maker, other))
+        digoxin = c.execute("select id from molecules where inn = 'Digoxin'").fetchone()[0]
+        c.commit()
+    with app_conn(env) as a:
+        # manufacturer files: their own only; the team sees all
+        as_user(a, maker)
+        fid = a.execute("insert into stored_files (name, size, data, uploaded_by) values ('gmp.pdf', 3, 'pdf', %s) returning id", (maker,)).fetchone()[0]
+        a.execute("insert into mfr_files (user_id, kind, file_path, file_name) values (%s, 'gmp', %s, 'gmp.pdf')", (maker, f"db:{fid}"))
+        a.execute("insert into watches (user_id, molecule_id) values (%s, %s)", (maker, digoxin))
+        a.commit()
+        as_user(a, other)
+        assert a.execute("select count(*) from mfr_files").fetchone()[0] == 0
+        assert a.execute("select count(*) from stored_files where id = %s", (fid,)).fetchone()[0] == 0
+        with pytest.raises(psycopg.errors.InsufficientPrivilege):
+            a.execute("insert into mfr_files (user_id, kind, file_path, file_name) values (%s, 'gmp', 'db:x', 'x')", (maker,))
+        a.rollback()
+        # regulatory: customers read published requirements only, never the documents; the team writes both
+        as_user(a, team)
+        did = a.execute("""insert into reg_documents (country, title, file_path, file_name) values ('KZ', 'Guideline', 'db:none', 'g.txt')
+                           returning id""").fetchone()[0]
+        a.execute("""insert into reg_requirements (country, topic, applies, match, title, body, status, document_id)
+                     values ('KZ', 'Dossier', 'molecule', 'digoxin', 'Draft rule', 'Team only for now.', 'draft', %s)""", (did,))
+        a.commit()
+        as_user(a, other)
+        assert a.execute("select count(*) from reg_documents").fetchone()[0] == 0
+        titles = [r[0] for r in a.execute("select title from reg_requirements where country = 'KZ'").fetchall()]
+        assert "Draft rule" not in titles and "Labels in Kazakh and Russian" in titles
+        assert a.execute("select count(*) from reg_requirements where applies = 'form' and match = 'tablet'").fetchone()[0] == 5
+        with pytest.raises(psycopg.errors.InsufficientPrivilege):
+            a.execute("insert into reg_requirements (country, topic, title, body) values ('TZ', 'Dossier', 'x', 'y')")
+        a.rollback()
+    # a new Digoxin registration: the watching manufacturer gets an alert naming only where it is made
+    rows = registry_rows(n=129, extra=[("Doxycycline", "Delta Medics Ltd"), ("Doxycycline", "Beta Distributors (T) Ltd"),
+                                       ("Digoxin", "GAMMA HEALTHCARE LTD")], cancel={"TAN 20 HM 0006"})
+    job.run(job.create_job(write_registry(tmp / "r3.xls", rows), "upload"))
+    alerts = q("select channel, subject, body from notifications where user_id = %s order by channel", maker)
+    assert [x[0] for x in alerts] == ["email", "whatsapp"] and alerts[0][1] == "New competitor: Digoxin"
+    assert "India" in alerts[0][2] and "GAMMA" not in alerts[0][2].upper() and "MAKER" not in alerts[0][2].upper()
+    assert q("select count(*) from notifications where user_id = %s", other)[0][0] == 0
+    with app_conn(env) as a:
+        as_user(a, maker)
+        s = a.execute("select molecule, competitors, new_90, made_in from my_competitor_summary('TZ')").fetchall()
+        assert s == [("Digoxin", 1, 1, "India")]
+        assert a.execute("select change, made_in from my_competitor_watch(array['TZ'], 90)").fetchall() == [("added", "India")]
+        a.rollback()
+    # weekly summary: once a week, only with something to say
+    with psycopg.connect(URL) as c:
+        cur = c.cursor()
+        c.execute("delete from notifications where user_id = %s", (maker,))
+        assert digest.send_weekly(cur) == 1
+        assert digest.send_weekly(cur) == 0                     # not again this week
+        c.commit()
+    body = q("select body from notifications where user_id = %s and channel = 'whatsapp'", maker)[0][0]
+    assert "new competitor registration" in body and "GAMMA" not in body.upper()
+    assert q("select digest_sent_at is not null from manufacturer_profiles where user_id = %s", other)[0][0] is False  # completed today
+    # WhatsApp: template messages carry the text as one variable without line breaks; no credentials means stubbed
+    p = notify.whatsapp_payload("+255 700-000 001", "Line one\nLine two", template="nazryx_update")
+    assert p["to"] == "255700000001" and p["template"]["components"][0]["parameters"][0]["text"] == "Line one Line two"
+    assert notify.send_whatsapp("+255700000001", "hi") == "stubbed"
+    # reading documents: only well-formed requirements are kept
+    kept = reg_extract.clean([
+        {"topic": "Labelling", "applies": "all", "match": "x", "title": "Labels", "body": "Russian labels."},
+        {"topic": "Dossier", "applies": "atc", "match": "j01", "title": "Antibiotics", "body": "Extra data."},
+        {"topic": "Dossier", "applies": "form", "match": "", "title": "No match", "body": "Dropped."},
+        {"topic": "Nonsense", "applies": "all", "match": None, "title": "Bad topic", "body": "Dropped."}])
+    assert [(k["applies"], k["match"]) for k in kept] == [("all", None), ("atc", "J01")]
+
+
+def test_reg_extract_drafts_from_a_document(env):
+    import reg_extract
+
+    class Block:
+        type = "text"
+        text = '{"requirements": [{"topic": "Marking", "applies": "all", "match": null, "title": "Data Matrix", "body": "Every pack."}]}'
+
+    class Client:
+        class beta:
+            class messages:
+                @staticmethod
+                def create(**kw):
+                    assert kw["messages"][0]["content"][0]["type"] == "text"
+                    return type("R", (), {"stop_reason": "end_turn", "content": [Block()]})()
+
+    with psycopg.connect(URL) as c:
+        fid = c.execute("insert into stored_files (name, size, data) values ('g.txt', 5, 'rules') returning id").fetchone()[0]
+        c.execute("delete from reg_documents")
+        did = c.execute("insert into reg_documents (country, title, file_path, file_name) values ('UZ', 'Order', %s, 'g.txt') returning id",
+                        (f"db:{fid}",)).fetchone()[0]
+        c.commit()
+    assert reg_extract.run(client=Client()) == 1
+    assert q("select status, found from reg_documents where id = %s", did)[0] == ("done", 1)
+    assert q("select status, title from reg_requirements where document_id = %s", did)[0] == ("draft", "Data Matrix")

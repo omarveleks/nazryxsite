@@ -7,6 +7,7 @@ import { OpeningIcon } from '@/components/Icons';
 import { requireUser } from '@/lib/auth';
 import { one, rows, withUser } from '@/lib/db';
 import { HIGH_DEMAND, canUse, countryName } from '@/lib/mfr';
+import { REQ_SQL, type Requirement } from '@/lib/regulatory';
 
 export const metadata = { title: 'Market' };
 
@@ -35,9 +36,10 @@ export default async function MfrMarket({ searchParams }: { searchParams: Promis
     await loadLive(db);
     const targets = targetMarkets(p?.target_countries);
     const market = pickMarket(sp.market, targets, p?.primary_market);
-    if (!hasData(market)) return { targets, market };
+    const reqs = (await rows(db, REQ_SQL, [market]) as Requirement[]).filter((r) => r.applies === 'all');
+    if (!hasData(market)) return { targets, market, reqs };
     const h = await headline(db, market, u.id);
-    if (!full) return { targets, market, h };
+    if (!full) return { targets, market, reqs, h };
     const cats = await rows(db, `
       select m.category, count(*)::int as molecules, sum(cm.registrations)::int as products, round(avg(cm.registrants), 1)::float as per_molecule,
              count(*) filter (where cm.registrants = 0 and cm.rankable)::int as open,
@@ -51,7 +53,7 @@ export default async function MfrMarket({ searchParams }: { searchParams: Promis
     const years = await rows(db, `select reg_year as year, count(*)::int as n from registrations
         where country = $1 and active and reg_year between 2000 and extract(year from now())::int group by reg_year order by reg_year`, [market]);
     const routes = await rows(db, 'select label, description, months_low, months_high from registration_routes order by sort');
-    return { targets, market, h, cats, origin, years, routes };
+    return { targets, market, reqs, h, cats, origin, years, routes };
   });
   const m = d.market;
   return (
@@ -74,6 +76,12 @@ export default async function MfrMarket({ searchParams }: { searchParams: Promis
             sold there.</span>
           <Link className="btn btn-blue btn-sm" href={`/m/products?market=${m}`}>See your products</Link>
         </section>
+        {d.reqs.length > 0 && (
+          <section className="card stack" style={{ gap: 8 }}>
+            <div className="card-h"><h2>What {countryName(m)} requires</h2><Link className="btn-link" href={`/m/regulatory?market=${m}`}>All requirements, and yours by product</Link></div>
+            <div className="grid g3" style={{ gap: 8 }}>{d.reqs.slice(0, 6).map((r) => (
+              <div key={r.id} className="small"><span className="lbl">{r.topic}</span><div><b>{r.title}</b></div><div className="muted">{r.body}</div></div>))}</div>
+          </section>)}
         {!full ? (
           <PlanLock need="data" title={`The full ${countryName(m)} market`}>
             Every therapeutic class with its competition and openings, where registered products are made, how fast new registrations arrive,

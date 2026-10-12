@@ -9,7 +9,7 @@ import { dbMessage, one, withUser } from '@/lib/db';
 import { back, int, str } from '@/lib/forms';
 import { findMolecule } from '@/lib/match';
 import { AGENCY_KINDS, APPROACHES, GOALS, LAUNCH_SCOPES, CERTIFICATIONS, COMPANY_SIZES, CONTACT_ROLES, DOSAGE_FORMS, MFR_COUNTRIES, MFR_PLANS, NEEDS,
-  SERVICES, THERAPEUTIC_AREAS, TIMELINES, NEEDS_PLAN, LAUNCH_STAGES, WIZARD, type WizardStep, canUse, countryName, suggestPlan, tierOf, type PlanKey } from '@/lib/mfr';
+  SERVICES, THERAPEUTIC_AREAS, TIMELINES, NEEDS_PLAN, LAUNCH_STAGES, MFR_FILE_KINDS, WIZARD, type WizardStep, canUse, countryName, suggestPlan, tierOf, type PlanKey } from '@/lib/mfr';
 import { DOSSIER_ITEMS } from '@/lib/format';
 import { saveUpload } from '@/lib/uploads';
 import { TOUR } from '@/lib/tour';
@@ -64,7 +64,7 @@ export async function saveMfrStep(f: FormData) {
         else await db.query(`insert into manufacturer_profiles (user_id, company_name, hq_country, website, company_size, contact_role)
                              values ($1, $2, $3, $4, $5, $6)`, [u.id, ...v]);
         const phone = str(f, 'whatsapp', 40);
-        if (phone) await db.query('update users set whatsapp = $2 where id = $1', [u.id, phone]);
+        if (phone) await db.query('update users set whatsapp = $2, notify_whatsapp = true where id = $1', [u.id, phone]);
       } else if (!had) {
         throw new Error('Start with your company.');
       } else if (step === 2) {
@@ -457,4 +457,64 @@ export async function setPrimaryMarket(f: FormData) {
     await withUser(u.id, (db) => db.query('update manufacturer_profiles set primary_market = $2 where user_id = $1', [u.id, market]));
   }
   redirect(to);
+}
+
+/** Upload a catalogue (PDF, Excel, Word ...) or a starter-pack document. The team loads catalogues for the manufacturer
+ *  and checks GMP certificates for the Verified badge. */
+export async function uploadMfrFile(f: FormData) {
+  const u = await requireUser({ manufacturer: true });
+  const kind = str(f, 'kind', 20) || 'catalogue';
+  const to = safeNext(str(f, 'return', 200), '/m/products#files');
+  const path = to.split('#')[0], hash = to.includes('#') ? `#${to.split('#')[1]}` : '';
+  if (!MFR_FILE_KINDS[kind]) back(path, { error: 'Pick what the file is.' });
+  try {
+    const saved = await saveUpload(f.get('file'), u.id);
+    if (!saved) back(path, { error: 'Choose a file.' });
+    await withUser(u.id, async (db) => {
+      await db.query('insert into mfr_files (user_id, kind, file_path, file_name, note) values ($1, $2, $3, $4, $5)',
+        [u.id, kind, saved!.path, saved!.name, str(f, 'note', 300) || null]);
+      await teamNote(db, kind === 'catalogue' ? 'Catalogue uploaded: load the products' : `${MFR_FILE_KINDS[kind]} uploaded`,
+        `${u.email} uploaded ${saved!.name}.${kind === 'gmp' ? ' Check it for the Verified badge.' : ''}`);
+    });
+  } catch (e) {
+    if (isRedirect(e)) throw e;
+    back(path, { error: errText(e) });
+  }
+  redirect(`${path}${path.includes('?') ? '&' : '?'}uploaded=${kind}${hash}`);
+}
+
+export async function deleteMfrFile(f: FormData) {
+  const u = await requireUser({ manufacturer: true });
+  await withUser(u.id, (db) => db.query('delete from mfr_files where id = $1 and user_id = $2', [int(f, 'file_id'), u.id]));
+  redirect('/m/products?removed=1#files');
+}
+
+/** Competitor watch: follow a molecule (from your products, or any molecule by name). */
+export async function watchMolecule(f: FormData) {
+  const u = await requireUser({ manufacturer: true });
+  const to = safeNext(str(f, 'return', 200), '/m/products?tab=watch');
+  if (!canUse(u.mfr_tier, 'competitors')) redirect('/m/plan?want=data');
+  try {
+    await withUser(u.id, async (db) => {
+      if (f.get('all') === '1') {
+        await db.query(`insert into watches (user_id, molecule_id) select distinct $1::uuid, molecule_id from mfr_products
+                        where user_id = $1 and molecule_id is not null on conflict do nothing`, [u.id]);
+        return;
+      }
+      const mol = int(f, 'molecule_id') ?? (str(f, 'name', 120) ? await findMolecule(db, str(f, 'name', 120)) : null);
+      if (!mol) throw new Error('We do not track that molecule in your markets yet. Check the spelling or pick one of your products.');
+      await db.query('insert into watches (user_id, molecule_id) values ($1, $2) on conflict do nothing', [u.id, mol]);
+    });
+  } catch (e) {
+    if (isRedirect(e)) throw e;
+    back(to, { error: errText(e) });
+  }
+  back(to, { saved: '1' });
+}
+
+export async function unwatchMolecule(f: FormData) {
+  const u = await requireUser({ manufacturer: true });
+  const to = safeNext(str(f, 'return', 200), '/m/products?tab=watch');
+  await withUser(u.id, (db) => db.query('delete from watches where user_id = $1 and molecule_id = $2', [u.id, int(f, 'molecule_id')]));
+  back(to, { saved: '1' });
 }

@@ -12,6 +12,8 @@ const QUERIES: Record<string, string> = {
   account: 'select file_path as path, file_name as name from account_documents where id = $1',
   supplier: 'select file_path as path, file_name as name from supplier_documents where id = $1',
   mcatalogue: 'select catalogue_path as path, catalogue_name as name from manufacturer_profiles where user_id = $1',
+  mfile: 'select file_path as path, file_name as name from mfr_files where id = $1',
+  regdoc: 'select file_path as path, file_name as name from reg_documents where id = $1',
 };
 const UUID_KINDS = new Set(['mcatalogue']);
 

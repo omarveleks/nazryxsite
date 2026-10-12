@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 """Background worker: runs queued ingest jobs (oldest first), applies payments, delivers queued notifications through the stubbed
-providers and sends the 48-hour upload reminder. Wakes on NOTIFY 'ingest' or every POLL_SECONDS."""
+providers, sends the weekly manufacturer summary and the 48-hour upload reminder, and reads regulatory documents. Wakes on NOTIFY 'ingest' or every POLL_SECONDS."""
 import logging
 import os
 import time
 
 from db import connect
 import billing
+import digest
 import ingest_job
 import notify
 import reminder
@@ -32,11 +33,18 @@ def tick():
     with connect() as conn:
         cur = conn.cursor()
         billing.process(cur)          # plans switched on or off, invoices and order confirmations
+        digest.send_weekly(cur)       # the weekly summary for manufacturers (email and WhatsApp)
         notify.deliver_queued(cur)
         for (code,) in cur.execute("select code from countries where enabled").fetchall():
             reminder.check_and_remind(cur, code)
         reminder.remind_questions(cur)
         conn.commit()
+    if os.environ.get("ANTHROPIC_API_KEY"):
+        try:
+            import reg_extract
+            reg_extract.run()         # drafts requirements from uploaded regulatory documents; the team publishes them
+        except Exception:
+            log.exception("regulatory reading failed")
     return bool(row)
 
 

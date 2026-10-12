@@ -4,10 +4,10 @@ import MarketPicker, { AgencyMarket, dataMarkets, hasData, loadLive, pickMarket,
 import MedicineSearch from '@/components/MedicineSearch';
 import { Bar, Empty, Flash, LockIcon, PlanLock, Tabs } from '@/components/ui';
 import { DemandIcon } from '@/components/Icons';
-import { addMfrProducts, saveLaunch } from '@/app/actions/mfr';
+import { addMfrProducts, deleteMfrFile, saveLaunch, unwatchMolecule, uploadMfrFile, watchMolecule } from '@/app/actions/mfr';
 import { requireUser } from '@/lib/auth';
 import { one, rows, withUser } from '@/lib/db';
-import { HIGH_DEMAND, LAUNCH_STAGES, canUse, countryName, productClass } from '@/lib/mfr';
+import { HIGH_DEMAND, LAUNCH_STAGES, MFR_FILE_KINDS, canUse, countryName, productClass } from '@/lib/mfr';
 import { fmtDate } from '@/lib/format';
 
 export const metadata = { title: 'My products' };
@@ -16,13 +16,14 @@ type Fact = { molecule_id: number; country: string; registrants: number; registr
   rankable: boolean; score: number | null; demand: number | null };
 const competition = (f?: Fact) => !f || (!f.registrations && !f.on_national_list) ? 'absent'
   : f.registrants === 0 ? 'open' : f.registrants <= 3 ? 'few' : f.registrants < 8 ? 'some' : 'crowded';
+const WATCH: Record<string, string> = { added: 'New competitor', removed: 'Competitor left', status: 'Registration lapsed', reactivated: 'Back on the market' };
 const COMP: Record<string, [string, string]> = {
   open: ['Nobody registered', 'peach'], few: ['1 to 3 competitors', 'mint'], some: ['4 to 7 competitors', 'blue'], crowded: ['8 or more competitors', ''],
   absent: ['Not on this market yet', ''],
 };
 
 // The manufacturer's catalogue against its markets: a portfolio dashboard on top, then every product.
-export default async function MfrProducts({ searchParams }: { searchParams: Promise<{ added?: string; matched?: string; error?: string; market?: string; tab?: string; saved?: string }> }) {
+export default async function MfrProducts({ searchParams }: { searchParams: Promise<{ added?: string; matched?: string; error?: string; market?: string; tab?: string; saved?: string; uploaded?: string; removed?: string }> }) {
   const sp = await searchParams;
   const u = await requireUser({ manufacturer: true });
   const analysis = canUse(u.mfr_tier, 'portfolio');
@@ -40,9 +41,16 @@ export default async function MfrProducts({ searchParams }: { searchParams: Prom
     const launches = await rows(db, `select l.id, l.country, l.stage, l.updated_at, coalesce(m.inn, p.name) as name, p.id as product_id
         from launches l join mfr_products p on p.id = l.product_id left join molecules m on m.id = p.molecule_id
         where l.user_id = $1 order by l.updated_at desc`, [u.id]);
-    return { targets, primary: prof?.primary_market as string | null, products, facts, launches };
+    const files = await rows(db, 'select id, kind, file_name, created_at from mfr_files where user_id = $1 order by created_at desc', [u.id]);
+    const market = pickMarket(sp.market, targets, prof?.primary_market);
+    // competitor watch: the molecules followed, in the market shown, and what moved across all markets with data
+    const watching = sp.tab === 'watch' && canUse(u.mfr_tier, 'competitors');
+    const watched = watching && hasData(market) ? await rows(db, 'select * from my_competitor_summary($1)', [market]) : [];
+    const events = watching && dataMarkets(targets).length ? await rows(db, 'select * from my_competitor_watch($1, 90)', [dataMarkets(targets)]) : [];
+    const watchCount = Number((await one(db, 'select count(*)::int as n from watches where user_id = $1', [u.id]))?.n ?? 0);
+    return { targets, market, products, facts, launches, files, watched, events, watchCount };
   });
-  const market = pickMarket(sp.market, d.targets, d.primary);
+  const market = d.market;
   const fact = (mol: number | null, c: string) => d.facts.find((f) => f.molecule_id === mol && f.country === c);
   const focus = hasData(market) ? market : null;      // the market the dashboard reads
 
@@ -63,14 +71,55 @@ export default async function MfrProducts({ searchParams }: { searchParams: Prom
 
   return (
     <Shell user={u} title="My products" sub={`Your catalogue against ${countryName(market)}`}
-      actions={<a className="btn btn-blue btn-sm" href="#add">Add a product</a>}>
+      actions={<a className="btn btn-blue btn-sm" href="/m/products#add">Add a product</a>}>
       <Flash sp={sp} />
+      {sp.uploaded && <div className="ok" role="status">{sp.uploaded === 'catalogue' ? 'Catalogue received. Our team adds every product from it, usually within one working day.'
+        : sp.uploaded === 'gmp' ? 'GMP certificate received. Our team checks it for your Verified badge.' : 'Document received.'}</div>}
       {sp.added && <div className="ok" role="status">Added {sp.added} products; {sp.matched} matched to a molecule we track.
         {Number(sp.added) > Number(sp.matched) ? ' Our team matches the rest.' : ''}</div>}
-      <Tabs current={sp.tab === 'launches' ? 'launches' : 'portfolio'} items={[
+      <Tabs current={sp.tab === 'launches' || sp.tab === 'watch' ? sp.tab : 'portfolio'} items={[
         { key: 'portfolio', label: 'Portfolio', href: '/m/products' },
+        { key: 'watch', label: `Competitor watch${d.watchCount ? ` (${d.watchCount})` : ''}`, href: '/m/products?tab=watch' },
         { key: 'launches', label: `Launch tracker${d.launches.length ? ` (${d.launches.length})` : ''}`, href: '/m/products?tab=launches' }]} />
-      {sp.tab === 'launches' ? (
+      {sp.tab === 'watch' ? (
+        !canUse(u.mfr_tier, 'competitors') ? (
+          <PlanLock need="data" title="Competitor watch">Follow any molecule. See every new competitor in your markets, where their product is made,
+            and get an alert by email or WhatsApp the week it is registered.</PlanLock>
+        ) : (<>
+          <MarketPicker targets={d.targets} current={market} path="/m/products?tab=watch" />
+          <section className="card stack">
+            <div className="card-h"><div><h2>Molecules you watch</h2><p className="note">Competitors in {countryName(market)} today and new ones in the last 90 days.
+              We alert you by email or WhatsApp when a new one is registered.</p></div>
+              {d.products.some((p) => p.molecule_id) && <form action={watchMolecule}><input type="hidden" name="all" value="1" />
+                <button className="btn btn-ghost btn-sm" type="submit">Watch all my products</button></form>}</div>
+            {!hasData(market) ? <AgencyMarket code={market} /> : d.watched.length === 0 ? <Empty>You are not watching any molecule yet. Watch all your products, or add one below.</Empty> : (
+              <div className="tbl-wrap"><table className="tbl">
+                <thead><tr><th>Molecule</th><th className="r">Competitors</th><th className="r">New, 90 days</th><th className="hide-m">Their products are made in</th><th /></tr></thead>
+                <tbody>{d.watched.map((w) => (
+                  <tr key={w.molecule_id}><td><b>{w.molecule}</b><div className="sub2">{w.category ?? ''}</div></td>
+                    <td className="r num">{w.competitors}</td>
+                    <td className="r">{w.new_90 ? <span className="pill peach num">+{w.new_90}</span> : <span className="muted">0</span>}</td>
+                    <td className="small hide-m">{w.made_in ?? '—'}</td>
+                    <td className="r"><form action={unwatchMolecule}><input type="hidden" name="molecule_id" value={w.molecule_id} />
+                      <input type="hidden" name="return" value={`/m/products?tab=watch&market=${market}`} />
+                      <button className="btn-link small" type="submit">Stop watching</button></form></td></tr>))}</tbody></table></div>)}
+            <form action={watchMolecule} className="row" style={{ maxWidth: 560 }}>
+              <input type="hidden" name="return" value={`/m/products?tab=watch&market=${market}`} />
+              <input className="input" name="name" placeholder="Watch another molecule, e.g. by its generic name" aria-label="Molecule to watch" required style={{ flex: '1 1 220px' }} />
+              <button className="btn btn-blue btn-sm" type="submit">Watch</button>
+            </form>
+          </section>
+          <section className="card">
+            <div className="card-h"><div><h2>What competitors did</h2><p className="note">In the molecules you watch, all your markets, last 90 days.</p></div></div>
+            {d.events.length === 0 ? <Empty>Quiet: no competitor moves in the molecules you watch.</Empty> : (
+              <div>{d.events.map((w, i) => (
+                <div key={i} className="between small" style={{ padding: '10px 0', borderTop: i ? '1px solid var(--line)' : undefined, gap: 12 }}>
+                  <span><b>{WATCH[w.change] ?? w.change}</b> · {w.molecule} · {countryName(w.country)}{w.made_in ? <span className="muted"> · made in {w.made_in}</span> : null}</span>
+                  <span className="muted num" style={{ whiteSpace: 'nowrap' }}>{fmtDate(w.at)}</span>
+                </div>))}</div>)}
+          </section>
+        </>)
+      ) : sp.tab === 'launches' ? (
         <section className="card">
           <div className="card-h"><div><h2>Launch tracker</h2><p className="note">Each product in each market, from chosen to on the shelf. Add products from their page.</p></div></div>
           {d.launches.length === 0 ? <Empty>Nothing on the tracker yet. Open a product and add it for a market.</Empty> : (
@@ -140,10 +189,17 @@ export default async function MfrProducts({ searchParams }: { searchParams: Prom
       </section>
 
       </>)}
+      {sp.tab !== 'watch' && sp.tab !== 'launches' && (<>
       <section className="card stack" id="add" data-tour="add-products">
         <h2>Add a product</h2>
         <p className="note">Search by name. Not there? Add it as written and our team takes care of it.</p>
         <div style={{ maxWidth: 560 }}><MedicineSearch /></div>
+        <form action={uploadMfrFile} className="row" style={{ maxWidth: 560, padding: '10px 12px', border: '1px dashed var(--line)', borderRadius: 12 }}>
+          <input type="hidden" name="kind" value="catalogue" /><input type="hidden" name="return" value="/m/products#add" />
+          <span className="small" style={{ flex: '1 1 100%' }}><b>Or upload your catalogue</b> as PDF, Excel, Word or CSV. We add every product for you.</span>
+          <input name="file" type="file" required aria-label="Catalogue file" accept=".pdf,.xls,.xlsx,.csv,.doc,.docx,.txt" style={{ flex: '1 1 200px', minWidth: 0 }} />
+          <button className="btn btn-ghost btn-sm" type="submit">Upload</button>
+        </form>
         <details>
           <summary className="btn-link">Add many at once</summary>
           <form action={addMfrProducts} className="stack" style={{ marginTop: 10, maxWidth: 560 }}>
@@ -153,6 +209,23 @@ export default async function MfrProducts({ searchParams }: { searchParams: Prom
           </form>
         </details>
       </section>
+      <section className="card stack" id="files">
+        <div className="card-h"><div><h2>Your documents</h2><p className="note">Catalogues, and the small starter pack we check first: GMP certificate, CPP,
+          certificate of analysis, labels. Full dossiers only when we review one for you. A checked GMP certificate earns your Verified badge.</p></div></div>
+        {d.files.length > 0 && (
+          <div className="tbl-wrap"><table className="tbl"><tbody>{d.files.map((x) => (
+            <tr key={x.id}><td><a href={`/files/mfile/${x.id}`}><b>{x.file_name}</b></a><div className="sub2">{MFR_FILE_KINDS[x.kind]} · {fmtDate(x.created_at)}</div></td>
+              <td className="r"><form action={deleteMfrFile}><input type="hidden" name="file_id" value={x.id} />
+                <button className="btn-link small" type="submit">Remove</button></form></td></tr>))}</tbody></table></div>)}
+        <form action={uploadMfrFile} className="row" style={{ maxWidth: 640 }}>
+          <input type="hidden" name="return" value="/m/products#files" />
+          <select className="input" name="kind" aria-label="What the file is" defaultValue="gmp" style={{ flex: '1 1 180px' }}>
+            {Object.entries(MFR_FILE_KINDS).map(([k, l]) => <option key={k} value={k}>{l}</option>)}</select>
+          <input name="file" type="file" required aria-label="File" accept=".pdf,.png,.jpg,.jpeg,.xls,.xlsx,.csv,.doc,.docx,.txt" style={{ flex: '1 1 200px', minWidth: 0 }} />
+          <button className="btn btn-blue btn-sm" type="submit">Upload</button>
+        </form>
+      </section>
+      </>)}
     </Shell>
   );
 }

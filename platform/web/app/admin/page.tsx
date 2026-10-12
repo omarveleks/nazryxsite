@@ -11,13 +11,14 @@ import { answerQuestion, reviewManufacturer, grantCredits, keepSeparate, saveRou
   rejectSuggestion, resetPassword, resetTwoStep, reviewClaim, setPlan } from '@/app/actions/admin';
 import { StagePill } from '@/components/ui';
 import { deleteAccountDoc, deleteSupplierDoc, savePlanPrices, uploadAccountDoc, uploadSupplierDoc } from '@/app/actions/docs';
+import RegulatoryTab from './RegulatoryTab';
 import { ACCOUNT_DOC_KINDS, SUPPLIER_DOC_KINDS, daysLeft } from '@/lib/docs';
 
 export const metadata = { title: 'Admin' };
 export const dynamic = 'force-dynamic';
 const H48 = 48 * 3600e3;
 
-export default async function Admin({ searchParams }: { searchParams: Promise<{ tab?: string; error?: string; saved?: string; queued?: string; dq?: string }> }) {
+export default async function Admin({ searchParams }: { searchParams: Promise<{ tab?: string; error?: string; saved?: string; queued?: string; dq?: string; rc?: string }> }) {
   const sp = await searchParams;
   const u = await requireTeam();
   // each team member sees only the tabs their permissions open; owners see all of them and the Team tab
@@ -100,6 +101,12 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
           union all
           select 'Manufacturer catalogue', '/admin/accounts/' || p.user_id, '/files/mcatalogue/' || p.user_id, p.catalogue_name, 'catalogue', false, false, p.created_at, u.email
             from manufacturer_profiles p join users u on u.id = p.user_id where p.catalogue_path is not null
+          union all
+          select 'Manufacturer files', '/admin/accounts/' || f.user_id || '#mfiles', '/files/mfile/' || f.id, f.file_name, f.kind, false, false, f.created_at, u.email
+            from mfr_files f join users u on u.id = f.user_id
+          union all
+          select 'Regulatory: ' || d.country, '/admin?tab=regulatory&rc=' || d.country, '/files/regdoc/' || d.id, d.file_name, 'regulatory', true, true, d.created_at, null
+            from reg_documents d
         ) x where $1 = '' or x.file_name ilike '%' || $1 || '%' or x.email ilike '%' || $1 || '%' or x.place ilike '%' || $1 || '%'
         order by created_at desc limit 80`, [q]);
     }
@@ -149,6 +156,7 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
     { key: 'questions', label: `Questions (${c.open_questions})`, href: '/admin?tab=questions' },
     { key: 'manufacturers', label: `Manufacturers (${c.mfr_open})`, href: '/admin?tab=manufacturers' },
     { key: 'documents', label: `Documents${c.expiring ? ` (${c.expiring})` : ''}`, href: '/admin?tab=documents' },
+    { key: 'regulatory', label: 'Regulatory', href: '/admin?tab=regulatory' },
     { key: 'accounts', label: `Accounts${c.plan_requests ? ` (${c.plan_requests})` : ''}`, href: '/admin?tab=accounts' },
     { key: 'content', label: 'Content', href: '/admin?tab=content' },
     { key: 'activity', label: 'Activity', href: '/admin?tab=activity' },
@@ -431,6 +439,7 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
                   <td className="small">{x.from_team ? 'Nazryx' : 'Customer'}</td><td className="r small">{ago(x.created_at)}</td></tr>))}</tbody></table></div>)}
         </section>
       </>)}
+      {tab === 'regulatory' && <RegulatoryTab userId={u.id} country={sp.rc} />}
       {tab === 'none' && <section className="card"><p className="muted">Your account has no Admin areas yet. Ask an owner to give you access.</p></section>}
       {tab === 'team' && (<>
         <section className="card stack">

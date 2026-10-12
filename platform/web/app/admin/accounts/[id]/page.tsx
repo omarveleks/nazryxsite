@@ -7,7 +7,7 @@ import { requireTeam } from '@/lib/auth';
 import { one, rows, withUser } from '@/lib/db';
 import { ACCOUNT_DOC_KINDS } from '@/lib/docs';
 import { fmtDate } from '@/lib/format';
-import { APPROACHES, GOALS, LAUNCH_SCOPES, MFR_PLANS, NEEDS, PLAN_ORDER, SERVICES, TIMELINES, countryName, suggestPlan } from '@/lib/mfr';
+import { APPROACHES, GOALS, LAUNCH_SCOPES, MFR_FILE_KINDS, MFR_PLANS, NEEDS, PLAN_ORDER, SERVICES, TIMELINES, countryName, suggestPlan } from '@/lib/mfr';
 
 export const metadata = { title: 'Account' };
 
@@ -33,6 +33,7 @@ export default async function AdminAccount({ params, searchParams }: { params: P
       engagements: await rows(db, 'select id, kind, country, stage, status, updated_at from engagements where user_id = $1 order by updated_at desc limit 30', [id]),
       wants: await rows(db, 'select wanted, note, status, created_at from plan_requests where user_id = $1 order by created_at desc limit 10', [id]),
       docs: await rows(db, 'select * from account_documents where user_id = $1 order by created_at desc', [id]),
+      mfiles: await rows(db, 'select id, kind, file_name, created_at from mfr_files where user_id = $1 order by created_at desc', [id]),
     };
   });
   if (!d) notFound();
@@ -115,6 +116,14 @@ export default async function AdminAccount({ params, searchParams }: { params: P
                 <span className="small" style={{ flex: 1 }}>{p.verified_at ? `Verified manufacturer since ${fmtDate(p.verified_at)}` : 'Not verified yet'}</span>
                 <button className="btn btn-ghost btn-sm" type="submit">{p.verified_at ? 'Remove badge' : 'Mark verified (GMP checked)'}</button>
               </form>
+            </section>)}
+          {d.mfiles.length > 0 && (
+            <section className="card stack" id="mfiles">
+              <h2>Uploaded by the manufacturer</h2>
+              <p className="note">Catalogues to load, and the starter pack. A valid GMP certificate is what the Verified badge checks.</p>
+              {d.mfiles.map((x) => (
+                <div key={x.id} className="between"><a href={`/files/mfile/${x.id}`}>{x.file_name}</a>
+                  <span className="sub2">{MFR_FILE_KINDS[x.kind]} · {fmtDate(x.created_at)}</span></div>))}
             </section>)}
           <section className="card stack" id="documents">
             <h2>Account documents</h2>

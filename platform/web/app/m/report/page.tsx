@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { VerifiedIcon } from '@/components/Icons';
 import { redirect } from 'next/navigation';
 import Brand from '@/components/Brand';
 import PrintButton from '@/components/PrintButton';
@@ -17,7 +18,7 @@ export default async function MarketRead({ searchParams }: { searchParams: Promi
   if (!canUse(u.mfr_tier, 'market_read')) redirect('/m/plan?want=data');
   const d = await withUser(u.id, async (db) => {
     await loadLive(db);
-    const p = await one(db, 'select company_name, target_countries from manufacturer_profiles where user_id = $1', [u.id]);
+    const p = await one(db, 'select company_name, target_countries, verified_at from manufacturer_profiles where user_id = $1', [u.id]);
     const targets = targetMarkets(p?.target_countries);
     const market = sp.market && hasData(sp.market) ? sp.market : targets.find(hasData) ?? 'TZ';
     const h = await one(db, `select (select count(*)::int from registrations where country = $1 and active) as products,
@@ -37,6 +38,7 @@ export default async function MarketRead({ searchParams }: { searchParams: Promi
       <Brand href="/m" />
       <div><span className="lbl">Market read · {fmtDate(new Date())}</span>
         <h1>{m}, for {d.p?.company_name}</h1>
+        {d.p?.verified_at && <span className="pill blue" style={{ marginTop: 6 }}><VerifiedIcon /> Verified manufacturer</span>}
         <p className="muted" style={{ marginTop: 6 }}>Prepared for one manufacturer. Not for circulation.</p></div>
 
       <section className="card stack"><h2>1. The market</h2>

@@ -300,7 +300,23 @@ def feed_for_new_registrations(cur, upload_id, country, limit=300):
         join users u on (exists (select 1 from follows f where f.user_id = u.id and f.company_id = r.ltr_id)
                          or exists (select 1 from watches w where w.user_id = u.id and w.molecule_id = r.molecule_id))
         left join users o on o.id = u.owner_id
-        where r.first_upload_id = %s and r.active and coalesce(o.plan, u.plan) = 'paid'""", (upload_id,))
+        where r.first_upload_id = %s and r.active and coalesce(o.plan, u.plan) = 'paid'
+          and u.account_type is distinct from 'manufacturer'""", (upload_id,))
+    # manufacturers on a plan: a competitor alert for each molecule they watch, by email and WhatsApp (their settings decide
+    # which goes out). Companies stay anonymous on this side: only where the product is made.
+    cur.execute("""
+        insert into notifications (user_id, channel, subject, body)
+        select u.id, ch, 'New competitor: ' || x.inn,
+               x.n || ' new ' || case when x.n = 1 then 'registration' else 'registrations' end || ' of ' || x.inn || ' in ' || x.country_name
+               || coalesce(' (made in ' || x.made_in || ')', '') || '. See Competitor watch in your Nazryx portal.'
+        from (select w.user_id, m.inn, k.name as country_name, count(*) as n,
+                     string_agg(distinct initcap(lower(r.manufacturing_country)), ', ') as made_in
+              from registrations r join watches w on w.molecule_id = r.molecule_id join molecules m on m.id = r.molecule_id
+              join countries k on k.code = r.country
+              where r.first_upload_id = %s and r.active group by w.user_id, m.inn, k.name) x
+        join users u on u.id = x.user_id and u.account_type = 'manufacturer'
+        join manufacturer_profiles p on p.user_id = u.id and p.active_plan is not null
+        cross join (values ('email'), ('whatsapp')) as c(ch)""", (upload_id,))
 
 
 def apply_out(conn, out, upload_id, country=COUNTRY, initial=False):
