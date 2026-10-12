@@ -678,7 +678,7 @@ def test_plan_tier_partner_search_and_catalog(env):
         as_user(a, maker)
         assert a.execute("select mfr_tier()").fetchone()[0] == 0
         rows = a.execute("select code, open_to, carries_mine, total, mine from partner_search('TZ')").fetchall()
-        assert 0 < len(rows) <= 5 and rows[0][3] >= len(rows)                     # no plan: five rows, total still known
+        assert 0 < len(rows) <= 3 and rows[0][3] >= len(rows)                     # no plan: three rows, total still known
         assert all(r[1] + r[2] == r[4] == 1 for r in rows)                          # open to + carries = my molecules
         with pytest.raises(psycopg.errors.RaiseException):                          # cannot give itself a plan
             a.execute("update manufacturer_profiles set active_plan = 'entry' where user_id = %s", (maker,))
@@ -690,8 +690,16 @@ def test_plan_tier_partner_search_and_catalog(env):
         a.commit()
         as_user(a, maker)
         assert a.execute("select mfr_tier()").fetchone()[0] == 1
+        target = a.execute("select total from partner_search('TZ')").fetchall()
+        assert len(target) == min(target[0][0], 10)                                  # Basic Market Data: a target list of ten
+        assert q("select plan from users where id = %s", maker)[0][0] == "paid"     # an active plan makes the account paid
+        a.rollback()
+        as_user(a, team)
+        a.execute("update manufacturer_profiles set active_plan = 'access' where user_id = %s", (maker,))
+        a.commit()
+        as_user(a, maker)
         full = a.execute("select total from partner_search('TZ')").fetchall()
-        assert len(full) == min(full[0][0], 200)                                     # with a plan: every distributor
+        assert len(full) == min(full[0][0], 200)                                     # Complete Market Access: every distributor
         a.rollback()
 
 

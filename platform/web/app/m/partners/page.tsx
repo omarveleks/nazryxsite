@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import Shell from '@/components/Shell';
-import MarketPicker, { AgencyMarket, hasData, loadLive, targetMarkets } from '@/components/MarketPicker';
+import MarketPicker, { AgencyMarket, hasData, loadLive, pickMarket, targetMarkets } from '@/components/MarketPicker';
 import { Empty, Flash, PlanLock } from '@/components/ui';
 import { requestIntro } from '@/app/actions/mfr';
 import { requireUser } from '@/lib/auth';
@@ -20,9 +20,9 @@ export default async function Partners({ searchParams }: { searchParams: Promise
   const lists = canUse(u.mfr_tier, 'distributors'), matching = canUse(u.mfr_tier, 'matching'), intro = canUse(u.mfr_tier, 'partner_intro');
   const d = await withUser(u.id, async (db) => {
     await loadLive(db);
-    const prof = await one(db, 'select target_countries, status from manufacturer_profiles where user_id = $1', [u.id]);
+    const prof = await one(db, 'select target_countries, status, primary_market from manufacturer_profiles where user_id = $1', [u.id]);
     const targets = targetMarkets(prof?.target_countries);
-    const market = sp.market && targets.includes(sp.market) ? sp.market : targets.find(hasData) ?? targets[0];
+    const market = pickMarket(sp.market, targets, prof?.primary_market);
     const cats = await categories(db);
     const mine = await rows(db, `select distinct m.id, m.inn from mfr_products p join molecules m on m.id = p.molecule_id where p.user_id = $1 order by m.inn`, [u.id]);
     const cls = sp.class && cats.includes(sp.class) ? sp.class : null;
@@ -38,9 +38,10 @@ export default async function Partners({ searchParams }: { searchParams: Promise
   const total = d.list[0]?.total ?? 0, mineN = d.list[0]?.mine ?? d.mine.length;
   const filtered = Boolean(d.cls || d.molecule || Number(sp.min));
   return (
-    <Shell user={u} title="Distributors" sub={`Who could carry your products in ${countryName(d.market)}`}>
+    <Shell user={u} title="Distributors" sub={`Who could carry your products in ${countryName(d.market)}`}
+      actions={intro ? <Link className="btn btn-blue btn-sm" href="/m/partners/intro">Ask us to find distributors</Link> : undefined}>
       <Flash sp={sp} />
-      <MarketPicker targets={d.targets} current={d.market} path="/m/partners" noAll />
+      <MarketPicker targets={d.targets} current={d.market} path="/m/partners" />
       {!hasData(d.market) ? <AgencyMarket code={d.market} /> : (<>
         <form method="get" className="card tight stack" style={{ gap: 10 }}>
           <input type="hidden" name="market" value={d.market} />
@@ -78,17 +79,11 @@ export default async function Partners({ searchParams }: { searchParams: Promise
                   </div>
                 </div>
                 {!intro ? <PlanLock compact need="entry" title="Introduction" />
-                  : d.status !== 'approved' ? <span className="note">Introductions open once our team approves your company.</span> : (
-                  <form action={requestIntro} className="row" style={{ gap: 6 }}>
-                    <input type="hidden" name="code" value={p.code} /><input type="hidden" name="class" value={d.cls ?? ''} /><input type="hidden" name="market" value={d.market} />
-                    <select className="input" name="product_id" aria-label="For which product" defaultValue={d.molecule ? '' : ''} style={{ maxWidth: 200 }}>
-                      <option value="">Any product</option>{d.products.map((x) => <option key={x.id} value={x.id}>{x.name}</option>)}</select>
-                    <button className="btn btn-blue btn-sm" type="submit">Request introduction</button>
-                  </form>)}
+                  : <Link className="btn btn-blue btn-sm" href={`/m/partners/intro?code=${p.code}`}>Request introduction</Link>}
               </div>))}</div>)}
           {!lists && total > shown.length && (
-            <div style={{ marginTop: 12 }}><PlanLock need="data" title={`${total - shown.length} more distributors`}>
-              The full target distributor list for {countryName(d.market)}, with every filter.</PlanLock></div>)}
+            <div style={{ marginTop: 12 }}><PlanLock need="access" title={`${total - shown.length} more distributors`}>
+              Every distributor in {countryName(d.market)}, with how many of your molecules each does not carry yet.</PlanLock></div>)}
         </section>
         <p className="note">Introductions are part of market entry: we contact the distributor, present your product and help agree terms.</p>
       </>)}

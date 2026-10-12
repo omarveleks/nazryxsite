@@ -112,7 +112,7 @@ check(true, 'team turns on two-step sign-in');
 for (const tab of ['', '?tab=review', '?tab=claims', '?tab=requests', '?tab=documents', '?tab=manufacturers', '?tab=accounts', '?tab=content', '?tab=activity']) {
   const r = await t.goto(B + '/admin' + tab); check(r.status() === 200, `admin ${tab || 'data updates'}`);
 }
-await t.goto(B + '/admin?tab=claims');
+await t.goto(B + '/admin?tab=claims'); await t.waitForLoadState('networkidle');   // let the page finish loading before clicking
 await Promise.all([t.waitForLoadState('networkidle'), t.locator(`tr:has-text("${email}") button:has-text("Approve")`).click()]);
 await t.goto(B + '/admin?tab=questions');
 await t.locator('textarea[name=answer]').first().fill('Yes, if the reference product is WHO-prequalified.');
@@ -251,7 +251,7 @@ await k.goto(B + '/m/plan?want=access');
 check((await k.locator('main').innerText()).includes('To unlock that') && (await k.locator('main').innerText()).includes('Compare the plans'), 'upgrade flow names the plan that unlocks it');
 
 // the team approves the company and switches the plan on; everything opens
-await t.goto(B + '/admin?tab=manufacturers');
+await t.goto(B + '/admin?tab=manufacturers'); await t.waitForLoadState('networkidle');
 await Promise.all([t.waitForURL(/saved=1/), t.locator(`tr:has-text("${kmail}") button:has-text("Approve")`).click()]);
 await t.locator('a:has-text("Smoke Generics")').first().click(); await t.waitForURL(/admin\/accounts\//);
 const acct = await t.locator('main').innerText();
@@ -280,11 +280,20 @@ check((await k.locator('body').innerText()).includes('Your portfolio against it'
 await k.goto(B + '/m/market?market=TZ');
 check((await k.locator('main').innerText()).includes('Where registered products are made'), 'market page for the manufacturer');
 await k.goto(B + '/m/market?market=KE');
-check((await k.locator('main').innerText()).includes('Talk to our team'), 'markets without data point to our team');
+check((await k.locator('main').innerText()).includes('Managed by Nazryx'), 'markets without data show as managed by Nazryx');
+await k.goto(B + '/m/products');
+await Promise.all([k.waitForLoadState('networkidle'), k.click('form[aria-label=Market] button:has-text("Kenya")')]);
+check((await k.locator('main').innerText()).includes('Your catalogue against Kenya'), 'the market switch changes the market across the portal');
+await k.goto(B + '/m/market');
+check((await k.locator('main').innerText()).includes('Kenya'), 'the chosen market carries over to other pages');
+await k.click('form[aria-label=Market] button:has-text("Tanzania")'); await k.waitForLoadState('networkidle');
 await k.goto(B + '/m/partners?class=' + encodeURIComponent('Anti-infective Medicines'));
 const kpart = await k.locator('main').innerText();
 check(/Distributor [0-9A-F]{8}/.test(kpart) && /Open to \d+ of your \d+ molecules/.test(kpart) && !kpart.includes('Alpha Pharma'), 'partners show codes and how open each is to you');
-await Promise.all([k.waitForURL(/\/m\/engagements\/\d+\?new=1/), k.locator('button:has-text("Request introduction")').first().click()]);
+await Promise.all([k.waitForURL(/\/m\/partners\/intro\?code=/), k.locator('a:has-text("Request introduction")').first().click()]);
+await k.locator('input[name=scope][value=all]').check(); await k.selectOption('#partner', 'exclusive');
+await Promise.all([k.waitForURL(/\/m\/engagements\/\d+\?new=1/), k.click('button:has-text("Send to our team")')]);
+check((await k.locator('main').innerText()).includes('the entire portfolio'), 'introduction form: whole portfolio, specific products or our choice');
 check(true, 'manufacturer requests an introduction');
 await k.goto(B + '/m/services/market_entry');
 await Promise.all([k.waitForURL(/\/m\/engagements\/\d+\?new=1/), k.click('button:has-text("Send to our team")')]);

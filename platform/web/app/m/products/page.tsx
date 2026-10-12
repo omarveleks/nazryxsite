@@ -28,7 +28,7 @@ export default async function MfrProducts({ searchParams }: { searchParams: Prom
   const analysis = canUse(u.mfr_tier, 'portfolio');
   const d = await withUser(u.id, async (db) => {
     await loadLive(db);
-    const prof = await one(db, 'select target_countries from manufacturer_profiles where user_id = $1', [u.id]);
+    const prof = await one(db, 'select target_countries, primary_market from manufacturer_profiles where user_id = $1', [u.id]);
     const targets = targetMarkets(prof?.target_countries);
     const products = await rows(db, `select p.id, p.name, p.strength, p.dosage_form, p.molecule_id, p.atc, m.inn, m.category
         from mfr_products p left join molecules m on m.id = p.molecule_id where p.user_id = $1 order by coalesce(m.inn, p.name)`, [u.id]);
@@ -40,12 +40,11 @@ export default async function MfrProducts({ searchParams }: { searchParams: Prom
     const launches = await rows(db, `select l.id, l.country, l.stage, l.updated_at, coalesce(m.inn, p.name) as name, p.id as product_id
         from launches l join mfr_products p on p.id = l.product_id left join molecules m on m.id = p.molecule_id
         where l.user_id = $1 order by l.updated_at desc`, [u.id]);
-    return { targets, products, facts, launches };
+    return { targets, primary: prof?.primary_market as string | null, products, facts, launches };
   });
-  const market = pickMarket(sp.market, d.targets);
+  const market = pickMarket(sp.market, d.targets, d.primary);
   const fact = (mol: number | null, c: string) => d.facts.find((f) => f.molecule_id === mol && f.country === c);
-  const live = dataMarkets(d.targets);
-  const focus = market === 'all' ? live[0] : market;      // the market the dashboard reads (all: the first with data)
+  const focus = hasData(market) ? market : null;      // the market the dashboard reads
 
   const list = d.products.map((p) => ({ ...p, cls: productClass(p), f: focus ? fact(p.molecule_id, focus) : undefined }))
     .sort((a, b) => (b.f?.score ?? -1) - (a.f?.score ?? -1) || String(a.inn ?? a.name).localeCompare(String(b.inn ?? b.name)));
@@ -63,7 +62,7 @@ export default async function MfrProducts({ searchParams }: { searchParams: Prom
   const visible = (i: number) => analysis || i < 3;
 
   return (
-    <Shell user={u} title="My products" sub={market === 'all' ? 'Your catalogue across your markets' : `Your catalogue against ${countryName(market)}`}
+    <Shell user={u} title="My products" sub={`Your catalogue against ${countryName(market)}`}
       actions={<a className="btn btn-blue btn-sm" href="#add">Add a product</a>}>
       <Flash sp={sp} />
       {sp.added && <div className="ok" role="status">Added {sp.added} products; {sp.matched} matched to a molecule we track.
@@ -93,10 +92,10 @@ export default async function MfrProducts({ searchParams }: { searchParams: Prom
       ) : (<>
       <MarketPicker targets={d.targets} current={market} path="/m/products" />
 
-      {market !== 'all' && !hasData(market) ? <AgencyMarket code={market} /> : n > 0 && (<>
+      {!hasData(market) ? <AgencyMarket code={market} /> : n > 0 && (<>
         <div className="grid g4" data-tour="portfolio">
           <div className="tile t-white"><span className="k">Products</span><span className="v num">{n}</span><span className="small">{matched} matched to a molecule</span></div>
-          <div className="tile t-peach"><span className="k"><DemandIcon /> In high demand{focus && market === 'all' ? ` in ${countryName(focus)}` : ''}</span>
+          <div className="tile t-peach"><span className="k"><DemandIcon /> In high demand</span>
             <span className="v num">{list.filter((p) => Number(p.f?.demand ?? 0) >= HIGH_DEMAND).length}</span>
             <span className="small">{by('open')} of your products have nobody registered</span></div>
           {analysis ? (<>
@@ -124,16 +123,16 @@ export default async function MfrProducts({ searchParams }: { searchParams: Prom
         {n === 0 ? <Empty>No products yet. Search for your first one below.</Empty> : (
           <div className="tbl-wrap"><table className="tbl">
             <thead><tr><th>Product</th><th className="hide-m">Class</th>
-              {market === 'all' ? live.map((c) => <th key={c} className="r">{countryName(c)}</th>) : <th className="r">Competition</th>}</tr></thead>
+              <th className="r">Competition in {countryName(market)}</th></tr></thead>
             <tbody>{list.map((p, i) => (
               <tr key={p.id}>
-                <td><Link href={`/m/products/${p.id}${market !== 'all' ? `?market=${market}` : ''}`}><b>{p.inn ?? p.name}</b></Link>
+                <td><Link href={`/m/products/${p.id}`}><b>{p.inn ?? p.name}</b></Link>
                   {Number(p.f?.demand ?? 0) >= HIGH_DEMAND && visible(i) && <span style={{ marginLeft: 6, color: 'var(--pastel-peach-ink)' }}><DemandIcon size={11} title="High demand" /></span>}
                   <div className="sub2">{[p.inn ? p.name : null, p.molecule_id ? null : 'Not matched yet'].filter(Boolean).join(' · ')}</div></td>
                 <td className="small hide-m">{p.cls ?? '—'}</td>
-                {(market === 'all' ? live : [market]).map((c) => {
+                {[market].map((c) => {
                   const f = fact(p.molecule_id, c);
-                  return <td key={c} className="r">{!hasData(c) ? <span className="note">—</span>
+                  return <td key={c} className="r">{!hasData(c) ? <span className="pill blue">Managed by Nazryx</span>
                     : !visible(i) ? <span className="note row" style={{ justifyContent: 'flex-end', gap: 4 }}><LockIcon /> Locked</span>
                     : <span className={`pill ${COMP[competition(f)][1]}`}>{competition(f) === 'some' || competition(f) === 'crowded' ? `${f!.registrants} competitors` : COMP[competition(f)][0]}</span>}</td>;
                 })}

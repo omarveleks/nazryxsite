@@ -452,7 +452,8 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
         <section className="card stack">
           <h2>Team ({d.members.filter((m: any) => !m.disabled).length})</h2>
           {d.members.map((m: any) => (
-            <form key={m.id} action={updateTeamMember} className="stack" style={{ gap: 8, paddingTop: 12, borderTop: '1px solid var(--line)', opacity: m.disabled ? 0.6 : 1 }}>
+            <div key={m.id} className="stack" style={{ gap: 8, paddingTop: 12, borderTop: '1px solid var(--line)', opacity: m.disabled ? 0.6 : 1 }}>
+            <form action={updateTeamMember} className="stack" style={{ gap: 8 }}>
               <input type="hidden" name="user_id" value={m.id} />
               <div className="between"><span><b>{m.name || m.email}</b><span className="sub2"> · {m.email}{m.two_step ? ' · two-step on' : ''}</span></span>
                 <span className="row" style={{ gap: 6 }}>{m.disabled ? <span className="pill">Removed</span> : m.team_owner ? <span className="pill solid">Owner</span> : null}
@@ -461,12 +462,12 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
                 <div className="row" style={{ gap: 6 }}>{TEAM_PERMISSIONS.map(([k, l]) => (
                   <label key={k} className="row small" style={{ gap: 4, marginRight: 8 }}><input type="checkbox" name="perm" value={k} defaultChecked={m.team_owner || m.team_permissions?.includes(k)} /> {l}</label>))}</div>
               </>)}
-              <div className="row">
-                {!m.disabled && !m.team_owner && <button className="btn btn-blue btn-sm" type="submit">Save</button>}
-                {!m.team_owner && <button className="btn btn-ghost btn-sm" type="submit" formAction={removeTeamMember} name="restore" value={m.disabled ? '1' : '0'}>
-                  {m.disabled ? 'Give access back' : 'Remove access'}</button>}
-              </div>
-            </form>))}
+              {!m.disabled && !m.team_owner && <button className="btn btn-blue btn-sm" type="submit" style={{ alignSelf: 'flex-start' }}>Save</button>}
+            </form>
+            {!m.team_owner && (
+              <form action={removeTeamMember}><input type="hidden" name="user_id" value={m.id} /><input type="hidden" name="restore" value={m.disabled ? '1' : '0'} />
+                <button className="btn btn-ghost btn-sm" type="submit">{m.disabled ? 'Give access back' : 'Remove access'}</button></form>)}
+            </div>))}
           <p className="note">The owner opens everything and manages the team. Removing someone signs them out at once and stops them signing in;
             their past work stays in the activity log.</p>
         </section>

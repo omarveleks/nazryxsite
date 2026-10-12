@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import Shell from '@/components/Shell';
-import MarketPicker, { AgencyMarket, hasData, loadLive, pickMarket, targetMarkets } from '@/components/MarketPicker';
+import MarketPicker, { AgencyMarket, ManagedShowcase, hasData, loadLive, pickMarket, targetMarkets } from '@/components/MarketPicker';
 import YearChart from '@/components/YearChart';
 import { PlanLock } from '@/components/ui';
 import { OpeningIcon } from '@/components/Icons';
@@ -31,15 +31,10 @@ export default async function MfrMarket({ searchParams }: { searchParams: Promis
   const u = await requireUser({ manufacturer: true });
   const full = canUse(u.mfr_tier, 'market');
   const d = await withUser(u.id, async (db) => {
-    const p = await one(db, 'select target_countries from manufacturer_profiles where user_id = $1', [u.id]);
+    const p = await one(db, 'select target_countries, primary_market from manufacturer_profiles where user_id = $1', [u.id]);
     await loadLive(db);
     const targets = targetMarkets(p?.target_countries);
-    const market = pickMarket(sp.market, targets);
-    if (market === 'all') {
-      const cards = [];
-      for (const c of targets.filter(hasData)) cards.push({ c, h: await headline(db, c, u.id) });
-      return { targets, market, cards };
-    }
+    const market = pickMarket(sp.market, targets, p?.primary_market);
     if (!hasData(market)) return { targets, market };
     const h = await headline(db, market, u.id);
     if (!full) return { targets, market, h };
@@ -60,31 +55,14 @@ export default async function MfrMarket({ searchParams }: { searchParams: Promis
   });
   const m = d.market;
   return (
-    <Shell user={u} title="Market" sub={m === 'all' ? 'Your markets side by side' : `${countryName(m)}: size, openings and competition`}
-      actions={m !== 'all' && hasData(m) ? (canUse(u.mfr_tier, 'market_read') ? <Link className="btn btn-ghost btn-sm" href={`/m/report?market=${m}`}>Download market read</Link>
+    <Shell user={u} title="Market" sub={hasData(m) ? `${countryName(m)}: size, openings and competition` : `${countryName(m)}: managed by Nazryx`}
+      actions={hasData(m) ? (canUse(u.mfr_tier, 'market_read') ? <Link className="btn btn-ghost btn-sm" href={`/m/report?market=${m}`}>Download market read</Link>
         : <PlanLock compact need="data" title="Market read (PDF)" />) : undefined}>
       <MarketPicker targets={d.targets} current={m} path="/m/market" />
 
-      {m === 'all' && (
-        <div className="grid g2" data-tour="market">{d.cards!.map(({ c, h }) => (
-          <section key={c} className="card stack">
-            <h2>{countryName(c)}</h2>
-            {h && (<>
-              <div className="grid g2">
-                <div><span className="note">Registered products</span><div className="num" style={{ fontSize: 22, fontWeight: 700 }}>{h.products.toLocaleString('en')}</div></div>
-                <div><span className="note">On the essential list, nobody registered</span><div className="num" style={{ fontSize: 22, fontWeight: 700 }}>{h.open}</div></div>
-                <div><span className="note">Your molecules already on the market</span><div className="num" style={{ fontSize: 22, fontWeight: 700 }}>{h.mine_on_market}</div></div>
-                <div><span className="note">Your molecules in high demand</span><div className="num" style={{ fontSize: 22, fontWeight: 700 }}>{h.mine_high}</div></div>
-              </div>
-              <Link className="btn btn-ghost btn-sm" href={`/m/market?market=${c}`} style={{ alignSelf: 'flex-start' }}>Open {countryName(c)}</Link>
-            </>)}
-          </section>))}
-          {d.targets.some((c) => !hasData(c)) && <p className="note" style={{ gridColumn: '1 / -1' }}>Our team works {d.targets.filter((c) => !hasData(c)).map(countryName).join(', ')} with you directly.</p>}
-        </div>)}
+      {!hasData(m) && <AgencyMarket code={m} />}
 
-      {m !== 'all' && !hasData(m) && <AgencyMarket code={m} />}
-
-      {m !== 'all' && d.h && (<>
+      {d.h && (<>
         <div className="grid g4" data-tour="market">
           <div className="tile t-blue"><span className="k">Registered products</span><span className="v num">{d.h.products.toLocaleString('en')}</span></div>
           <div className="tile t-mint"><span className="k">Distributors holding registrations</span><span className="v num">{d.h.distributors}</span></div>
@@ -132,6 +110,7 @@ export default async function MfrMarket({ searchParams }: { searchParams: Promis
           </section>
         </>)}
       </>)}
+      <ManagedShowcase codes={d.targets.filter((c) => c !== m && !hasData(c))} />
     </Shell>
   );
 }

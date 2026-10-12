@@ -51,12 +51,16 @@ export default async function SourcingList({ searchParams }: { searchParams: Pro
                   <div className="row" style={{ gap: 6 }}>
                     <label className="sr" htmlFor={`qty_${m.id}`}>Quantity for {m.inn}</label>
                     <input className="input" id={`qty_${m.id}`} name={`qty_${m.id}`} placeholder="Quantity (optional)" style={{ width: 170 }} />
-                    <button className="btn btn-ghost btn-sm" type="submit" formAction={toggleList} name="molecule_id" value={m.id} formNoValidate>Remove</button>
+                    <button className="btn btn-ghost btn-sm" type="submit" form={`remove_${m.id}`}>Remove</button>
                   </div>
                 </div>))}
               <input type="hidden" name="return" value="/requests/list" />
             </form>
           )}
+          {/* one small form per molecule for Remove, outside the send form (a button cannot carry its own server action and a name) */}
+          {d.items.map((m) => (
+            <form key={m.id} id={`remove_${m.id}`} action={toggleList} hidden>
+              <input type="hidden" name="molecule_id" value={m.id} /><input type="hidden" name="return" value="/requests/list" /></form>))}
         </section>
         <div className="stack">
           <section className="card stack">

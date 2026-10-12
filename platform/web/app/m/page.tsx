@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import Shell from '@/components/Shell';
-import { hasData, loadLive, targetMarkets } from '@/components/MarketPicker';
+import { ManagedBadge, hasData, loadLive, pickMarket, targetMarkets } from '@/components/MarketPicker';
 import { DemandIcon, VerifiedIcon } from '@/components/Icons';
 import { Badges, Empty, Flash, PlanLock, StagePill } from '@/components/ui';
 import { chooseSample, tourGo } from '@/app/actions/mfr';
@@ -22,12 +22,13 @@ export default async function MfrHome({ searchParams }: { searchParams: Promise<
   const full = canUse(u.mfr_tier, 'portfolio'), watchAll = canUse(u.mfr_tier, 'watch');
   const d = await withUser(u.id, async (db) => {
     await loadLive(db);
-    const profile = await one(db, `select company_name, status, target_countries, suggested_plan, chosen_plan, active_plan, verified_at, sample_product_id,
+    const profile = await one(db, `select company_name, status, target_countries, suggested_plan, chosen_plan, active_plan, verified_at, sample_product_id, primary_market,
                                    cardinality(certifications) + cardinality(dosage_forms) as profile_bits
                                    from manufacturer_profiles where user_id = $1`, [u.id]);
     const targets = targetMarkets(profile?.target_countries);
     const live = targets.filter(hasData);
-    const focus = live[0] ?? 'TZ';
+    const chosen = pickMarket(undefined, targets, profile?.primary_market);
+    const focus = hasData(chosen) ? chosen : live[0] ?? 'TZ';
     const counts = await one(db, `select count(*)::int as products, count(p.molecule_id)::int as matched,
         count(*) filter (where g.demand >= ${HIGH_DEMAND})::int as high,
         count(*) filter (where cm.registrants <= 3 and (cm.registrations > 0 or cm.on_national_list))::int as few,
@@ -144,7 +145,7 @@ export default async function MfrHome({ searchParams }: { searchParams: Promise<
             <div className="between"><h2>Your markets</h2><Link className="btn-link" href="/m/onboarding?step=3">Edit</Link></div>
             {d.targets.map((c) => (
               <div key={c} className="between"><span>{countryName(c)}</span>
-                {hasData(c) ? <Link className="small" href={`/m/market?market=${c}`}>Open →</Link> : <span className="note">With our team</span>}</div>))}
+                {hasData(c) ? <Link className="small" href={`/m/market?market=${c}`}>Open →</Link> : <ManagedBadge />}</div>))}
             {canUse(u.mfr_tier, 'market_read') && <Link className="btn btn-ghost btn-sm" href={`/m/report?market=${d.focus}`} style={{ alignSelf: 'flex-start' }}>Download a market read</Link>}
           </section>
 

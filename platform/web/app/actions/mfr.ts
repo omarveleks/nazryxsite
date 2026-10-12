@@ -312,23 +312,38 @@ export async function requestService(f: FormData) {
   redirect(`/m/engagements/${id}?new=1`);
 }
 
-/** Ask the team to introduce an anonymised distributor from the partner finder. */
+/** An introduction request: a distributor (or let us pick), which products (specific, our choice or the whole
+ *  portfolio) and the basics. Starts a market entry engagement for the team. */
 export async function requestIntro(f: FormData) {
   const u = await requireUser({ manufacturer: true });
-  const code = str(f, 'code', 12).toUpperCase(), product = int(f, 'product_id');
-  if (!/^[0-9A-F]{8}$/.test(code)) back('/m/partners', { error: 'Pick a distributor profile.' });
+  const code = str(f, 'code', 12).toUpperCase();
+  const back_ = `/m/partners/intro${code ? `?code=${code}` : ''}`;
+  if (code && !/^[0-9A-F]{8}$/.test(code)) back('/m/partners', { error: 'Pick a distributor profile.' });
   if (!canUse(u.mfr_tier, 'partner_intro')) redirect(`/m/plan?want=${NEEDS_PLAN.partner_intro}`);
+  const picked = [...new Set(f.getAll('products').map((x) => parseInt(String(x), 10)).filter(Number.isFinite))];
+  const scope = picked.length ? 'selected' : ['selected', 'nazryx', 'all'].includes(str(f, 'scope', 12)) ? str(f, 'scope', 12) : 'nazryx';
+  if (scope === 'selected' && !picked.length) back(back_, { error: 'Tick the products you want to put forward, or let us choose.' });
+  const country = codes.includes(str(f, 'market', 2)) ? str(f, 'market', 2) : 'TZ';
   let id = 0;
   try {
     id = await withUser(u.id, async (db) => {
-      const country = codes.includes(str(f, 'market', 2)) ? str(f, 'market', 2) : 'TZ';
+      const names = picked.length ? (await db.query(`select coalesce(m.inn, p.name) as n from mfr_products p left join molecules m on m.id = p.molecule_id
+                                                     where p.user_id = $1 and p.id = any($2) order by 1`, [u.id, picked])).rows.map((r: any) => r.n) : [];
+      const lines = [
+        code ? `Distributor profile ${code}.` : 'Nazryx to shortlist the distributors.',
+        `Products: ${scope === 'all' ? 'the entire portfolio' : scope === 'nazryx' ? 'Nazryx to choose' : names.join(', ')}.`,
+        `Partner: ${({ exclusive: 'exclusive', non_exclusive: 'non-exclusive is fine', unsure: 'not sure yet' } as Record<string, string>)[str(f, 'partner', 20)] ?? 'not sure yet'}.`,
+        `Start: ${({ now: 'as soon as possible', '3m': 'within 3 months', '6m': 'in 6 months or more' } as Record<string, string>)[str(f, 'start', 4)] ?? 'not given'}.`,
+        str(f, 'contact', 200) ? `Contact: ${str(f, 'contact', 200)}.` : '',
+        str(f, 'detail', 1500),
+      ].filter(Boolean).join('\n');
       const r = await one(db, `insert into engagements (user_id, kind, country, product_id, detail) values ($1, 'market_entry', $2, $3, $4) returning id`,
-        [u.id, country, product, `Start with distributor profile ${code}${str(f, 'class', 120) ? ` (${str(f, 'class', 120)})` : ''}. ${str(f, 'detail', 1000)}`.trim()]);
-      await teamNote(db, 'Introduction requested', `${u.email} asked to meet distributor profile ${code}. Engagement #${r!.id}.`);
+        [u.id, country, picked.length === 1 ? picked[0] : null, lines]);
+      await teamNote(db, 'Introduction requested', `${u.email} asked for an introduction${code ? ` to distributor profile ${code}` : ''} in ${country}. Engagement #${r!.id}.`);
       return r!.id as number;
     });
   } catch (e) {
-    back('/m/partners', { error: dbMessage(e) });
+    back(back_, { error: dbMessage(e) });
   }
   redirect(`/m/engagements/${id}?new=1`);
 }
@@ -432,4 +447,14 @@ export async function tourGo(f: FormData) {
   });
   if (!t) redirect('/m');
   redirect(t.path.includes('{product}') ? (product ? t.path.replace('{product}', String(product)) : '/m/products') : t.path);
+}
+
+/** The market shown across the portal (market picker). */
+export async function setPrimaryMarket(f: FormData) {
+  const u = await requireUser({ manufacturer: true });
+  const market = str(f, 'market', 2), to = safeNext(str(f, 'return', 200), '/m');
+  if (codes.includes(market)) {
+    await withUser(u.id, (db) => db.query('update manufacturer_profiles set primary_market = $2 where user_id = $1', [u.id, market]));
+  }
+  redirect(to);
 }

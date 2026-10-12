@@ -206,6 +206,11 @@ molecule page for paid plans.
 - **Markets**: Tanzania, Kazakhstan, Kyrgyzstan, Uzbekistan and Kenya get full market screens as soon as their data is loaded
   (a market counts as live when it has registrations). Senegal, Cameroon, Côte d'Ivoire and Haiti are worked by the team and
   kept in the background of the interface.
+- **Markets in the portal**: one market at a time, the one chosen with the market switch (shown only with more than one
+  market; it carries across pages). Markets without screens show as "Managed by Nazryx" with the trust badge.
+- **Distributors by plan**: three without a plan, a target list of ten on Basic Market Data, every distributor on Complete
+  Market Access. **Introductions** (Complete Market Entry) go through one form: a distributor or let us pick, specific products,
+  our choice or the whole portfolio, and the basics. An active manufacturer plan also makes the account paid (team seats).
 - **Services**: three only. Market entry (distributor, local technical representative, registration and launch; includes
   introductions), Dossier and regulatory review (Complete Market Access), Renewals and compliance (everyone). The Services page
   starts with "What do you want?": goal, market, how much we should do, then the plan or service that fits.

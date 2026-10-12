@@ -19,22 +19,19 @@ export default async function MfrProduct({ params, searchParams }: { params: Pro
   const u = await requireUser({ manufacturer: true });
   const d = await withUser(u.id, async (db) => {
     await loadLive(db);
-    const prof = await one(db, 'select target_countries, sample_product_id from manufacturer_profiles where user_id = $1', [u.id]);
+    const prof = await one(db, 'select target_countries, sample_product_id, primary_market from manufacturer_profiles where user_id = $1', [u.id]);
     // the free full read opens every section for one product
     const sampled = prof?.sample_product_id === id;
     const t = sampled ? 3 : u.mfr_tier;
     const targets = targetMarkets(prof?.target_countries);
-    // a product page opens on a market with data; the general view is one click away
-    const market = sp.market ? pickMarket(sp.market, targets) : targets.find(hasData) ?? targets[0];
-    const focus = market === 'all' ? targets.find(hasData) ?? 'TZ' : market;
+    const market = pickMarket(sp.market, targets, prof?.primary_market);
+    const focus = hasData(market) ? market : targets.find(hasData) ?? 'TZ';
     const p = await one(db, `${mfrProductsSql(focus)} where p.id = $1 and p.user_id = $2`, [id, u.id]);
     if (!p) return null;
     const launches = await rows(db, 'select id, country, stage from launches where product_id = $1 and user_id = $2', [id, u.id]);
     const base = { p, targets, market, t, sampled, launches };
     if (!p.molecule_id) return base;
-    const across = market === 'all' ? await rows(db, `select country, registrants, registrations, on_national_list, facility_level from country_molecules
-        where molecule_id = $1 and country = any($2)`, [p.molecule_id, targets]) : [];
-    if (market === 'all' || !hasData(market)) return { ...base, across };
+    if (!hasData(market)) return base;
     const origin = canUse(t, 'market') ? await rows(db, `select initcap(lower(coalesce(manufacturing_country, 'not stated'))) as country, count(*)::int as n
         from registrations where molecule_id = $1 and country = $2 and active group by 1 order by n desc limit 5`, [p.molecule_id, market]) : null;
     const lapsed = canUse(t, 'market') ? Number((await one(db, `select count(*)::int as n from registrations where molecule_id = $1 and country = $2 and not active`,
@@ -66,16 +63,6 @@ export default async function MfrProduct({ params, searchParams }: { params: Pro
           {!p.molecule_id ? (
             <section className="card stack"><h2>Not matched yet</h2>
               <p className="muted">Our team is matching &ldquo;{p.name}&rdquo; to the market. You can still ask for any service in the meantime.</p></section>
-          ) : market === 'all' ? (
-            <section className="card">
-              <div className="card-h"><h2>Across your markets</h2></div>
-              <table className="tbl"><tbody>{d.targets.filter(hasData).map((c) => {
-                const f = 'across' in d ? d.across?.find((x) => x.country === c) : null;
-                return (<tr key={c}><td><Link href={`/m/products/${id}?market=${c}`}>{countryName(c)}</Link></td>
-                  <td className="r">{f ?  <>{registeredLine(f.registrants, f.registrations)}{f.on_national_list ? ` · essential list${f.facility_level ? `, level ${f.facility_level}` : ''}` : ''}</>
-                    : 'Not on this market yet'}</td></tr>);
-              })}</tbody></table>
-            </section>
           ) : !hasData(market) ? <AgencyMarket code={market} /> : (<>
             <section className="card stack" data-tour="product">
               <div className="card-h"><h2>Why {countryName(market)}</h2>{p.registrants != null && <Badges m={p} />}</div>
@@ -145,7 +132,7 @@ export default async function MfrProduct({ params, searchParams }: { params: Pro
             <form action={saveLaunch} className="stack" style={{ gap: 8 }}>
               <input type="hidden" name="product_id" value={id} /><input type="hidden" name="return" value={`/m/products/${id}`} />
               <div className="row">
-                <select className="input" name="country" aria-label="Market" defaultValue={market === 'all' ? d.targets[0] : market} style={{ flex: '1 1 120px' }}>
+                <select className="input" name="country" aria-label="Market" defaultValue={market} style={{ flex: '1 1 120px' }}>
                   {d.targets.map((c) => <option key={c} value={c}>{countryName(c)}</option>)}</select>
                 <select className="input" name="stage" aria-label="Stage" defaultValue="selected" style={{ flex: '1 1 140px' }}>
                   {LAUNCH_STAGES.map(([k, l]) => <option key={k} value={k}>{l}</option>)}</select>

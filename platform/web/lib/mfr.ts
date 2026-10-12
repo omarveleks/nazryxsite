@@ -172,7 +172,7 @@ export const TIER: Record<string, number> = { data: 1, access: 2, entry: 3 };
 export const tierOf = (plan?: string | null) => TIER[plan ?? ''] ?? 0;
 /** The lowest plan that includes a feature or service. 24-hour reports are open to everyone. */
 export const NEEDS_PLAN: Record<string, PlanKey> = {
-  market: 'data', portfolio: 'data', distributors: 'data', watch: 'data', market_read: 'data',
+  market: 'data', portfolio: 'data', watch: 'data', market_read: 'data', distributors: 'access',
   matching: 'access', pricing: 'access', pathway: 'access', dossier_review: 'access',
   partner_intro: 'entry', market_entry: 'entry', forecast: 'entry',
 };
