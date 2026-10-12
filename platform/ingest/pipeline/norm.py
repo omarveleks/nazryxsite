@@ -261,3 +261,20 @@ def company_key(name):
     s = re.sub(r"[^a-z0-9 ]", " ", s)
     s = re.sub(CO_STOP, " ", s)
     return re.sub(r"\s+", " ", s).strip()
+
+
+def same_stem(a, b):
+    """Close spellings of one medicine, never a different one: same number of ingredients, each pair starting alike, and
+    no name inside the other ('esomeprazole' is not 'omeprazole', 'oxymetazoline' is not 'xylometazoline',
+    'lorazepam' is not 'clonazepam')."""
+    ta, tb = sorted(a.split()), sorted(b.split())
+    if len(ta) != len(tb):
+        return False
+    for x, y in zip(ta, tb):
+        if x == y:
+            continue
+        if x[:3] != y[:3] or x.endswith(y) or y.endswith(x):          # a prefix makes another medicine (es-, levo-, dex-)
+            return False
+        if (x.startswith(y) or y.startswith(x)) and abs(len(x) - len(y)) > 2:   # a longer ending too ('metronidazol' + 'e' is fine)
+            return False
+    return True

@@ -12,9 +12,9 @@ export async function activeRequestCount(db: Db, uid: string): Promise<number> {
                                 and stage not in ('Registration', 'Shipment', 'Closed')`, [uid]))?.n ?? 0);
 }
 
-export async function categories(db: Db): Promise<string[]> {
+export async function categories(db: Db, country: string = COUNTRY): Promise<string[]> {
   return (await rows(db, `select distinct m.category from molecules m join country_molecules cm on cm.molecule_id = m.id
-                          where cm.country = $1 and m.category is not null order by 1`, [COUNTRY])).map((r) => r.category);
+                          where cm.country = $1 and m.category is not null order by 1`, [country])).map((r) => r.category);
 }
 
 /** Molecule rows for lists (search, open molecules): registrations, badges, the caller's own status.

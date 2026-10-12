@@ -242,7 +242,7 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
       </>)}
       {tab === 'review' && (<>
         <section className="card">
-          <div className="card-h"><h2>Suggested matches</h2><span className="note">Essential molecules with no exact registry match. Accept to merge them.</span></div>
+          <div className="card-h"><h2>Suggested matches</h2><span className="note">Possible spelling differences between the official list and the register. Accept only if it is the same medicine; nothing changes until you do.</span></div>
           {d.sugg.length === 0 ? <Empty>No open suggestions.</Empty> : (
             <div className="tbl-wrap"><table className="tbl"><thead><tr><th>Official list</th><th>Registry molecule</th><th>Similarity</th><th className="r"></th></tr></thead>
               <tbody>{d.sugg.map((s: any) => (
@@ -253,7 +253,7 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
               </tbody></table></div>)}
         </section>
         <section className="card">
-          <div className="card-h"><h2>Possible duplicate distributors</h2></div>
+          <div className="card-h"><h2>Possible duplicate distributors</h2><span className="note">Two spellings that may be one company. Merge only if they are; branches and units of one group can stay separate.</span></div>
           {d.dups.length === 0 ? <Empty>No open pairs.</Empty> : (
             <div className="tbl-wrap"><table className="tbl"><thead><tr><th>Company A</th><th>Company B</th><th>Similarity</th><th className="r"></th></tr></thead>
               <tbody>{d.dups.map((p: any) => (
@@ -266,7 +266,8 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
               </tbody></table></div>)}
         </section>
         <section className="card">
-          <div className="card-h"><h2>Essential molecules with no registration</h2><span className="note">Map one by hand if the registry uses another name</span></div>
+          <div className="card-h"><h2>Essential molecules with no registration</h2><span className="note">On the official list, no single-ingredient product registered. These are real openings, not errors.
+            &ldquo;In combinations&rdquo; above 0 means it is sold only inside combination products. Map one only if the register uses another name for it.</span></div>
           <div className="tbl-wrap"><table className="tbl"><thead><tr><th>Molecule</th><th>Class</th><th>In combinations</th><th className="r">Map to registry molecule</th></tr></thead>
             <tbody>{d.unmatched.map((m: any) => (
               <tr key={m.id}><td>{m.inn}</td><td className="small">{m.category}</td><td className="num">{m.in_combinations}</td>

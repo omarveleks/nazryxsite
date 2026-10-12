@@ -23,7 +23,7 @@ from rapidfuzz import fuzz, process
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(HERE, "pipeline"))
 
-from norm import company_key, display_name, form_of, molecule_key, spelling_variants  # noqa: E402
+from norm import company_key, display_name, form_of, molecule_key, same_stem, spelling_variants  # noqa: E402
 import loader  # noqa: E402
 import xlsx_rows  # noqa: E402
 
@@ -436,17 +436,6 @@ class Namer:
         if len(parts) == 1 and names:
             return names[0]
         return " + ".join(self.ingredient(p) for p in parts)
-
-
-def same_stem(a, b):
-    """Close spellings of one medicine, never a different one: 'esomeprazole' is not 'omeprazole', nor 'levofloxacin'
-    'ofloxacin' (one name inside the other), and both must start alike."""
-    for x, y in zip(sorted(a.split()), sorted(b.split())):
-        if x == y:
-            continue
-        if x[:2] != y[:2] or x.endswith(y) or y.endswith(x) or x.startswith(y) or y.startswith(x):
-            return False
-    return True
 
 
 class Matcher:

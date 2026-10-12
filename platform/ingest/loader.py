@@ -12,6 +12,7 @@ import pandas as pd
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "pipeline"))
 
 from companies import same_company  # noqa: E402
+from norm import same_stem  # noqa: E402
 from gap import score_molecule  # noqa: E402
 
 COUNTRY = "TZ"
@@ -273,8 +274,10 @@ def load_review_queues(cur, data, upload_id, country):
             mine = set(r.key.split())
             # same ingredients spelled differently, not a combination that merely contains this molecule
             options = [k for k in keys if not (mine < set(k.split()))]
-            best = process.extractOne(r.key, options, scorer=fuzz.token_sort_ratio)
-            if not best or best[1] < 80:
+            # a close spelling of the same medicine only: different medicines that look alike are left out
+            options = [k for k in options if same_stem(r.key, k)]
+            best = process.extractOne(r.key, options, scorer=fuzz.token_sort_ratio) if options else None
+            if not best or best[1] < 85:
                 continue
             src = cur.execute("select molecule_id from molecule_aliases where alias = %s", (r.key,)).fetchone()
             dst = cur.execute("select molecule_id from molecule_aliases where alias = %s", (best[0],)).fetchone()
