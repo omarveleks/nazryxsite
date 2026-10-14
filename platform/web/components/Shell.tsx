@@ -6,7 +6,6 @@ import type { ReactNode } from 'react';
 import type { User } from '@/lib/auth';
 import Brand from './Brand';
 import NavLinks from './NavLinks';
-import CountryPicker from './CountryPicker';
 import { signOut } from '@/app/actions/auth';
 
 export default function Shell({ user, title, sub, crumb, actions, children }: {
@@ -17,7 +16,7 @@ export default function Shell({ user, title, sub, crumb, actions, children }: {
     <div className="shell">
       <aside className="side">
         <Brand />
-        <NavLinks team={user.role === 'team'} manufacturer={user.account_type === 'manufacturer'} />
+        <NavLinks team={user.role === 'team'} />
         {user.account_type === 'manufacturer' && user.role !== 'team' ? (
           <div className="plan-box">
             <b>{user.mfr_active ? MFR_PLANS[user.mfr_active as keyof typeof MFR_PLANS]?.name : 'No plan yet'}</b>
@@ -26,14 +25,7 @@ export default function Shell({ user, title, sub, crumb, actions, children }: {
             <Link className="btn-link hide-m" href="/m/plan">{user.mfr_active ? 'Your plan' : 'See plans'}</Link>
             {user.mfr_verified && <span className="pill blue hide-m" style={{ alignSelf: 'flex-start' }}><VerifiedIcon /> Verified manufacturer</span>}
           </div>
-        ) : (
-        <div className="plan-box">
-          <b>{user.role === 'team' ? 'Nazryx team' : user.plan === 'paid' ? 'Paid plan' : 'Free plan'}</b>
-          {user.plan !== 'paid' && user.role !== 'team' ? (
-            <span className="num">{user.credits} enrich credits left</span>
-          ) : <span className="hide-m">Unlimited enrich</span>}
-          {user.plan !== 'paid' && user.role !== 'team' && <Link className="btn-link hide-m" href="/settings#plan">Upgrade</Link>}
-        </div>)}
+        ) : user.role === 'team' ? <div className="plan-box"><b>Nazryx team</b></div> : null}
         <div className="side-foot">
           <Link href="/help">Help and contact</Link>
           <span>{user.email}</span>
@@ -49,9 +41,6 @@ export default function Shell({ user, title, sub, crumb, actions, children }: {
           </div>
           <div className="top-right">
             {actions}
-            {user.role !== 'team' && user.account_type !== 'manufacturer' && <Link className={`btn btn-sm ${user.list_count ? 'btn-blue' : 'btn-ghost'}`} href="/requests/list">
-              Sourcing list{user.list_count ? ` · ${user.list_count}` : ''}</Link>}
-            {user.account_type !== 'manufacturer' && <CountryPicker paid={user.plan === 'paid'} />}
             <Link className="avatar" href="/settings" title="Settings">{initials || 'You'}</Link>
           </div>
         </div>

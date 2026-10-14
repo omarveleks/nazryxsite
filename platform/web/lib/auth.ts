@@ -70,17 +70,15 @@ export const getUser = cache(async (): Promise<User | null> => {
     where u.id = $1`, [id]));
 });
 
-/** Signed-in customer pages. Distributor and manufacturer accounts each have their own area; `shared` pages
- *  (settings, help) serve both. The team can open everything. */
+/** Signed-in customer pages: the manufacturer area, and `shared` pages (settings, help). The distributor side is
+ *  paused, so a distributor account only reaches the shared pages. The team can open everything. */
 export async function requireUser(opts: { allowOnboarding?: boolean; manufacturer?: boolean; shared?: boolean } = {}): Promise<User> {
   const u = await getUser();
   if (!u) redirect('/signup?mode=signin');
   const mfr = u.account_type === 'manufacturer';
-  if (!u.onboarded && !opts.allowOnboarding && u.role !== 'team') redirect(mfr ? '/m/onboarding' : '/onboarding');
-  if (u.role !== 'team' && !opts.shared) {
-    if (opts.manufacturer && !mfr) redirect('/home');
-    if (!opts.manufacturer && mfr) redirect('/m');
-  }
+  if (u.role !== 'team' && !mfr && !opts.shared) redirect('/help?paused=1');
+  if (!u.onboarded && !opts.allowOnboarding && u.role !== 'team' && mfr) redirect('/m/onboarding');
+  if (u.role !== 'team' && !opts.shared && !opts.manufacturer) redirect('/m');
   return u;
 }
 

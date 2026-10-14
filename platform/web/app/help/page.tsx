@@ -3,48 +3,43 @@ import type { ReactNode } from 'react';
 import Brand from '@/components/Brand';
 import Shell from '@/components/Shell';
 import { getUser } from '@/lib/auth';
-import { COVERAGE_NOTE, FREE } from '@/lib/format';
+import { COVERAGE_NOTE } from '@/lib/format';
 import { SUPPORT_EMAIL, SUPPORT_WHATSAPP } from '@/lib/support';
 
 export const metadata = { title: 'Help' };
 
+// Questions manufacturers ask. The distributor side is paused (distributor/README.md keeps its help text in git history).
 const QA: [string, ReactNode][] = [
-  ['How current is it?', <>Updated every two days. Company and competitor figures count <b>registered products, not sales</b>.</>],
-  ['How do you pick molecules for me?', <>From the classes in your portfolio, we show a few official TMDA list molecules that few or no companies
-    have registered in Tanzania. Hide the ones you do not want. You see how many companies registered each one, never a made-up score.</>],
-  ['What happens when I source a molecule?', <>It follows the normal route for a medicine: product request, regulatory check (who holds a
-    registration, its status, restrictions), regulatory analysis (the route and timeline to register it), pricing and logistics (anonymous
-    quotes, landed price, lead time), then registration and shipment. You see each step on the request.</>],
-  ['Can I just ask a question?', <>Yes. Use <a href="/expert">Ask the expert</a> for regulatory, pricing or sourcing questions, with or
-    without a molecule. Free plans get 3 questions a month. Compare two molecules side by side from any molecule page.</>],
-  ['What is the sourcing list?', <>Add molecules from Search, Open molecules or a molecule page with &quot;+ List&quot;, then request them
-    all at once. Each becomes its own request.</>],
-  ['What is the EML level?', <>Where the official TMDA list allows a medicine to be stocked: A dispensaries and up, B health centres,
-    C district hospitals, D regional hospitals, S specialist hospitals.</>],
-  ['How do enrich credits work?', <>The free plan has {FREE.credits} credits a month. Opening a molecule&apos;s full page costs one credit,
-    once; opening it again is free. Credits reset at the start of each month. The paid plan has no credit limit.</>],
-  ['What do I get on the paid plan?', <>Price bands, supplier availability, the full ranked list of gaps, more countries as they launch,
-    alerts on every new registration by companies you follow, team seats, and no limit on active requests
-    (free: {FREE.requests}). Upgrade from Settings and our team will contact you.</>],
-  ['Why do I need to claim my company?', <>So we know you are who you say you are. We check your licence and your work email by hand,
-    then unlock your company profile and can pre-fill your portfolio from your registrations.</>],
-  ['How do sourcing requests work?', <>Tell us the molecule, quantity and target price. Our team reaches out, finds suppliers and posts
-    quotes. Quotes are anonymous until you accept one: accepting reveals the supplier and the price, and opens an order. You see each
-    stage on the Requests page, and updates arrive by email or WhatsApp.</>],
-  ['Who can see my portfolio and requests?', <>Only you, teammates on your account, and the Nazryx team. Other companies never see them.
-    Supplier details stay private to the Nazryx team until you accept a quote.</>],
+  ['Where does the market data come from?', <>From each country&rsquo;s official medicines register: Tanzania, Kenya, Kazakhstan, Kyrgyzstan
+    and Uzbekistan, and their national essential medicines lists. We refresh it whenever the regulator publishes. Figures count
+    <b> registered products, not sales</b>.</>],
+  ['How do my products get in?', <>Upload your catalogue (Excel, CSV, Word or PDF) or search and add them one by one from My products.
+    We read the generic name of each product and match it to the market, so French or local spellings are fine.</>],
+  ['What does &ldquo;Register these first&rdquo; mean?', <>Your products ranked by opening: on the official list, few or no companies
+    registered, and in demand. Each one shows why.</>],
+  ['Who are the companies on the Distributors page?', <>The local companies holding registrations in that market. Where the register does
+    not name the distributor (Kazakhstan, Kyrgyzstan) it is the company holding the registration. Names stay private: we make the
+    introduction.</>],
+  ['How do competitor alerts work?', <>Watch a molecule, or all your products, under My products. When a new competitor is registered in one
+    of your markets we tell you by email or WhatsApp, and once a week you get a short summary.</>],
+  ['What do the plans include?', <>Each plan covers the markets you choose, monthly or yearly. Basic Market Data shows the market; Complete
+    Market Access adds distributor matching, pricing and the route to approval; Complete Market Entry is our team doing it with you.
+    Add a market at any time from Plan.</>],
+  ['Can I talk to someone?', <>Yes. Book a call from Home at a time that suits you, or write to us below.</>],
   ['How do I keep my account safe?', <>Turn on two-step sign-in in Settings. After your password you type a code from an app on your phone.
     After five wrong passwords, sign-in pauses for 15 minutes.</>],
 ];
 
-export default async function Help() {
+export default async function Help({ searchParams }: { searchParams: Promise<{ paused?: string }> }) {
+  const sp = await searchParams;
   const u = await getUser();
   const body = (
     <div className="stack" style={{ maxWidth: 760 }}>
       <section className="card stack">
         <h2>Talk to us</h2>
         <p>Email <b>{SUPPORT_EMAIL}</b>{SUPPORT_WHATSAPP && <> or WhatsApp <b>{SUPPORT_WHATSAPP}</b></>}. We will get back to you.</p>
-        {u && <p className="note">For a sourcing question, message us inside the request so everything stays in one place.</p>}
+        {sp.paused && u?.account_type !== 'manufacturer' && <p className="note">The distributor portal is closed for now while we focus on
+          manufacturers. Write to us and we help you directly.</p>}
       </section>
       {QA.map(([q, a]) => (
         <section key={q} className="card stack" style={{ gap: 8 }}>
@@ -55,9 +50,9 @@ export default async function Help() {
       <p className="note">{COVERAGE_NOTE}</p>
     </div>
   );
-  if (u && u.onboarded) return <Shell user={u} title="Help" sub="How Nazryx works, and how to reach us">{body}</Shell>;
+  if (u && u.onboarded && (u.account_type === 'manufacturer' || u.role === 'team')) return <Shell user={u} title="Help" sub="How Nazryx works, and how to reach us">{body}</Shell>;
   return (
-    <div className="wrap-narrow"><Brand href={u ? '/home' : '/signup'} /><h1>Help</h1>{body}
-      {!u && <Link className="btn btn-blue" href="/signup" style={{ alignSelf: 'flex-start' }}>Create a free account</Link>}</div>
+    <div className="wrap-narrow"><Brand href={u ? '/' : '/signup'} /><h1>Help</h1>{body}
+      {!u && <Link className="btn btn-blue" href="/signup" style={{ alignSelf: 'flex-start' }}>Create an account</Link>}</div>
   );
 }

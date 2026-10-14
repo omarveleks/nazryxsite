@@ -44,7 +44,7 @@ export default async function AdminEngagement({ params, searchParams }: { params
           <button className="btn btn-blue btn-sm" type="submit">Update</button>
         </form>
         {/profile [0-9A-F]{8}/.test(e.detail ?? '') && (
-          <p className="note">Profile stands for: {d.partner ? <Link href={`/company/${d.partner.id}`}><b>{title(d.partner.display_name)}</b></Link> : 'not found (the registry may have changed)'}. Never share the name until both sides agree.</p>)}
+          <p className="note">Profile stands for: {d.partner ? <b>{title(d.partner.display_name)}</b> : 'not found (the registry may have changed)'}. Never share the name until both sides agree.</p>)}
         <form action={uploadEngagementDoc} className="row">
           <input type="hidden" name="engagement_id" value={id} />
           <select className="input" name="item" defaultValue={e.kind === 'report' ? 'report' : 'other'} aria-label="Document type" style={{ flex: '0 1 240px' }}>

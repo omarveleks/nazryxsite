@@ -1,4 +1,4 @@
-// Browser smoke test: the main customer and team flows on a freshly bootstrapped stack (synthetic data from
+// Browser smoke test: the manufacturer and team flows (the distributor side is paused: web/distributor/e2e keeps its checks) on a freshly bootstrapped stack (synthetic data from
 // make_fixture.py). Usage: BASE=http://localhost:3000 DEMO_PASSWORD=... SEED_TEAM_PASSWORD=... node smoke.mjs
 import { chromium } from 'playwright';
 import { createHmac } from 'node:crypto';
@@ -25,78 +25,28 @@ async function page(width = 1280) {
   return p;
 }
 async function signin(p, email, pw, secret) {
-  await p.goto(B + '/signup?mode=signin&as=distributor'); await p.fill('#email', email); await p.fill('#password', pw);
-  await Promise.all([p.waitForURL(/home|verify|onboarding/), p.click('button[type=submit]')]);
+  await p.goto(B + '/signup?mode=signin'); await p.fill('#email', email); await p.fill('#password', pw);
+  await Promise.all([p.waitForURL(/\/m|\/help|verify|onboarding/), p.click('button[type=submit]')]);
   if (p.url().includes('/signin/verify')) {
     await p.fill('#code', totp(secret));
-    await Promise.all([p.waitForURL(/home/), p.click('button[type=submit]')]);
+    await Promise.all([p.waitForURL(/\/m/), p.click('button[type=submit]')]);
   }
 }
 
-// 1. a new customer signs up, claims a company, enriches a molecule, sends a request
+// 1. the portal is the manufacturer side: sign-up has no distributor choice and the distributor pages are not deployed
 const c = await page();
-const email = `smoke${Date.now()}@alphapharma.co.tz`;
 await c.goto(B + '/signup');
-check((await c.locator('a.tile').count()) === 2, 'sign-up starts with two big choices');
-await Promise.all([c.waitForURL(/as=distributor/), c.click('a.tile:has-text("distributor")')]);
-await c.fill('#name', 'Smoke Test'); await c.fill('#email', email); await c.fill('#password', 'smoke-password-123');
-await Promise.all([c.waitForURL(/onboarding/), c.click('button[type=submit]')]);
-await c.fill('#q', 'alpha'); await Promise.all([c.waitForURL(/q=alpha/), c.click('form[method=get] button')]);
-await c.locator('input[name=company_id]').first().check();
-await Promise.all([c.waitForURL(/onboarding\/focus/), c.click('text=Continue')]);
-check(true, 'sign up and claim a company');
-await c.locator('input[name=goals][value=new_molecules]').check();
-await c.locator('input[name=classes]').first().check();
-await c.locator('input[name=supplier_countries][value=India]').check();
-await Promise.all([c.waitForURL(/\/home/), c.click('text=Save and continue')]);
-check((await c.locator('main').innerText()).includes('Your focus'), 'set your focus during onboarding');
-await c.goto(B + '/search?q=doxy');
-await Promise.all([c.waitForURL(/molecule\/\d+/), c.locator('a .nm').first().click()]);
-await c.locator('button:has-text("Enrich, 1 credit")').first().click();
-await c.locator('.tabs').waitFor();
-check((await c.locator('.plan-box').innerText()).includes('19'), 'enrich spends one credit');
-const molPage = await c.content();
-check(!/Gap score|Demand strength/.test(molPage) && molPage.includes('Registered in Tanzania'), 'molecule page shows registrations, no score');
-for (const path of ['/market', '/market/whitespace', '/competitors', '/competitors?tab=compare', '/portfolio', '/portfolio?tab=benchmark', '/requests', '/settings', '/settings/security', '/help']) {
-  const r = await c.goto(B + path); check(r.status() === 200, `customer page ${path}`);
+const su = (await c.locator('body').innerText()).toLowerCase();
+check((await c.locator('a.tile').count()) === 0 && su.includes('take your products further') && !su.includes('distributor'), 'sign-up is for manufacturers only');
+for (const path of ['/home', '/search', '/market', '/competitors', '/portfolio', '/requests', '/expert', '/molecule/1', '/export/open']) {
+  check((await c.goto(B + path)).status() === 404, `distributor page ${path} is not deployed`);
 }
-await c.goto(B + '/home');
-const homeHtml = await c.content();
-check(['Market intelligence', 'Quick sourcing', 'Portfolio analysis'].every((t) => homeHtml.includes(t)), 'home shows the three services');
-await c.fill('#list', 'Amoxicillin 500mg capsules\nCiprofloxacin\nNot A Real Medicine');
-await Promise.all([c.waitForURL(/added=/), c.click('text=Analyse my portfolio')]);
-check(Number(new URL(c.url()).searchParams.get('added')) >= 2 && (await c.content()).includes('Full analysis'), 'paste a product list to build the portfolio');
-await c.goto(B + '/requests/new'); await c.fill('#molecule', 'Amoxicillin');   // quantity is optional
-await Promise.all([c.waitForURL(/sent=/), c.click('text=Send request')]);
-const reqId = new URL(c.url()).searchParams.get('sent');
-check(Boolean(reqId), 'send a sourcing request');
-await c.goto(B + '/search?q=cipro');
-await c.locator('button:has-text("+ List")').first().click();
-await c.locator('a:has-text("Sourcing list · 1")').waitFor();
-await c.goto(B + '/requests/list');
-await Promise.all([c.waitForURL(/sent=1/), c.locator('button:has-text("Request 1 molecule")').click()]);
-check((await c.content()).includes('Product request'), 'sourcing list sends its molecules as requests');
-check((await c.goto(B + '/admin')).status() === 404, 'admin is hidden from customers');
-await c.goto(B + '/compare?an=Amoxicillin&bn=Doxycycline');
-const cmp = await c.locator('main').innerText();
-check(cmp.includes('Amoxicillin') && cmp.includes('Doxycycline') && cmp.includes('Registered forms'), 'compare two molecules');
-await c.goto(B + '/export/open');
-check(c.url().includes('/settings'), 'export sends free plans to the plans page');
-await c.goto(B + '/expert'); await c.fill('#body', 'Can Doxycycline go through the abridged route?');
-await Promise.all([c.waitForURL(/sent=1/), c.click('text=Send question')]);
-check(true, 'ask the expert');
-
-// 2. the demo customer accepts an anonymous quote and the supplier is revealed
+// an existing distributor account is told the distributor portal is closed, and stays out of the manufacturer area
 const d = await page();
 await signin(d, 'demo-free@nazryx.test', process.env.DEMO_PASSWORD);
-await d.goto(B + '/requests'); await d.click('.col:has-text("Pricing and logistics") .rcard'); await d.waitForURL(/requests\/\d+/);
-check(!(await d.content()).includes('Demo Supplier'), 'supplier hidden before accepting');
-check((await d.content()).includes('Shelf life on arrival'), 'quotes show payment terms, shelf life and GMP before accepting');
-await Promise.all([d.waitForURL(/accepted=1/), d.locator('button:has-text("Accept")').first().click()]);
-check((await d.content()).includes('Demo Supplier'), 'supplier revealed after accepting');
-await d.goto(B + '/portfolio?tab=sourced');
-const sup = await d.locator('main').innerText();
-check(sup.includes('Documents ready') && sup.includes('items ready'), 'portfolio shows supply and shipments');
+check(d.url().includes('/help') && (await d.locator('body').innerText()).includes('distributor portal is closed'), 'a distributor account is told the distributor portal is closed');
+await d.goto(B + '/m'); check(d.url().includes('/help'), 'and cannot open the manufacturer area');
+check((await d.goto(B + '/admin')).status() === 404, 'admin is hidden from customers');
 
 // 3. the team account must set up two-step sign-in before Admin opens, then works the admin pages
 const t = await page();
@@ -109,79 +59,46 @@ const secret = (await t.locator('code').first().innerText()).replace(/\s+/g, '')
 await t.fill('input[name=code]', totp(secret));
 await Promise.all([t.waitForURL(/on=1/), t.click('button:has-text("Turn on")')]);
 check(true, 'team turns on two-step sign-in');
-await t.goto(B + '/admin'); await t.waitForLoadState('networkidle');
-await Promise.all([t.waitForURL(/\/m$/), t.click('nav a:has-text("Manufacturer")')]);
+await t.goto(B + '/m'); await t.waitForLoadState('networkidle');
 const tm = await t.locator('nav').innerText();
-check(tm.includes('My products') && tm.includes('Regulatory') && (await t.locator('main').innerText()).includes('Register these first'), 'admin switches to the manufacturer side');
+check(tm.includes('My products') && tm.includes('Regulatory') && tm.includes('Admin') && !tm.includes('Search')
+  && (await t.locator('main').innerText()).includes('Register these first'), 'the team works on the manufacturer side, with Admin');
 await t.goto(B + '/m/market?market=TZ'); await t.waitForLoadState('networkidle');
 const mkt = await t.locator('main').innerText();
 check(!mkt.includes('Uganda') && mkt.includes('Add your products'), 'manufacturer market has one market switch and no empty catalogue line');
-await Promise.all([t.waitForURL(/\/home/), t.click('nav a:has-text("Distributor")')]);
-check((await t.locator('nav').innerText()).includes('Search'), 'and back to the distributor side');
-for (const tab of ['', '?tab=review', '?tab=claims', '?tab=requests', '?tab=documents', '?tab=manufacturers', '?tab=accounts', '?tab=content', '?tab=activity', '?tab=regulatory', '?tab=calls']) {
+for (const tab of ['', '?tab=review', '?tab=documents', '?tab=manufacturers', '?tab=accounts', '?tab=content', '?tab=activity', '?tab=regulatory', '?tab=calls', '?tab=team']) {
   const r = await t.goto(B + '/admin' + tab); check(r.status() === 200, `admin ${tab || 'data updates'}`);
 }
-await t.goto(B + '/admin?tab=claims'); await t.waitForLoadState('networkidle');   // let the page finish loading before clicking
-await Promise.all([t.waitForLoadState('networkidle'), t.locator(`tr:has-text("${email}") button:has-text("Approve")`).click()]);
-await t.goto(B + '/admin?tab=questions');
-await t.locator('textarea[name=answer]').first().fill('Yes, if the reference product is WHO-prequalified.');
-await Promise.all([t.waitForURL(/saved=1/), t.locator('button:has-text("Send answer")').first().click()]);
-await c.goto(B + '/expert');
-check((await c.locator('main').innerText()).includes('Yes, if the reference product is WHO-prequalified.'), 'customer sees the expert answer');
-const exp = await t.request.get(B + '/export/open');
-check(exp.status() === 200 && (exp.headers()['content-type'] || '').includes('text/csv'), 'export to Excel for paid plans and the team');
+const atabs = await t.locator('.tabs').innerText();
+check(!atabs.includes('Claims') && !atabs.includes('Requests') && !atabs.includes('Questions'), 'Admin has no distributor tabs');
+const teamTab = await t.locator('main').innerText();
+check(teamTab.includes('Last sign-in') && !teamTab.includes('Last sign-in never') && teamTab.includes('last active') && teamTab.includes('changes this week'), 'Admin > Team shows last sign-in, last active and changes');
 await t.goto(B + '/admin?tab=activity');
-check((await t.content()).includes('company claims'), 'claim approval is in the activity log');
-await t.goto(B + `/admin/requests/${reqId}`);
-await t.selectOption('#verdict', 'go'); await t.fill('#summary', 'Few competitors and supply is ready.');
-await t.fill('#price_range', 'USD 1.00-1.20 per pack');
-await t.fill('#regulatory_check', 'Nobody holds an active registration.');
-await Promise.all([t.waitForURL(/saved=1/), t.click('text=Send assessment to the customer')]);
-await t.goto(B + `/admin/requests/${reqId}`);
-await t.selectOption('select[name=item_gmp]', 'have'); await t.selectOption('select[name=item_stability]', 'missing');
-await Promise.all([t.waitForURL(/saved=1/), t.click('text=Save dossier readiness')]);
-await c.goto(B + `/requests/${reqId}`);
-const evalPage = await c.content();
-check((await c.locator('main').innerText()).includes('1 of 10 items ready'), 'customer sees dossier readiness');
-check(evalPage.includes('Few competitors and supply is ready.') && evalPage.includes('USD 1.00-1.20') && evalPage.includes('Nobody holds an active registration.'),
-  'customer sees the assessment, step by step, in the request');
-// the team uploads documents on the request: a dossier document marks its item ready; an internal one stays hidden
-await t.goto(B + `/admin/requests/${reqId}`);
-await t.selectOption('#documents select[name=kind]', 'dossier'); await t.selectOption('#documents select[name=item]', 'stability');
-await t.setInputFiles('#documents input[name=file]', { name: 'stability.pdf', mimeType: 'application/pdf', buffer: Buffer.from('%PDF-1.4 s') });
-await Promise.all([t.waitForURL(/saved=1/), t.click('#documents button:has-text("Upload")')]);
-await t.selectOption('#documents select[name=kind]', 'other'); await t.check('#documents input[name=internal]');
-await t.setInputFiles('#documents input[name=file]', { name: 'margin-notes.pdf', mimeType: 'application/pdf', buffer: Buffer.from('%PDF-1.4 m') });
-await Promise.all([t.waitForURL(/saved=1/), t.click('#documents button:has-text("Upload")')]);
-await c.goto(B + `/requests/${reqId}`);
-const docPage = await c.locator('main').innerText();
-check(docPage.includes('stability.pdf') && docPage.includes('2 of 10 items ready'), 'team dossier upload reaches the customer and marks the item ready');
-check(!docPage.includes('margin-notes.pdf'), 'internal documents stay with the team');
+check((await t.locator('main').innerText()).includes('Everyone'), 'activity can be filtered by team member');
 await t.goto(B + '/admin?tab=documents');
 await t.fill('input[name=supplier_name]', 'Smoke Supplier'); await t.selectOption('form:has(input[name=supplier_name]) select[name=kind]', 'gmp');
 await t.fill('input[name=expires_on]', new Date(Date.now() + 20 * 86400e3).toISOString().slice(0, 10));
 await t.setInputFiles('form:has(input[name=supplier_name]) input[name=file]', { name: 'smoke-gmp.pdf', mimeType: 'application/pdf', buffer: Buffer.from('%PDF-1.4 g') });
 await Promise.all([t.waitForURL(/saved=1/), t.click('button:has-text("Upload supplier document")')]);
 const dtab = await t.locator('main').innerText();
-check(dtab.includes('smoke-gmp.pdf') && dtab.includes('stability.pdf'), 'supplier documents and all documents in Admin');
-// the owner adds a team member who can only work on sourcing requests
+check(dtab.includes('smoke-gmp.pdf'), 'supplier documents in Admin');
+// the owner adds a team member who can only work on manufacturers
 const memberMail = `member${Date.now()}@nazryx.test`;
 await t.goto(B + '/admin?tab=team');
 await t.fill('input[name=name]', 'Smoke Member'); await t.fill('input[name=email]', memberMail); await t.fill('input[name=password]', 'member-password-123');
-await t.locator('form:has(input[name=password]) input[name=perm][value=requests]').check();
+await t.locator('form:has(input[name=password]) input[name=perm][value=manufacturers]').check();
 await Promise.all([t.waitForURL(/saved=1/), t.click('button:has-text("Add team member")')]);
 const mb = await page();
-await mb.goto(B + '/signup?mode=signin&as=distributor'); await mb.fill('#email', memberMail); await mb.fill('#password', 'member-password-123');
-await Promise.all([mb.waitForURL(/home/), mb.click('button[type=submit]')]);
+await mb.goto(B + '/signup?mode=signin'); await mb.fill('#email', memberMail); await mb.fill('#password', 'member-password-123');
+await Promise.all([mb.waitForURL(/\/m/), mb.click('button[type=submit]')]);
 await mb.goto(B + '/admin');
 const mtabs = await mb.locator('.tabs').innerText();
-check(mtabs.includes('Requests') && !mtabs.includes('Accounts') && !mtabs.includes('Team'), 'a team member sees only the areas they were given');
+check(mtabs.includes('Manufacturers') && !mtabs.includes('Accounts') && !mtabs.includes('Team'), 'a team member sees only the areas they were given');
 check((await mb.goto(B + '/admin?tab=accounts')) && !(await mb.locator('.tabs').innerText()).includes('Accounts'), 'other areas stay closed');
-const acc404 = await mb.goto(B + `/admin/requests/${reqId}`);
-check(acc404.status() === 200, 'the member works on requests');
+check((await mb.goto(B + '/admin?tab=manufacturers')).status() === 200 && (await mb.locator('main').innerText()).includes('Manufacturers'), 'the member works on manufacturers');
 const t2 = await page();
 await signin(t2, process.env.SEED_TEAM_EMAIL || 'team@nazryx.test', process.env.SEED_TEAM_PASSWORD, secret);
-check(t2.url().includes('/home'), 'team signs in with a two-step code');
+check(t2.url().includes('/m'), 'team signs in with a two-step code');
 if (XLS) {
   await t.goto(B + '/admin'); await t.setInputFiles('#file', XLS);
   await Promise.all([t.waitForURL(/queued=1/), t.click('text=Upload registration list')]);
@@ -194,7 +111,6 @@ if (XLS) {
 const k = await page();
 const kmail = `maker${Date.now()}@example.com`;
 await k.goto(B + '/signup');
-await Promise.all([k.waitForURL(/as=manufacturer/), k.click('a.tile:has-text("manufacturer")')]);
 await k.fill('#name', 'Maker Test'); await k.fill('#email', kmail); await k.fill('#password', 'smoke-password-123');
 await Promise.all([k.waitForURL(/\/m\/onboarding/), k.click('button[type=submit]')]);
 await k.fill('#company_name', 'Smoke Generics'); await k.fill('#hq_country', 'India');
@@ -227,7 +143,6 @@ await Promise.all([k.waitForURL(/\/m$/), k.click('button:has-text("End tour")')]
 check((await k.locator('[role=dialog]:has-text("Tour ·")').count()) === 0 && (await k.locator('main').innerText()).includes('Get set up'), 'tour ends; Home shows the set-up checklist');
 await k.goto(B + '/m');
 check((await k.locator('main').innerText()).includes('Register these first'), 'manufacturer lands on its own home');
-await k.goto(B + '/home'); check(k.url().endsWith('/m'), 'manufacturers are kept out of the distributor area');
 // without an active plan: the free screens work, the rest is locked with a way to unlock it
 await k.goto(B + '/m/services');
 const svc = await k.locator('main').innerText();
@@ -370,27 +285,18 @@ await t.goto(B + '/admin?tab=calls');
 check((await t.locator('main').innerText()).includes('Smoke Generics'), 'the team sees the booked call in Admin');
 await k.goto(B + '/m');
 check((await k.locator('main').innerText()).includes('Your call:'), 'the next call shows on Home');
-await c.goto(B + '/m'); check(c.url().includes('/home'), 'distributors are kept out of the manufacturer area');
 
 // 4. phone width: no sideways scrolling
-const m = await page(375);
-await signin(m, 'demo-free@nazryx.test', process.env.DEMO_PASSWORD);
-for (const path of ['/home', '/search?q=amox', '/market', '/market/whitespace', '/requests', '/portfolio', '/help']) {
-  await m.goto(B + path);
-  const w = await m.evaluate(() => document.documentElement.scrollWidth);
-  check(w <= 380, `no sideways scroll at 375px on ${path}`);
-}
-
 const mk = await page(375);
-await mk.goto(B + '/signup?mode=signin&as=manufacturer'); await mk.fill('#email', kmail); await mk.fill('#password', 'smoke-password-123');
+await mk.goto(B + '/signup?mode=signin'); await mk.fill('#email', kmail); await mk.fill('#password', 'smoke-password-123');
 await Promise.all([mk.waitForURL(/\/m(\?|$)/), mk.click('button[type=submit]')]);
-for (const path of ['/m', '/m/products', '/m/products?tab=watch', '/m/regulatory', '/m/market', '/m/call', '/m/plan']) {
+for (const path of ['/m', '/m/products', '/m/products?tab=watch', '/m/regulatory', '/m/market', '/m/partners', '/m/call', '/m/plan', '/settings', '/help']) {
   await mk.goto(B + path);
   check(await mk.evaluate(() => document.documentElement.scrollWidth) <= 380, `no sideways scroll at 375px on ${path}`);
 }
 
 const m2 = await page(375);
-for (const path of ['/signup', '/signup?as=manufacturer', '/signup?mode=signin']) {
+for (const path of ['/signup', '/signup?mode=signin']) {
   await m2.goto(B + path);
   check(await m2.evaluate(() => document.documentElement.scrollWidth) <= 380, `no sideways scroll at 375px on ${path}`);
 }

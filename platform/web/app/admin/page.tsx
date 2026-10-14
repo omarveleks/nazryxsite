@@ -19,7 +19,7 @@ export const metadata = { title: 'Admin' };
 export const dynamic = 'force-dynamic';
 const H48 = 48 * 3600e3;
 
-export default async function Admin({ searchParams }: { searchParams: Promise<{ tab?: string; error?: string; saved?: string; queued?: string; dq?: string; rc?: string }> }) {
+export default async function Admin({ searchParams }: { searchParams: Promise<{ tab?: string; error?: string; saved?: string; queued?: string; dq?: string; rc?: string; who?: string }> }) {
   const sp = await searchParams;
   const u = await requireTeam();
   // each team member sees only the tabs their permissions open; owners see all of them and the Team tab
@@ -123,18 +123,24 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
                                      order by (r.stage = 'Closed'), r.updated_at desc limit 100`);
     }
     if (tab === 'accounts') {
-      out.users = await rows(db, `select u.id, u.email, u.name, u.role, u.plan, u.credits, u.created_at, u.owner_id,
+      out.users = await rows(db, `select u.id, u.email, u.name, u.role, u.plan, u.credits, u.created_at, u.owner_id, u.last_login_at, u.last_seen_at,
                                   (select string_agg(p.wanted, ', ') from plan_requests p where p.user_id = u.id and p.status = 'open') as wants,
                                   auth_totp_enabled(u.id) as two_step
                                   from users u order by (select count(*) from plan_requests p where p.user_id = u.id and p.status = 'open') desc, u.created_at desc limit 200`);
     }
     if (tab === 'team') {
-      out.members = await rows(db, `select id, email, name, team_owner, team_permissions, disabled, created_at, auth_totp_enabled(id) as two_step
-                                    from users where role = 'team' order by disabled, team_owner desc, created_at`);
+      out.members = await rows(db, `select u.id, u.email, u.name, u.team_owner, u.team_permissions, u.disabled, u.created_at, auth_totp_enabled(u.id) as two_step,
+                                    u.last_login_at, u.last_seen_at, a.last_change, a.week
+                                    from users u left join lateral (select max(at) as last_change, count(*) filter (where at > now() - interval '7 days')::int as week
+                                                                   from audit_log where actor = u.id) a on true
+                                    where u.role = 'team' order by u.disabled, u.team_owner desc, u.created_at`);
     }
     if (tab === 'activity') {
+      out.who = await rows(db, `select id, coalesce(name, email) as name from users where role = 'team' order by 2`);
+      const who = out.who.find((m: any) => m.id === sp.who)?.id ?? null;
       out.log = await rows(db, `select a.at, a.action, a.table_name, a.row_id, a.changes, u.email
-                                from audit_log a left join users u on u.id = a.actor order by a.at desc limit 200`);
+                                from audit_log a left join users u on u.id = a.actor where $1::uuid is null or a.actor = $1
+                                order by a.at desc limit 200`, [who]);
     }
     if (tab === 'content') {
       out.routes = await rows(db, 'select key, label, description, months_low, months_high from registration_routes order by sort');
@@ -149,12 +155,10 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
   const overdue = msLeft <= 0;
   const diff = d.lastAny?.diff ?? {};
   const c = d.counts;
+  // Claims, sourcing requests and expert questions belong to the paused distributor side (distributor/README.md)
   const tabs = [
     { key: 'data', label: 'Data updates', href: '/admin?tab=data' },
     { key: 'review', label: `Review queue (${c.suggestions + c.dups})`, href: '/admin?tab=review' },
-    { key: 'claims', label: `Claims (${c.claims})`, href: '/admin?tab=claims' },
-    { key: 'requests', label: `Requests (${c.open_requests})`, href: '/admin?tab=requests' },
-    { key: 'questions', label: `Questions (${c.open_questions})`, href: '/admin?tab=questions' },
     { key: 'manufacturers', label: `Manufacturers (${c.mfr_open})`, href: '/admin?tab=manufacturers' },
     { key: 'documents', label: `Documents${c.expiring ? ` (${c.expiring})` : ''}`, href: '/admin?tab=documents' },
     { key: 'regulatory', label: 'Regulatory', href: '/admin?tab=regulatory' },
@@ -286,7 +290,7 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
             <div className="tbl-wrap"><table className="tbl"><thead><tr><th>Who</th><th>Company</th><th>Evidence</th><th>Portfolio</th><th className="r">Decision</th></tr></thead>
               <tbody>{d.claims.map((k: any) => (
                 <tr key={k.id}><td><b>{k.name || k.email}</b><div className="sub2">{k.email} · {fmtDate(k.created_at)}</div></td>
-                  <td>{k.cid ? <Link href={`/company/${k.cid}`}>{title(k.company)}</Link> : <>{k.company} <span className="pill">not in list</span></>}</td>
+                  <td>{k.cid ? title(k.company) : <>{k.company} <span className="pill">not in list</span></>}</td>
                   <td><span className={`pill ${k.domain_match ? 'mint' : 'peach'}`}>{k.domain_match ? 'Domain matches' : 'Domain does not match'}</span>
                     <div className="small">{k.licence_path && <><a href={`/files/licence/${k.id}`}>Licence</a> · </>}{k.catalogue_path && <a href={`/files/catalogue/${k.id}`}>Catalogue</a>}</div></td>
                   <td className="small">{k.portfolio_source}</td>
@@ -369,6 +373,7 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
           <div className="tbl-wrap"><table className="tbl"><thead><tr><th>Account</th><th>Role</th><th>Plan</th><th className="r">Credits</th><th className="r">Actions</th></tr></thead>
             <tbody>{d.users.map((x: any) => (
               <tr key={x.id}><td><Link href={`/admin/accounts/${x.id}`}><b>{x.name || x.email}</b></Link><div className="sub2">{x.email}{x.owner_id ? ' · teammate seat' : ''}</div>
+                <div className="sub2">{x.last_login_at ? `Signed in ${ago(x.last_login_at)} · active ${ago(x.last_seen_at ?? x.last_login_at)}` : 'Not signed in yet'}</div>
                 {x.wants && <span className="pill solid">Asked for: {x.wants}</span>}</td>
                 <td>{x.role}</td><td>{x.plan}</td><td className="r num">{x.credits}</td>
                 <td className="r">{x.role === 'customer' && !x.owner_id && (<div className="row" style={{ justifyContent: 'flex-end' }}>
@@ -474,7 +479,9 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
             <div key={m.id} className="stack" style={{ gap: 8, paddingTop: 12, borderTop: '1px solid var(--line)', opacity: m.disabled ? 0.6 : 1 }}>
             <form action={updateTeamMember} className="stack" style={{ gap: 8 }}>
               <input type="hidden" name="user_id" value={m.id} />
-              <div className="between"><span><b>{m.name || m.email}</b><span className="sub2"> · {m.email}{m.two_step ? ' · two-step on' : ''}</span></span>
+              <div className="between"><span><b>{m.name || m.email}</b><span className="sub2"> · {m.email}{m.two_step ? ' · two-step on' : ''}</span>
+                <div className="sub2">Last sign-in {m.last_login_at ? ago(m.last_login_at) : 'never'} · last active {m.last_seen_at ? ago(m.last_seen_at) : 'never'}
+                  {' · '}<Link href={`/admin?tab=activity&who=${m.id}`}>{m.week} {m.week === 1 ? 'change' : 'changes'} this week{m.last_change ? `, latest ${ago(m.last_change)}` : ''}</Link></div></span>
                 <span className="row" style={{ gap: 6 }}>{m.disabled ? <span className="pill">Removed</span> : m.team_owner ? <span className="pill solid">Owner</span> : null}
                   {m.id === u.id && <span className="pill blue">You</span>}</span></div>
               {!m.disabled && !m.team_owner && (<>
@@ -494,6 +501,9 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
       {tab === 'activity' && (
         <section className="card">
           <div className="card-h"><h2>Team activity</h2><span className="note">Every change a team account makes, recorded by the database. Latest 200.</span></div>
+          <div className="row" style={{ gap: 6, marginBottom: 10 }} aria-label="Who">
+            <Link className={`pill ${!sp.who ? 'solid' : ''}`} href="/admin?tab=activity">Everyone</Link>
+            {d.who.map((m: any) => <Link key={m.id} className={`pill ${sp.who === m.id ? 'solid' : ''}`} href={`/admin?tab=activity&who=${m.id}`}>{m.name}</Link>)}</div>
           {d.log.length === 0 ? <Empty>No team actions yet.</Empty> : (
             <div className="tbl-wrap"><table className="tbl"><thead><tr><th>When</th><th>Who</th><th>What</th><th>Details</th></tr></thead>
               <tbody>{d.log.map((a: any, i: number) => (

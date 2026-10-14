@@ -7,7 +7,7 @@ import { newSecret, verifyCode } from '@/lib/totp';
 
 /** Start (or restart) set-up: a fresh secret, not active until a code confirms it. */
 export async function startTwoStep() {
-  const u = await requireUser({ allowOnboarding: true });
+  const u = await requireUser({ allowOnboarding: true, shared: true });
   await withUser(u.id, async (db) => {
     const row = await one(db, 'select enabled from user_totp where user_id = $1', [u.id]);
     if (row?.enabled) return;
@@ -18,7 +18,7 @@ export async function startTwoStep() {
 }
 
 export async function confirmTwoStep(f: FormData) {
-  const u = await requireUser({ allowOnboarding: true });
+  const u = await requireUser({ allowOnboarding: true, shared: true });
   const ok = await withUser(u.id, async (db) => {
     const row = await one(db, 'select secret, enabled from user_totp where user_id = $1', [u.id]);
     if (!row || row.enabled) return Boolean(row?.enabled);
@@ -31,7 +31,7 @@ export async function confirmTwoStep(f: FormData) {
 }
 
 export async function disableTwoStep(f: FormData) {
-  const u = await requireUser({ allowOnboarding: true });
+  const u = await requireUser({ allowOnboarding: true, shared: true });
   if (u.role === 'team' && teamTwoStepRequired()) back('/settings/security', { error: 'Team accounts must keep two-step sign-in on.' });
   const ok = await withUser(u.id, async (db) => {
     const row = await one(db, 'select secret from user_totp where user_id = $1 and enabled', [u.id]);

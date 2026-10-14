@@ -1,72 +1,39 @@
 import Link from 'next/link';
 import Shell from '@/components/Shell';
 import { Flash } from '@/components/ui';
-import { addSeat, changePassword, requestUpgrade, updateSettings } from '@/app/actions/app';
+import { addSeat, changePassword, updateSettings } from '@/app/actions/app';
 import { requireUser } from '@/lib/auth';
 import { rows, withUser } from '@/lib/db';
-import { FREE, fmtDate, title } from '@/lib/format';
+import { fmtDate } from '@/lib/format';
 import { ACCOUNT_DOC_KINDS } from '@/lib/docs';
-import { activeRequestCount } from '@/lib/queries';
 
 export const metadata = { title: 'Settings' };
 
 export default async function Settings({ searchParams }: { searchParams: Promise<{ saved?: string; error?: string; upgrade?: string }> }) {
   const sp = await searchParams;
   const u = await requireUser({ shared: true });
-  const paid = u.plan === 'paid';
+  const paid = u.plan === 'paid';   // team seats come with the paid account plan
   const d = await withUser(u.id, async (db) => ({
-    active: await activeRequestCount(db, u.id),
     seats: await rows(db, 'select email, name from users where owner_id = $1 order by created_at', [u.id]),
-    open: await rows(db, "select wanted, created_at from plan_requests where user_id = $1 and status = 'open'", [u.id]),
     docs: await rows(db, 'select id, kind, title, file_name, created_at from account_documents where user_id = $1 order by created_at desc', [u.id]),
     twoStep: Boolean((await rows(db, 'select enabled from user_totp where user_id = $1 and enabled', [u.id])).length),
-    claim: (await rows(db, `select k.status, k.licence_name, coalesce(c.display_name, k.company_name) as company, k.review_note
-                            from company_claims k left join companies c on c.id = k.company_id where k.user_id = coalesce($2::uuid, $1::uuid)
-                            order by k.created_at desc limit 1`, [u.id, u.owner_id]))[0],
   }));
   const channel = u.notify_email && u.notify_whatsapp ? 'both' : u.notify_whatsapp ? 'whatsapp' : u.notify_email ? 'email' : 'inapp';
   return (
     <Shell user={u} title="Settings and plan" sub="Account and usage">
       <Flash sp={sp} />
-      {sp.upgrade && <div className="ok">Thanks. Our team will contact you to set up the paid plan.</div>}
       <div className="grid g2">
-        {u.account_type === 'manufacturer' ? (
-          <section className="card stack" id="plan">
-            <h2>Your plan</h2>
-            <p className="note">Your suggested subscription, the other plans and add-ons. Our team confirms scope and price with you.</p>
-            <Link className="btn btn-blue btn-sm" href="/m/plan" style={{ alignSelf: 'flex-start' }}>See your plan</Link>
-          </section>
-        ) : (
         <section className="card stack" id="plan">
-          <div className="between"><h2>Plan and usage</h2><span className={`pill ${paid ? 'solid' : ''}`}>{paid ? 'Paid' : 'Free'}</span></div>
-          <table className="tbl"><tbody>
-            <tr><td>Enrich credits</td><td className="r num">{paid ? 'Unlimited' : `${u.credits} of ${FREE.credits} left this month`}</td></tr>
-            <tr><td>Countries</td><td className="r num">1 of {paid ? 'all live markets' : 1}</td></tr>
-            <tr><td>Active requests</td><td className="r num">{d.active}{paid ? '' : ` of ${FREE.requests}`}</td></tr>
-          </tbody></table>
-          {!paid && u.role !== 'team' && (
-            d.open.length ? <p className="note">Upgrade requested. Our team will be in touch.</p> : (
-              <form action={requestUpgrade} className="stack">
-                <input type="hidden" name="wanted" value="paid" />
-                <p className="note">Paid adds prices, supplier availability, the full whitespace list, more countries, alerts and team seats.</p>
-                <textarea className="input" name="note" placeholder="Anything we should know (optional)" />
-                <button className="btn btn-blue" type="submit">Upgrade</button>
-              </form>))}
+          <h2>Your plan</h2>
+          <p className="note">Your plan, the markets in it, and the other plans and add-ons.</p>
+          <Link className="btn btn-blue btn-sm" href="/m/plan" style={{ alignSelf: 'flex-start' }}>See your plan</Link>
         </section>
-        )}
-        {u.account_type === 'manufacturer' ? (
-          <section className="card stack" id="company">
-            <h2>Your company</h2>
-            <p className="note">Company details, certifications and the markets you want to enter.</p>
-            <Link className="btn btn-ghost btn-sm" href="/m/onboarding?step=1" style={{ alignSelf: 'flex-start' }}>Edit company</Link>
-          </section>
-        ) : (
-          <section className="card stack" id="focus">
-            <h2>Your focus</h2>
-            <p className="note">Therapeutic classes, goals, levels of care and supplier countries. They shape your home page and brief our team.</p>
-            <Link className="btn btn-ghost btn-sm" href="/onboarding/focus?next=/settings" style={{ alignSelf: 'flex-start' }}>Edit your focus</Link>
-          </section>
-        )}
+        <section className="card stack" id="company">
+          <h2>Your company</h2>
+          <p className="note">Company details, certifications and the markets you want to enter.</p>
+          <Link className="btn btn-ghost btn-sm" href="/m/onboarding?step=1" style={{ alignSelf: 'flex-start' }}>Edit company</Link>
+        </section>
+        {(paid || d.seats.length > 0 || u.owner_id) && (
         <section className="card stack" id="team">
           <h2>Team seats</h2>
           {paid && !u.owner_id ? (<>
@@ -78,8 +45,8 @@ export default async function Settings({ searchParams }: { searchParams: Promise
                 <input className="input full" name="password" type="password" placeholder="First password (10+ characters)" aria-label="First password" required minLength={10} />
               </div>
               <button className="btn btn-ghost btn-sm" type="submit">Add teammate</button>
-            </form></>) : <p className="note">{u.owner_id ? 'You are on a teammate seat.' : '1 seat on free. Add teammates on the paid plan.'}</p>}
-        </section>
+            </form></>) : <p className="note">You are on a teammate seat.</p>}
+        </section>)}
         <section className="card stack">
           <h2>Notifications and language</h2>
           <form action={updateSettings} className="stack">
@@ -104,11 +71,9 @@ export default async function Settings({ searchParams }: { searchParams: Promise
               <span className="sub2">{ACCOUNT_DOC_KINDS[x.kind]} · {fmtDate(x.created_at)}</span></div>))}
         </section>
         <section className="card stack">
-          <h2>Profile and verification</h2>
-          {d.claim ? (
-            <p>{title(d.claim.company)}. Licence: <b>{d.claim.status === 'approved' ? 'verified' : d.claim.status === 'rejected' ? 'not verified' : 'pending'}</b>
-              {d.claim.review_note ? <span className="note"> · {d.claim.review_note}</span> : null}</p>
-          ) : <p className="note">No company claimed yet. <a href="/onboarding">Claim your company</a>.</p>}
+          <h2>Profile and security</h2>
+          {u.account_type === 'manufacturer' && <p>{u.mfr_verified ? <b>Verified manufacturer</b>
+            : <span className="note">Not verified yet. We verify manufacturers once their company details and certificates are in.</span>}</p>}
           <hr className="divider" />
           <div className="between"><span>Two-step sign-in: <b>{d.twoStep ? 'on' : 'off'}</b></span>
             <a className="btn btn-ghost btn-sm" href="/settings/security">{d.twoStep ? 'Manage' : 'Set up'}</a></div>

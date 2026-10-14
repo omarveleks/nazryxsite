@@ -2,33 +2,20 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
+// The manufacturer area (the distributor side is paused: see distributor/README.md). The team also gets Admin.
 const NAV = [
-  ['/home', 'Home'], ['/search', 'Search'], ['/market', 'Market'], ['/competitors', 'Competitors'],
-  ['/portfolio', 'My portfolio'], ['/requests', 'Requests'], ['/settings', 'Settings'],
-] as const;
-
-// Manufacturer accounts: their own area for expanding into new markets.
-const MFR_NAV = [
   ['/m', 'Home'], ['/m/market', 'Market'], ['/m/products', 'My products'], ['/m/regulatory', 'Regulatory'], ['/m/partners', 'Distributors'], ['/m/services', 'Services'],
   ['/m/plan', 'Plan'], ['/settings', 'Settings'],
 ] as const;
 
-export default function NavLinks({ team, manufacturer }: { team: boolean; manufacturer?: boolean }) {
+export default function NavLinks({ team }: { team: boolean }) {
   const path = usePathname();
-  // the team switches between the two sides of the portal; the menu follows the side it is on
-  const mfrView = manufacturer || (team && (path === '/m' || path.startsWith('/m/')));
-  const base = mfrView ? MFR_NAV : NAV;
-  const items = team ? [...base, ['/admin', 'Admin'] as const] : base;
+  const items = team ? [...NAV, ['/admin', 'Admin'] as const] : NAV;
   return (
     <nav className="nav" aria-label="Main">
-      {team && (
-        <div className="row" style={{ gap: 4, marginBottom: 8 }} aria-label="View">
-          <Link href="/home" className={`pill ${!mfrView ? 'solid' : ''}`} style={{ fontSize: 12 }}>Distributor</Link>
-          <Link href="/m" className={`pill ${mfrView ? 'solid' : ''}`} style={{ fontSize: 12 }}>Manufacturer</Link>
-        </div>)}
       {items.map(([href, label]) => (
         <Link key={href} href={href} className={path === href || (href !== '/m' && path.startsWith(href + '/')) ? 'on' : ''}
-          aria-current={path.startsWith(href) ? 'page' : undefined}>{label}</Link>
+          aria-current={path === href || (href !== '/m' && path.startsWith(href + '/')) ? 'page' : undefined}>{label}</Link>
       ))}
     </nav>
   );

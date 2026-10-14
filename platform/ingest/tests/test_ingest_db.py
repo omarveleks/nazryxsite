@@ -1124,3 +1124,23 @@ def test_book_a_call(env):
         c.commit()
     body = q("select body from notifications where user_id = %s and channel = 'whatsapp' order by id desc limit 1", a_id)[0][0]
     assert "https://meet.example/abc" in body
+
+
+def test_sign_in_and_last_active_are_recorded(env):
+    """Signing in records the time; using the portal marks the account active, at most every five minutes."""
+    with psycopg.connect(URL) as c:
+        uid = c.execute("insert into users (email, password_hash, role) values ('seen@example.com', 'x', 'team') returning id").fetchone()[0]
+        c.commit()
+    with app_conn(env) as a:
+        a.execute("select auth_create_session('seen-token', %s, now() + interval '1 day')", (uid,))
+        a.commit()
+    login, seen = q("select last_login_at, last_seen_at from users where id = %s", uid)[0]
+    assert login is not None and seen == login
+    with psycopg.connect(URL) as c:
+        c.execute("update users set last_seen_at = now() - interval '1 hour' where id = %s", (uid,))
+        c.commit()
+    with app_conn(env) as a:
+        assert a.execute("select auth_session_user('seen-token')").fetchone()[0] == uid
+        assert a.execute("select auth_session_user('no-such-token')").fetchone()[0] is None
+        a.commit()
+    assert q("select last_seen_at > now() - interval '1 minute' from users where id = %s", uid)[0][0] is True
