@@ -8,7 +8,7 @@ import { one, rows, withUser } from '@/lib/db';
 import { categories } from '@/lib/queries';
 import { canUse, countryName, tierIn } from '@/lib/mfr';
 
-export const metadata = { title: 'Distributors' };
+export const metadata = { title: 'Partners' };
 
 const SIZES: [string, string][] = [['0', 'Any size'], ['20', '20+ products'], ['100', '100+ products'], ['300', '300+ products']];
 const SORTS: [string, string][] = [['open', 'Sort: most open to you'], ['size', 'Sort: largest'], ['class', 'Sort: strongest in class']];
@@ -42,7 +42,7 @@ export default async function Partners({ searchParams }: { searchParams: Promise
   const filtered = Boolean(d.cls || d.molecule || Number(sp.min));
   const noun = d.byHolder ? 'companies' : 'distributors';
   return (
-    <Shell user={u} title="Distributors" sub={`Who could carry your products in ${countryName(d.market)}`}
+    <Shell user={u} title="Partners" sub={`Who could carry your products in ${countryName(d.market)}`}
       actions={intro ? <Link className="btn btn-blue btn-sm" href="/m/partners/intro">Ask us to find distributors</Link> : undefined}>
       <Flash sp={sp} />
       <MarketPicker u={u} targets={d.targets} current={d.market} path="/m/partners" />
