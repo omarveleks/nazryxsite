@@ -374,3 +374,15 @@ export async function resetTwoStep(f: FormData) {
   await team((db) => db.query('select admin_reset_totp($1)', [str(f, 'user_id', 40)]), '/admin?tab=accounts');
   redirect('/admin?tab=accounts&saved=1');
 }
+
+/** Admin > Data updates > Sources: run a collector now, switch it off or on, or use a pull that was held. */
+export async function updateSource(f: FormData) {
+  await requireTeam('data');
+  const key = str(f, 'key', 40), act = str(f, 'act', 20);
+  const sql = act === 'run' ? 'update data_sources set run_now = true where key = $1'
+    : act === 'use_held' ? 'update data_sources set release_held = true where key = $1 and held_path is not null'
+    : act === 'off' ? 'update data_sources set enabled = false where key = $1'
+    : 'update data_sources set enabled = true where key = $1';
+  await team((db) => db.query(sql, [key]), '/admin?tab=data');
+  redirect('/admin?tab=data&saved=1#sources');
+}

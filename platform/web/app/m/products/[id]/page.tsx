@@ -6,7 +6,7 @@ import { Badges, Empty, Flash, LockIcon, PlanLock } from '@/components/ui';
 import { deleteMfrProduct, saveLaunch, unwatchMolecule, updateProductChecks, watchMolecule } from '@/app/actions/mfr';
 import { requireUser } from '@/lib/auth';
 import { one, rows, withUser } from '@/lib/db';
-import { BE_STATUS, beSuggestion, levelLabel, registeredLine } from '@/lib/format';
+import { BE_STATUS, beSuggestion, fmtDate, fmtMoney, levelLabel, registeredLine } from '@/lib/format';
 import { REQ_SQL, forProduct, type Requirement } from '@/lib/regulatory';
 import { AGENCY_KINDS, LAUNCH_STAGES, MFR_PLANS, NEEDS_PLAN, SERVICES, canUse, tierIn, countryName, mfrProductsSql, productClass, reasons } from '@/lib/mfr';
 
@@ -47,7 +47,13 @@ export default async function MfrProduct({ params, searchParams }: { params: Pro
     // distributors strong in the class who do not carry this molecule yet (codes only; names stay with Nazryx)
     const open = canUse(t, 'matching') && p.category ? (await rows(db, 'select carries from partner_search($1, $2, $3)', [market, p.category, p.molecule_id]))
       .filter((x) => !x.carries).length : null;
-    return { ...base, origin, lapsed, route, price, open };
+    // public tenders for this molecule in this market, and the official price caps where the market publishes them
+    const tenders = canUse(t, 'market') && p.molecule_id ? await rows(db, `select title, buyer, stage, coalesce(awarded, closing, published) as at, quantity,
+        unit_price, value, currency, bidders, url from tenders where country = $2 and $1 = any(molecule_ids)
+        order by coalesce(awarded, closing, published) desc nulls last limit 6`, [p.molecule_id, market]) : [];
+    const caps = canUse(t, 'pricing') && p.molecule_id ? await one(db, `select count(*)::int as n, min(max_retail) as lo, max(max_retail) as hi, min(currency) as cur
+        from reference_prices where molecule_id = $1 and country = $2 and max_retail > 0`, [p.molecule_id, market]) : null;
+    return { ...base, origin, lapsed, route, price, open, tenders, caps };
   });
   if (!d) notFound();
   const { p, market } = d;
@@ -101,8 +107,19 @@ export default async function MfrProduct({ params, searchParams }: { params: Pro
               {!canUse(d.t, 'pricing') ? <PlanLock need="access" title="Pricing analysis" u={u} market={market}>The price band we suggest for this product in {countryName(market)}.</PlanLock>
                 : 'price' in d && d.price ? <p><b>{d.price.currency} {Number(d.price.price_low).toFixed(2)}–{Number(d.price.price_high).toFixed(2)}</b> per {d.price.unit}{d.price.note ? ` · ${d.price.note}` : ''}</p>
                 : <p className="note">Our team is setting it. Ask for a price check and we answer within 24 hours.</p>}
+              {'caps' in d && d.caps?.n ? <p className="small">Official maximum retail price in {countryName(market)}: <b>{d.caps.cur} {fmtMoney(d.caps.lo)}{d.caps.hi !== d.caps.lo ? `–${fmtMoney(d.caps.hi)}` : ''}</b> across {d.caps.n} registered {d.caps.n === 1 ? 'pack' : 'packs'}.</p> : null}
             </section>
           </>)}
+          {'tenders' in d && d.tenders.length > 0 && (
+            <section className="card stack">
+              <div className="card-h"><h2>Public tenders in {countryName(market)}</h2><span className="note">Collected from the official procurement portals</span></div>
+              {d.tenders.map((x, i) => (
+                <div key={i} className="between small" style={{ borderTop: i ? '1px solid var(--line)' : undefined, paddingTop: i ? 8 : 0, gap: 12, flexWrap: 'wrap' }}>
+                  <span style={{ minWidth: 0, flex: '1 1 260px' }}><b>{x.title}</b><div className="sub2">{x.buyer ?? ''}{x.at ? ` · ${fmtDate(x.at)}` : ''}</div></span>
+                  <span className="r">{x.quantity ? `${fmtMoney(x.quantity)} units` : ''}{x.unit_price ? ` at ${x.currency ?? ''} ${fmtMoney(x.unit_price)}` : x.value ? `${x.currency ?? ''} ${fmtMoney(x.value)}` : ''}
+                    <div><span className={`pill ${x.stage === 'open' ? 'mint' : ''}`}>{x.stage === 'open' ? 'Open' : x.stage === 'awarded' ? `Awarded${x.bidders ? ` · ${x.bidders} ${x.bidders === 1 ? 'bid' : 'bids'}` : ''}` : 'Closed'}</span></div></span>
+                </div>))}
+            </section>)}
           <section className="card stack">
             <div className="card-h"><h2>Requirements in {countryName(market)}</h2><Link className="btn-link" href={`/m/regulatory?market=${market}&product=${id}#p${id}`}>All requirements</Link></div>
             {!canUse(d.t, 'requirements') ? <PlanLock need="access" title="What this product needs" u={u} market={market}>Bioequivalence, sterile, controlled or biological: the steps this product needs on top of the market&rsquo;s general requirements.</PlanLock>

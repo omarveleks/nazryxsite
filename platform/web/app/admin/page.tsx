@@ -8,7 +8,7 @@ import { one, rows, withUser } from '@/lib/db';
 import { STAGES, ago, fmtDate, title } from '@/lib/format';
 import { MFR_PLANS, SERVICES, countryName } from '@/lib/mfr';
 import { answerQuestion, reviewManufacturer, grantCredits, keepSeparate, saveRoutes, setMoleculeRoute, matchMolecule, mergeCompanies, postRegulatory, addPrice, editUseCase, queueRecompute,
-  rejectSuggestion, resetPassword, resetTwoStep, reviewClaim, setPlan } from '@/app/actions/admin';
+  rejectSuggestion, resetPassword, resetTwoStep, reviewClaim, setPlan, updateSource } from '@/app/actions/admin';
 import { StagePill } from '@/components/ui';
 import { deleteAccountDoc, deleteSupplierDoc, savePlanPrices, uploadAccountDoc, uploadSupplierDoc } from '@/app/actions/docs';
 import RegulatoryTab from './RegulatoryTab';
@@ -47,6 +47,8 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
                                     from registry_uploads r left join users u on u.id = r.uploaded_by order by r.id desc limit 15`);
       out.reminders = await rows(db, 'select sent_at from reminders_log order by sent_at desc limit 3');
       out.refs = await rows(db, 'select kind, name, uploaded_at from reference_files');
+      out.sources = await rows(db, `select key, country, kind, label, url, every_hours, enabled, run_now, last_run, last_ok, last_rows, last_error,
+                                    held_rows, release_held from data_sources order by kind, country`);
     }
     if (tab === 'review') {
       out.sugg = await rows(db, `select s.molecule_id, m.inn, m.category, t.id as to_id, t.inn as to_inn, s.confidence, s.reason
@@ -174,6 +176,26 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
       <Flash sp={sp} />
       {sp.queued && <div className="ok" role="status">Queued. The ingest job runs in the background; refresh to see the result.</div>}
       {tab === 'data' && (<>
+        <section className="card stack" id="sources">
+          <div className="card-h"><div><h2>Sources</h2><p className="note">Collected by themselves: registers weekly, tenders daily, prices every three days.
+            A register pull much smaller than what is loaded waits here instead of replacing good data.</p></div></div>
+          <div className="tbl-wrap"><table className="tbl"><thead><tr><th>Source</th><th>Last run</th><th className="r">Rows</th><th>Status</th><th /></tr></thead>
+            <tbody>{(d.sources ?? []).map((x: any) => (
+              <tr key={x.key}>
+                <td><b>{x.label}</b><div className="sub2">{x.kind} · every {x.every_hours >= 24 ? `${Math.round(x.every_hours / 24)} days` : `${x.every_hours} h`} · <a href={x.url} target="_blank" rel="noopener noreferrer">{x.url.replace('https://', '')}</a></div></td>
+                <td className="small">{x.last_run ? ago(x.last_run) : 'never'}{x.run_now && <div className="sub2">queued</div>}</td>
+                <td className="r num">{x.last_rows?.toLocaleString('en') ?? '—'}</td>
+                <td className="small">{!x.enabled ? <span className="pill">Off</span>
+                  : x.held_rows ? <span className="pill peach">Held</span>
+                  : x.last_error ? <span className="pill peach">Error</span>
+                  : x.last_ok ? <span className="pill mint">OK</span> : <span className="pill">Waiting</span>}
+                  {x.last_error && <div className="sub2" style={{ maxWidth: 320 }}>{x.last_error}</div>}</td>
+                <td className="r"><div className="row" style={{ justifyContent: 'flex-end', gap: 6 }}>
+                  {[['run', 'Run now'], ...(x.held_rows && !x.release_held ? [['use_held', 'Use it anyway']] : []), [x.enabled ? 'off' : 'on', x.enabled ? 'Turn off' : 'Turn on']].map(([act, l]) => (
+                    <form key={act} action={updateSource}><input type="hidden" name="key" value={x.key} /><input type="hidden" name="act" value={act} />
+                      <button className="btn btn-ghost btn-sm" type="submit">{l}</button></form>))}</div></td>
+              </tr>))}</tbody></table></div>
+        </section>
         <section className={`tile ${overdue ? 't-alert' : 't-blue'}`} role={overdue ? 'alert' : undefined}>
           <span className="v" style={{ fontSize: 24 }}>{overdue
             ? `Registration list update overdue${last ? ` by ${Math.round(-msLeft / 36e5)} hours` : ''}`

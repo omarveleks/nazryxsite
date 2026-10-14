@@ -10,6 +10,7 @@ market never merges or renames another market's companies. Molecule names and cl
 never overwritten.
 """
 import csv
+import json
 import datetime as dt
 import hashlib
 import os
@@ -170,7 +171,9 @@ def _table(path, header_words):
     """Every sheet's rows as dicts, from the header row that contains the given words."""
     if str(path).lower().endswith((".xls", ".html", ".htm")):
         frames = pd.read_html(path) if not str(path).lower().endswith(".xls") else [pd.read_excel(path, header=None, dtype=str)]
-        sheets = {str(i): [[("" if pd.isna(c) else str(c)).strip() for c in r] for r in f.values.tolist()] for i, f in enumerate(frames)}
+        # an HTML table's <th> header becomes pandas' column names: keep it as the first row
+        sheets = {str(i): [[str(c).strip() for c in f.columns]] + [[("" if pd.isna(c) else str(c)).strip() for c in r] for r in f.values.tolist()]
+                  for i, f in enumerate(frames)}
     else:
         sheets = xlsx_rows.rows(path)
     out = []
@@ -572,7 +575,8 @@ NEW_FROM_LIST = {"KG", "KE", "KZ"}
 def apply(conn, path, upload_id, country, initial=False, who_keys=()):
     if country not in ADAPTERS:
         raise ValueError(f"No reader for {country} registries yet.")
-    raw = [r for r in ADAPTERS[country](path) if r.get("certificate_no") or r.get("brand")]
+    rows = json.load(open(path, encoding="utf-8")) if str(path).endswith(".json") else ADAPTERS[country](path)   # .json: collected
+    raw = [r for r in rows if r.get("certificate_no") or r.get("brand")]
     if len(raw) < 50:
         raise ValueError(f"Only {len(raw)} products in this file. This does not look like the full {COUNTRIES[country].title()} register.")
     cur = conn.cursor()

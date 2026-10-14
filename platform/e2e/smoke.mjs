@@ -69,6 +69,10 @@ check(!mkt.includes('Uganda') && mkt.includes('Add your products'), 'manufacture
 for (const tab of ['', '?tab=review', '?tab=documents', '?tab=manufacturers', '?tab=accounts', '?tab=content', '?tab=activity', '?tab=regulatory', '?tab=calls', '?tab=team']) {
   const r = await t.goto(B + '/admin' + tab); check(r.status() === 200, `admin ${tab || 'data updates'}`);
 }
+await t.goto(B + '/admin?tab=data');
+const src = await t.locator('#sources').innerText();
+check(src.includes('Kazakhstan medicine register') && src.includes('Tanzania public tenders') && src.includes('Run now'), 'Admin lists the data sources with their health');
+await t.goto(B + '/admin?tab=team');
 const atabs = await t.locator('.tabs').innerText();
 check(!atabs.includes('Claims') && !atabs.includes('Requests') && !atabs.includes('Questions'), 'Admin has no distributor tabs');
 const teamTab = await t.locator('main').innerText();

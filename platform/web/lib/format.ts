@@ -92,3 +92,9 @@ export const FOCUS_GOALS: [string, string, string][] = [
 export const SUPPLIER_COUNTRIES = ['India', 'China', 'Pakistan', 'Bangladesh', 'Egypt', 'Jordan', 'Turkey', 'Kenya', 'South Africa', 'Europe', 'Other'];
 export const LEVEL_FILTERS = [['A', 'Level A, dispensaries'], ['B', 'Level B, health centres'], ['C', 'Level C, district hospitals'],
   ['D', 'Level D, regional hospitals'], ['S', 'Level S, specialist']] as const;
+
+/** Amounts and quantities: whole numbers with thousands separators, two decimals under 100. */
+export function fmtMoney(v: number | string | null | undefined) {
+  const n = Number(v ?? 0);
+  return n.toLocaleString('en', { maximumFractionDigits: Math.abs(n) < 100 ? 2 : 0 });
+}

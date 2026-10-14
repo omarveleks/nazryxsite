@@ -29,6 +29,14 @@ def summary(cur, user_id, countries):
                 bits.append(f"{gone} lapsed or withdrawn")
             if bits:
                 lines.append(f"{name}: {' and '.join(bits)} in your molecules.")
+        tenders = cur.execute("""
+            select count(*) filter (where t.stage = 'open'), count(*) from tenders t
+            where t.country = any(%s) and t.updated_at > now() - interval '7 days'
+              and exists (select 1 from mfr_products p where p.user_id = %s and p.molecule_id = any(t.molecule_ids))""",
+            (countries, user_id)).fetchone()
+        if tenders and tenders[1]:
+            lines.append(f"{tenders[1]} public {'tender' if tenders[1] == 1 else 'tenders'} for your molecules this week"
+                         + (f", {tenders[0]} still open." if tenders[0] else "."))
     moved = cur.execute("""select count(*) from engagements where user_id = %s and updated_at > now() - interval '7 days'""",
                         (user_id,)).fetchone()[0]
     if moved:

@@ -42,6 +42,13 @@ def tick():
             reminder.check_and_remind(cur, code)
         reminder.remind_questions(cur)
         conn.commit()
+    if not row and os.environ.get("COLLECT", "1") != "0":
+        try:
+            import collect
+            with connect() as conn:
+                collect.run(conn)         # the next due source: registers weekly, tenders daily, prices every 3 days
+        except Exception:
+            log.exception("collector failed")
     if os.environ.get("ANTHROPIC_API_KEY"):
         try:
             import reg_extract

@@ -1144,3 +1144,51 @@ def test_sign_in_and_last_active_are_recorded(env):
         assert a.execute("select auth_session_user('no-such-token')").fetchone()[0] is None
         a.commit()
     assert q("select last_seen_at > now() - interval '1 minute' from users where id = %s", uid)[0][0] is True
+
+
+def test_collectors_hold_small_pulls_and_keep_medicine_tenders(env, monkeypatch):
+    """A register pull is queued like an upload (the first one as a baseline); a much smaller one waits for the team
+    until it is released. Tenders keep medicines only, matched to molecules in English or Russian."""
+    import collect
+    import storage
+    with psycopg.connect(URL) as c:
+        cur = c.cursor()
+        c.execute("delete from registry_uploads where status = 'queued'")
+        monkeypatch.setattr(collect, "REGISTRIES", {"KE": lambda s, tmp: (open(os.path.join(tmp, "k.html"), "w").write("<table></table>") and os.path.join(tmp, "k.html"), 500)})
+        monkeypatch.setattr(storage, "store", lambda cur, path, name=None, uploaded_by=None: "db:00000000-0000-0000-0000-000000000000")
+        assert collect.run(c, "registry_KE") == "registry_KE"
+        assert q("select kind, file_name from registry_uploads where status = 'queued' and country = 'KE'")[0] == ("initial", "collected: k.html")
+        c.execute("delete from registry_uploads where status = 'queued'")
+        c.execute("update data_sources set last_ok = now() where key = 'registry_KE'")
+        c.commit()
+        loaded = q("select count(*) from registrations where country = 'KE' and active")[0][0]
+        monkeypatch.setattr(collect, "HOLD_RATIO", 10.0 if loaded else 0.0)   # force a hold when anything is loaded
+        collect.run(c, "registry_KE")
+        held = q("select held_rows, last_error from data_sources where key = 'registry_KE'")[0]
+        if loaded:
+            assert held[0] == 500 and held[1].startswith("Held:")
+            assert not q("select 1 from registry_uploads where status = 'queued' and country = 'KE'")
+            c.execute("update data_sources set release_held = true where key = 'registry_KE'")
+            c.commit()
+            collect.run(c, "registry_KE")
+            assert q("select kind from registry_uploads where status = 'queued' and country = 'KE'")[0] == ("upload",)
+            assert q("select held_rows, release_held from data_sources where key = 'registry_KE'")[0] == (None, False)
+        c.execute("delete from registry_uploads where status = 'queued'")
+        c.commit()
+        # tenders: a medicine lot (Russian name), a building tender that only names a chemical, an OCDS medicine item
+        idx = collect.MoleculeIndex(cur)
+        rows = [dict(country="KZ", source="t", ref="1", title="Амоксициллин, таблетка 500 мг", stage="open"),
+                dict(country="KZ", source="t", ref="2", title="Supply of building materials", stage="open", text="aluminium"),
+                collect._ocds({"ocid": "o-1", "tender": {"title": "Supply of goods", "items": [
+                    {"description": "Amoxicillin 500mg caps", "classification": {"id": "51101500"}, "quantity": 1000, "unit": {"value": {"amount": 2.5}}}]},
+                    "awards": [{"date": "2026-10-01", "value": {"amount": 2500, "currency": "TZS"}}]}, "TZ", "t", "u"),
+                collect._ocds({"ocid": "o-2", "tender": {"title": "Supply of schools laboratory equipment", "items": [
+                    {"description": "Glucose 1kg", "classification": {"id": "41000000"}}]}}, "TZ", "t", "u")]
+        assert rows[3] is None                                   # not a medicine tender
+        assert collect.save_tenders(cur, [r for r in rows if r], idx) == 2
+        c.commit()
+    got = dict(q("select ref, stage from tenders where source = 't'"))
+    assert got == {"1": "open", "o-1": "awarded"}
+    amox = q("select id from molecules where canonical_key = 'amoxicillin'")[0][0]
+    assert q("select count(*) from tenders where source = 't' and %s = any(molecule_ids)", amox)[0][0] == 2
+    assert q("select quantity, unit_price, value from tenders where ref = 'o-1'")[0] == (1000, 2.5, 2500)

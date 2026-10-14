@@ -8,6 +8,7 @@ import { requireUser } from '@/lib/auth';
 import { one, rows, withUser } from '@/lib/db';
 import { HIGH_DEMAND, canUse, countryName, tierIn } from '@/lib/mfr';
 import { REQ_SQL, type Requirement } from '@/lib/regulatory';
+import { fmtDate, fmtMoney } from '@/lib/format';
 
 export const metadata = { title: 'Market' };
 
@@ -56,7 +57,13 @@ export default async function MfrMarket({ searchParams }: { searchParams: Promis
         where country = $1 and active and reg_year between 2000 and extract(year from now())::int group by reg_year order by reg_year`, [market]);
     // the routes table describes Tanzania; other markets show their requirements card instead
     const routes = market === 'TZ' ? await rows(db, 'select label, description, months_low, months_high from registration_routes order by sort') : [];
-    return { targets, market, reqs, h, cats, origin, years, routes };
+    // medicine tenders collected from the market's procurement portals; the user's molecules first
+    const tenders = await rows(db, `select t.title, t.buyer, t.stage, coalesce(t.awarded, t.closing, t.published) as at, t.quantity, t.unit_price, t.value,
+        t.currency, t.bidders, exists (select 1 from mfr_products p where p.user_id = $2 and p.molecule_id = any(t.molecule_ids)) as mine
+        from tenders t where t.country = $1 order by mine desc, coalesce(t.awarded, t.closing, t.published) desc nulls last limit 8`, [market, u.id]);
+    const tcount = await one(db, `select count(*) filter (where stage = 'open')::int as open,
+        count(*) filter (where coalesce(awarded, closing, published) > now() - interval '90 days')::int as recent from tenders where country = $1`, [market]);
+    return { targets, market, reqs, h, cats, origin, years, routes, tenders, tcount };
   });
   const m = d.market;
   const full = canUse(tierIn(u, m), 'market');
@@ -123,6 +130,18 @@ export default async function MfrMarket({ searchParams }: { searchParams: Promis
               </section>}
             </div>
           </div>
+          {d.tenders!.length > 0 && (
+            <section className="card stack">
+              <div className="card-h"><div><h2>Medicine tenders in {countryName(m)}</h2>
+                <p className="note">{d.tcount?.open ?? 0} open now, {d.tcount?.recent ?? 0} in the last 90 days. Collected daily from the official procurement portals; yours first.</p></div></div>
+              {d.tenders!.map((x, i) => (
+                <div key={i} className="between small" style={{ borderTop: i ? '1px solid var(--line)' : undefined, paddingTop: i ? 8 : 0, gap: 12, flexWrap: 'wrap' }}>
+                  <span style={{ minWidth: 0, flex: '1 1 260px' }}><b>{x.title}</b>{x.mine && <span className="pill blue" style={{ marginLeft: 6 }}>Your molecule</span>}
+                    <div className="sub2">{x.buyer ?? ''}{x.at ? ` · ${fmtDate(x.at)}` : ''}</div></span>
+                  <span className="r">{x.quantity ? `${fmtMoney(x.quantity)} units` : ''}{x.unit_price ? ` at ${x.currency ?? ''} ${fmtMoney(x.unit_price)}` : x.value ? `${x.currency ?? ''} ${fmtMoney(x.value)}` : ''}
+                    <div><span className={`pill ${x.stage === 'open' ? 'mint' : ''}`}>{x.stage === 'open' ? 'Open' : x.stage === 'awarded' ? 'Awarded' : 'Closed'}</span></div></span>
+                </div>))}
+            </section>)}
           <section className="card">
             <div className="card-h"><h2>Registrations by certificate year</h2><span className="note">Products still registered today</span></div>
             <YearChart data={d.years!} />
