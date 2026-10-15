@@ -1207,3 +1207,17 @@ def test_only_the_team_sees_partner_names(env):
         as_user(a, cust)
         assert a.execute("select count(*) from team_partner_names('TZ')").fetchone()[0] == 0
         a.rollback()
+
+
+def test_manufacturers_can_watch_all_their_molecules(env):
+    """The 5-molecule limit was the distributor free plan's; a manufacturer watches every product."""
+    with psycopg.connect(URL) as c:
+        maker = c.execute("insert into users (email, password_hash, account_type, onboarded) values ('watchall@example.com', 'x', 'manufacturer', true) returning id").fetchone()[0]
+        c.commit()
+    mols = [r[0] for r in q("select id from molecules order by id limit 8")]
+    with app_conn(env) as a:
+        as_user(a, maker)
+        for m in mols:
+            a.execute("insert into watches (user_id, molecule_id) values (%s, %s)", (maker, m))
+        a.commit()
+    assert q("select count(*) from watches where user_id = %s", maker)[0][0] == len(mols) > 5

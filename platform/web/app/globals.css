@@ -263,3 +263,9 @@ details.more[open] > summary { display: none; }
 .spin { width: 14px; height: 14px; flex: none; border: 2px solid var(--pastel-blue); border-top-color: var(--blue); border-radius: 50%; animation: spin .8s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
 @media (prefers-reduced-motion: reduce) { .spin { animation: none; } }
+
+/* the bar shown between a click and the next page */
+.nav-progress { position: fixed; top: 0; left: 0; height: 3px; width: 100%; background: var(--blue); z-index: 1000;
+  transform-origin: left; animation: nav-progress 8s cubic-bezier(.1, .7, .2, 1) forwards; }
+@keyframes nav-progress { from { transform: scaleX(.05); } to { transform: scaleX(.95); } }
+@media (prefers-reduced-motion: reduce) { .nav-progress { animation: none; transform: scaleX(.6); } }

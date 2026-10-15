@@ -1,5 +1,7 @@
 import type { Metadata, Viewport } from 'next';
+import { Suspense } from 'react';
 import './globals.css';
+import NavProgress from '@/components/NavProgress';
 
 export const metadata: Metadata = {
   title: { default: 'Nazryx Intelligence', template: '%s · Nazryx' },
@@ -17,7 +19,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {/* eslint-disable-next-line @next/next/no-page-custom-font */}
         <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" />
       </head>
-      <body>{children}</body>
+      <body><Suspense fallback={null}><NavProgress /></Suspense>{children}</body>
     </html>
   );
 }

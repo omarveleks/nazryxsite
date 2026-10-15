@@ -49,7 +49,8 @@ def ca_bundle():
 
 def num(v):
     try:
-        return float(str(v).replace("\xa0", "").replace(" ", "").replace(",", ".")) if v not in (None, "") else None
+        t = re.sub(r",(?=\d{3}(\D|$))", "", str(v).replace("\xa0", "").replace(" ", ""))   # 91,000 -> 91000; 2,5 -> 2.5
+        return float(t.replace(",", ".")) if v not in (None, "") else None
     except ValueError:
         return None
 
@@ -197,7 +198,7 @@ def queue_registry(cur, src, stored, name):
 
 # ------------------------------------------------------------------ tenders: molecule matching and storage
 PHARMA = re.compile(r"pharma|medicin|drugs?\b|vaccin|antibiot|tablet|capsul|inject|syrup|infusion|лекарств|препарат|медикамент|фарма|"
-                    r"вакцин|таблет|капсул|инъекц|раствор|лиофилизат|суспенз|порошок|мазь|сироп|ампул|dori|vaksin|tibbiy|preparat", re.I)
+                    r"вакцин|таблет|капсул|инъекц|раствор|лиофилизат|суспенз|порошок|мазь|сироп|ампул|dori|vaksin|tibbiy|preparat|дори|дармон|тиббий", re.I)
 
 
 class MoleculeIndex:
@@ -230,6 +231,8 @@ def save_tenders(cur, rows, index):
         if not mols and not PHARMA.search(t["title"]):
             continue
         t.setdefault("buyer", None)
+        if t["stage"] == "open" and t.get("closing") and t["closing"] < dt.date.today():
+            t["stage"] = "closed"                 # past its deadline
         cols = ["country", "source", "ref", "title", "buyer", "stage", "published", "closing", "awarded", "value", "currency",
                 "quantity", "unit_price", "bidders", "url"]
         vals = [t.get(c) for c in cols]
@@ -250,7 +253,7 @@ def ten_KZ(s, src):
     import pandas as pd
     from io import StringIO
     ca, out = ca_bundle(), []
-    pages = [({}, p) for p in range(1, 31)] + [({"statuses": 360}, p) for p in range(1, 31 if src["last_ok"] else 1501)]
+    pages = [({}, p) for p in range(1, 61)] + [({"statuses": 360}, p) for p in range(1, 31 if src["last_ok"] else 1501)]
     for extra, page in pages:      # open lots, then completed lots (10 a page, newest first; a deeper first pull)
         h = s.get("https://fms.ecc.kz/ru/subpriceoffer", params={**extra, "page": page}, verify=ca, timeout=TIMEOUT).text
         links = {}                                # lot number -> its notice page on the portal
@@ -277,6 +280,33 @@ def ten_KZ(s, src):
     return out
 
 
+def ten_KZ_hosp(s, src):
+    """Public hospitals' own purchases (med.ecc.kz): open and finished announcements; medicine ones are kept."""
+    import pandas as pd
+    from io import StringIO
+    ca, out = ca_bundle(), []
+    for page in range(1, 51 if src["last_ok"] else 301):
+        h = s.get("https://med.ecc.kz/ru/searchanno", params={"page": page}, verify=ca, timeout=TIMEOUT).text
+        links = {}
+        for row in h.split("<tr")[1:]:
+            no, ann = re.search(r">\s*(\d{5,}-\d+)\s*<", row), re.search(r"/ru/announce/index/(\d+)", row)
+            if no and ann:
+                links[no.group(1)] = f"https://med.ecc.kz/ru/announce/index/{ann.group(1)}"
+        tables = pd.read_html(StringIO(h))
+        t = max(tables, key=len) if tables else None
+        if t is None or t.empty:
+            break
+        for r in t.astype(str).values.tolist():    # no, organiser, name, method, subject, start, end, lots, amount, status
+            if len(r) < 10 or not re.match(r"\d+-", r[0] or ""):
+                continue
+            status = r[9].lower()
+            out.append(dict(country="KZ", source="kz_hospitals", ref=r[0], title=r[2][:500], buyer=r[1],
+                            stage="open" if "опублик" in status or "прием" in status else "awarded" if "состоял" in status and "не " not in status else "closed",
+                            published=day(r[5]), closing=day(r[6]), value=num(r[8]), currency="KZT",
+                            url=links.get(r[0], "https://med.ecc.kz/ru/searchanno")))
+    return out
+
+
 def ten_UZ(s, src):
     """Open UZEX e-tenders (lot name, buyer, start price); medicine lots are picked out by name."""
     out = []
@@ -289,6 +319,86 @@ def ten_UZ(s, src):
                             value=num(x.get("cost")), currency=x.get("currency") or "UZS",
                             url=f"https://etender.uzex.uz/lot/{x.get('id')}"))
     return out
+
+
+def ten_UZ_deals(s, src):
+    """Completed UZEX deals: the lot description, buyer, start and final price, number of participants."""
+    out = []
+    for start in range(1, (2000 if src["last_ok"] else 20000) + 1, 500):
+        d = s.post("https://apietender.uzex.uz/api/common/DealsList", json={"from": start, "to": start + 499, "System_Id": 0}, timeout=TIMEOUT).json()
+        if not d:
+            break
+        for x in d:
+            out.append(dict(country="UZ", source="uz_deals", ref=str(x.get("deal_id")), title=(x.get("category_name") or "")[:500],
+                            buyer=x.get("customer_name"), stage="awarded", awarded=day(x.get("deal_date")),
+                            value=num(x.get("deal_cost")), currency="UZS", bidders=x.get("participants_count"),
+                            url="https://etender.uzex.uz"))
+    return out
+
+
+def _kg_rows(s, page, limit):
+    """Rows of a table on the Kyrgyz procurement portal (PrimeFaces), 100 at a time, as label/value lists."""
+    h = s.get(page, timeout=TIMEOUT).text
+    table = re.search(r'PrimeFaces\.cw\("DataTable","[^"]+",\{id:"([^"]+)"', h).group(1)
+    form = re.search(r'<form id="([^"]+)"[^>]*>(?:(?!</form>).)*' + re.escape(table), h, re.S).group(1)
+    state = re.search(r'name="javax\.faces\.ViewState"[^>]*value="([^"]+)"', h).group(1)
+    for first in range(0, limit, 100):
+        r = s.post(page, timeout=TIMEOUT, headers={"Faces-Request": "partial/ajax", "X-Requested-With": "XMLHttpRequest"}, data={
+            "javax.faces.partial.ajax": "true", "javax.faces.source": table, "javax.faces.partial.execute": table,
+            "javax.faces.partial.render": table, f"{table}_pagination": "true", f"{table}_first": str(first), f"{table}_rows": "100",
+            f"{table}_encodeFeature": "true", form: form, "javax.faces.ViewState": state})
+        rows = re.findall(r"<tr[^>]*>(.*?)</tr>", r.text, re.S)
+        if not rows:
+            break
+        for row in rows:
+            t = [x.strip() for x in re.sub(r"<[^>]+>", "|", html.unescape(row)).split("|") if x.strip()]
+            yield lambda label, t=t: [t[i + 1] for i, x in enumerate(t[:-1]) if x == label]
+
+
+def kg_day(v):
+    m = re.search(r"(\d{2})\.(\d{2})\.(\d{4})", v or "")
+    return dt.date(int(m.group(3)), int(m.group(2)), int(m.group(1))) if m else day(v)
+
+
+def ten_KG(s, src):
+    """Kyrgyz state procurement: open announcements (buyer, planned amount, deadline) and results (lots, contract
+    amounts, signing date). No winner names are kept."""
+    out = []
+    for get in _kg_rows(s, "https://zakupki.gov.kg/popp/view/order/list.xhtml", 1000 if src["last_ok"] else 3000):
+        ad = (get("number") or [None])[0]
+        if ad and get("purchase Name"):
+            out.append(dict(country="KG", source="kg_zakupki_open", ref=ad, title=get("purchase Name")[0][:500],
+                            buyer=(get("Name of company") or [None])[0], stage="open", published=kg_day((get("Date published") or [""])[0]),
+                            closing=kg_day((get("Bids Submission Deadline") or [""])[0]), value=num((get("Planned amount") or [""])[0]),
+                            currency="KGS", url="https://zakupki.gov.kg/popp/view/order/list.xhtml"))
+    for get in _kg_rows(s, "https://zakupki.gov.kg/popp/view/order/winners.xhtml", 1000 if src["last_ok"] else 10000):
+        ad = (get("Number of ads") or [None])[0]
+        if not ad:
+            continue
+        lots = [re.sub(r"^L\d+-\d+:\s*", "", x) for x in get("lotNumber")]
+        out.append(dict(country="KG", source="kg_zakupki", ref=f"{ad}-{(get('Contract number') or [''])[0]}",
+                        title=(get("purchase Name") or [""])[0][:500], text=" ".join(lots), stage="awarded",
+                        awarded=kg_day((get("Date of signing the contract") or [""])[0]),
+                        value=sum(num(v) or 0 for v in get("The price of the contract")) or None, currency="KGS",
+                        url="https://zakupki.gov.kg/popp/view/order/winners.xhtml"))
+    return out
+
+
+def ten_KE_live(s, src):
+    """Kenya's open tenders (PPIP), all procuring entities. Only tender fields are kept: the feed also carries the
+    names and contacts of the officers who posted them, which are dropped here."""
+    out, page = [], 1
+    while page <= 60:
+        d = s.get("https://tenders.go.ke/api/active-tenders", params={"page": page, "perpage": 100}, timeout=TIMEOUT).json()
+        for x in d.get("data", []):
+            pe = ((x.get("created_by") or {}).get("pe") or {}).get("name") or (x.get("pe") or {}).get("name")
+            out.append(dict(country="KE", source="ke_ppip", ref=x.get("ocid") or str(x.get("id")), title=x.get("title") or "",
+                            buyer=pe, stage="open", published=day(x.get("published_at")), closing=day(x.get("close_at")),
+                            url="https://tenders.go.ke"))
+        if page >= (d.get("last_page") or 1):
+            break
+        page += 1
+    return [t for t in out if OCDS_PHARMA.search(t["title"]) and not re.search(r"non[- ]?pharm", t["title"], re.I)]
 
 
 def _ocds(rel, country, source, url):
@@ -345,7 +455,7 @@ def ten_KE(s, src):
     return out
 
 
-TENDERS = {"KZ": ten_KZ, "UZ": ten_UZ, "TZ": ten_TZ, "KE": ten_KE}
+TENDERS = {"KZ": lambda s, src: ten_KZ(s, src) + ten_KZ_hosp(s, src), "UZ": lambda s, src: ten_UZ(s, src) + ten_UZ_deals(s, src), "TZ": ten_TZ, "KE": lambda s, src: ten_KE_live(s, src) + ten_KE(s, src), "KG": ten_KG}
 
 
 # ------------------------------------------------------------------ prices
@@ -408,6 +518,7 @@ def run(conn, only=None):
                 n, warning = run_registry(cur, src, s, tmp)
             elif kind == "tenders":
                 n = save_tenders(cur, TENDERS[country](s, src), MoleculeIndex(cur))
+                cur.execute("update tenders set stage = 'closed' where country = %s and stage = 'open' and closing < current_date", (country,))
             elif kind == "prices":
                 n = prices_UZ(cur, s)
         cur.execute("""update data_sources set last_rows = %s, last_error = %s, last_ok = case when %s then last_ok else now() end
