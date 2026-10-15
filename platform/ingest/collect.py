@@ -47,6 +47,23 @@ def ca_bundle():
     return path
 
 
+def html_table(r, page):
+    """The largest table of a portal page (lxml only, no html5lib fallback that hides the cause). On the first page a
+    missing table is an error naming what the site sent; later it just means the list ended."""
+    import pandas as pd
+    from io import StringIO
+    try:
+        tables = pd.read_html(StringIO(r.text), flavor="lxml")
+    except ValueError:
+        tables = []
+    if tables:
+        return max(tables, key=len)
+    if page == 1:
+        sent = re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", r.text))[:160]
+        raise RuntimeError(f"No table on {r.url} (HTTP {r.status_code}): {sent}")
+    return None
+
+
 def num(v):
     try:
         t = re.sub(r",(?=\d{3}(\D|$))", "", str(v).replace("\xa0", "").replace(" ", ""))   # 91,000 -> 91000; 2,5 -> 2.5
@@ -255,18 +272,18 @@ def ten_KZ(s, src):
     ca, out = ca_bundle(), []
     pages = [({}, p) for p in range(1, 61)] + [({"statuses": 360}, p) for p in range(1, 31 if src["last_ok"] else 1501)]
     for extra, page in pages:      # open lots, then completed lots (10 a page, newest first; a deeper first pull)
-        h = s.get("https://fms.ecc.kz/ru/subpriceoffer", params={**extra, "page": page}, verify=ca, timeout=TIMEOUT).text
+        resp = s.get("https://fms.ecc.kz/ru/subpriceoffer", params={**extra, "page": page}, verify=ca, timeout=TIMEOUT)
+        h = resp.text
         links = {}                                # lot number -> its notice page on the portal
         for row in h.split("<tr")[1:]:
             lot, ann = re.search(r">\s*(\d{5,}-[^<\s]+)\s*<", row), re.search(r"/ru/announce/index/(\d+)", row)
             if lot and ann:
                 links[lot.group(1)] = f"https://fms.ecc.kz/ru/announce/index/{ann.group(1)}"
-        tables = pd.read_html(StringIO(h))
-        if not tables:
-            break
-        t = max(tables, key=len)
-        if t.empty:
-            break
+        t = html_table(resp, page)
+        if t is None or t.empty:
+            if extra:
+                break
+            continue
         for r in t.astype(str).values.tolist():   # lot, buyer, notice (with dates), medicine, form, method, month, qty, price, sum, status, bids
             if len(r) < 12 or not re.match(r"\d+-", r[0] or ""):
                 continue
@@ -286,14 +303,14 @@ def ten_KZ_hosp(s, src):
     from io import StringIO
     ca, out = ca_bundle(), []
     for page in range(1, 51 if src["last_ok"] else 301):
-        h = s.get("https://med.ecc.kz/ru/searchanno", params={"page": page}, verify=ca, timeout=TIMEOUT).text
+        resp = s.get("https://med.ecc.kz/ru/searchanno", params={"page": page}, verify=ca, timeout=TIMEOUT)
+        h = resp.text
         links = {}
         for row in h.split("<tr")[1:]:
             no, ann = re.search(r">\s*(\d{5,}-\d+)\s*<", row), re.search(r"/ru/announce/index/(\d+)", row)
             if no and ann:
                 links[no.group(1)] = f"https://med.ecc.kz/ru/announce/index/{ann.group(1)}"
-        tables = pd.read_html(StringIO(h))
-        t = max(tables, key=len) if tables else None
+        t = html_table(resp, page)
         if t is None or t.empty:
             break
         for r in t.astype(str).values.tolist():    # no, organiser, name, method, subject, start, end, lots, amount, status

@@ -170,7 +170,7 @@ FIELDS = ["certificate_no", "brand", "generic", "atc", "dosage_form", "strength"
 def _table(path, header_words):
     """Every sheet's rows as dicts, from the header row that contains the given words."""
     if str(path).lower().endswith((".xls", ".html", ".htm")):
-        frames = pd.read_html(path) if not str(path).lower().endswith(".xls") else [pd.read_excel(path, header=None, dtype=str)]
+        frames = pd.read_html(path, flavor="lxml") if not str(path).lower().endswith(".xls") else [pd.read_excel(path, header=None, dtype=str)]
         # an HTML table's <th> header becomes pandas' column names: keep it as the first row
         sheets = {str(i): [[str(c).strip() for c in f.columns]] + [[("" if pd.isna(c) else str(c)).strip() for c in r] for r in f.values.tolist()]
                   for i, f in enumerate(frames)}
