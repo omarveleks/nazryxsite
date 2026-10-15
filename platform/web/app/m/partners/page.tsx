@@ -33,7 +33,10 @@ export default async function Partners({ searchParams }: { searchParams: Promise
       [market, cls, molecule?.id ?? null, false, Number(sp.min) || 0, sort]) : [];
     const products = await rows(db, `select p.id, coalesce(m.inn, p.name) as name from mfr_products p left join molecules m on m.id = p.molecule_id
                                      where p.user_id = $1 order by 2 limit 300`, [u.id]);
-    return { targets, market, cats, mine, cls, molecule, sort, list, products, byHolder, status: prof?.status };
+    // the team sees the names behind the codes, one click away (customers never do)
+    const names: Record<string, string> = u.role === 'team' && sp.names === '1'
+      ? Object.fromEntries((await rows(db, 'select code, name from team_partner_names($1)', [market])).map((r) => [r.code, r.name])) : {};
+    return { targets, market, cats, mine, cls, molecule, sort, list, products, byHolder, names, status: prof?.status };
   });
   const t = tierIn(u, d.market);
   const lists = canUse(t, 'distributors'), matching = canUse(t, 'matching'), intro = canUse(t, 'partner_intro');
@@ -43,12 +46,15 @@ export default async function Partners({ searchParams }: { searchParams: Promise
   const noun = d.byHolder ? 'companies' : 'distributors';
   return (
     <Shell user={u} title="Partners" sub={`Who could carry your products in ${countryName(d.market)}`}
-      actions={intro ? <Link className="btn btn-blue btn-sm" href="/m/partners/intro">Ask us to find distributors</Link> : undefined}>
+      actions={u.role === 'team'
+        ? <Link className="btn btn-blue btn-sm" href={`/m/partners?market=${d.market}${sp.names === '1' ? '' : '&names=1'}`}>{sp.names === '1' ? 'Hide names' : 'Show names'}</Link>
+        : intro ? <Link className="btn btn-blue btn-sm" href="/m/partners/intro">Ask us to find distributors</Link> : undefined}>
       <Flash sp={sp} />
       <MarketPicker u={u} targets={d.targets} current={d.market} path="/m/partners" />
       {!hasData(d.market) ? <AgencyMarket code={d.market} /> : (<>
         <form method="get" className="card tight stack" style={{ gap: 10 }}>
           <input type="hidden" name="market" value={d.market} />
+          {sp.names === '1' && <input type="hidden" name="names" value="1" />}
           <div className="row">
             <select className="input" name="class" defaultValue={d.cls ?? ''} aria-label="Therapeutic class" style={{ flex: '2 1 220px' }}>
               <option value="">All therapeutic classes</option>{d.cats.map((c) => <option key={c} value={c}>{c}</option>)}</select>
@@ -74,7 +80,8 @@ export default async function Partners({ searchParams }: { searchParams: Promise
             <div>{shown.map((p, i) => (
               <div key={p.code} className="between" style={{ alignItems: 'flex-start', flexWrap: 'wrap', padding: '10px 0', borderTop: i ? '1px solid var(--line)' : undefined }}>
                 <div style={{ minWidth: 0, flex: '1 1 320px' }}>
-                  <span className="nm">{d.byHolder ? 'Company' : 'Distributor'} {p.code}</span>
+                  <span className="nm">{d.names[p.code] ?? `${d.byHolder ? 'Company' : 'Distributor'} ${p.code}`}</span>
+                  {d.names[p.code] && <span className="sub2"> · {p.code}</span>}
                   {d.byHolder && p.local_maker && <span className="pill mint" style={{ marginLeft: 8, fontSize: 12 }}>Local</span>}
                   <div className="sub2">{p.products} registered products · {p.molecules} molecules · {p.classes} classes{d.cls ? ` · ${p.in_class} in ${d.cls}` : ''}</div>
                   {p.top_classes && <div className="sub2">Strongest in {p.top_classes}</div>}

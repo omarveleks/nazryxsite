@@ -48,7 +48,7 @@ export default async function MfrProduct({ params, searchParams }: { params: Pro
     const open = canUse(t, 'matching') && p.category ? (await rows(db, 'select carries from partner_search($1, $2, $3)', [market, p.category, p.molecule_id]))
       .filter((x) => !x.carries).length : null;
     // public tenders for this molecule in this market, and the official price caps where the market publishes them
-    const tenders = canUse(t, 'market') && p.molecule_id ? await rows(db, `select title, buyer, stage, coalesce(awarded, closing, published) as at, quantity,
+    const tenders = canUse(t, 'market') && p.molecule_id ? await rows(db, `select id, title, buyer, stage, coalesce(awarded, closing, published) as at, quantity,
         unit_price, value, currency, bidders, url from tenders where country = $2 and $1 = any(molecule_ids)
         order by coalesce(awarded, closing, published) desc nulls last limit 6`, [p.molecule_id, market]) : [];
     const caps = canUse(t, 'pricing') && p.molecule_id ? await one(db, `select count(*)::int as n, min(max_retail) as lo, max(max_retail) as hi, min(currency) as cur
@@ -112,13 +112,13 @@ export default async function MfrProduct({ params, searchParams }: { params: Pro
           </>)}
           {'tenders' in d && d.tenders.length > 0 && (
             <section className="card stack">
-              <div className="card-h"><h2>Public tenders in {countryName(market)}</h2><span className="note">Collected from the official procurement portals</span></div>
+              <div className="card-h"><h2>Public tenders in {countryName(market)}</h2><Link className="btn-link" href={`/m/tenders?market=${market}`}>All tenders</Link></div>
               {d.tenders.map((x, i) => (
-                <div key={i} className="between small" style={{ borderTop: i ? '1px solid var(--line)' : undefined, paddingTop: i ? 8 : 0, gap: 12, flexWrap: 'wrap' }}>
+                <Link key={i} href={`/m/tenders/${x.id}`} className="between small" style={{ borderTop: i ? '1px solid var(--line)' : undefined, paddingTop: i ? 8 : 0, gap: 12, flexWrap: 'wrap', textDecoration: 'none', color: 'inherit' }}>
                   <span style={{ minWidth: 0, flex: '1 1 260px' }}><b>{x.title}</b><div className="sub2">{x.buyer ?? ''}{x.at ? ` · ${fmtDate(x.at)}` : ''}</div></span>
                   <span className="r">{x.quantity ? `${fmtMoney(x.quantity)} units` : ''}{x.unit_price ? ` at ${x.currency ?? ''} ${fmtMoney(x.unit_price)}` : x.value ? `${x.currency ?? ''} ${fmtMoney(x.value)}` : ''}
                     <div><span className={`pill ${x.stage === 'open' ? 'mint' : ''}`}>{x.stage === 'open' ? 'Open' : x.stage === 'awarded' ? `Awarded${x.bidders ? ` · ${x.bidders} ${x.bidders === 1 ? 'bid' : 'bids'}` : ''}` : 'Closed'}</span></div></span>
-                </div>))}
+                </Link>))}
             </section>)}
           <section className="card stack">
             <div className="card-h"><h2>Requirements in {countryName(market)}</h2><Link className="btn-link" href={`/m/regulatory?market=${market}&product=${id}#p${id}`}>All requirements</Link></div>

@@ -171,7 +171,8 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
     { key: 'team', label: 'Team', href: '/admin?tab=team' },
   ].filter((t) => allowedTabs.includes(t.key));
   return (
-    <Shell user={u} title="Admin" sub="Nazryx team only. Not visible to customers.">
+    <Shell user={u} title="Admin" sub="Nazryx team only. Not visible to customers."
+      actions={<Link className="btn btn-blue btn-sm" href="/m/partners?names=1">Distributors with names</Link>}>
       <Tabs items={tabs} current={tab} />
       <Flash sp={sp} />
       {sp.queued && <div className="ok" role="status">Queued. The ingest job runs in the background; refresh to see the result.</div>}

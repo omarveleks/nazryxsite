@@ -253,6 +253,11 @@ def ten_KZ(s, src):
     pages = [({}, p) for p in range(1, 31)] + [({"statuses": 360}, p) for p in range(1, 31 if src["last_ok"] else 1501)]
     for extra, page in pages:      # open lots, then completed lots (10 a page, newest first; a deeper first pull)
         h = s.get("https://fms.ecc.kz/ru/subpriceoffer", params={**extra, "page": page}, verify=ca, timeout=TIMEOUT).text
+        links = {}                                # lot number -> its notice page on the portal
+        for row in h.split("<tr")[1:]:
+            lot, ann = re.search(r">\s*(\d{5,}-[^<\s]+)\s*<", row), re.search(r"/ru/announce/index/(\d+)", row)
+            if lot and ann:
+                links[lot.group(1)] = f"https://fms.ecc.kz/ru/announce/index/{ann.group(1)}"
         tables = pd.read_html(StringIO(h))
         if not tables:
             break
@@ -268,7 +273,7 @@ def ten_KZ(s, src):
                                   "open" if "опублик" in status or "прием" in status else "closed",
                             published=day(when[0]) if when else None, closing=day(when[-1]) if when else None,
                             quantity=num(r[7]), unit_price=num(r[8]), value=num(r[9]), currency="KZT",
-                            bidders=int(num(r[11]) or 0), url="https://fms.ecc.kz/ru/subpriceoffer"))
+                            bidders=int(num(r[11]) or 0), url=links.get(r[0], "https://fms.ecc.kz/ru/subpriceoffer")))
     return out
 
 

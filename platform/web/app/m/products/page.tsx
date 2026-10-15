@@ -8,7 +8,7 @@ import { DemandIcon } from '@/components/Icons';
 import { addMfrProducts, deleteMfrFile, saveLaunch, unwatchMolecule, uploadMfrFile, watchMolecule } from '@/app/actions/mfr';
 import { requireUser } from '@/lib/auth';
 import { one, rows, withUser } from '@/lib/db';
-import { HIGH_DEMAND, LAUNCH_STAGES, MFR_FILE_KINDS, canUse, countryName, covers, productClass, tierIn } from '@/lib/mfr';
+import { HIGH_DEMAND, LAUNCH_STAGES, MFR_FILE_KINDS, canUse, countryName, covers, productClass, tierIn, byMolecule } from '@/lib/mfr';
 import { fmtDate } from '@/lib/format';
 
 export const metadata = { title: 'My products' };
@@ -57,11 +57,13 @@ export default async function MfrProducts({ searchParams }: { searchParams: Prom
 
   const list = d.products.map((p) => ({ ...p, cls: productClass(p), f: focus ? fact(p.molecule_id, focus) : undefined }))
     .sort((a, b) => (b.f?.score ?? -1) - (a.f?.score ?? -1) || String(a.inn ?? a.name).localeCompare(String(b.inn ?? b.name)));
-  const n = list.length, matched = list.filter((p) => p.molecule_id).length;
-  const by = (k: string) => list.filter((p) => competition(p.f) === k).length;
-  const onMarket = list.filter((p) => p.f && p.f.registrants > 0);
+  // doses, forms and packs of one medicine count once: the analysis and the list are by molecule
+  const mols = byMolecule(list);
+  const packs = list.length, n = mols.length, matched = list.filter((p) => p.molecule_id).length;
+  const by = (k: string) => mols.filter((p) => competition(p.f) === k).length;
+  const onMarket = mols.filter((p) => p.f && p.f.registrants > 0);
   const avg = onMarket.length ? (onMarket.reduce((s, p) => s + p.f!.registrants, 0) / onMarket.length).toFixed(1) : '—';
-  const classes = Object.entries(list.reduce<Record<string, typeof list>>((acc, p) => { const c = p.cls ?? 'Not classified'; (acc[c] ??= []).push(p); return acc; }, {}))
+  const classes = Object.entries(mols.reduce<Record<string, typeof mols>>((acc, p) => { const c = p.cls ?? 'Not classified'; (acc[c] ??= []).push(p); return acc; }, {}))
     .map(([cls, ps]) => {
       const on = ps.filter((p) => p.f && p.f.registrants > 0);
       return { cls, n: ps.length, open: ps.filter((p) => competition(p.f) === 'open').length,
@@ -143,14 +145,14 @@ export default async function MfrProducts({ searchParams }: { searchParams: Prom
 
       {!hasData(market) ? <AgencyMarket code={market} /> : n > 0 && (<>
         <div className="grid g4" data-tour="portfolio">
-          <div className="tile t-white"><span className="k">Products</span><span className="v num">{n}</span><span className="small">{matched} matched to a molecule</span></div>
+          <div className="tile t-white"><span className="k">Medicines</span><span className="v num">{n}</span><span className="small">{packs} products{packs > matched ? `, ${packs - matched} not matched yet` : ''}</span></div>
           <div className="tile t-peach"><span className="k"><DemandIcon /> In high demand</span>
-            <span className="v num">{list.filter((p) => Number(p.f?.demand ?? 0) >= HIGH_DEMAND).length}</span>
-            <span className="small">{by('open')} of your products have nobody registered</span></div>
+            <span className="v num">{mols.filter((p) => Number(p.f?.demand ?? 0) >= HIGH_DEMAND).length}</span>
+            <span className="small">{by('open')} of your medicines have nobody registered</span></div>
           {analysis ? (<>
-            <div className="tile t-blue"><span className="k">Average competitors</span><span className="v num">{avg}</span><span className="small">per product already on the market</span></div>
+            <div className="tile t-blue"><span className="k">Average competitors</span><span className="v num">{avg}</span><span className="small">per medicine already on the market</span></div>
             <div className="tile t-mint"><span className="k">Top class</span><span className="v" style={{ fontSize: 20, lineHeight: 1.2 }}>{top?.cls ?? '—'}</span>
-              <span className="small">{top ? `${top.n} of your products` : ''}</span></div>
+              <span className="small">{top ? `${top.n} of your medicines` : ''}</span></div>
           </>) : <div style={{ gridColumn: 'span 2' }}><PlanLock need="data" title="Your portfolio analysis" u={u} market={market}>Competition and depth for every product, your strongest classes, and where you are open.</PlanLock></div>}
         </div>
         {analysis && (
@@ -168,16 +170,16 @@ export default async function MfrProducts({ searchParams }: { searchParams: Prom
       </>)}
 
       <section className="card">
-        <div className="card-h"><h2>All products</h2><span className="note">{analysis ? 'Clearest openings first' : 'Your top 3 shown in full'}</span></div>
+        <div className="card-h"><h2>All medicines</h2><span className="note">{analysis ? 'Clearest openings first' : 'Your top 3 shown in full'}</span></div>
         {n === 0 ? <Empty>No products yet. Search for your first one below.</Empty> : (
           <div className="tbl-wrap"><table className="tbl">
             <thead><tr><th>Product</th><th className="hide-m">Class</th>
               <th className="r">Competition in {countryName(market)}</th></tr></thead>
-            <tbody>{list.map((p, i) => (
+            <tbody>{mols.map((p, i) => (
               <tr key={p.id}>
                 <td><Link href={`/m/products/${p.id}`}><b>{p.inn ?? p.name}</b></Link>
                   {Number(p.f?.demand ?? 0) >= HIGH_DEMAND && visible(i) && <span style={{ marginLeft: 6, color: 'var(--pastel-peach-ink)' }}><DemandIcon size={11} title="High demand" /></span>}
-                  <div className="sub2">{[p.inn ? p.name : null, p.molecule_id ? null : 'Not matched yet'].filter(Boolean).join(' · ')}</div></td>
+                  <div className="sub2">{[p.packs > 1 ? `${p.packs} products` : p.inn ? p.name : null, p.variants || null, p.molecule_id ? null : 'Not matched yet'].filter(Boolean).join(' · ')}</div></td>
                 <td className="small hide-m">{p.cls ?? '—'}</td>
                 {[market].map((c) => {
                   const f = fact(p.molecule_id, c);

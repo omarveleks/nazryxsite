@@ -1192,3 +1192,18 @@ def test_collectors_hold_small_pulls_and_keep_medicine_tenders(env, monkeypatch)
     amox = q("select id from molecules where canonical_key = 'amoxicillin'")[0][0]
     assert q("select count(*) from tenders where source = 't' and %s = any(molecule_ids)", amox)[0][0] == 2
     assert q("select quantity, unit_price, value from tenders where ref = 'o-1'")[0] == (1000, 2.5, 2500)
+
+
+def test_only_the_team_sees_partner_names(env):
+    team = q("select id from users where role = 'team' limit 1")[0][0]
+    with psycopg.connect(URL) as c:
+        cust = c.execute("insert into users (email, password_hash, account_type, onboarded) values ('names@example.com', 'x', 'manufacturer', true) returning id").fetchone()[0]
+        c.commit()
+    with app_conn(env) as a:
+        as_user(a, team)
+        names = a.execute("select code, name from team_partner_names('TZ')").fetchall()
+        codes = {r[0] for r in a.execute("select code from partner_search('TZ')").fetchall()}
+        assert names and codes <= {n[0] for n in names} and all(n[1] for n in names)
+        as_user(a, cust)
+        assert a.execute("select count(*) from team_partner_names('TZ')").fetchone()[0] == 0
+        a.rollback()

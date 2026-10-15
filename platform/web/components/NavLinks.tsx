@@ -4,7 +4,7 @@ import { usePathname } from 'next/navigation';
 
 // The manufacturer area (the distributor side is paused: see distributor/README.md). The team also gets Admin.
 const NAV = [
-  ['/m', 'Home'], ['/m/market', 'Market'], ['/m/products', 'My products'], ['/m/regulatory', 'Regulatory'], ['/m/partners', 'Partners'], ['/m/services', 'Services'],
+  ['/m', 'Home'], ['/m/market', 'Market'], ['/m/products', 'My products'], ['/m/regulatory', 'Regulatory'], ['/m/partners', 'Partners'], ['/m/tenders', 'Tenders'], ['/m/services', 'Services'],
   ['/m/plan', 'Plan'], ['/settings', 'Settings'],
 ] as const;
 

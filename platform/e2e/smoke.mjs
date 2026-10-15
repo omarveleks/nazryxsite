@@ -69,6 +69,10 @@ check(!mkt.includes('Uganda') && mkt.includes('Add your products'), 'manufacture
 for (const tab of ['', '?tab=review', '?tab=documents', '?tab=manufacturers', '?tab=accounts', '?tab=content', '?tab=activity', '?tab=regulatory', '?tab=calls', '?tab=team']) {
   const r = await t.goto(B + '/admin' + tab); check(r.status() === 200, `admin ${tab || 'data updates'}`);
 }
+await t.goto(B + '/admin'); await t.waitForLoadState('networkidle');
+await Promise.all([t.waitForURL(/partners\?names=1/), t.click('a:has-text("Distributors with names")')]);
+const named = await t.locator('main').innerText();
+check(/Ltd|Limited|Pharm/i.test(named) && named.includes('Hide names'), 'admin sees distributor names with one click');
 await t.goto(B + '/admin?tab=data');
 const src = await t.locator('#sources').innerText();
 check(src.includes('Kazakhstan medicine register') && src.includes('Tanzania public tenders') && src.includes('Run now'), 'Admin lists the data sources with their health');
@@ -180,6 +184,8 @@ check((await k.locator('main').innerText()).includes('To unlock that') && (await
 await k.goto(B + '/m/plan?billing=year');
 const yearText = await k.locator('main').innerText();
 check(yearText.includes('$1,990') && yearText.includes('/ year') && /included · each extra market \$490 a year/.test(yearText), 'plans: yearly billing at ten months, one market included, extra markets priced');
+check((await k.goto(B + '/m/tenders')).status() === 200 && (await k.locator('nav').innerText()).includes('Tenders')
+  && (await k.locator('main').innerText()).includes('Unlock with Basic Market Data'), 'tenders page in the menu, locked without a plan');
 await k.goto(B + '/m/regulatory');
 const regFree = await k.locator('main').innerText();
 check(regFree.includes('Regulator and route') && regFree.includes('Local technical representative') && regFree.includes('Unlock with Complete Market Access'),
@@ -223,6 +229,7 @@ check((await k.locator('main').innerText()).includes('By therapeutic class'), 'a
 await k.goto(B + '/m/products');
 await k.locator('a b', { hasText: 'Doxycycline' }).first().click(); await k.waitForURL(/\/m\/products\/\d+/);
 await Promise.all([k.waitForURL(/saved=1/), k.click('button:has-text("Add to the tracker")')]);
+check((await k.goto(B + '/m/tenders?market=TZ&show=all')).status() === 200, 'tenders page opens with a plan');
 await k.goto(B + '/m/products?tab=launches');
 check((await k.locator('main').innerText()).includes('Doxycycline'), 'launch tracker');
 await k.goto(B + '/m/products?tab=watch'); await k.waitForLoadState('networkidle');
