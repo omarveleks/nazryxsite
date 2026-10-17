@@ -32,3 +32,16 @@ def test_one_family_for_every_spelling():
     assert pricing.family("Cetirizine") == pricing.family("Setirizin")
     assert pricing.family("Metformin") != pricing.family("Metronidazole")
     assert pricing.units_in("Safcor 2.5mg Tablet · 1× 14’s") == 14
+
+
+def test_messy_registry_names_resolve_only_when_sure():
+    singles = [pricing.family(x) for x in ["telmisartan", "sildenafil", "moxifloxacin", "clobetasol", "gentamicin", "sulfadoxine",
+                                           "pyrimethamine", "paracetamol", "diclofenac", "prednisone", "esomeprazole"]]
+    assert pricing.ingredients("Telmirsatan", singles) == pricing.family("telmisartan")
+    assert pricing.ingredients("Moxifloxacin Hydrohloride", singles) == pricing.family("moxifloxacin")
+    assert pricing.ingredients("Each Film Tablet Contains: Sildenafil Citrat …", singles) == pricing.family("sildenafil")
+    assert pricing.ingredients("Clobetasol Proprionate Gentamycin Sulphate", singles) == pricing.family("clobetasol + gentamicin")
+    assert pricing.ingredients("Sulfadoxine Pyrimethamine", singles) == pricing.family("sulfadoxine + pyrimethamine")
+    assert pricing.ingredients("Paracetamol Diclofenac Serratiopeptidase", singles) is None     # one ingredient unknown
+    assert pricing.ingredients("Prednisolone", singles) is None                               # not prednisone
+    assert pricing.ingredients("Omeprazole", singles) is None                                 # not esomeprazole

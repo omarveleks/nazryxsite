@@ -1263,6 +1263,12 @@ def test_molecule_prices_from_listings_and_neighbour_estimates(env, monkeypatch)
         est = got[("KZ", mols[2])]
         assert est[0] == "estimate" and round(float(est[4]), 2) == 2.0 and est[2] == "500 mg"
         assert round(est[1], 1) == round(3 * 8.75 / 87.5 * 2 * 452, 1)              # Kyrgyz price x 2, in tenge
+        # a combination nobody prices: its ingredients added up (no measured combination ratio here, so 1.0)
+        a, b = [r[0] for r in cur.execute("select inn from molecules where id = any(%s) order by id", (mols[:2],))]
+        combo = cur.execute("insert into molecules (inn, canonical_key) values (%s, %s) returning id", (f"{a} + {b}", f"zz combo {a}")).fetchone()[0]
+        pricing.rebuild(cur)
+        kg = dict(cur.execute("select molecule_id, unit_price from molecule_prices where country = 'KG'").fetchall())
+        assert round(float(kg[combo]), 2) == round(float(kg[mols[0]] + kg[mols[1]]), 2)
         c.rollback()
 
 

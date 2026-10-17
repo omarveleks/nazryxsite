@@ -29,6 +29,7 @@ export function priceBasis(p: MoleculePrice) {
   if (p.basis === 'listings') return `From ${p.n} ${p.n === 1 ? what.replace(/s\b/g, '') : what} in ${here}. Low and premium are the cheapest and dearest tenth.`;
   const gap = Number(p.factor ?? 1);
   const adj = Math.abs(gap - 1) < 0.005 ? '' : `, adjusted for the usual price gap (${here} is ${Math.round(Math.abs(gap - 1) * 100)}% ${gap > 1 ? 'higher' : 'lower'})`;
+  if (p.kinds.includes('ingredients')) return `Estimated from the prices of its ${p.n} ingredients in ${here}: combination packs usually cost about ${Math.round(gap * 100)}% of their ingredients bought separately (measured on ${p.overlap} combinations).`;
   const abroad = ABROAD[p.from_country ?? ''];
   return abroad
     ? `Estimated from ${abroad}'s official prices${adj}. No price is published for it in ${here} or nearby markets yet.`

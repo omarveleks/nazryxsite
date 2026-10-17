@@ -92,6 +92,40 @@ def family(inn):
     return "+".join(sorted(set(parts)))
 
 
+SALT_WORDS = ("hydrochloride", "dihydrochloride", "hydrobromide", "bromide", "butylbromide", "sulphate", "sulfate", "citrate",
+              "maleate", "fumarate", "besylate", "besilate", "mesylate", "mesilate", "potassium", "sodium", "disodium", "magnesium",
+              "calcium", "meglumine", "dimeglumine", "monohydrate", "dihydrate", "trihydrate", "anhydrous", "acetate", "phosphate",
+              "lactate", "gluconate", "tartrate", "succinate", "propionate", "dipropionate", "valerate", "hyclate", "equivalent",
+              "contains", "tablet", "tablets", "capsule", "capsules", "coated", "orally", "dispersible", "disintegrating",
+              "injection", "solution", "syrup", "suspension", "cream", "ointment", "sachet", "drops", "chewable", "prolonged",
+              "release", "modified", "extended", "infusion", "powder", "film")
+FILLER = {"each", "contains", "to", "of", "as", "with", "for", "the", "and", "in", "acid", "base", "free", "usp", "bp", "ip", "inn", "eq", "equivalent"}
+
+
+def ingredients(name, singles):
+    """The single-molecule families in a free-text name ('Each tablet contains: Telmirsatan …', 'Clobetasol Proprionate
+    Gentamycin Sulphate'), or None unless every meaningful word is recognised (close spellings allowed)."""
+    from rapidfuzz import process, fuzz
+    words = re.findall(r"[a-z][a-z\-]{3,}", re.sub(r"\(.*?\)", " ", (name or "").lower()))
+    found = []
+    for w in words:
+        if w in FILLER or process.extractOne(w, SALT_WORDS, scorer=fuzz.ratio, score_cutoff=85):
+            continue                                    # salts and label words, typos included ('hydrohloride')
+        k = family(w)
+        if not k or len(k) < 5:
+            continue
+        if k in singles:
+            found.append(k)
+            continue
+        # a typo, not another medicine: very close, same start, same length within one letter (prednisolone is not prednisone)
+        hits = [h for h, score, _ in process.extract(k, singles, scorer=fuzz.ratio, score_cutoff=90, limit=3)
+                if h[:3] == k[:3] and abs(len(h) - len(k)) <= 1]
+        if not hits:
+            return None                                 # a word we do not know: do not guess
+        found.append(hits[0])
+    return "+".join(sorted(set(found))) or None
+
+
 def observations(cur):
     """(country, molecule, kind, text, units, pack price, currency) from every source."""
     rows = cur.execute("""select country, molecule_id, kind, coalesce(pack, name), units, pack_price, currency from price_listings
@@ -159,6 +193,17 @@ def rebuild(cur):
         avg = sum(t) / len(t)
         out[(c, m)] = dict(basis="listings", kinds=sorted({o[1] for o in obs}), unit=unit, strength=usual, unit_price=avg,
                            unit_usd=avg / float(fx[CURRENCY[c]]), lo=pct(local, 0.1), hi=pct(local, 0.9), n=len(local), by=by)
+    # molecules whose name only differs by typos, salts or label text share the family that has prices
+    priced = {k for (_, k) in out}
+    singles = sorted(k for k in priced if isinstance(k, str) and "+" not in k)
+    for mid, inn in cur.execute("select id, inn from molecules where inn is not null").fetchall():
+        if fam.get(mid) in priced:
+            continue
+        k = ingredients(inn, singles)
+        if k in priced and k != fam.get(mid):
+            members.setdefault(k, []).append(mid)
+            members.get(fam.get(mid), []).remove(mid) if mid in members.get(fam.get(mid), []) else None
+            fam[mid] = k
     # estimates for what a market lacks: from the market whose prices compare best with it (neighbours first, then the
     # market sharing the most priced molecules), adjusted by the median price ratio between the two markets
     direct = dict(out)
@@ -204,20 +249,51 @@ def rebuild(cur):
                                    unit_price=v["unit_usd"] * factor * rate, unit_usd=v["unit_usd"] * factor,
                                    lo=v["lo"] / rate_n * factor * rate, hi=v["hi"] / rate_n * factor * rate,
                                    n=v["n"], by=[], from_country=n, factor=factor, overlap=overlap)
+    # combinations nobody prices: their ingredients' prices added up, scaled by how combination packs compare with their
+    # ingredients where both are priced (measured on our data)
+    samples = []
+    for (c, k), v in direct.items():
+        parts = k.split("+") if isinstance(k, str) and "+" in k else []
+        if parts and all((c, p) in direct and direct[(c, p)]["unit"] == v["unit"] for p in parts):
+            samples.append(v["unit_usd"] / sum(direct[(c, p)]["unit_usd"] for p in parts))
+    combo_factor = statistics.median(samples) if len(samples) >= MIN_OVERLAP else 1.0
+    singles = sorted(k for (_, k) in out if isinstance(k, str) and "+" not in k)
+    for mid, inn in cur.execute("select id, inn from molecules where inn is not null").fetchall():
+        k = fam.get(mid)
+        k = k if isinstance(k, str) and "+" in k else ingredients(inn, singles)
+        if not k or "+" not in k:
+            continue
+        parts, added = k.split("+"), False
+        for c in markets:
+            if (c, k) in out or (c, fam.get(mid)) in out or not all((c, p) in out for p in parts) \
+                    or len({out[(c, p)]["unit"] for p in parts}) > 1:
+                continue
+            usd, rate = sum(out[(c, p)]["unit_usd"] for p in parts) * combo_factor, float(fx[CURRENCY[c]])
+            out[(c, k)] = dict(basis="estimate", kinds=["ingredients"], unit=out[(c, parts[0])]["unit"], strength=None,
+                               unit_price=usd * rate, unit_usd=usd, lo=sum(out[(c, p)]["lo"] for p in parts) * combo_factor,
+                               hi=sum(out[(c, p)]["hi"] for p in parts) * combo_factor, n=len(parts), by=[],
+                               from_country=None, factor=combo_factor, overlap=len(samples))
+            added = True
+        if added and mid not in members.setdefault(k, []):
+            members[k].append(mid)
+
     import json
     cur.execute("delete from molecule_prices")
     with cur.copy("""copy molecule_prices (country, molecule_id, basis, kinds, currency, unit, strength, unit_price, unit_usd, lo, hi, n,
                      from_country, factor, overlap, by_strength) from stdin""") as cp:
+        written = set()                                 # a molecule in two families keeps the first (best) price
         for (c, k), v in out.items():
             if c not in MARKETS:
                 continue
             for m in members.get(k, [k]):
+                if (c, m) in written:
+                    continue
+                written.add((c, m))
                 cp.write_row((c, m, v["basis"], v["kinds"], CURRENCY[c], v["unit"], v["strength"], round(v["unit_price"], 4), round(v["unit_usd"], 6),
                               round(v["lo"], 4), round(v["hi"], 4), v["n"], v.get("from_country"), v.get("factor"), v.get("overlap"),
                               json.dumps(v["by"], ensure_ascii=False)))
-    n = sum(len(members.get(k, [k])) for c, k in out if c in MARKETS)
-    log.info("molecule prices: %s", n)
-    return n
+    log.info("molecule prices: %s", len(written))
+    return len(written)
 
 
 # ------------------------------------------------------------------ collectors
@@ -597,13 +673,17 @@ def prices_INTL(cur, s):
         subst = {k: ft[k] if len(ft.get(k, [])) == 1 else v for k, v in sa.items()}
         for r in get("CIS_CIP_bdpm.txt", "utf-8"):
             c = r.split("\t")
-            price = num(re.sub(r"[\s\u00a0]", "", c[9] if len(c) > 9 else "").replace(",", "."))
+            raw = re.sub(r"[\s\u00a0]", "", c[9] if len(c) > 9 else "")
+            price = num(raw.replace(",", "", raw.count(",") - 1).replace(",", "."))      # '3,982,28' is 3982.28
             if len(c) < 10 or len(subst.get(c[0], [])) != 1 or not price:
                 continue
             inn, dose = subst[c[0]][0]
-            m = re.search(r"(\d+)\s*(comprimé|gélule|capsule|ampoule|flacon|sachet|suppositoire|seringue|stylo)", c[2])
+            unit_words = r"(?:comprimé|gélule|capsule|ampoule|flacon|sachet|suppositoire|seringue|stylo)"
+            boxes = re.search(r"(\d+)\s+(?:plaquettes?|étuis?|flacons?|boîtes?)\b.*?de\s+(\d+)\s+" + unit_words, c[2])
+            m = re.search(r"(\d+)\s*" + unit_words, c[2])
             pack = f"{forms.get(c[0], '')} {dose} · {c[2]}"
-            units = int(m.group(1)) if m else (None if unit_of(pack) == "tablet or capsule" else 1)
+            units = int(boxes.group(1)) * int(boxes.group(2)) if boxes else int(m.group(1)) if m else \
+                (None if unit_of(pack) == "tablet or capsule" else 1)
             save_listing(cur, "FR", "bdpm", "cap", c[1], inn, pack, generics.molecule(cur, inn) or generics.molecule(cur, french_base(inn)), units,
                          price, "EUR")
             n += 1
