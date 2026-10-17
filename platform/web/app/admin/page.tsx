@@ -49,6 +49,10 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
       out.refs = await rows(db, 'select kind, name, uploaded_at from reference_files');
       out.sources = await rows(db, `select key, country, kind, label, url, every_hours, enabled, run_now, last_run, last_ok, last_rows, last_error,
                                     held_rows, release_held from data_sources order by kind, country`);
+      // how many molecules on each market's register have a price, and from which tier
+      out.coverage = await rows(db, `with reg as (select distinct country, molecule_id from registrations where active and molecule_id is not null)
+        select r.country, count(*)::int as total, count(p.molecule_id)::int as priced, count(*) filter (where p.basis = 'listings')::int as direct
+        from reg r left join molecule_prices p using (country, molecule_id) group by 1 order by 1`);
     }
     if (tab === 'review') {
       out.sugg = await rows(db, `select s.molecule_id, m.inn, m.category, t.id as to_id, t.inn as to_inn, s.confidence, s.reason
@@ -180,6 +184,8 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
         <section className="card stack" id="sources">
           <div className="card-h"><div><h2>Sources</h2><p className="note">Collected by themselves: registers weekly, tenders daily, prices every three days.
             A register pull much smaller than what is loaded waits here instead of replacing good data.</p></div></div>
+          {(d.coverage ?? []).length > 0 && <p className="small">Prices: {(d.coverage ?? []).map((c: any) =>
+            `${c.country} ${Math.round((100 * c.priced) / Math.max(1, c.total))}% (${c.direct} direct)`).join(' · ')} of registered molecules.</p>}
           <div className="tbl-wrap"><table className="tbl"><thead><tr><th>Source</th><th>Last run</th><th className="r">Rows</th><th>Status</th><th /></tr></thead>
             <tbody>{(d.sources ?? []).map((x: any) => (
               <tr key={x.key}>

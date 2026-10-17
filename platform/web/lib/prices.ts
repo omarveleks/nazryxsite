@@ -12,6 +12,8 @@ export type MoleculePrice = {
 export const PRICE_SQL = `select molecule_id, country, basis, kinds, currency, unit, strength, unit_price, unit_usd, lo, hi, n,
   from_country, factor, overlap, by_strength from molecule_prices`;
 
+// Reference countries used for the third tier (official price lists abroad).
+const ABROAD: Record<string, string> = { PK: 'Pakistan', GB: 'the UK', FR: 'France' };
 const UNIT_SHORT: Record<string, string> = { 'tablet or capsule': 'tablet', 'ampoule or vial': 'vial', pack: 'pack' };
 const KIND: Record<string, string> = { retail: 'pharmacy prices', cap: 'official maximum prices', reimbursement: 'reimbursement amounts', tender: 'public tender prices' };
 
@@ -23,8 +25,12 @@ export const usd = (v: string | number) => `$${Number(v) < 1 ? Number(v).toFixed
 // Where the number comes from, in one plain sentence.
 export function priceBasis(p: MoleculePrice) {
   const what = p.kinds.map((k) => KIND[k] ?? k).join(' and ');
-  if (p.basis === 'listings') return `From ${p.n} ${p.n === 1 ? what.replace(/s\b/g, '') : what} in ${countryName(p.country)}. Low and premium are the cheapest and dearest tenth.`;
+  const here = countryName(p.country);
+  if (p.basis === 'listings') return `From ${p.n} ${p.n === 1 ? what.replace(/s\b/g, '') : what} in ${here}. Low and premium are the cheapest and dearest tenth.`;
   const gap = Number(p.factor ?? 1);
-  const adj = Math.abs(gap - 1) < 0.005 ? '' : `, adjusted for the usual price gap between the two markets (${countryName(p.country)} is ${Math.round(Math.abs(gap - 1) * 100)}% ${gap > 1 ? 'higher' : 'lower'})`;
-  return `Estimated from ${p.n} ${what} in ${countryName(p.from_country ?? '')}${adj}. No public price in ${countryName(p.country)} yet.`;
+  const adj = Math.abs(gap - 1) < 0.005 ? '' : `, adjusted for the usual price gap (${here} is ${Math.round(Math.abs(gap - 1) * 100)}% ${gap > 1 ? 'higher' : 'lower'})`;
+  const abroad = ABROAD[p.from_country ?? ''];
+  return abroad
+    ? `Estimated from ${abroad}'s official prices${adj}. No price is published for it in ${here} or nearby markets yet.`
+    : `Estimated from ${p.n} ${what} in ${countryName(p.from_country)}${adj}. No public price in ${here} yet.`;
 }

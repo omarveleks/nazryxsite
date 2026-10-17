@@ -13,12 +13,13 @@ import statistics
 log = logging.getLogger("pricing")
 MARKETS = ("KZ", "KG", "UZ", "KE", "TZ")
 NEIGHBOURS = {"KZ": ("KG", "UZ"), "KG": ("KZ", "UZ"), "UZ": ("KZ", "KG"), "KE": ("TZ",), "TZ": ("KE",)}
-CURRENCY = {"KZ": "KZT", "KG": "KGS", "UZ": "UZS", "KE": "KES", "TZ": "TZS"}
+CURRENCY = {"KZ": "KZT", "KG": "KGS", "UZ": "UZS", "KE": "KES", "TZ": "TZS", "PK": "PKR", "GB": "GBP", "FR": "EUR"}
+ABROAD = ("PK", "GB", "FR")    # reference countries: only for molecules none of our markets prices, Pakistan first
 RANK = {"retail": 0, "cap": 1, "reimbursement": 2, "tender": 3}
 MIN_OVERLAP = 15          # molecules priced in both markets before their price ratio is trusted; otherwise 1.0
 
-INJ = re.compile(r"инъек|инфуз|ампул|амп\.|\bфл\.|д/ин|в/в|в/м|флак.*(инъ|инф)|лиофил|inject|infusion|ampoule|\bamps?\b|\bvials?\b|\binj\b|i\.v\.", re.I)
-SOLID = re.compile(r"табл|таб\.|капс|драже|супп|свеч|пастил|саше|пакет|гранул.*пакет|tablet|\btabs?\b|capsul|\bcaps?\b|sachet|"
+INJ = re.compile(r"injectable|perfusion|инъек|инфуз|ампул|амп\.|\bфл\.|д/ин|в/в|в/м|флак.*(инъ|инф)|лиофил|inject|infusion|ampoule|\bamps?\b|\bvials?\b|\binj\b|i\.v\.", re.I)
+SOLID = re.compile(r"comprim|gélule|табл|таб\.|капс|драже|супп|свеч|пастил|саше|пакет|гранул.*пакет|tablet|\btabs?\b|capsul|\bcaps?\b|sachet|"
                    r"supposit|pessar|lozeng|\bsupp\b|\b\d+\s*'?s\b", re.I)
 STRENGTH = re.compile(r"(\d+(?:[.,]\d+)?)\s*(mg|мг|mcg|мкг|µg|gm|g|г|ml|мл|iu|ме|ед|%)(?![a-zа-я])", re.I)
 UNIT_EN = {"мг": "mg", "мкг": "mcg", "µg": "mcg", "г": "g", "gm": "g", "мл": "ml", "ме": "IU", "ед": "IU", "iu": "IU"}
@@ -31,7 +32,7 @@ def unit_of(text):
 
 def units_in(text):
     """How many units a pack holds, from its description; None when a counted pack does not say."""
-    t = (text or "").lower().replace("х", "x").replace("×", "x")
+    t = (text or "").lower().replace("х", "x").replace("×", "x").replace("’", "'")
     m = re.search(r"№\s*(\d+)(?:\s*x\s*(\d+))?", t)
     if m:
         return int(m.group(1)) * int(m.group(2) or 1)
@@ -59,10 +60,36 @@ def refresh_fx(cur, s):
     d = s.get("https://open.er-api.com/v6/latest/USD", timeout=30).json()
     if d.get("result") != "success":
         return
-    for cur_code in set(CURRENCY.values()) | {"EUR", "RUB"}:
+    for cur_code in set(CURRENCY.values()) | {"RUB"}:
         if d["rates"].get(cur_code):
             cur.execute("""insert into fx_rates (currency, per_usd) values (%s, %s) on conflict (currency)
                            do update set per_usd = excluded.per_usd, updated_at = now()""", (cur_code, d["rates"][cur_code]))
+
+
+SALTS = re.compile(r"\b(?:hydrochloride|hcl|dihydrochloride|hydrobromide|sodium|disodium|potassium|calcium|magnesium|besylate|"
+                   r"besilate|maleate|mesylate|mesilate|fumarate|hemifumarate|succinate|tartrate|bitartrate|citrate|hyclate|"
+                   r"propanediol|monohydrate|dihydrate|trihydrate|sesquihydrate|anhydrous|acetate|phosphate|sulfate|sulphate|"
+                   r"inn|usp|bp|base|trometamol|tromethamine|arginine|lysine|meglumine|dipropionate|propionate|valerate)\b")
+
+
+def family(inn):
+    """One key for every spelling of a molecule: salts dropped, and English and Russian-style Latin spellings alike
+    ('Xylometazoline hydrochloride' and 'Ksilometazolin' -> 'ksilometazolin'). Combinations: each part, sorted."""
+    parts = []
+    for part in re.split(r"\s*\+\s*|\s*/\s*|\s+and\s+", (inn or "").lower()):
+        t = SALTS.sub(" ", re.sub(r"\(.*?\)", " ", part))
+        t = re.sub(r"[^a-z]", "", t)
+        for a_, b_ in (("ph", "f"), ("th", "t"), ("x", "ks"), ("qu", "kv"), ("w", "v"), ("y", "i"), ("kh", "h"), ("h", "g"),
+                       ("ce", "tse"), ("ci", "tsi"), ("c", "k"), ("j", "i")):
+            t = t.replace(a_, b_)
+        t = re.sub(r"(.)\1+", r"\1", t).replace("ts", "s")       # Uzbek Latin writes ц as s
+        t = re.sub(r"[e]$", "", t)
+        if "atsid" in t or "asid" in t:                            # clavulanic acid = clavulanate
+            t = re.sub(r"ik?a?t?s?id$", "", t.replace("atsid", "asid")).rstrip("a")
+            t = re.sub(r"ik$", "", t) + "at"
+        if t:
+            parts.append(t)
+    return "+".join(sorted(set(parts)))
 
 
 def observations(cur):
@@ -94,9 +121,17 @@ def trimmed(xs):
 
 def rebuild(cur):
     fx = dict(cur.execute("select currency, per_usd from fx_rates").fetchall())
+    sources = tuple(c for c in MARKETS + ABROAD if CURRENCY[c] in fx)       # a country without an exchange rate sits out
+    fam, members = {}, {}                      # every spelling of a molecule shares its prices
+    for mid, inn in cur.execute("select id, inn from molecules where inn is not null"):
+        k = family(inn)
+        if k:
+            fam[mid] = k
+            members.setdefault(k, []).append(mid)
     groups = {}
     for c, m, kind, text, units, price, ccy in observations(cur):
-        if c not in MARKETS or ccy not in fx:
+        m = fam.get(m, m)
+        if c not in sources or ccy not in fx:
             continue
         units = units if units is not None else units_in(text)
         if not units:
@@ -128,8 +163,10 @@ def rebuild(cur):
     # market sharing the most priced molecules), adjusted by the median price ratio between the two markets
     direct = dict(out)
     factors = {}
-    for c in MARKETS:
-        for n in MARKETS:
+    markets = tuple(c for c in MARKETS if c in sources)
+    abroad = tuple(c for c in ABROAD if c in sources)
+    for c in markets:
+        for n in markets:
             if n == c:
                 continue
             ratios = [direct[(c, m)]["unit_usd"] / direct[(n, m)]["unit_usd"] for (cc, m) in direct
@@ -144,11 +181,19 @@ def rebuild(cur):
             return f, k, 0 if n in NEIGHBOURS[c] else 1
         if n in NEIGHBOURS[c]:
             return 1.0, k, 2
-        via = [factors[(nb, n)] for nb in NEIGHBOURS[c] if nb != n and factors[(nb, n)][1] >= MIN_OVERLAP]
+        via = [factors[(nb, n)] for nb in NEIGHBOURS[c] if nb != n and factors.get((nb, n), (1, 0))[1] >= MIN_OVERLAP]
         return (max(via, key=lambda x: x[1]) + (3,)) if via else (1.0, k, 4)
 
-    for c in MARKETS:
-        order = sorted((n for n in MARKETS if n != c), key=lambda n: (gap(c, n)[2], -gap(c, n)[1]))
+    for c in markets:
+        for n in abroad:
+            ratios = [direct[(c, m)]["unit_usd"] / direct[(n, m)]["unit_usd"] for (cc, m) in direct
+                      if cc == c and (n, m) in direct and direct[(n, m)]["unit_usd"] > 0
+                      and (direct[(n, m)]["unit"], direct[(n, m)]["strength"]) == (direct[(c, m)]["unit"], direct[(c, m)]["strength"])]
+            factors[(c, n)] = (statistics.median(ratios) if len(ratios) >= MIN_OVERLAP else 1.0, len(ratios))
+    for c in markets:
+        # our markets first (second tier), then prices abroad (third tier), each in order of how well it compares
+        order = sorted((n for n in markets if n != c), key=lambda n: (gap(c, n)[2], -gap(c, n)[1])) \
+            + sorted(abroad, key=lambda n: (gap(c, n)[2] > 1, ABROAD.index(n)))
         for n in order:
             factor, overlap, _ = gap(c, n)
             rate, rate_n = float(fx[CURRENCY[c]]), float(fx[CURRENCY[n]])
@@ -163,12 +208,16 @@ def rebuild(cur):
     cur.execute("delete from molecule_prices")
     with cur.copy("""copy molecule_prices (country, molecule_id, basis, kinds, currency, unit, strength, unit_price, unit_usd, lo, hi, n,
                      from_country, factor, overlap, by_strength) from stdin""") as cp:
-        for (c, m), v in out.items():
-            cp.write_row((c, m, v["basis"], v["kinds"], CURRENCY[c], v["unit"], v["strength"], round(v["unit_price"], 4), round(v["unit_usd"], 6),
-                          round(v["lo"], 4), round(v["hi"], 4), v["n"], v.get("from_country"), v.get("factor"), v.get("overlap"),
-                          json.dumps(v["by"], ensure_ascii=False)))
-    log.info("molecule prices: %s", len(out))
-    return len(out)
+        for (c, k), v in out.items():
+            if c not in MARKETS:
+                continue
+            for m in members.get(k, [k]):
+                cp.write_row((c, m, v["basis"], v["kinds"], CURRENCY[c], v["unit"], v["strength"], round(v["unit_price"], 4), round(v["unit_usd"], 6),
+                              round(v["lo"], 4), round(v["hi"], 4), v["n"], v.get("from_country"), v.get("factor"), v.get("overlap"),
+                              json.dumps(v["by"], ensure_ascii=False)))
+    n = sum(len(members.get(k, [k])) for c, k in out if c in MARKETS)
+    log.info("molecule prices: %s", n)
+    return n
 
 
 # ------------------------------------------------------------------ collectors
@@ -203,6 +252,12 @@ class Names:
             w = re.match(r"[a-zа-яё][a-zа-яё\-]{3,}", brand.strip().lower())     # in Python: the database may not lower Cyrillic
             if w:
                 seen.setdefault(w.group(0), []).append(mol)
+        self.fam, self.combos = {}, {}
+        for mid, inn in cur.execute("select id, inn from molecules where inn is not null"):
+            k = family(inn)
+            self.fam[mid] = k
+            if "+" in k:
+                self.combos.setdefault(k, mid)
         self.brand = {}
         for w, ms in seen.items():                     # the brand's molecule when at least 3 in 4 registrations agree
             top = max(set(ms), key=ms.count)
@@ -213,8 +268,8 @@ class Names:
         mols = self.inn.find(name, extra)
         if len(mols) == 1:
             return mols[0]
-        if mols:
-            return None
+        if mols:                                       # several ingredients: the combination of exactly those, if we know it
+            return self.combos.get("+".join(sorted({self.fam.get(m, "") for m in mols})))
         w = re.match(r"[a-zа-яё][a-zа-яё\-]{3,}", (name or "").strip().lower())
         return self.brand.get(w.group(0)) if w else None
 
@@ -232,7 +287,7 @@ def due_items(cur, source, per_run, list_items, every_days=7):
                                          order by checked_at nulls first limit %s""", (source, every_days, per_run)).fetchall()]
 
 
-ITEM_SOURCES = {"KZ": ("prices_KZ", "prices_KZ_ep"), "TZ": ("prices_TZ",)}
+ITEM_SOURCES = {"KZ": ("prices_KZ", "prices_KZ_ep"), "TZ": ("prices_TZ",), "INTL": ("prices_INTL_pk",)}
 
 
 def catching_up(cur, country):
@@ -478,4 +533,101 @@ def prices_TZ(cur, s):
                 n += 1
         checked(cur, "prices_TZ", url)
         time.sleep(1)
+    return n
+
+
+# Abroad (third tier): official price lists of an exporting country and two reference countries, read in bulk.
+DRAP = "https://e.dra.gov.pk/public/price"
+DRAP_PER_RUN = 150            # pages of 20 medicines, two seconds apart
+NHS_TARIFF = "https://www.nhsbsa.nhs.uk/pharmacies-gp-practices-and-appliance-contractors/drug-tariff/drug-tariff-part-viii"
+BDPM = "https://base-donnees-publique.medicaments.gouv.fr/download/file/"
+
+
+def english_molecule(cur, names, generics, text):
+    """An English or French INN in a product name, or None."""
+    return names.find(text) if names.inn.find(text) else generics.molecule(cur, text)
+
+
+FR_SALT = re.compile(r"^(?:di|hémi|mono)?(?:chlorhydrate|bromhydrate|fumarate|maléate|succinate|tartrate|sulfate|citrate|acétate|"
+                     r"mésilate|mésylate|bésilate|bésylate|tosilate|phosphate|lactate|gluconate|valérate|propionate|butyrate|"
+                     r"chlorure|bromure|nitrate|oxalate|malate|énanthate|décanoate|palmitate|pamoate|furoate|xinafoate)"
+                     r"\s+(?:de\s+|d['’]\s*)", re.I)
+FR_SUFFIX = re.compile(r"\s+(?:sodique|disodique|calcique|potassique|magnésique|monohydraté|trihydraté|dihydraté|anhydre)\b.*$", re.I)
+
+
+def french_base(name):
+    """'FUMARATE DE QUÉTIAPINE' -> 'QUÉTIAPINE', 'ÉNOXAPARINE SODIQUE' -> 'ÉNOXAPARINE'."""
+    return FR_SUFFIX.sub("", FR_SALT.sub("", (name or "").strip())).strip()
+
+
+def prices_INTL(cur, s):
+    import csv
+    import io
+    import time
+    from catalogue import Generics
+    from urllib.parse import urljoin
+    import pandas as pd
+    names, generics, n = Names(cur, "KE"), Generics(cur), 0
+    # UK Drug Tariff Part VIIIA (monthly CSV; prices in pence)
+    page = s.get(NHS_TARIFF, timeout=60).text
+    link = next(iter(re.findall(r'href="([^"]*Part%20VIIIA[^"]*\.csv)"', page)), None)
+    done = cur.execute("select state from source_items where source = 'prices_INTL' and ref = 'nhs'").fetchone()
+    if link and (not done or done[0] != link):
+        rows = list(csv.reader(io.StringIO(s.get(urljoin(NHS_TARIFF, link), timeout=120).content.decode("utf-8-sig", "ignore"))))
+        head = next(i for i, r in enumerate(rows) if r and r[0] == "Medicine")
+        for r in rows[head + 1:]:
+            if len(r) < 7 or not num(r[6]):
+                continue
+            counted = re.match(r"tablet|capsule|ampoule|vial|sachet|suppositor|pessar|lozenge", r[2] or "", re.I)
+            save_listing(cur, "GB", "nhs_tariff", "cap", r[4] or r[0], r[0], f"{r[0]} · {r[1]} {r[2]}",
+                         english_molecule(cur, names, generics, r[0]), num(r[1]) if counted else 1, num(r[6]) / 100, "GBP")
+            n += 1
+        cur.execute("""insert into source_items (source, ref, checked_at, state) values ('prices_INTL', 'nhs', now(), %s)
+                       on conflict (source, ref) do update set checked_at = now(), state = excluded.state""", (link,))
+    # France: reimbursed public prices (weekly), single-substance medicines only
+    done = cur.execute("select checked_at from source_items where source = 'prices_INTL' and ref = 'bdpm'").fetchone()
+    if not done or (dt.datetime.now(dt.timezone.utc) - done[0]).days >= 7:
+        get = lambda f, enc: s.get(BDPM + f, timeout=300).content.decode(enc, "ignore").splitlines()
+        forms = {r.split("\t")[0]: r.split("\t")[2] for r in get("CIS_bdpm.txt", "latin-1") if r.count("\t") > 2}
+        sa, ft = {}, {}                  # active substance as named (often a salt), and its active part where stated
+        for r in get("CIS_COMPO_bdpm.txt", "latin-1"):
+            c = r.split("\t")
+            if len(c) > 6 and c[6] in ("SA", "FT"):
+                (sa if c[6] == "SA" else ft).setdefault(c[0], []).append((c[3], c[4]))
+        subst = {k: ft[k] if len(ft.get(k, [])) == 1 else v for k, v in sa.items()}
+        for r in get("CIS_CIP_bdpm.txt", "utf-8"):
+            c = r.split("\t")
+            price = num(re.sub(r"[\s\u00a0]", "", c[9] if len(c) > 9 else "").replace(",", "."))
+            if len(c) < 10 or len(subst.get(c[0], [])) != 1 or not price:
+                continue
+            inn, dose = subst[c[0]][0]
+            m = re.search(r"(\d+)\s*(comprimé|gélule|capsule|ampoule|flacon|sachet|suppositoire|seringue|stylo)", c[2])
+            pack = f"{forms.get(c[0], '')} {dose} · {c[2]}"
+            units = int(m.group(1)) if m else (None if unit_of(pack) == "tablet or capsule" else 1)
+            save_listing(cur, "FR", "bdpm", "cap", c[1], inn, pack, generics.molecule(cur, inn) or generics.molecule(cur, french_base(inn)), units,
+                         price, "EUR")
+            n += 1
+        cur.execute("""insert into source_items (source, ref, checked_at) values ('prices_INTL', 'bdpm', now())
+                       on conflict (source, ref) do update set checked_at = now()""")
+
+    # Pakistan: notified maximum retail prices of essential medicines, a page at a time
+    def pages():
+        first = s.get(DRAP, params={"category": "Essential Drugs", "page": 1}, timeout=60).text
+        last = max([int(x) for x in re.findall(r"page=(\d+)", first)] or [1])
+        return range(1, last + 1)
+
+    for p in due_items(cur, "prices_INTL_pk", DRAP_PER_RUN, pages, every_days=30):
+        r = s.get(DRAP, params={"category": "Essential Drugs", "page": p}, timeout=60)
+        for t in (pd.read_html(io.StringIO(r.text)) if r.ok and "<table" in r.text else []):
+            if "Price" not in t.columns:
+                continue
+            for _, x in t.iterrows():
+                name, price = str(x.get("Product Name") or ""), num(re.sub(r"[^\d.]", "", str(x.get("Price") or "")))
+                mol = english_molecule(cur, names, generics, name) if price else None
+                if mol:
+                    save_listing(cur, "PK", "drap", "cap", str(x.get("Reg. Number")), name, f"{name} · {x.get('Pack Size')}",
+                                 mol, None, price, "PKR")
+                    n += 1
+        checked(cur, "prices_INTL_pk", str(p))
+        time.sleep(2)
     return n

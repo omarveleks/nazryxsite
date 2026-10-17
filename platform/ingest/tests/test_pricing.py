@@ -15,3 +15,20 @@ def test_pack_counts_units_and_strengths():
     assert pricing.strength_of("Rocephin 1Gm vial") == "1000 mg"
     assert pricing.strength_of("Цефтриаксон 1 г") == pricing.strength_of("Ceftriaxone 1000mg") == "1000 mg"
     assert pricing.strength_of("Oxytocin 10 IU/ml") == "10 IU"
+
+
+def test_french_salt_names():
+    assert pricing.french_base("FUMARATE DE QUÉTIAPINE") == "QUÉTIAPINE"
+    assert pricing.french_base("MALÉATE D'ÉNALAPRIL") == "ÉNALAPRIL"
+    assert pricing.french_base("ÉNOXAPARINE SODIQUE ") == "ÉNOXAPARINE"
+
+
+def test_one_family_for_every_spelling():
+    assert pricing.family("Xylometazoline hydrochloride") == pricing.family("Ksilometazolin")
+    assert pricing.family("Bromhexine") == pricing.family("Bromgeksin")
+    assert pricing.family("Dapagliflozin Propanediol") == pricing.family("Dapagliflozin")
+    assert pricing.family("Paracetamol + Caffeine") == pricing.family("Caffeine/Paracetamol")
+    assert pricing.family("Amoxicillin + Clavulanic acid") == pricing.family("Amoxicillin Trihydrate + Potassium Clavulanate")
+    assert pricing.family("Cetirizine") == pricing.family("Setirizin")
+    assert pricing.family("Metformin") != pricing.family("Metronidazole")
+    assert pricing.units_in("Safcor 2.5mg Tablet · 1× 14’s") == 14
