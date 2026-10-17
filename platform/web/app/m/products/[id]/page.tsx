@@ -8,13 +8,13 @@ import { requireUser } from '@/lib/auth';
 import { one, rows, withUser } from '@/lib/db';
 import { BE_STATUS, beSuggestion, fmtDate, fmtMoney, levelLabel, registeredLine } from '@/lib/format';
 import { REQ_SQL, forProduct, type Requirement } from '@/lib/regulatory';
-import { PRICE_SQL, priceBasis, unitShort, unitWord, usd, type MoleculePrice } from '@/lib/prices';
+import { PRICE_SQL, packOf, priceBasis, unitShort, unitWord, usd, type MoleculePrice } from '@/lib/prices';
 import { AGENCY_KINDS, LAUNCH_STAGES, MFR_PLANS, NEEDS_PLAN, SERVICES, canUse, tierIn, countryName, mfrProductsSql, productClass, reasons } from '@/lib/mfr';
 
 export const metadata = { title: 'Product' };
 
 // One product against one market (or all of them): why it fits, the route, the price, the distributors who could take it.
-export default async function MfrProduct({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ saved?: string; error?: string; market?: string; added?: string; sample?: string }> }) {
+export default async function MfrProduct({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ saved?: string; error?: string; market?: string; added?: string; sample?: string; exw?: string; units?: string }> }) {
   const id = Number((await params).id);
   const sp = await searchParams;
   if (!Number.isInteger(id)) notFound();
@@ -52,7 +52,11 @@ export default async function MfrProduct({ params, searchParams }: { params: Pro
         order by coalesce(awarded, closing, published) desc nulls last limit 6`, [p.molecule_id, market]) : [];
     // the molecule's average price in this market: listings, or an estimate from a neighbouring market
     const avg = canUse(t, 'market') ? await one(db, `${PRICE_SQL} where molecule_id = $1 and country = $2`, [p.molecule_id, market]) as MoleculePrice | null : null;
-    return { ...base, origin, lapsed, route, open, tenders, ...(canUse(t, 'market') ? { avg } : {}) };
+    // a market with only one or two products prices the brand; a generic usually enters lower (measured on lists that say which is which)
+    const costs = avg ? await one(db, 'select freight, duty, distributor, pharmacy, vat from market_costs where country = $1', [market]) : null;
+    const brands = avg ? await one(db, `select (select registrants from country_molecules where molecule_id = $1 and country = $2) as registrants,
+        (select value from price_factors where key = 'generic_vs_originator') as generic`, [p.molecule_id, market]) : null;
+    return { ...base, origin, lapsed, route, open, tenders, brands, costs, ...(canUse(t, 'market') ? { avg } : {}) };
   });
   if (!d) notFound();
   const { p, market } = d;
@@ -109,10 +113,12 @@ export default async function MfrProduct({ params, searchParams }: { params: Pro
               <div className="grid g3">
                 {([['Low', d.avg.lo, 't-mint'], ['Average', d.avg.unit_price, 't-blue'], ['Premium', d.avg.hi, 't-lav']] as const).map(([k, v, tone]) => (
                   <div key={k} className={`tile ${tone}`}><span className="k">{k}</span>
-                    <span className="v num" style={{ fontSize: 22 }}>{v != null ? `${d.avg!.currency} ${fmtMoney(v)}` : '—'}</span>
-                    <span className="small">per {unitWord(d.avg!)}{k === 'Average' ? ` · ${usd(d.avg!.unit_usd)}` : ''}</span></div>))}
+                    <span className="v num" style={{ fontSize: 22 }}>{v != null ? `${d.avg!.currency} ${fmtMoney(Number(v) * packOf(d.avg!))}` : '—'}</span>
+                    <span className="small">per {unitWord(d.avg!)}{k === 'Average' ? ` · ${usd(Number(d.avg!.unit_usd) * packOf(d.avg!))}` : ''}</span></div>))}
               </div>
               <p className="small muted">{priceBasis(d.avg)}</p>
+              {d.brands?.registrants != null && Number(d.brands.registrants) <= 2 && Number(d.brands.generic) < 1 && (
+                <p className="small"><span className="pill peach">Few products</span> Only {d.brands.registrants} {Number(d.brands.registrants) === 1 ? 'product is' : 'products are'} registered here, so these prices are mostly the brand&rsquo;s. A generic usually enters about {Math.round((1 - Number(d.brands.generic)) * 100)}% lower: around <b>{d.avg.currency} {fmtMoney(Number(d.avg.unit_price) * packOf(d.avg) * Number(d.brands.generic))}</b> per {unitWord(d.avg)}.</p>)}
               {d.avg.by_strength.length > 1 && (
                 <div className="tbl-wrap"><table className="tbl"><thead><tr><th>Strength</th><th className="r">Per {unitShort(d.avg)}</th><th className="r">Per pack</th><th className="r">Prices</th></tr></thead>
                   <tbody>{d.avg.by_strength.map((x) => <tr key={x.strength}><td>{x.strength}</td><td className="r num">{fmtMoney(x.unit)}</td><td className="r num">{fmtMoney(x.pack)}</td><td className="r num">{x.n}</td></tr>)}</tbody></table></div>)}
@@ -121,6 +127,7 @@ export default async function MfrProduct({ params, searchParams }: { params: Pro
               <span><b>Price in {countryName(market)}</b><div className="small muted">No public price for this medicine yet. We check it for you within 24 hours.</div></span>
               <Link className="btn btn-ghost btn-sm" href="/m/call?topic=market_entry">Ask for a price</Link>
             </section>))}
+          {'avg' in d && d.avg && 'costs' in d && d.costs && <MarginCheck p={d.avg} c={d.costs} id={id} market={market} exw={sp.exw} units={sp.units} />}
           {'tenders' in d && d.tenders.length > 0 && (
             <section className="card stack">
               <div className="card-h"><h2>Public tenders in {countryName(market)}</h2><Link className="btn-link" href={`/m/tenders?market=${market}`}>All tenders</Link></div>
@@ -192,5 +199,47 @@ export default async function MfrProduct({ params, searchParams }: { params: Pro
         </div>
       </div>
     </Shell>
+  );
+}
+
+
+// What a manufacturer can charge ex-works and still sell at the market's prices: the shelf price taken back through VAT,
+// the pharmacy and distributor mark-ups, duty and freight. With their own ex-works price, where it lands on the shelf.
+function MarginCheck({ p, c, id, market, exw, units }: { p: MoleculePrice; c: Record<string, string>; id: number; market: string; exw?: string; units?: string }) {
+  const chain = ['freight', 'duty', 'distributor', 'pharmacy', 'vat'].reduce((m, k) => m * (1 + Number(c[k])), 1);
+  const perUSD = Number(p.unit_price) / Number(p.unit_usd);                 // local currency per US dollar
+  const liquid = p.unit === 'ml' || p.unit === 'g';
+  const pack = Number(units) > 0 ? Number(units) : liquid ? packOf(p) : 30;
+  const word = liquid ? `${fmtMoney(pack)} ${p.unit}` : `${fmtMoney(pack)} ${unitShort(p)}s`;
+  const target = (Number(p.unit_usd) / chain) * pack;                     // USD per pack, ex-works, to sell at the average
+  const mine = Number(exw) > 0 ? Number(exw) : null;
+  const shelf = mine != null ? (mine / pack) * chain * perUSD : null;      // local currency per unit on the shelf
+  const lo = Number(p.lo ?? p.unit_price), hi = Number(p.hi ?? p.unit_price), avg = Number(p.unit_price);
+  const where = shelf == null ? null : shelf <= lo ? ['mint', 'Cheapest on the shelf'] : shelf <= avg ? ['mint', 'Competitive']
+    : shelf <= hi ? ['peach', 'Premium end'] : ['peach', 'Above the market'];
+  const pct = (k: string) => `${Math.round(Number(c[k]) * 100)}%`;
+  return (
+    <section className="card stack">
+      <h2>Margin check</h2>
+      <p>To sell at the market average, your ex-works price can be up to <b>${target < 1 ? target.toFixed(3) : fmtMoney(target)}</b> per {word}.</p>
+      <form className="row" style={{ gap: 8, flexWrap: 'wrap', alignItems: 'flex-end' }}>
+        <input type="hidden" name="market" value={market} />
+        <label className="small" style={{ flex: '1 1 140px' }}>Your ex-works price (USD per pack)
+          <input className="input" name="exw" type="number" step="any" min="0" defaultValue={exw ?? ''} placeholder={target.toFixed(2)} /></label>
+        <label className="small" style={{ flex: '1 1 110px' }}>{liquid ? `Pack size (${p.unit})` : 'Units per pack'}
+          <input className="input" name="units" type="number" step="any" min="0" defaultValue={units ?? String(pack)} /></label>
+        <button className="btn btn-blue btn-sm" type="submit">Check</button>
+      </form>
+      {shelf != null && where && mine != null && (
+        <div className="grid g3">
+          <div className="tile t-blue"><span className="k">Your shelf price</span><span className="v num" style={{ fontSize: 22 }}>{p.currency} {fmtMoney(shelf * (liquid ? pack : 1))}</span>
+            <span className="small">per {liquid ? word : unitShort(p)}</span></div>
+          <div className={`tile t-${where[0]}`}><span className="k">Position</span><span className="v" style={{ fontSize: 20 }}>{where[1]}</span>
+            <span className="small">market {p.currency} {fmtMoney(lo * (liquid ? pack : 1))}–{fmtMoney(hi * (liquid ? pack : 1))}</span></div>
+          <div className="tile t-lav"><span className="k">Headroom</span><span className="v num" style={{ fontSize: 22 }}>{Math.round(((target - mine) / mine) * 100)}%</span>
+            <span className="small">{target >= mine ? 'room to raise your price or margins' : 'cut needed to reach the average'}</span></div>
+        </div>)}
+      <p className="small muted">Assumes freight {pct('freight')}, duty and fees {pct('duty')}, distributor {pct('distributor')}, pharmacy {pct('pharmacy')}, VAT {pct('vat')}. Shelf prices are {p.basis === 'estimate' ? 'estimated' : 'from the market'}.</p>
+    </section>
   );
 }

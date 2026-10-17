@@ -30,6 +30,16 @@ STRENGTH = re.compile(r"(\d+(?:[.,]\d+)?)\s*(mg|mq|мг|mcg|мкг|µg|gm|g|г|m
 UNIT_EN = {"мг": "mg", "mq": "mg", "мкг": "mcg", "µg": "mcg", "г": "g", "gm": "g", "мл": "ml", "ме": "IU", "ед": "IU", "iu": "IU"}
 
 
+VOLUME = re.compile(r"(?<![/\d.,])(\d+(?:[.,]\d+)?)\s*(ml|мл|g|gm|г|гр)(?![a-zа-я/])", re.I)
+
+
+def volume_of(text):
+    """The bottle or tube size: '5мл', '100 ml', '30 g'; not the '5 ml' of '250 mg/5 ml'. (amount, 'ml' or 'g')"""
+    hits = [(float(v.replace(",", ".")), "ml" if u.lower() in ("ml", "мл") else "g") for v, u in VOLUME.findall(text or "")]
+    hits = [h for h in hits if h[0] > 0]
+    return hits[-1] if hits else None
+
+
 COUNTED = re.compile(r"№\s*\d|\b\d+\s*'?s\b|\bx\s*\d+", re.I)
 NOT_COUNTED = re.compile(r"\d\s*(?:ml|мл|л)\b|крем|мазь|гел|сироп|капл|спрей|аэроз|сусп|раствор д/нар|cream|ointment|gel\b|syrup|"
                          r"drops|spray|suspension|lotion|shampoo|шампун|лосьон|паст", re.I)
@@ -163,6 +173,19 @@ def pct(xs, q):
     return xs[min(len(xs) - 1, max(0, round(q * (len(xs) - 1))))]
 
 
+def originator_gap(cur, fam):
+    """How a generic's price compares with the originator's for the same medicine, form and strength, on lists that say
+    which is which (South Africa's). Returns (median ratio, molecules measured), or (1.0, n) when too few."""
+    by = {}
+    for m, text, units, price, orig in cur.execute("""select molecule_id, coalesce(pack, name), units, pack_price, originator
+                                                      from price_listings where originator is not null and molecule_id is not null"""):
+        u = units if units is not None else units_in(text)
+        if u:
+            by.setdefault((fam.get(m, m), unit_of(text), strength_of(text)), {}).setdefault(orig, []).append(float(price) / float(u))
+    ratios = [statistics.median(v[False]) / statistics.median(v[True]) for v in by.values() if True in v and False in v]
+    return (statistics.median(ratios) if len(ratios) >= MIN_OVERLAP else 1.0), len(ratios)
+
+
 def sanity(obs):
     """Checks every price against the same medicine, form and strength elsewhere, after allowing for each country's usual
     price level. A pharmacy price far too low for a pack is read as the price of one tablet (some shops list per tablet);
@@ -221,9 +244,12 @@ def rebuild(cur):
         units = units if units is not None else units_in(text)
         if not units:
             continue                                  # a counted pack that does not say how many: no unit price
-        raw.append(dict(c=c, m=fam.get(m, m), kind=kind, unit=unit_of(text), strength=strength_of(text), units=float(units),
-                        price=float(price), usd_rate=float(fx[ccy]), countable=bool(COUNTED.search(text or "")
-                                                                               and not NOT_COUNTED.search(text or ""))))
+        unit, volume = unit_of(text), None
+        if unit == "pack" and (vol := volume_of(text)):
+            unit, volume, units = vol[1], vol[0], float(units) * vol[0]    # drops, syrups, creams: per ml or g
+        raw.append(dict(c=c, m=fam.get(m, m), kind=kind, unit=unit, strength=strength_of(text), units=float(units),
+                        price=float(price), usd_rate=float(fx[ccy]), volume=volume, countable=bool(COUNTED.search(text or "")
+                                                                                             and not NOT_COUNTED.search(text or ""))))
     # 'ЦЕФТРИАКСОН 1г №1' names no form: a counted item takes the form the medicine usually comes in (a vial here)
     forms = {}
     for o in raw:
@@ -237,7 +263,7 @@ def rebuild(cur):
     for o in sanity(raw):
         local = float(fx[CURRENCY[o["c"]]])               # into the market's own currency
         groups.setdefault((o["c"], o["m"]), []).append((RANK[o["kind"]], o["kind"], o["unit"], o["strength"],
-                                                         o["usd"] * o["usd_rate"], o["price"], o["usd_rate"] / local))
+                                                         o["usd"] * o["usd_rate"], o["price"], o["usd_rate"] / local, o.get("volume")))
     # every market's headline is the molecule's usual form and strength across all countries (paracetamol 500 mg tablet),
     # so markets compare like for like; tablets count double when choosing it
     usual_form = {}
@@ -274,8 +300,28 @@ def rebuild(cur):
                       "n": len(v)} for k, v in strengths.items()), key=lambda x: -x["n"])[:6]
         local = sorted(o[4] / o[6] for o in obs if (o[2], o[3]) == (unit, usual))      # in the market's own currency
         avg = statistics.median(local)               # one premium brand or promotion cannot pull it
+        vols = [o[7] for o in obs if (o[2], o[3]) == (unit, usual) and o[7]]
         out[(c, m)] = dict(basis="listings", kinds=sorted({o[1] for o in obs}), unit=unit, strength=usual, unit_price=avg,
-                           unit_usd=avg / float(fx[CURRENCY[c]]), lo=pct(local, 0.1), hi=pct(local, 0.9), n=len(local), by=by)
+                           unit_usd=avg / float(fx[CURRENCY[c]]), lo=pct(local, 0.1), hi=pct(local, 0.9), n=len(local), by=by,
+                           pack_size=statistics.median(vols) if vols else None)
+    # where a market only publishes official maximums, the shelf price is the maximum times how shelf prices compare with
+    # maximums where both are known (measured on our data)
+    both = []
+    for (c, m), obs in groups.items():
+        by = {}
+        for o in obs:
+            if o[1] in ("retail", "cap"):
+                by.setdefault((o[2], o[3]), {}).setdefault(o[1], []).append(o[4] / o[6])
+        both += [statistics.median(v["retail"]) / statistics.median(v["cap"]) for v in by.values() if "retail" in v and "cap" in v]
+    shelf_vs_max = statistics.median(both) if len(both) >= MIN_OVERLAP else 1.0
+    for v in out.values():
+        if v["kinds"] == ["cap"]:
+            for f in ("unit_price", "unit_usd", "lo", "hi"):
+                v[f] *= shelf_vs_max
+    generic_vs_originator, pairs = originator_gap(cur, fam)
+    for key, value, n in (("shelf_vs_max", shelf_vs_max, len(both)), ("generic_vs_originator", generic_vs_originator, pairs)):
+        cur.execute("""insert into price_factors (key, value, n) values (%s, %s, %s) on conflict (key)
+                       do update set value = excluded.value, n = excluded.n, updated_at = now()""", (key, round(value, 4), n))
     # molecules whose name only differs by typos, salts or label text share the family that has prices
     priced = {k for (_, k) in out}
     singles = sorted(k for k in priced if isinstance(k, str) and "+" not in k)
@@ -327,10 +373,10 @@ def rebuild(cur):
             for n, v in priced:
                 factor, overlap, tier = gap(c, n)
                 cands.append((tier <= 3, v["strength"], v["unit"], v["unit_usd"] * factor, v["lo"] / float(fx[CURRENCY[n]]) * factor,
-                              v["hi"] / float(fx[CURRENCY[n]]) * factor, v["n"], n, v["kinds"], factor, overlap))
+                              v["hi"] / float(fx[CURRENCY[n]]) * factor, v["n"], n, v["kinds"], factor, overlap, v.get("pack_size")))
             if (c, m) in weak:                                   # this market's own single listing
                 u_, st_, usd_ = weak[(c, m)]
-                cands.append((True, st_, u_, usd_, usd_, usd_, 1, c, ["retail"], 1.0, 0))
+                cands.append((True, st_, u_, usd_, usd_, usd_, 1, c, ["retail"], 1.0, 0, None))
             if any(x[0] for x in cands):
                 cands = [x for x in cands if x[0]]
             usual = max({(x[2], x[1]) for x in cands}, key=lambda k: sum(1 for x in cands if (x[2], x[1]) == k))
@@ -339,7 +385,8 @@ def rebuild(cur):
             main = min(cands, key=lambda x: abs(x[3] - usd))
             out[(c, m)] = dict(basis="estimate", kinds=main[8], unit=usual[0], strength=usual[1], unit_price=usd * rate, unit_usd=usd,
                                lo=statistics.median(x[4] for x in cands) * rate, hi=statistics.median(x[5] for x in cands) * rate,
-                               n=sum(x[6] for x in cands), by=[], from_country=main[7], factor=main[9], overlap=len(cands))
+                               n=sum(x[6] for x in cands), by=[], from_country=main[7], factor=main[9], overlap=len(cands),
+                               pack_size=statistics.median([x[11] for x in cands if x[11]] or [0]) or None)
     # combinations nobody prices: their ingredients' prices added up, scaled by how combination packs compare with their
     # ingredients where both are priced (measured on our data)
     samples = []
@@ -371,7 +418,7 @@ def rebuild(cur):
     import json
     cur.execute("delete from molecule_prices")
     with cur.copy("""copy molecule_prices (country, molecule_id, basis, kinds, currency, unit, strength, unit_price, unit_usd, lo, hi, n,
-                     from_country, factor, overlap, by_strength) from stdin""") as cp:
+                     from_country, factor, overlap, by_strength, pack_size) from stdin""") as cp:
         written = set()                                 # a molecule in two families keeps the first (best) price
         for (c, k), v in out.items():
             if c not in MARKETS:
@@ -382,7 +429,7 @@ def rebuild(cur):
                 written.add((c, m))
                 cp.write_row((c, m, v["basis"], v["kinds"], CURRENCY[c], v["unit"], v["strength"], round(v["unit_price"], 4), round(v["unit_usd"], 6),
                               round(v["lo"], 4), round(v["hi"], 4), v["n"], v.get("from_country"), v.get("factor"), v.get("overlap"),
-                              json.dumps(v["by"], ensure_ascii=False)))
+                              json.dumps(v["by"], ensure_ascii=False), v.get("pack_size")))
     log.info("molecule prices: %s", len(written))
     return len(written)
 
@@ -468,12 +515,13 @@ def checked(cur, source, ref, state=None):
                 (state, source, ref))
 
 
-def save_listing(cur, country, source, kind, ref, name, pack, molecule, units, price, currency):
-    cur.execute("""insert into price_listings (country, source, kind, ref, name, pack, molecule_id, units, pack_price, currency)
-                   values (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+def save_listing(cur, country, source, kind, ref, name, pack, molecule, units, price, currency, originator=None):
+    cur.execute("""insert into price_listings (country, source, kind, ref, name, pack, molecule_id, units, pack_price, currency, originator)
+                   values (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                    on conflict (source, ref) do update set name = excluded.name, pack = excluded.pack, molecule_id = excluded.molecule_id,
-                   units = excluded.units, pack_price = excluded.pack_price, currency = excluded.currency, seen = current_date""",
-                (country, source, kind, str(ref)[:200], (name or "")[:300], (pack or "")[:300], molecule, units, price, currency))
+                   units = excluded.units, pack_price = excluded.pack_price, currency = excluded.currency,
+                   originator = excluded.originator, seen = current_date""",
+                (country, source, kind, str(ref)[:200], (name or "")[:300], (pack or "")[:300], molecule, units, price, currency, originator))
 
 
 NDDA = "https://register.ndda.kz/register/api/v1/PharmaRegister"
@@ -868,8 +916,10 @@ def prices_NEAR(cur, s):
             solid = form in ("TAB", "CAP", "TBC", "TBD", "TBE", "CPS", "TAF")
             units = (num(r[11]) or 1) * (num(r[12]) or 1) if solid else (num(r[12]) or 1)
             text = " + ".join(inn)
-            save_listing(cur, "ZA", "sep", "cap", r[3], text, f"{text} {r[8]} {r[9]} {'tablet' if solid else form}", english_molecule(cur, names, generics, text),
-                         units, price, "ZAR")
+            volume = "" if solid or not num(r[11]) else f" · {r[11]} {'g' if r[9].strip().lower().endswith('/g') else 'ml'}"
+            save_listing(cur, "ZA", "sep", "cap", r[3], text, f"{text} {r[8]} {r[9]} {'tablet' if solid else form}{volume}",
+                         english_molecule(cur, names, generics, text), units, price, "ZAR",
+                         originator={"originator": True, "generic": False}.get(str(r[20]).strip().lower()))
             n += 1
         read_version(cur, "za", url)
     # Ghana: NHIS medicines list (price per tablet, vial or bottle, GHS)

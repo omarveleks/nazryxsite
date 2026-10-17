@@ -7,6 +7,7 @@ import { addTeamMember, removeTeamMember, updateTeamMember } from '@/app/actions
 import { one, rows, withUser } from '@/lib/db';
 import { STAGES, ago, fmtDate, title } from '@/lib/format';
 import { MFR_PLANS, SERVICES, countryName } from '@/lib/mfr';
+import { saveMarketCosts } from '@/app/actions/admin';
 import { answerQuestion, reviewManufacturer, grantCredits, keepSeparate, saveRoutes, setMoleculeRoute, matchMolecule, mergeCompanies, postRegulatory, addPrice, editUseCase, queueRecompute,
   rejectSuggestion, resetPassword, resetTwoStep, reviewClaim, setPlan, updateSource } from '@/app/actions/admin';
 import { StagePill } from '@/components/ui';
@@ -53,6 +54,7 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
       out.coverage = await rows(db, `with reg as (select distinct country, molecule_id from registrations where active and molecule_id is not null)
         select r.country, count(*)::int as total, count(p.molecule_id)::int as priced, count(*) filter (where p.basis = 'listings')::int as direct
         from reg r left join molecule_prices p using (country, molecule_id) group by 1 order by 1`);
+      out.costs = await rows(db, 'select country, freight, duty, distributor, pharmacy, vat from market_costs order by country');
     }
     if (tab === 'review') {
       out.sugg = await rows(db, `select s.molecule_id, m.inn, m.category, t.id as to_id, t.inn as to_inn, s.confidence, s.reason
@@ -181,6 +183,17 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
       <Flash sp={sp} />
       {sp.queued && <div className="ok" role="status">Queued. The ingest job runs in the background; refresh to see the result.</div>}
       {tab === 'data' && (<>
+        <section className="card stack" id="costs">
+          <div className="card-h"><div><h2>Margin check assumptions</h2><p className="note">What is added on the way from ex-works to the shelf in each market, in %.</p></div></div>
+          {(d.costs ?? []).map((c: any) => (
+            <form key={c.country} action={saveMarketCosts} className="row" style={{ gap: 8, flexWrap: 'wrap', alignItems: 'flex-end' }}>
+              <input type="hidden" name="country" value={c.country} /><b style={{ width: 100 }}>{countryName(c.country)}</b>
+              {(['freight', 'duty', 'distributor', 'pharmacy', 'vat'] as const).map((k) => (
+                <label key={k} className="small" style={{ width: 90 }}>{k === 'duty' ? 'Duty, fees' : k === 'vat' ? 'VAT' : title(k)}
+                  <input className="input" name={k} type="number" step="any" min="0" defaultValue={Math.round(Number(c[k]) * 1000) / 10} /></label>))}
+              <button className="btn btn-ghost btn-sm" type="submit">Save</button>
+            </form>))}
+        </section>
         <section className="card stack" id="sources">
           <div className="card-h"><div><h2>Sources</h2><p className="note">Collected by themselves: registers weekly, tenders daily, prices every three days.
             A register pull much smaller than what is loaded waits here instead of replacing good data.</p></div></div>

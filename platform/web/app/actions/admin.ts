@@ -386,3 +386,13 @@ export async function updateSource(f: FormData) {
   await team((db) => db.query(sql, [key]), '/admin?tab=data');
   redirect('/admin?tab=data&saved=1#sources');
 }
+
+
+/** The team's cost assumptions per market for the margin check (shares entered as percentages). */
+export async function saveMarketCosts(f: FormData) {
+  await requireTeam('data');
+  const share = (k: string) => Math.min(5, Math.max(0, Number(str(f, k, 10)) / 100 || 0));
+  await team((db) => db.query(`update market_costs set freight = $2, duty = $3, distributor = $4, pharmacy = $5, vat = $6, updated_at = now()
+    where country = $1`, [str(f, 'country', 2), share('freight'), share('duty'), share('distributor'), share('pharmacy'), share('vat')]), '/admin?tab=data');
+  redirect('/admin?tab=data&saved=1#costs');
+}

@@ -63,3 +63,10 @@ def test_sanity_reads_shop_prices_per_tablet_and_drops_errors():
     kept = {x["c"]: x for x in pricing.sanity(obs)}
     assert kept["E"]["units"] == 1 and abs(kept["E"]["usd"] - 0.1) < 1e-9
     assert "F" not in kept and {"A", "B", "C", "D"} <= set(kept)
+
+
+def test_bottle_and_tube_sizes():
+    assert pricing.volume_of("ВИЗИПРЕС Капли глазные 2% 5мл флакон-капельницы") == (5.0, "ml")
+    assert pricing.volume_of("Amoxicillin 250mg/5ml suspension 100ml") == (100.0, "ml")     # not the 5 ml of the strength
+    assert pricing.volume_of("БРОКСИНАК Капли глазные 0,09% 1.7мл") == (1.7, "ml")
+    assert pricing.volume_of("Diclofenac 1% gel 50г") == (50.0, "g")
