@@ -45,3 +45,21 @@ def test_messy_registry_names_resolve_only_when_sure():
     assert pricing.ingredients("Paracetamol Diclofenac Serratiopeptidase", singles) is None     # one ingredient unknown
     assert pricing.ingredients("Prednisolone", singles) is None                               # not prednisone
     assert pricing.ingredients("Omeprazole", singles) is None                                 # not esomeprazole
+
+
+def test_pack_counts_written_with_x():
+    assert pricing.units_in("Teva Amlodipine 5mg X28") == 28
+    assert pricing.units_in("Amoxilite 500mg Cap · 10x10's") == 100
+    assert pricing.units_in("Benza-200 Tablets (Albendazole) 200mg · 1 x 2’s") == 2       # not a pack of 200
+    assert pricing.unit_of("Teva Amlodipine 5mg X28") == "tablet or capsule"
+
+
+def test_sanity_reads_shop_prices_per_tablet_and_drops_errors():
+    def o(c, price, units, kind="cap"):
+        return dict(c=c, m="amlodipin", unit="tablet or capsule", strength="5 mg", units=units, price=price, usd_rate=1.0, kind=kind)
+    obs = [o("A", 3.0, 30), o("B", 3.3, 30), o("C", 2.7, 30), o("D", 3.0, 30),
+           o("E", 0.1, 30, "retail"),          # a shop's price for one tablet, divided by 30 by mistake
+           o("F", 300.0, 30)]                  # a data error: a thousand times too dear
+    kept = {x["c"]: x for x in pricing.sanity(obs)}
+    assert kept["E"]["units"] == 1 and abs(kept["E"]["usd"] - 0.1) < 1e-9
+    assert "F" not in kept and {"A", "B", "C", "D"} <= set(kept)

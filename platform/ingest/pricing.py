@@ -20,14 +20,19 @@ CURRENCY = {"KZ": "KZT", "KG": "KGS", "UZ": "UZS", "KE": "KES", "TZ": "TZS", "PK
             "NG": "NGN", "GH": "GHS", "ZA": "ZAR", "BY": "BYN", "AM": "AMD", "AZ": "AZN"}
 ABROAD = ("PK", "GB", "FR")    # far reference countries: last, only for molecules nothing nearer prices, Pakistan first
 OTHERS = NEARBY["africa"] + NEARBY["cis"] + ABROAD
-RANK = {"retail": 0, "cap": 1, "reimbursement": 2, "tender": 3}
+RANK = {"survey": 0, "retail": 0, "cap": 1, "reimbursement": 2, "tender": 3}
 MIN_OVERLAP = 15          # molecules priced in both markets before their price ratio is trusted; otherwise 1.0
 
 INJ = re.compile(r"injectable|perfusion|инъек|инфуз|ампул|амп\.|\bфл\.|д/ин|в/в|в/м|флак.*(инъ|инф)|лиофил|inject|infusion|ampoule|\bamps?\b|\bvials?\b|\binj\b|i\.v\.", re.I)
 SOLID = re.compile(r"comprim|gélule|табл|таб\.|капс|драже|супп|свеч|пастил|саше|пакет|гранул.*пакет|tablet|\btabs?\b|capsul|\bcaps?\b|sachet|"
-                   r"supposit|pessar|lozeng|\bsupp\b|\b\d+\s*'?s\b", re.I)
+                   r"supposit|pessar|lozeng|\bsupp\b|\b\d+\s*'?s\b|\d\s*mg\s*x\s*\d", re.I)
 STRENGTH = re.compile(r"(\d+(?:[.,]\d+)?)\s*(mg|mq|мг|mcg|мкг|µg|gm|g|г|ml|мл|iu|ме|ед|%)(?![a-zа-я])", re.I)
 UNIT_EN = {"мг": "mg", "mq": "mg", "мкг": "mcg", "µg": "mcg", "г": "g", "gm": "g", "мл": "ml", "ме": "IU", "ед": "IU", "iu": "IU"}
+
+
+COUNTED = re.compile(r"№\s*\d|\b\d+\s*'?s\b|\bx\s*\d+", re.I)
+NOT_COUNTED = re.compile(r"\d\s*(?:ml|мл|л)\b|крем|мазь|гел|сироп|капл|спрей|аэроз|сусп|раствор д/нар|cream|ointment|gel\b|syrup|"
+                         r"drops|spray|suspension|lotion|shampoo|шампун|лосьон|паст", re.I)
 
 
 def unit_of(text):
@@ -47,10 +52,12 @@ def units_in(text):
         for x in po:
             n *= int(x)
         return n
-    m = (re.search(r"(\d+)\s*x\s*(\d+)\s*(?:tab|cap|amp|vial|sachet|supp|блист)", t)
+    m = (re.search(r"(\d+)\s*x\s*(\d+)\s*(?:tab|cap|amp|vial|sachet|supp|блист|'?s\b)", t)     # 2 x 10 tabs, 10x10's
          or re.search(r"(?:pack|box|strip|bottle) of\s*(\d+)()", t)
-         or re.search(r"(\d+)()\s*(?:tablets?|tabs?|capsules?|caps?|sachets?|ampoules?|amps?|vials?|suppositories|pessaries|lozenges)\b", t)
-         or re.search(r"\b(\d+)()\s*'?s\b", t))
+         or re.search(r"(?<![\w-])(\d+)()\s*(?:tablets?|tabs?|capsules?|caps?|sachets?|ampoules?|amps?|vials?|suppositories|"
+                      r"pessaries|lozenges)\b", t)                                     # not 'Benza-200 Tablets'
+         or re.search(r"\b(\d+)()\s*'?s\b", t)
+         or re.search(r"(?:^|\s)x\s*(\d+)()\b(?!\s*(?:ml|g)\b)", t))                    # '5mg x28', 'x100'
     if m:
         return int(m.group(1)) * int(m.group(2) or 1)
     return None if unit_of(text) == "tablet or capsule" else 1     # a single vial, bottle or tube
@@ -156,6 +163,48 @@ def pct(xs, q):
     return xs[min(len(xs) - 1, max(0, round(q * (len(xs) - 1))))]
 
 
+def sanity(obs):
+    """Checks every price against the same medicine, form and strength elsewhere, after allowing for each country's usual
+    price level. A pharmacy price far too low for a pack is read as the price of one tablet (some shops list per tablet);
+    a price still more than 8 times off is dropped as a data error. obs: dicts with c, m, unit, strength, units, price,
+    usd_rate (units of the listing's currency per USD) and kind. Returns the kept dicts with a 'usd' per unit."""
+    import math
+    for o in obs:
+        o["usd"] = o["price"] / o["units"] / o["usd_rate"]
+    group = {}
+    for o in obs:
+        group.setdefault((o["m"], o["unit"], o["strength"]), {}).setdefault(o["c"], []).append(o["usd"])
+    med = {k: {c: statistics.median(v) for c, v in by_c.items()} for k, by_c in group.items()}
+
+    def ref(k, c):
+        """The median of the other countries' prices for this medicine, or None when fewer than two others price it."""
+        others = [v for cc, v in med[k].items() if cc != c]
+        return statistics.median(others) if len(others) >= 2 else None
+
+    level = {}                                                     # each country's usual price level against the others
+    for k, by_c in med.items():
+        for c, v in by_c.items():
+            r = ref(k, c)
+            if r:
+                level.setdefault(c, []).append(v / r)
+    level = {c: statistics.median(v) for c, v in level.items() if len(v) >= 10}
+    kept = []
+    for o in obs:
+        k = (o["m"], o["unit"], o["strength"])
+        r = ref(k, o["c"])
+        if r is None:
+            kept.append(o)
+            continue
+        expect = r * level.get(o["c"], 1.0)
+        if o["kind"] == "retail" and o["units"] > 1 and o["usd"] < expect / 4:
+            per_tablet = o["price"] / o["usd_rate"]
+            if abs(math.log(per_tablet / expect)) < abs(math.log(o["usd"] / expect)):
+                o["units"], o["usd"] = 1, per_tablet                 # the shop lists the price of one tablet
+        if 1 / 8 <= o["usd"] / expect <= 8:
+            kept.append(o)
+    return kept
+
+
 def rebuild(cur):
     fx = dict(cur.execute("select currency, per_usd from fx_rates").fetchall())
     sources = tuple(c for c in MARKETS + OTHERS if CURRENCY[c] in fx)       # a country without an exchange rate sits out
@@ -165,26 +214,55 @@ def rebuild(cur):
         if k:
             fam[mid] = k
             members.setdefault(k, []).append(mid)
-    groups = {}
+    raw = []
     for c, m, kind, text, units, price, ccy in observations(cur):
-        m = fam.get(m, m)
         if c not in sources or ccy not in fx:
             continue
         units = units if units is not None else units_in(text)
         if not units:
             continue                                  # a counted pack that does not say how many: no unit price
-        unit = unit_of(text)
-        groups.setdefault((c, m), []).append((RANK[kind], kind, unit, strength_of(text), float(price) / float(units),
-                                              float(price), float(fx[ccy]) / float(fx[CURRENCY[c]])))
+        raw.append(dict(c=c, m=fam.get(m, m), kind=kind, unit=unit_of(text), strength=strength_of(text), units=float(units),
+                        price=float(price), usd_rate=float(fx[ccy]), countable=bool(COUNTED.search(text or "")
+                                                                               and not NOT_COUNTED.search(text or ""))))
+    # 'ЦЕФТРИАКСОН 1г №1' names no form: a counted item takes the form the medicine usually comes in (a vial here)
+    forms = {}
+    for o in raw:
+        if o["unit"] != "pack":
+            f = forms.setdefault(o["m"], {})
+            f[o["unit"]] = f.get(o["unit"], 0) + 1
+    for o in raw:
+        if o["unit"] == "pack" and o["countable"] and o["m"] in forms:
+            o["unit"] = max(forms[o["m"]], key=forms[o["m"]].get)
+    groups = {}
+    for o in sanity(raw):
+        local = float(fx[CURRENCY[o["c"]]])               # into the market's own currency
+        groups.setdefault((o["c"], o["m"]), []).append((RANK[o["kind"]], o["kind"], o["unit"], o["strength"],
+                                                         o["usd"] * o["usd_rate"], o["price"], o["usd_rate"] / local))
+    # every market's headline is the molecule's usual form and strength across all countries (paracetamol 500 mg tablet),
+    # so markets compare like for like; tablets count double when choosing it
+    usual_form = {}
+    for (c, m), obs in groups.items():
+        for o in obs:
+            if o[3]:
+                k = usual_form.setdefault(m, {})
+                k[(o[2], o[3])] = k.get((o[2], o[3]), 0) + (2 if o[2] == "tablet or capsule" else 1)
+    usual_form = {m: max(v, key=v.get) for m, v in usual_form.items()}
     out = {}
     for (c, m), obs in groups.items():
         best = min(o[0] for o in obs)
         obs = [o for o in obs if o[0] == best]                         # the best kind of evidence this market has
-        # the headline is the most listed form and strength, tablets first when they are a fair share of the listings
         sizes = {}
         for o in obs:
             sizes[(o[2], o[3])] = sizes.get((o[2], o[3]), 0) + 1
-        unit, usual = max(sizes, key=lambda k: (sizes[k] * (2 if k[0] == "tablet or capsule" else 1), k[1] is not None))
+        want = usual_form.get(m)
+        if want and want not in sizes and (want[0] == "tablet or capsule" or not any(k[1] for k in sizes)):
+            continue                     # this market only prices another form (an infusion, a gel): estimate the usual one
+        unit, usual = want if want in sizes else max(sizes, key=lambda k: (sizes[k] * (2 if k[0] == "tablet or capsule" else 1),
+                                                                           k[1] is not None))
+        if usual is None and sizes[(unit, usual)] < 3:
+            continue                     # one or two listings without a strength are not enough to call it market data
+        if sizes[(unit, usual)] == 1 and all(o[1] == "retail" for o in obs if (o[2], o[3]) == (unit, usual)):
+            continue                     # a single shop listing (often one brand) is weaker than the blended estimate
         strengths = {}
         for o in obs:
             if o[2] == unit and o[3]:
@@ -513,12 +591,9 @@ def prices_KG(cur, s):
     return n
 
 
-# Kenya: the procurement regulator's quarterly market price survey (national average of five towns), and a pharmacy
-# chain's open product feed, prescription medicines (its robots.txt asks for 30 seconds between requests).
+# Kenya: the procurement regulator's quarterly market price survey (national average of five towns). A pharmacy chain's
+# feed was tried and left out: its prices mix per tablet, per strip and per box with nothing to tell them apart.
 PPRA = "https://ppra.go.ke/market-price-index/"
-GOODLIFE = "https://www.goodlife.co.ke/wp-json/wc/store/v1/products"
-GOODLIFE_RX = 8156         # its "Prescription Products" category: medicines, not cosmetics or supplements
-GOODLIFE_PAGES = 6         # 100 products a page, 30 s apart
 MONTHS = {m: i for i, m in enumerate(["january", "february", "march", "april", "may", "june", "july", "august", "september",
                                       "october", "november", "december"], 1)}
 
@@ -552,7 +627,6 @@ def num(v):
 
 
 def prices_KE(cur, s):
-    import time
     names, n = Names(cur, "KE"), 0
     # the survey: when a new quarter is out
     links = re.findall(r'"(https://ppra\.go\.ke/download/(?:mprg|market-price[a-z-]*)-([a-z]+)-(\d{4})/\?wpdmdl=\d+)"',
@@ -563,31 +637,11 @@ def prices_KE(cur, s):
         if not got or got[0] != url:
             for item, unit, qty, avg in ppra_rows(s.get(url, timeout=300).content):
                 counted = re.match(r"tablet|capsule|ampoule|vial|sachet|suppositor|pessar", unit, re.I)
-                save_listing(cur, "KE", "ppra", "retail", f"{item}|{unit}|{qty:g}", item, f"{item} · {qty:g} {unit}",
+                save_listing(cur, "KE", "ppra", "survey", f"{item}|{unit}|{qty:g}", item, f"{item} · {qty:g} {unit}",
                              names.find(item), qty if counted else 1, avg, "KES")
                 n += 1
             cur.execute("""insert into source_items (source, ref, checked_at, state) values ('prices_KE', 'ppra', now(), %s)
                            on conflict (source, ref) do update set checked_at = now(), state = excluded.state""", (url,))
-    # the pharmacy feed, a few pages a run
-    row = cur.execute("select state from source_items where source = 'prices_KE' and ref = 'goodlife'").fetchone()
-    page = int(row[0]) if row and row[0] else 1
-    for _ in range(GOODLIFE_PAGES):
-        r = s.get(GOODLIFE, params={"per_page": 100, "page": page, "category": GOODLIFE_RX}, timeout=120)
-        items = r.json() if r.ok else []
-        for x in items:
-            p = x.get("prices") or {}
-            price = num(p.get("price"))
-            mol = names.find(x.get("name") or "", re.sub(r"<[^>]+>", " ", x.get("short_description") or ""))
-            if price and mol:
-                save_listing(cur, "KE", "goodlife", "retail", x["id"], x.get("name"), x.get("name"), mol, None,
-                             price / 10 ** int(p.get("currency_minor_unit") or 0), p.get("currency_code") or "KES")
-                n += 1
-        page = 1 if len(items) < 100 else page + 1
-        if page == 1:
-            break
-        time.sleep(30)
-    cur.execute("""insert into source_items (source, ref, checked_at, state) values ('prices_KE', 'goodlife', now(), %s)
-                   on conflict (source, ref) do update set checked_at = now(), state = excluded.state""", (str(page),))
     return n
 
 
@@ -627,8 +681,9 @@ BDPM = "https://base-donnees-publique.medicaments.gouv.fr/download/file/"
 
 
 def english_molecule(cur, names, generics, text):
-    """An English or French INN in a product name, or None."""
-    return names.find(text) if names.inn.find(text) else generics.molecule(cur, text)
+    """An English or French INN in a product name, or None. A combination ('A + B') never counts as one of its parts."""
+    m = names.find(text) if names.inn.find(text) else generics.molecule(cur, text)
+    return None if m and "+" in (text or "") and "+" not in names.fam.get(m, "+") else m
 
 
 RCETH = "https://www.rceth.by/Refbank/reestr_drugregpricenew/results"
@@ -801,7 +856,7 @@ def prices_NEAR(cur, s):
                     break
                 if x[7]:
                     inn.append(x[7])
-            price, form = num(r[16]), r[10].upper()
+            price, form = num(r[16]), r[10].strip().upper()
             if not price:
                 continue
             solid = form in ("TAB", "CAP", "TBC", "TBD", "TBE", "CPS", "TAF")
