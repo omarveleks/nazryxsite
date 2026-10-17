@@ -48,7 +48,7 @@ export default async function MfrProduct({ params, searchParams }: { params: Pro
     const open = canUse(t, 'matching') && p.category ? (await rows(db, 'select carries from partner_search($1, $2, $3)', [market, p.category, p.molecule_id]))
       .filter((x) => !x.carries).length : null;
     // public tenders for this molecule in this market, and the official price caps where the market publishes them
-    const tenders = canUse(t, 'market') && p.molecule_id ? await rows(db, `select id, title, buyer, stage, coalesce(awarded, closing, published) as at, quantity,
+    const tenders = canUse(t, 'market') && p.molecule_id ? await rows(db, `select id, coalesce(title_en, title) as title, coalesce(buyer_en, buyer) as buyer, stage, coalesce(awarded, closing, published) as at, quantity,
         unit_price, value, currency, bidders, url from tenders where country = $2 and $1 = any(molecule_ids)
         order by coalesce(awarded, closing, published) desc nulls last limit 6`, [p.molecule_id, market]) : [];
     const caps = canUse(t, 'pricing') && p.molecule_id ? await one(db, `select count(*)::int as n, min(max_retail) as lo, max(max_retail) as hi, min(currency) as cur

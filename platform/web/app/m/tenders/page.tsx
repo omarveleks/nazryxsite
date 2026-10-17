@@ -25,7 +25,7 @@ export default async function Tenders({ searchParams }: { searchParams: Promise<
         count(*)::int as all from tenders t where t.country = $1`, [market, u.id]);
     const show = SHOW.some(([k]) => k === sp.show) ? sp.show! : counts?.mine ? 'mine' : 'all';
     const where = show === 'mine' ? `and ${mine}` : show === 'open' ? "and t.stage = 'open'" : '';
-    const list = await rows(db, `select t.id, t.title, t.buyer, t.stage, coalesce(t.awarded, t.closing, t.published) as at, t.quantity, t.unit_price,
+    const list = await rows(db, `select t.id, coalesce(t.title_en, t.title) as title, coalesce(t.buyer_en, t.buyer) as buyer, t.stage, coalesce(t.awarded, t.closing, t.published) as at, t.quantity, t.unit_price,
         t.value, t.currency, t.bidders, ${mine} as mine from tenders t where t.country = $1 ${where}
         order by (t.stage = 'open') desc, coalesce(t.awarded, t.closing, t.published) desc nulls last limit 100`, [market, u.id]);
     return { targets, market, counts, show, list };

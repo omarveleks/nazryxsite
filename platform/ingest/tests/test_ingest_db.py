@@ -1194,6 +1194,45 @@ def test_collectors_hold_small_pulls_and_keep_medicine_tenders(env, monkeypatch)
     assert q("select quantity, unit_price, value from tenders where ref = 'o-1'")[0] == (1000, 2.5, 2500)
 
 
+
+def test_tender_text_is_translated_once(env):
+    """Russian and Uzbek tender text gets an English line; the same text is asked for once; English text is left alone;
+    a changed title drops its old translation."""
+    import collect
+    import translate
+    asked = []
+
+    class Fake:
+        class beta:
+            class messages:
+                @staticmethod
+                def create(**kw):
+                    texts = [json.loads(ln)["text"] for ln in kw["messages"][0]["content"].splitlines()[1:]]
+                    asked.extend(texts)
+                    out = {"items": [{"i": i, "en": "EN " + t} for i, t in enumerate(texts)]}
+                    return type("R", (), {"stop_reason": "end_turn", "content": [type("B", (), {"type": "text", "text": json.dumps(out)})]})
+
+    with psycopg.connect(URL) as c:
+        cur = c.cursor()
+        cur.execute("delete from tenders")                    # only this test's tenders (rolled back at the end)
+        idx = collect.MoleculeIndex(cur)
+        buyer = "Учреждение «Нарынская областная больница»"
+        collect.save_tenders(cur, [dict(country="KG", source="tr", ref="1", title="Амоксициллин, таблетки", buyer=buyer, stage="open"),
+                                   dict(country="KG", source="tr", ref="2", title="Амоксициллин 500 мг, капсулы", buyer=buyer, stage="open"),
+                                   dict(country="UZ", source="tr", ref="3", title="Amoxicillin dori vositalari xaridi", stage="open"),
+                                   dict(country="KE", source="tr", ref="4", title="Supply of medicines", stage="open")], idx)
+        assert translate.run(cur, None) == 0                   # no key: nothing asked, originals stay
+        assert translate.run(cur, Fake) == 4
+        assert sorted(asked) == sorted(["Амоксициллин, таблетки", "Амоксициллин 500 мг, капсулы", buyer, "Amoxicillin dori vositalari xaridi"])
+        got = dict((r, (t, b)) for r, t, b in cur.execute("select ref, title_en, buyer_en from tenders where source = 'tr'"))
+        assert got["1"] == ("EN Амоксициллин, таблетки", "EN " + buyer) and got["2"][1] == "EN " + buyer
+        assert got["4"] == (None, None)
+        collect.save_tenders(cur, [dict(country="KG", source="tr", ref="1", title="Амоксициллин, капсулы", buyer=buyer, stage="open")], idx)
+        assert cur.execute("select title_en, buyer_en from tenders where source = 'tr' and ref = '1'").fetchone() == (None, "EN " + buyer)
+        assert translate.run(cur, Fake) == 1 and asked[-1] == "Амоксициллин, капсулы"
+        c.rollback()
+
+
 def test_only_the_team_sees_partner_names(env):
     team = q("select id from users where role = 'team' limit 1")[0][0]
     with psycopg.connect(URL) as c:

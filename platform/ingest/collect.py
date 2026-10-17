@@ -16,6 +16,7 @@ import tempfile
 import requests
 
 import storage
+import translate
 
 log = logging.getLogger("collect")
 UA = {"User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126 Safari/537.36 NazryxCollector/1.0"}
@@ -255,7 +256,9 @@ def save_tenders(cur, rows, index):
         vals = [t.get(c) for c in cols]
         cur.execute(f"""insert into tenders ({', '.join(cols)}, molecule_ids) values ({', '.join(['%s'] * len(cols))}, %s)
                         on conflict (source, ref) do update set {', '.join(f'{c} = excluded.{c}' for c in cols[3:])},
-                        molecule_ids = excluded.molecule_ids, updated_at = now()""", vals + [mols])
+                        molecule_ids = excluded.molecule_ids, updated_at = now(),
+                        title_en = case when tenders.title = excluded.title then tenders.title_en end,
+                        buyer_en = case when tenders.buyer is not distinct from excluded.buyer then tenders.buyer_en end""", vals + [mols])
         n += 1
     return n
 
@@ -536,6 +539,12 @@ def run(conn, only=None):
             elif kind == "tenders":
                 n = save_tenders(cur, TENDERS[country](s, src), MoleculeIndex(cur))
                 cur.execute("update tenders set stage = 'closed' where country = %s and stage = 'open' and closing < current_date", (country,))
+                cur.execute("savepoint tr")
+                try:
+                    translate.run(cur)                      # titles and buyers in English
+                except Exception:
+                    cur.execute("rollback to savepoint tr")
+                    log.exception("translation failed")
             elif kind == "prices":
                 n = prices_UZ(cur, s)
         cur.execute("""update data_sources set last_rows = %s, last_error = %s, last_ok = case when %s then last_ok else now() end

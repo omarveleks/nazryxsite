@@ -58,7 +58,7 @@ export default async function MfrMarket({ searchParams }: { searchParams: Promis
     // the routes table describes Tanzania; other markets show their requirements card instead
     const routes = market === 'TZ' ? await rows(db, 'select label, description, months_low, months_high from registration_routes order by sort') : [];
     // medicine tenders collected from the market's procurement portals; the user's molecules first
-    const tenders = await rows(db, `select t.id, t.title, t.buyer, t.stage, coalesce(t.awarded, t.closing, t.published) as at, t.quantity, t.unit_price, t.value,
+    const tenders = await rows(db, `select t.id, coalesce(t.title_en, t.title) as title, coalesce(t.buyer_en, t.buyer) as buyer, t.stage, coalesce(t.awarded, t.closing, t.published) as at, t.quantity, t.unit_price, t.value,
         t.currency, t.bidders, exists (select 1 from mfr_products p where p.user_id = $2 and p.molecule_id = any(t.molecule_ids)) as mine
         from tenders t where t.country = $1 order by mine desc, coalesce(t.awarded, t.closing, t.published) desc nulls last limit 8`, [market, u.id]);
     const tcount = await one(db, `select count(*) filter (where stage = 'open')::int as open,
