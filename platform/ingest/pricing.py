@@ -12,9 +12,15 @@ import statistics
 
 log = logging.getLogger("pricing")
 MARKETS = ("KZ", "KG", "UZ", "KE", "TZ")
-NEIGHBOURS = {"KZ": ("KG", "UZ"), "KG": ("KZ", "UZ"), "UZ": ("KZ", "KG"), "KE": ("TZ",), "TZ": ("KE",)}
-CURRENCY = {"KZ": "KZT", "KG": "KGS", "UZ": "UZS", "KE": "KES", "TZ": "TZS", "PK": "PKR", "GB": "GBP", "FR": "EUR"}
-ABROAD = ("PK", "GB", "FR")    # reference countries: only for molecules none of our markets prices, Pakistan first
+NEARBY = {"africa": ("UG", "RW", "NG", "GH", "ZA", "ET"),       # nearby countries with price data (estimates only)
+          "cis": ("BY", "AM", "AZ", "GE", "RU")}
+NEIGHBOURS = {"KZ": ("KG", "UZ") + NEARBY["cis"], "KG": ("KZ", "UZ") + NEARBY["cis"], "UZ": ("KZ", "KG") + NEARBY["cis"],
+              "KE": ("TZ",) + NEARBY["africa"], "TZ": ("KE",) + NEARBY["africa"]}
+CURRENCY = {"KZ": "KZT", "KG": "KGS", "UZ": "UZS", "KE": "KES", "TZ": "TZS", "PK": "PKR", "GB": "GBP", "FR": "EUR",
+            "UG": "UGX", "RW": "RWF", "NG": "NGN", "GH": "GHS", "ZA": "ZAR", "ET": "ETB",
+            "BY": "BYN", "AM": "AMD", "AZ": "AZN", "GE": "GEL", "RU": "RUB"}
+ABROAD = ("PK", "GB", "FR")    # far reference countries: last, only for molecules nothing nearer prices, Pakistan first
+OTHERS = NEARBY["africa"] + NEARBY["cis"] + ABROAD
 RANK = {"retail": 0, "cap": 1, "reimbursement": 2, "tender": 3}
 MIN_OVERLAP = 15          # molecules priced in both markets before their price ratio is trusted; otherwise 1.0
 
@@ -60,7 +66,7 @@ def refresh_fx(cur, s):
     d = s.get("https://open.er-api.com/v6/latest/USD", timeout=30).json()
     if d.get("result") != "success":
         return
-    for cur_code in set(CURRENCY.values()) | {"RUB"}:
+    for cur_code in set(CURRENCY.values()):
         if d["rates"].get(cur_code):
             cur.execute("""insert into fx_rates (currency, per_usd) values (%s, %s) on conflict (currency)
                            do update set per_usd = excluded.per_usd, updated_at = now()""", (cur_code, d["rates"][cur_code]))
@@ -155,7 +161,7 @@ def trimmed(xs):
 
 def rebuild(cur):
     fx = dict(cur.execute("select currency, per_usd from fx_rates").fetchall())
-    sources = tuple(c for c in MARKETS + ABROAD if CURRENCY[c] in fx)       # a country without an exchange rate sits out
+    sources = tuple(c for c in MARKETS + OTHERS if CURRENCY[c] in fx)       # a country without an exchange rate sits out
     fam, members = {}, {}                      # every spelling of a molecule shares its prices
     for mid, inn in cur.execute("select id, inn from molecules where inn is not null"):
         k = family(inn)
@@ -211,13 +217,14 @@ def rebuild(cur):
     markets = tuple(c for c in MARKETS if c in sources)
     abroad = tuple(c for c in ABROAD if c in sources)
     for c in markets:
-        for n in markets:
+        for n in sources:
             if n == c:
                 continue
             ratios = [direct[(c, m)]["unit_usd"] / direct[(n, m)]["unit_usd"] for (cc, m) in direct
                       if cc == c and (n, m) in direct and direct[(n, m)]["unit_usd"] > 0
                       and (direct[(n, m)]["unit"], direct[(n, m)]["strength"]) == (direct[(c, m)]["unit"], direct[(c, m)]["strength"])]
             factors[(c, n)] = (statistics.median(ratios) if len(ratios) >= MIN_OVERLAP else 1.0, len(ratios))
+
     def gap(c, n):
         """(factor, molecules behind it, how good): measured between the two markets, else borrowed from a neighbour of
         c that has it measured (neighbours price alike), else none (1.0)."""
@@ -230,14 +237,8 @@ def rebuild(cur):
         return (max(via, key=lambda x: x[1]) + (3,)) if via else (1.0, k, 4)
 
     for c in markets:
-        for n in abroad:
-            ratios = [direct[(c, m)]["unit_usd"] / direct[(n, m)]["unit_usd"] for (cc, m) in direct
-                      if cc == c and (n, m) in direct and direct[(n, m)]["unit_usd"] > 0
-                      and (direct[(n, m)]["unit"], direct[(n, m)]["strength"]) == (direct[(c, m)]["unit"], direct[(c, m)]["strength"])]
-            factors[(c, n)] = (statistics.median(ratios) if len(ratios) >= MIN_OVERLAP else 1.0, len(ratios))
-    for c in markets:
-        # our markets first (second tier), then prices abroad (third tier), each in order of how well it compares
-        order = sorted((n for n in markets if n != c), key=lambda n: (gap(c, n)[2], -gap(c, n)[1])) \
+        # our markets and nearby countries first, in order of how well their prices compare; far reference countries last
+        order = sorted((n for n in sources if n != c and n not in ABROAD), key=lambda n: (gap(c, n)[2], -gap(c, n)[1])) \
             + sorted(abroad, key=lambda n: (gap(c, n)[2] > 1, ABROAD.index(n)))
         for n in order:
             factor, overlap, _ = gap(c, n)
