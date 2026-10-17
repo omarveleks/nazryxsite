@@ -43,20 +43,16 @@ export default async function MfrProduct({ params, searchParams }: { params: Pro
     const routeKey = (await one(db, 'select route_key from molecule_routes where molecule_id = $1', [p.molecule_id]))?.route_key
       ?? (p.who_pq || p.sra_approved ? 'abridged' : 'full');
     const route = canUse(t, 'pathway') ? await one(db, 'select label, description, months_low, months_high from registration_routes where key = $1', [routeKey]) : null;
-    const price = canUse(t, 'pricing') ? await one(db, `select price_low, price_high, currency, unit, note from market_prices where molecule_id = $1 and kind = 'suggested'
-        order by observed_at desc limit 1`, [p.molecule_id]) : null;
     // distributors strong in the class who do not carry this molecule yet (codes only; names stay with Nazryx)
     const open = canUse(t, 'matching') && p.category ? (await rows(db, 'select carries from partner_search($1, $2, $3)', [market, p.category, p.molecule_id]))
       .filter((x) => !x.carries).length : null;
-    // public tenders for this molecule in this market, and the official price caps where the market publishes them
+    // public tenders for this molecule in this market
     const tenders = canUse(t, 'market') && p.molecule_id ? await rows(db, `select id, coalesce(title_en, title) as title, coalesce(buyer_en, buyer) as buyer, stage, coalesce(awarded, closing, published) as at, quantity,
         unit_price, value, currency, bidders, url from tenders where country = $2 and $1 = any(molecule_ids)
         order by coalesce(awarded, closing, published) desc nulls last limit 6`, [p.molecule_id, market]) : [];
-    const caps = canUse(t, 'pricing') && p.molecule_id ? await one(db, `select count(*)::int as n, min(max_retail) as lo, max(max_retail) as hi, min(currency) as cur
-        from reference_prices where molecule_id = $1 and country = $2 and max_retail > 0`, [p.molecule_id, market]) : null;
     // the molecule's average price in this market: listings, or an estimate from a neighbouring market
     const avg = canUse(t, 'market') ? await one(db, `${PRICE_SQL} where molecule_id = $1 and country = $2`, [p.molecule_id, market]) as MoleculePrice | null : null;
-    return { ...base, origin, lapsed, route, price, open, tenders, caps, ...(canUse(t, 'market') ? { avg } : {}) };
+    return { ...base, origin, lapsed, route, open, tenders, ...(canUse(t, 'market') ? { avg } : {}) };
   });
   if (!d) notFound();
   const { p, market } = d;
@@ -104,13 +100,6 @@ export default async function MfrProduct({ params, searchParams }: { params: Pro
               {'route' in d && d.route ? <p><b>{d.route.label}</b>{d.route.months_low != null ? `: about ${d.route.months_low}–${d.route.months_high ?? d.route.months_low} months` : ''}. <span className="muted">{d.route.description}</span></p>
                 : <PlanLock need="access" title="Route and timeline" u={u} market={market}>The registration route for this product, what it needs and how long it takes.</PlanLock>}
               <p className="muted">{p.be_study ? 'You have a bioequivalence study.' : be ? `${BE_STATUS[be]}.` : 'Whether a bioequivalence study is needed: we confirm it when we check your dossier.'}</p>
-            </section>
-            <section className="card stack">
-              <h2>Suggested selling price</h2>
-              {!canUse(d.t, 'pricing') ? <PlanLock need="access" title="Pricing analysis" u={u} market={market}>The price band we suggest for this product in {countryName(market)}.</PlanLock>
-                : 'price' in d && d.price ? <p><b>{d.price.currency} {Number(d.price.price_low).toFixed(2)}–{Number(d.price.price_high).toFixed(2)}</b> per {d.price.unit}{d.price.note ? ` · ${d.price.note}` : ''}</p>
-                : <p className="note">Our team is setting it. Ask for a price check and we answer within 24 hours.</p>}
-              {'caps' in d && d.caps?.n ? <p className="small">Official maximum retail price in {countryName(market)}: <b>{d.caps.cur} {fmtMoney(d.caps.lo)}{d.caps.hi !== d.caps.lo ? `–${fmtMoney(d.caps.hi)}` : ''}</b> across {d.caps.n} registered {d.caps.n === 1 ? 'pack' : 'packs'}.</p> : null}
             </section>
           </>)}
           {'avg' in d && (d.avg ? (
