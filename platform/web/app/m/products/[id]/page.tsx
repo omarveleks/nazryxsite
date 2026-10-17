@@ -8,6 +8,7 @@ import { requireUser } from '@/lib/auth';
 import { one, rows, withUser } from '@/lib/db';
 import { BE_STATUS, beSuggestion, fmtDate, fmtMoney, levelLabel, registeredLine } from '@/lib/format';
 import { REQ_SQL, forProduct, type Requirement } from '@/lib/regulatory';
+import { PRICE_SQL, perUnit, priceBasis, usd, type MoleculePrice } from '@/lib/prices';
 import { AGENCY_KINDS, LAUNCH_STAGES, MFR_PLANS, NEEDS_PLAN, SERVICES, canUse, tierIn, countryName, mfrProductsSql, productClass, reasons } from '@/lib/mfr';
 
 export const metadata = { title: 'Product' };
@@ -53,7 +54,9 @@ export default async function MfrProduct({ params, searchParams }: { params: Pro
         order by coalesce(awarded, closing, published) desc nulls last limit 6`, [p.molecule_id, market]) : [];
     const caps = canUse(t, 'pricing') && p.molecule_id ? await one(db, `select count(*)::int as n, min(max_retail) as lo, max(max_retail) as hi, min(currency) as cur
         from reference_prices where molecule_id = $1 and country = $2 and max_retail > 0`, [p.molecule_id, market]) : null;
-    return { ...base, origin, lapsed, route, price, open, tenders, caps };
+    // the molecule's average price in this market: listings, or an estimate from a neighbouring market
+    const avg = canUse(t, 'market') ? await one(db, `${PRICE_SQL} where molecule_id = $1 and country = $2`, [p.molecule_id, market]) as MoleculePrice | null : null;
+    return { ...base, origin, lapsed, route, price, open, tenders, caps, avg };
   });
   if (!d) notFound();
   const { p, market } = d;
@@ -110,6 +113,22 @@ export default async function MfrProduct({ params, searchParams }: { params: Pro
               {'caps' in d && d.caps?.n ? <p className="small">Official maximum retail price in {countryName(market)}: <b>{d.caps.cur} {fmtMoney(d.caps.lo)}{d.caps.hi !== d.caps.lo ? `–${fmtMoney(d.caps.hi)}` : ''}</b> across {d.caps.n} registered {d.caps.n === 1 ? 'pack' : 'packs'}.</p> : null}
             </section>
           </>)}
+          {'avg' in d && d.avg && (
+            <section className="card stack">
+              <div className="card-h"><h2>Price in {countryName(market)}</h2>{d.avg.basis === 'estimate' && <span className="pill peach">Estimate</span>}</div>
+              <div className="grid g3">
+                <div className="tile t-blue"><span className="k">Average price</span><span className="v num" style={{ fontSize: 22 }}>{perUnit(d.avg)}</span>
+                  <span className="small">{usd(d.avg.unit_usd)}{d.avg.strength ? ` · ${d.avg.strength}` : ''}</span></div>
+                <div className="tile t-mint"><span className="k">Usual range</span><span className="v num" style={{ fontSize: 22 }}>{d.avg.lo != null && d.avg.hi != null ? `${fmtMoney(d.avg.lo)}–${fmtMoney(d.avg.hi)}` : '—'}</span>
+                  <span className="small">{d.avg.currency} per {d.avg.unit}</span></div>
+                <div className="tile t-lav"><span className="k">Based on</span><span className="v num" style={{ fontSize: 22 }}>{d.avg.n}</span>
+                  <span className="small">{d.avg.basis === 'estimate' ? `prices in ${countryName(d.avg.from_country)}` : d.avg.n === 1 ? 'price' : 'prices'}</span></div>
+              </div>
+              <p className="small muted">{priceBasis(d.avg)}</p>
+              {d.avg.by_strength.length > 1 && (
+                <div className="tbl-wrap"><table className="tbl"><thead><tr><th>Strength</th><th className="r">Per {d.avg.unit}</th><th className="r">Per pack</th><th className="r">Prices</th></tr></thead>
+                  <tbody>{d.avg.by_strength.map((x) => <tr key={x.strength}><td>{x.strength}</td><td className="r num">{fmtMoney(x.unit)}</td><td className="r num">{fmtMoney(x.pack)}</td><td className="r num">{x.n}</td></tr>)}</tbody></table></div>)}
+            </section>)}
           {'tenders' in d && d.tenders.length > 0 && (
             <section className="card stack">
               <div className="card-h"><h2>Public tenders in {countryName(market)}</h2><Link className="btn-link" href={`/m/tenders?market=${market}`}>All tenders</Link></div>

@@ -10,6 +10,7 @@ import { requireUser } from '@/lib/auth';
 import { one, rows, withUser } from '@/lib/db';
 import { HIGH_DEMAND, LAUNCH_STAGES, MFR_FILE_KINDS, canUse, countryName, covers, productClass, tierIn, byMolecule } from '@/lib/mfr';
 import { fmtDate } from '@/lib/format';
+import { PRICE_SQL, perUnit, type MoleculePrice } from '@/lib/prices';
 
 export const metadata = { title: 'My products' };
 
@@ -46,7 +47,8 @@ export default async function MfrProducts({ searchParams }: { searchParams: Prom
     const watching = sp.tab === 'watch' && canUse(u.mfr_tier, 'competitors');
     const watched = watching && hasData(market) && covers(u, market) ? await rows(db, 'select * from my_competitor_summary($1)', [market]) : [];
     const watchCount = Number((await one(db, 'select count(*)::int as n from watches where user_id = $1', [u.id]))?.n ?? 0);
-    return { targets, market, products, facts, launches, files, watched, watchCount };
+    const prices = ids.length && hasData(market) ? await rows(db, `${PRICE_SQL} where molecule_id = any($1) and country = $2`, [ids, market]) as MoleculePrice[] : [];
+    return { targets, market, products, facts, launches, files, watched, watchCount, prices };
   });
   const market = d.market;
   const analysis = canUse(tierIn(u, market), 'portfolio');
@@ -174,7 +176,7 @@ export default async function MfrProducts({ searchParams }: { searchParams: Prom
         {n === 0 ? <Empty>No products yet. Search for your first one below.</Empty> : (
           <div className="tbl-wrap"><table className="tbl">
             <thead><tr><th>Product</th><th className="hide-m">Class</th>
-              <th className="r">Competition in {countryName(market)}</th></tr></thead>
+              <th className="r">Competition in {countryName(market)}</th><th className="r hide-m">Average price</th></tr></thead>
             <tbody>{mols.map((p, i) => (
               <tr key={p.id}>
                 <td><Link href={`/m/products/${p.id}`}><b>{p.inn ?? p.name}</b></Link>
@@ -187,6 +189,10 @@ export default async function MfrProducts({ searchParams }: { searchParams: Prom
                     : !visible(i) ? <span className="note row" style={{ justifyContent: 'flex-end', gap: 4 }}><LockIcon /> Locked</span>
                     : <span className={`pill ${COMP[competition(f)][1]}`}>{competition(f) === 'some' || competition(f) === 'crowded' ? `${f!.registrants} competitors` : COMP[competition(f)][0]}</span>}</td>;
                 })}
+                <td className="r small hide-m num">{(() => {
+                  const pr = visible(i) ? d.prices.find((x) => x.molecule_id === p.molecule_id) : undefined;
+                  return pr ? <>{perUnit(pr)}{pr.basis === 'estimate' && <div className="sub2">estimate</div>}</> : '—';
+                })()}</td>
               </tr>))}</tbody></table></div>)}
       </section>
 

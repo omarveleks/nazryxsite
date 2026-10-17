@@ -1233,6 +1233,39 @@ def test_tender_text_is_translated_once(env):
         c.rollback()
 
 
+
+def test_molecule_prices_from_listings_and_neighbour_estimates(env, monkeypatch):
+    """The average per unit uses the best evidence a market has and its usual strength; a market with no price gets
+    the neighbour's, adjusted by how the two markets' prices compare on the molecules priced in both."""
+    import pricing
+    monkeypatch.setattr(pricing, "MIN_OVERLAP", 2)
+    with psycopg.connect(URL) as c:
+        cur = c.cursor()
+        for t in ("price_listings", "reference_prices", "tenders"):
+            cur.execute(f"delete from {t}")
+        mols = [r[0] for r in cur.execute("select id from molecules order by id limit 3")]
+        rows = []
+        for i, m in enumerate(mols):                  # Kazakhstan is twice Kyrgyzstan's level on the first two
+            rows += [("KZ", "a", "cap", f"{m}-1", m, "Таблетки 500 мг №10", 10, 200 * (i + 1) * 4.52, "KZT")] if i < 2 else []
+            rows += [("KG", "b", "retail", f"{m}-1", m, "Таблетки 500 мг №10", 10, 100 * (i + 1) * 0.875, "KGS"),
+                     ("KG", "b", "retail", f"{m}-2", m, "Таблетки 500 мг №20", 20, 200 * (i + 1) * 0.875, "KGS"),
+                     ("KG", "b", "tender", f"{m}-3", m, "Таблетки 500 мг", 1, 1, "KGS"),           # weaker evidence: left out
+                     ("KG", "b", "retail", f"{m}-4", m, "Таблетки 250 мг №10", 10, 50, "KGS")]     # another strength
+        for r in rows:
+            cur.execute("""insert into price_listings (country, source, kind, ref, molecule_id, pack, units, pack_price, currency)
+                           values (%s, %s, %s, %s, %s, %s, %s, %s, %s)""", r)
+        cur.execute("update fx_rates set per_usd = case currency when 'KZT' then 452 when 'KGS' then 87.5 else per_usd end")
+        pricing.rebuild(cur)
+        got = {(c_, m): (b, float(u), s, n, f) for c_, m, b, u, s, n, f in
+               cur.execute("select country, molecule_id, basis, unit_price, strength, n, factor from molecule_prices")}
+        assert got[("KG", mols[0])][:4] == ("listings", 8.75, "500 mg", 2)           # 87.5 and 175 KGS for 10 and 20 tablets
+        assert got[("KZ", mols[0])][0] == "listings" and round(got[("KZ", mols[0])][1], 2) == 90.4
+        est = got[("KZ", mols[2])]
+        assert est[0] == "estimate" and round(float(est[4]), 2) == 2.0 and est[2] == "500 mg"
+        assert round(est[1], 1) == round(3 * 8.75 / 87.5 * 2 * 452, 1)              # Kyrgyz price x 2, in tenge
+        c.rollback()
+
+
 def test_only_the_team_sees_partner_names(env):
     team = q("select id from users where role = 'team' limit 1")[0][0]
     with psycopg.connect(URL) as c:

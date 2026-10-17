@@ -15,6 +15,7 @@ import tempfile
 
 import requests
 
+import pricing
 import storage
 import translate
 
@@ -509,6 +510,9 @@ def prices_UZ(cur, s):
     return n
 
 
+PRICES = {"UZ": prices_UZ, "KZ": pricing.prices_KZ}
+
+
 # ------------------------------------------------------------------ the schedule
 def due(cur):
     return cur.execute("""select key, country, kind, last_ok, release_held, held_path from data_sources
@@ -546,7 +550,10 @@ def run(conn, only=None):
                     cur.execute("rollback to savepoint tr")
                     log.exception("translation failed")
             elif kind == "prices":
-                n = prices_UZ(cur, s)
+                n = PRICES[country](cur, s)
+                pricing.refresh_fx(cur, s)
+            if kind in ("prices", "tenders"):
+                pricing.rebuild(cur)                    # averages per molecule and market, and neighbour estimates
         cur.execute("""update data_sources set last_rows = %s, last_error = %s, last_ok = case when %s then last_ok else now() end
                        where key = %s""", (n, warning, warning is not None, key))
         conn.commit()
