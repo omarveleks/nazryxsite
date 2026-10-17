@@ -314,6 +314,16 @@ export async function deleteMfrProduct(f: FormData) {
   redirect('/m/products');
 }
 
+/** Empty the portfolio in one go: every product (and its launch tracker rows) and the molecules watched. */
+export async function deleteAllMfrProducts() {
+  const u = await requireUser({ manufacturer: true });
+  await withUser(u.id, async (db) => {
+    await db.query('delete from mfr_products where user_id = $1', [u.id]);
+    await db.query('delete from watches where user_id = $1', [u.id]);
+  });
+  redirect('/m/products?cleared=1');
+}
+
 /** Ask for a service: market entry, dossier and regulatory review, renewals and compliance. */
 export async function requestService(f: FormData) {
   const u = await requireUser({ manufacturer: true });

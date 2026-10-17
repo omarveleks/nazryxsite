@@ -5,7 +5,7 @@ import MedicineSearch from '@/components/MedicineSearch';
 import AutoRefresh from '@/components/AutoRefresh';
 import { Bar, Empty, Flash, LockIcon, PlanLock, Tabs } from '@/components/ui';
 import { DemandIcon } from '@/components/Icons';
-import { addMfrProducts, deleteMfrFile, saveLaunch, unwatchMolecule, uploadMfrFile, watchMolecule } from '@/app/actions/mfr';
+import { addMfrProducts, deleteAllMfrProducts, deleteMfrFile, saveLaunch, unwatchMolecule, uploadMfrFile, watchMolecule } from '@/app/actions/mfr';
 import { requireUser } from '@/lib/auth';
 import { one, rows, withUser } from '@/lib/db';
 import { HIGH_DEMAND, LAUNCH_STAGES, MFR_FILE_KINDS, canUse, countryName, covers, productClass, tierIn, byMolecule } from '@/lib/mfr';
@@ -24,7 +24,7 @@ const COMP: Record<string, [string, string]> = {
 };
 
 // The manufacturer's catalogue against its markets: a portfolio dashboard on top, then every product.
-export default async function MfrProducts({ searchParams }: { searchParams: Promise<{ added?: string; matched?: string; error?: string; market?: string; tab?: string; saved?: string; uploaded?: string; removed?: string; reading?: string }> }) {
+export default async function MfrProducts({ searchParams }: { searchParams: Promise<{ added?: string; matched?: string; error?: string; market?: string; tab?: string; saved?: string; uploaded?: string; removed?: string; reading?: string; cleared?: string }> }) {
   const sp = await searchParams;
   const u = await requireUser({ manufacturer: true });
   const d = await withUser(u.id, async (db) => {
@@ -78,6 +78,7 @@ export default async function MfrProducts({ searchParams }: { searchParams: Prom
     <Shell user={u} title="My products" sub={`Your catalogue against ${countryName(market)}`}
       actions={<a className="btn btn-blue btn-sm" href="/m/products#add">Add a product</a>}>
       <Flash sp={sp} />
+      {sp.cleared && <div className="ok" role="status">All products removed.</div>}
       {reading.length > 0 && (<div className="ok row" role="status" style={{ gap: 10 }}><AutoRefresh />
         <span className="spin" aria-hidden="true" />Reading {reading.map((x) => x.file_name).join(', ')}. Your products appear here in a minute; no need to wait on this page.</div>)}
       {sp.reading && reading.length === 0 && lastCat?.status === 'done' && <div className="ok" role="status">Added {lastCat.added} products from {lastCat.file_name}; {lastCat.matched} matched to a molecule we track.
@@ -172,7 +173,13 @@ export default async function MfrProducts({ searchParams }: { searchParams: Prom
       </>)}
 
       <section className="card">
-        <div className="card-h"><h2>All medicines</h2><span className="note">{analysis ? 'Clearest openings first' : 'Your top 3 shown in full'}</span></div>
+        <div className="card-h"><h2>All medicines</h2>
+          <span className="row" style={{ gap: 10 }}><span className="note">{analysis ? 'Clearest openings first' : 'Your top 3 shown in full'}</span>
+            {n > 0 && <details style={{ position: 'relative' }}><summary className="btn-link small" style={{ cursor: 'pointer', listStyle: 'none' }}>Remove all</summary>
+              <form action={deleteAllMfrProducts} className="card stack small" style={{ position: 'absolute', right: 0, zIndex: 5, width: 240, marginTop: 6 }}>
+                <span>Remove all {packs} {packs === 1 ? "product" : "products"} from your portfolio? This cannot be undone.</span>
+                <button className="btn btn-sm" type="submit">Yes, remove all</button>
+              </form></details>}</span></div>
         {n === 0 ? <Empty>No products yet. Search for your first one below.</Empty> : (
           <div className="tbl-wrap"><table className="tbl">
             <thead><tr><th>Product</th><th className="hide-m">Class</th>

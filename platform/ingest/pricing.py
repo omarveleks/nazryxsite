@@ -56,7 +56,7 @@ def units_in(text):
          or re.search(r"(?:pack|box|strip|bottle) of\s*(\d+)()", t)
          or re.search(r"(?<![\w-])(\d+)()\s*(?:tablets?|tabs?|capsules?|caps?|sachets?|ampoules?|amps?|vials?|suppositories|"
                       r"pessaries|lozenges)\b", t)                                     # not 'Benza-200 Tablets'
-         or re.search(r"\b(\d+)()\s*'?s\b", t)
+         or re.search(r"\b(\d+)()\s*[',]?s\b", t)
          or re.search(r"(?:^|\s)x\s*(\d+)()\b(?!\s*(?:ml|g)\b)", t))                    # '5mg x28', 'x100'
     if m:
         return int(m.group(1)) * int(m.group(2) or 1)
@@ -247,7 +247,7 @@ def rebuild(cur):
                 k = usual_form.setdefault(m, {})
                 k[(o[2], o[3])] = k.get((o[2], o[3]), 0) + (2 if o[2] == "tablet or capsule" else 1)
     usual_form = {m: max(v, key=v.get) for m, v in usual_form.items()}
-    out = {}
+    out, weak = {}, {}
     for (c, m), obs in groups.items():
         best = min(o[0] for o in obs)
         obs = [o for o in obs if o[0] == best]                         # the best kind of evidence this market has
@@ -262,7 +262,10 @@ def rebuild(cur):
         if usual is None and sizes[(unit, usual)] < 3:
             continue                     # one or two listings without a strength are not enough to call it market data
         if sizes[(unit, usual)] == 1 and all(o[1] == "retail" for o in obs if (o[2], o[3]) == (unit, usual)):
-            continue                     # a single shop listing (often one brand) is weaker than the blended estimate
+            o = next(o for o in obs if (o[2], o[3]) == (unit, usual))
+            weak[(c, m)] = (unit, usual, o[4] / o[6] / float(fx[CURRENCY[c]]))
+            continue                     # a single shop listing (often one brand) is weaker than the blended estimate:
+                                         # it counts as one voice in this market's estimate below
         strengths = {}
         for o in obs:
             if o[2] == unit and o[3]:
@@ -325,6 +328,9 @@ def rebuild(cur):
                 factor, overlap, tier = gap(c, n)
                 cands.append((tier <= 3, v["strength"], v["unit"], v["unit_usd"] * factor, v["lo"] / float(fx[CURRENCY[n]]) * factor,
                               v["hi"] / float(fx[CURRENCY[n]]) * factor, v["n"], n, v["kinds"], factor, overlap))
+            if (c, m) in weak:                                   # this market's own single listing
+                u_, st_, usd_ = weak[(c, m)]
+                cands.append((True, st_, u_, usd_, usd_, usd_, 1, c, ["retail"], 1.0, 0))
             if any(x[0] for x in cands):
                 cands = [x for x in cands if x[0]]
             usual = max({(x[2], x[1]) for x in cands}, key=lambda k: sum(1 for x in cands if (x[2], x[1]) == k))
