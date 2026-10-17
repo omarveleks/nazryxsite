@@ -156,14 +156,6 @@ def pct(xs, q):
     return xs[min(len(xs) - 1, max(0, round(q * (len(xs) - 1))))]
 
 
-def trimmed(xs):
-    xs = sorted(xs)
-    if len(xs) >= 5:
-        k = max(1, len(xs) // 10)
-        xs = xs[k:-k]
-    return xs
-
-
 def rebuild(cur):
     fx = dict(cur.execute("select currency, per_usd from fx_rates").fetchall())
     sources = tuple(c for c in MARKETS + OTHERS if CURRENCY[c] in fx)       # a country without an exchange rate sits out
@@ -200,8 +192,7 @@ def rebuild(cur):
         by = sorted(({"strength": k, "unit": round(sum(u for u, _ in v) / len(v), 4), "pack": round(sum(p for _, p in v) / len(v), 2),
                       "n": len(v)} for k, v in strengths.items()), key=lambda x: -x["n"])[:6]
         local = sorted(o[4] / o[6] for o in obs if (o[2], o[3]) == (unit, usual))      # in the market's own currency
-        t = trimmed(local)
-        avg = sum(t) / len(t)
+        avg = statistics.median(local)               # one premium brand or promotion cannot pull it
         out[(c, m)] = dict(basis="listings", kinds=sorted({o[1] for o in obs}), unit=unit, strength=usual, unit_price=avg,
                            unit_usd=avg / float(fx[CURRENCY[c]]), lo=pct(local, 0.1), hi=pct(local, 0.9), n=len(local), by=by)
     # molecules whose name only differs by typos, salts or label text share the family that has prices
@@ -220,7 +211,6 @@ def rebuild(cur):
     direct = dict(out)
     factors = {}
     markets = tuple(c for c in MARKETS if c in sources)
-    abroad = tuple(c for c in ABROAD if c in sources)
     for c in markets:
         for n in sources:
             if n == c:
@@ -241,20 +231,31 @@ def rebuild(cur):
         via = [factors[(nb, n)] for nb in NEIGHBOURS[c] if nb != n and factors.get((nb, n), (1, 0))[1] >= MIN_OVERLAP]
         return (max(via, key=lambda x: x[1]) + (3,)) if via else (1.0, k, 4)
 
+    # an estimate is the median of every country that prices the molecule, each scaled by its measured price gap with this
+    # market, so no single source (or a source with one or two prices) decides it. Sources whose gap is measured, directly
+    # or through a neighbour, and our neighbouring markets count; others only when nothing better exists.
+    by_mol = {}
+    for (n, m), v in direct.items():
+        by_mol.setdefault(m, []).append((n, v))
     for c in markets:
-        # our markets and nearby countries first, in order of how well their prices compare; far reference countries last
-        order = sorted((n for n in sources if n != c and n not in ABROAD), key=lambda n: (gap(c, n)[2], -gap(c, n)[1])) \
-            + sorted(abroad, key=lambda n: (gap(c, n)[2] > 1, ABROAD.index(n)))
-        for n in order:
-            factor, overlap, _ = gap(c, n)
-            rate, rate_n = float(fx[CURRENCY[c]]), float(fx[CURRENCY[n]])
-            for (nn, m), v in direct.items():
-                if nn != n or (c, m) in out:
-                    continue
-                out[(c, m)] = dict(basis="estimate", kinds=v["kinds"], unit=v["unit"], strength=v["strength"],
-                                   unit_price=v["unit_usd"] * factor * rate, unit_usd=v["unit_usd"] * factor,
-                                   lo=v["lo"] / rate_n * factor * rate, hi=v["hi"] / rate_n * factor * rate,
-                                   n=v["n"], by=[], from_country=n, factor=factor, overlap=overlap)
+        rate = float(fx[CURRENCY[c]])
+        for m, priced in by_mol.items():
+            if (c, m) in out:
+                continue
+            cands = []
+            for n, v in priced:
+                factor, overlap, tier = gap(c, n)
+                cands.append((tier <= 3, v["strength"], v["unit"], v["unit_usd"] * factor, v["lo"] / float(fx[CURRENCY[n]]) * factor,
+                              v["hi"] / float(fx[CURRENCY[n]]) * factor, v["n"], n, v["kinds"], factor, overlap))
+            if any(x[0] for x in cands):
+                cands = [x for x in cands if x[0]]
+            usual = max({(x[2], x[1]) for x in cands}, key=lambda k: sum(1 for x in cands if (x[2], x[1]) == k))
+            cands = [x for x in cands if (x[2], x[1]) == usual]               # one form and strength, like for like
+            usd = statistics.median(x[3] for x in cands)
+            main = min(cands, key=lambda x: abs(x[3] - usd))
+            out[(c, m)] = dict(basis="estimate", kinds=main[8], unit=usual[0], strength=usual[1], unit_price=usd * rate, unit_usd=usd,
+                               lo=statistics.median(x[4] for x in cands) * rate, hi=statistics.median(x[5] for x in cands) * rate,
+                               n=sum(x[6] for x in cands), by=[], from_country=main[7], factor=main[9], overlap=len(cands))
     # combinations nobody prices: their ingredients' prices added up, scaled by how combination packs compare with their
     # ingredients where both are priced (measured on our data)
     samples = []
