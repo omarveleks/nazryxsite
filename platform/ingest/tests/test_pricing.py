@@ -11,5 +11,7 @@ def test_pack_counts_units_and_strengths():
     assert pricing.units_in("Ceftriaxone 1g vial") == 1 and pricing.units_in("Jetix Сироп 125г флаконы") == 1
     assert pricing.unit_of("Раствор для инъекций 2 мл ампулы №10") == "ampoule or vial"
     assert pricing.unit_of("Amoxicillin 250mg/5ml suspension 100ml") == "pack"
+    assert pricing.unit_of("БЕНЗИЛПЕНИЦИЛЛИНА натриевая соль 1г №1 фл.") == "ampoule or vial"
+    assert pricing.strength_of("Rocephin 1Gm vial") == "1000 mg"
     assert pricing.strength_of("Цефтриаксон 1 г") == pricing.strength_of("Ceftriaxone 1000mg") == "1000 mg"
     assert pricing.strength_of("Oxytocin 10 IU/ml") == "10 IU"

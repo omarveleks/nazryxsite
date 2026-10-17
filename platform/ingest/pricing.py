@@ -17,11 +17,11 @@ CURRENCY = {"KZ": "KZT", "KG": "KGS", "UZ": "UZS", "KE": "KES", "TZ": "TZS"}
 RANK = {"retail": 0, "cap": 1, "reimbursement": 2, "tender": 3}
 MIN_OVERLAP = 15          # molecules priced in both markets before their price ratio is trusted; otherwise 1.0
 
-INJ = re.compile(r"инъек|инфуз|ампул|амп\.|флак.*(инъ|инф)|лиофил|inject|infusion|ampoule|\bamps?\b|\bvials?\b|\binj\b|i\.v\.", re.I)
+INJ = re.compile(r"инъек|инфуз|ампул|амп\.|\bфл\.|д/ин|в/в|в/м|флак.*(инъ|инф)|лиофил|inject|infusion|ampoule|\bamps?\b|\bvials?\b|\binj\b|i\.v\.", re.I)
 SOLID = re.compile(r"табл|таб\.|капс|драже|супп|свеч|пастил|саше|пакет|гранул.*пакет|tablet|\btabs?\b|capsul|\bcaps?\b|sachet|"
                    r"supposit|pessar|lozeng|\bsupp\b|\b\d+\s*'?s\b", re.I)
-STRENGTH = re.compile(r"(\d+(?:[.,]\d+)?)\s*(mg|мг|mcg|мкг|µg|g|г|ml|мл|iu|ме|ед|%)(?![a-zа-я])", re.I)
-UNIT_EN = {"мг": "mg", "мкг": "mcg", "µg": "mcg", "г": "g", "мл": "ml", "ме": "IU", "ед": "IU", "iu": "IU"}
+STRENGTH = re.compile(r"(\d+(?:[.,]\d+)?)\s*(mg|мг|mcg|мкг|µg|gm|g|г|ml|мл|iu|ме|ед|%)(?![a-zа-я])", re.I)
+UNIT_EN = {"мг": "mg", "мкг": "mcg", "µg": "mcg", "г": "g", "gm": "g", "мл": "ml", "ме": "IU", "ед": "IU", "iu": "IU"}
 
 
 def unit_of(text):
@@ -103,16 +103,18 @@ def rebuild(cur):
     for (c, m), obs in groups.items():
         best = min(o[0] for o in obs)
         obs = [o for o in obs if o[0] == best]                         # the best kind of evidence this market has
-        unit = statistics.mode([o[2] for o in obs])                     # the usual unit (tablets, ampoules or packs)
-        obs = [o for o in obs if o[2] == unit]
+        # the headline is the most listed form and strength, tablets first when they are a fair share of the listings
+        sizes = {}
+        for o in obs:
+            sizes[(o[2], o[3])] = sizes.get((o[2], o[3]), 0) + 1
+        unit, usual = max(sizes, key=lambda k: (sizes[k] * (2 if k[0] == "tablet or capsule" else 1), k[1] is not None))
         strengths = {}
         for o in obs:
-            if o[3]:
+            if o[2] == unit and o[3]:
                 strengths.setdefault(o[3], []).append((o[4] / o[6], o[5] / o[6]))
         by = sorted(({"strength": k, "unit": round(sum(u for u, _ in v) / len(v), 4), "pack": round(sum(p for _, p in v) / len(v), 2),
                       "n": len(v)} for k, v in strengths.items()), key=lambda x: -x["n"])[:6]
-        usual = by[0]["strength"] if by else None                         # the average is for the most listed strength
-        local = [o[4] / o[6] for o in obs if usual is None or o[3] == usual]      # in the market's own currency
+        local = [o[4] / o[6] for o in obs if (o[2], o[3]) == (unit, usual)]      # in the market's own currency
         t = trimmed(local)
         avg = sum(t) / len(t)
         out[(c, m)] = dict(basis="listings", kinds=sorted({o[1] for o in obs}), unit=unit, strength=usual, unit_price=avg,
@@ -164,6 +166,54 @@ class Molecules:
         return self.g.molecule(cur, self.ru.get(inn) or inn) if inn else None
 
 
+class Names:
+    """A pharmacy's product name to its molecule: an INN in the name (English or Russian), else a brand registered in
+    that market or its neighbours. Names naming more than one molecule (combinations) are left out."""
+
+    def __init__(self, cur, country):
+        import collect
+        self.inn = collect.MoleculeIndex(cur)
+        seen = {}
+        region = [country, *NEIGHBOURS[country]]       # the same brands are sold across the region
+        for brand, mol in cur.execute("""select brand, molecule_id from registrations where country = any(%s)
+                                         and molecule_id is not null and brand is not null""", (region,)):
+            w = re.match(r"[a-zа-яё][a-zа-яё\-]{3,}", brand.strip().lower())     # in Python: the database may not lower Cyrillic
+            if w:
+                seen.setdefault(w.group(0), []).append(mol)
+        self.brand = {}
+        for w, ms in seen.items():                     # the brand's molecule when at least 3 in 4 registrations agree
+            top = max(set(ms), key=ms.count)
+            if ms.count(top) * 4 >= len(ms) * 3:
+                self.brand[w] = top
+
+    def find(self, name, extra=""):
+        mols = self.inn.find(name, extra)
+        if len(mols) == 1:
+            return mols[0]
+        if mols:
+            return None
+        w = re.match(r"[a-zа-яё][a-zа-яё\-]{3,}", (name or "").strip().lower())
+        return self.brand.get(w.group(0)) if w else None
+
+
+def due_items(cur, source, per_run, list_items, every_days=7):
+    """The next refs to read for a source read one record at a time; the list itself is refreshed every few days."""
+    listed = cur.execute("select checked_at from source_items where source = %s and ref = '*list'", (source,)).fetchone()
+    if not listed or listed[0] is None or (dt.datetime.now(dt.timezone.utc) - listed[0]).days >= every_days:
+        for ref in list_items():
+            cur.execute("insert into source_items (source, ref) values (%s, %s) on conflict do nothing", (source, str(ref)))
+        cur.execute("""insert into source_items (source, ref, checked_at) values (%s, '*list', now())
+                       on conflict (source, ref) do update set checked_at = now()""", (source,))
+    return [r[0] for r in cur.execute("""select ref from source_items where source = %s and ref <> '*list'
+                                         and (checked_at is null or checked_at < now() - make_interval(days => %s))
+                                         order by checked_at nulls first limit %s""", (source, every_days, per_run)).fetchall()]
+
+
+def checked(cur, source, ref, state=None):
+    cur.execute("update source_items set checked_at = now(), state = coalesce(%s, state) where source = %s and ref = %s",
+                (state, source, ref))
+
+
 def save_listing(cur, country, source, kind, ref, name, pack, molecule, units, price, currency):
     cur.execute("""insert into price_listings (country, source, kind, ref, name, pack, molecule_id, units, pack_price, currency)
                    values (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
@@ -177,30 +227,25 @@ KZ_PER_RUN = 400          # registrations checked per run (one request each), so
 
 
 def prices_KZ(cur, s):
-    """Maximum price per unit for each registration (NDDA). The register's ids are listed weekly; each run checks the
-    registrations looked at longest ago."""
+    """Maximum price per unit for each registration (NDDA): the register's ids are listed weekly, and each run checks
+    the registrations looked at longest ago."""
     import time
-    listed = cur.execute("select checked_at from source_items where source = 'prices_KZ:list' and ref = 'all'").fetchone()
-    if not listed or listed[0] is None or (dt.datetime.now(dt.timezone.utc) - listed[0]).days >= 7:
-        page = 1
+
+    def ids():
+        page, today = 1, dt.date.today().isoformat()
         while True:
             d = s.post(f"{NDDA}/list/paged", json={"currentPage": page, "perPage": 200}, timeout=120).json()
             for x in d.get("data", []):
-                if x.get("expirationDate") and x["expirationDate"][:10] < dt.date.today().isoformat():
-                    continue                              # lapsed registrations carry no current price
-                cur.execute("insert into source_items (source, ref) values ('prices_KZ', %s) on conflict do nothing", (str(x["id"]),))
+                if not (x.get("expirationDate") and x["expirationDate"][:10] < today):   # lapsed ones carry no price
+                    yield x["id"]
             if page >= int(d.get("lastPage") or 0) or not d.get("data"):
-                break
+                return
             page += 1
             time.sleep(0.5)
-        cur.execute("""insert into source_items (source, ref, checked_at) values ('prices_KZ:list', 'all', now())
-                       on conflict (source, ref) do update set checked_at = now()""")
-    ids = [r[0] for r in cur.execute("""select ref from source_items where source = 'prices_KZ'
-                                        order by checked_at nulls first limit %s""", (KZ_PER_RUN,)).fetchall()]
+
     mols, n, today = Molecules(cur, "KZ"), 0, dt.date.today().isoformat()
-    for rid in ids:
-        rows = s.get(f"{NDDA}/GetPriceList", params={"registerId": rid}, timeout=60).json() or []
-        for x in rows:
+    for rid in due_items(cur, "prices_KZ", KZ_PER_RUN, ids, every_days=3):
+        for x in s.get(f"{NDDA}/GetPriceList", params={"registerId": rid}, timeout=60).json() or []:
             if x.get("endDate") and x["endDate"][:10] < today or not x.get("maxPrice"):
                 continue
             pack = f"{x.get('dosageFormRu') or ''} · per {x.get('measurementUnitRu') or 'unit'}"
@@ -208,6 +253,196 @@ def prices_KZ(cur, s):
                          mols.find(cur, x.get("registrationCertificate"), x.get("internationalNonproprietaryNameRu")), 1,
                          x["maxPrice"], "KZT")
             n += 1
-        cur.execute("update source_items set checked_at = now() where source = 'prices_KZ' and ref = %s", (rid,))
+        checked(cur, "prices_KZ", rid)
         time.sleep(0.3)
+    return n + europharma(cur, s)
+
+
+def sitemap_urls(s, url, keep):
+    """Page URLs from a sitemap, following one level of sitemap indexes."""
+    xml = s.get(url, timeout=120).text
+    locs = re.findall(r"<loc>\s*([^<\s]+)\s*</loc>", xml)
+    if "<sitemapindex" in xml:
+        return [u for sm in locs if "product" in sm for u in sitemap_urls(s, sm, keep)]
+    return [u for u in locs if keep(u)]
+
+
+def ld_products(page):
+    """schema.org Product objects in a page's JSON-LD."""
+    import html as htmllib
+    import json
+    out = []
+    for block in re.findall(r"<script[^>]*ld\+json[^>]*>(.*?)</script>", page, re.S):
+        try:
+            d = json.loads(htmllib.unescape(block))
+        except ValueError:
+            continue
+        for x in (d.get("@graph") or [d]) if isinstance(d, dict) else d:
+            kind = x.get("@type") if isinstance(x, dict) else None
+            if kind == "Product" or isinstance(kind, list) and "Product" in kind:
+                out.append(x)
+    return out
+
+
+EUROPHARMA = "https://europharma.kz/sitemap_ru.xml"
+EP_PER_RUN = 150          # product pages a run, one a second: the whole chain about every five days
+
+
+def europharma(cur, s):
+    """A national pharmacy chain's medicine pages: the INN is stated, the price is the Almaty price when in stock."""
+    import time
+    mols, n = Molecules(cur, "KZ"), 0
+    pages = due_items(cur, "prices_KZ_ep", EP_PER_RUN, lambda: sitemap_urls(s, EUROPHARMA, lambda u: "europharma.kz/" in u))
+    for url in pages:
+        r = s.get(url, timeout=60)
+        for x in ld_products(r.text if r.ok else ""):
+            offer = x.get("offers") or {}
+            price = num(offer.get("price")) if isinstance(offer, dict) else None
+            if price and x.get("nonProprietaryName"):
+                save_listing(cur, "KZ", "europharma", "retail", url, x.get("name"), x.get("name"),
+                             mols.find(cur, None, x["nonProprietaryName"]), None, price, offer.get("priceCurrency") or "KZT")
+                n += 1
+        checked(cur, "prices_KZ_ep", url)
+        time.sleep(1)
+    return n
+
+
+# Kyrgyzstan: a pharmacy chain's whole catalogue in one open list, and the drug department's register of maximum prices.
+BIMED = "https://bimed.kg/api/products/"
+DLSMI = "https://dlsmi.kg/ru/price_regulation/"
+
+
+def prices_KG(cur, s):
+    import io
+    import pandas as pd
+    from urllib.parse import urljoin
+    names, mols, n = Names(cur, "KG"), Molecules(cur, "KG"), 0
+    for x in s.get(BIMED, timeout=300).json():
+        price, mol = num(x.get("price")), names.find(x.get("name") or "")
+        if price and mol:
+            save_listing(cur, "KG", "bimed", "retail", x["id"], x.get("name"), x.get("name"), mol, None, price, "KGS")
+            n += 1
+    page = s.get(DLSMI, timeout=60).text
+    files = [h for h in re.findall(r'href="([^"]+\.xlsx)"', page) if "сайт" in h and "расход" not in h]
+    if files:
+        url = urljoin(DLSMI.rstrip("/"), files[0])        # links are relative to the page without its trailing slash
+        sheet = pd.read_excel(io.BytesIO(s.get(url, timeout=300).content), header=None, dtype=str)
+        rows = sheet.values.tolist()
+        head = next((i for i, r in enumerate(rows) if any("МНН" in str(c) for c in r)), None)
+        if head is not None:
+            cols = [str(c) for c in rows[head]]
+            col = lambda word: next(i for i, c in enumerate(cols) if word in c)
+            name_c, inn_c, retail_c = col("Лекарственное"), col("МНН"), col("розничн")
+            for r in rows[head + 1:]:
+                price = num(r[retail_c])
+                if price and isinstance(r[name_c], str):
+                    save_listing(cur, "KG", "dlsmi", "cap", r[name_c], r[name_c], r[name_c], mols.find(cur, None, r[inn_c]),
+                                 None, price, "KGS")
+                    n += 1
+    return n
+
+
+# Kenya: the procurement regulator's quarterly market price survey (national average of five towns), and a pharmacy
+# chain's open product feed, prescription medicines (its robots.txt asks for 30 seconds between requests).
+PPRA = "https://ppra.go.ke/market-price-index/"
+GOODLIFE = "https://www.goodlife.co.ke/wp-json/wc/store/v1/products"
+GOODLIFE_RX = 8156         # its "Prescription Products" category: medicines, not cosmetics or supplements
+GOODLIFE_PAGES = 6         # 100 products a page, 30 s apart
+MONTHS = {m: i for i, m in enumerate(["january", "february", "march", "april", "may", "june", "july", "august", "september",
+                                      "october", "november", "december"], 1)}
+
+
+def ppra_rows(pdf):
+    """Medicine rows of the Market Price Reference Guide: (item, unit, quantity, national average KES)."""
+    import io
+    import pypdf
+    out, inside = [], False
+    for page in pypdf.PdfReader(io.BytesIO(pdf)).pages:
+        for line in page.extract_text(extraction_mode="layout").splitlines():
+            if re.search(r"PPRA\d{3}\s*[–-]", line):
+                inside = "PHARMACEUTICAL" in line.upper()
+                continue
+            if not inside:
+                continue
+            cells = re.split(r"\s{2,}", re.sub(r"\s*Page \d+ of \d+.*$", "", line).strip())
+            if re.match(r"\d+\.$", cells[0]) and len(cells) >= 6 and re.match(r"\d{8}$", cells[1]):
+                avg = num(cells[-1])
+                out.append([cells[2], cells[3], num(cells[4]), avg])
+            elif out and len(cells) == 1 and not re.search(r"S/No|UNSPSC|Code|Average", line):
+                out[-1][0] += " " + cells[0]          # an item name wrapped onto the next line
+    return [r for r in out if r[2] and r[3]]
+
+
+def num(v):
+    try:
+        return float(str(v).replace(",", "").strip())
+    except ValueError:
+        return None
+
+
+def prices_KE(cur, s):
+    import time
+    names, n = Names(cur, "KE"), 0
+    # the survey: when a new quarter is out
+    links = re.findall(r'"(https://ppra\.go\.ke/download/(?:mprg|market-price[a-z-]*)-([a-z]+)-(\d{4})/\?wpdmdl=\d+)"',
+                       s.get(PPRA, timeout=60).text)
+    if links:
+        url, month, year = max(links, key=lambda x: (int(x[2]), MONTHS.get(x[1], 0)))
+        got = cur.execute("select state from source_items where source = 'prices_KE' and ref = 'ppra'").fetchone()
+        if not got or got[0] != url:
+            for item, unit, qty, avg in ppra_rows(s.get(url, timeout=300).content):
+                counted = re.match(r"tablet|capsule|ampoule|vial|sachet|suppositor|pessar", unit, re.I)
+                save_listing(cur, "KE", "ppra", "retail", f"{item}|{unit}|{qty:g}", item, f"{item} · {qty:g} {unit}",
+                             names.find(item), qty if counted else 1, avg, "KES")
+                n += 1
+            cur.execute("""insert into source_items (source, ref, checked_at, state) values ('prices_KE', 'ppra', now(), %s)
+                           on conflict (source, ref) do update set checked_at = now(), state = excluded.state""", (url,))
+    # the pharmacy feed, a few pages a run
+    row = cur.execute("select state from source_items where source = 'prices_KE' and ref = 'goodlife'").fetchone()
+    page = int(row[0]) if row and row[0] else 1
+    for _ in range(GOODLIFE_PAGES):
+        r = s.get(GOODLIFE, params={"per_page": 100, "page": page, "category": GOODLIFE_RX}, timeout=120)
+        items = r.json() if r.ok else []
+        for x in items:
+            p = x.get("prices") or {}
+            price = num(p.get("price"))
+            mol = names.find(x.get("name") or "", re.sub(r"<[^>]+>", " ", x.get("short_description") or ""))
+            if price and mol:
+                save_listing(cur, "KE", "goodlife", "retail", x["id"], x.get("name"), x.get("name"), mol, None,
+                             price / 10 ** int(p.get("currency_minor_unit") or 0), p.get("currency_code") or "KES")
+                n += 1
+        page = 1 if len(items) < 100 else page + 1
+        if page == 1:
+            break
+        time.sleep(30)
+    cur.execute("""insert into source_items (source, ref, checked_at, state) values ('prices_KE', 'goodlife', now(), %s)
+                   on conflict (source, ref) do update set checked_at = now(), state = excluded.state""", (str(page),))
+    return n
+
+
+# Tanzania: no official or survey price list is public; an online pharmacy's product pages (schema.org prices).
+AFYADEPO = "https://afyadepot.co.tz"
+TZ_PER_RUN = 120
+
+
+def prices_TZ(cur, s):
+    import time
+
+    def urls():
+        xml = s.get(f"{AFYADEPO}/sitemap.xml", timeout=60).text
+        return re.findall(r"<loc>([^<]+/product/[^<]+)</loc>", xml)
+
+    names, n = Names(cur, "TZ"), 0
+    for url in due_items(cur, "prices_TZ", TZ_PER_RUN, urls):
+        r = s.get(url, timeout=60)
+        for x in ld_products(r.text if r.ok else ""):
+            offer = x.get("offers") or {}
+            price = num(offer.get("price")) if isinstance(offer, dict) else None
+            mol = names.find(x.get("name") or "", x.get("description") or "") if price else None
+            if mol:
+                save_listing(cur, "TZ", "afyadepo", "retail", url, x.get("name"), x.get("name"), mol, None, price,
+                             offer.get("priceCurrency") or "TZS")
+                n += 1
+        checked(cur, "prices_TZ", url)
+        time.sleep(1)
     return n

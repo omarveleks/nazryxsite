@@ -510,7 +510,8 @@ def prices_UZ(cur, s):
     return n
 
 
-PRICES = {"UZ": prices_UZ, "KZ": pricing.prices_KZ}
+PRICES = {"UZ": prices_UZ, "KZ": pricing.prices_KZ, "KE": pricing.prices_KE, "TZ": pricing.prices_TZ,
+          "KG": pricing.prices_KG}
 
 
 # ------------------------------------------------------------------ the schedule
