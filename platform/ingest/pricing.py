@@ -12,13 +12,12 @@ import statistics
 
 log = logging.getLogger("pricing")
 MARKETS = ("KZ", "KG", "UZ", "KE", "TZ")
-NEARBY = {"africa": ("UG", "RW", "NG", "GH", "ZA", "ET"),       # nearby countries with price data (estimates only)
-          "cis": ("BY", "AM", "AZ", "GE", "RU")}
+NEARBY = {"africa": ("NG", "GH", "ZA"),                          # nearby countries with price data (estimates only)
+          "cis": ("BY", "AM", "AZ")}
 NEIGHBOURS = {"KZ": ("KG", "UZ") + NEARBY["cis"], "KG": ("KZ", "UZ") + NEARBY["cis"], "UZ": ("KZ", "KG") + NEARBY["cis"],
               "KE": ("TZ",) + NEARBY["africa"], "TZ": ("KE",) + NEARBY["africa"]}
 CURRENCY = {"KZ": "KZT", "KG": "KGS", "UZ": "UZS", "KE": "KES", "TZ": "TZS", "PK": "PKR", "GB": "GBP", "FR": "EUR",
-            "UG": "UGX", "RW": "RWF", "NG": "NGN", "GH": "GHS", "ZA": "ZAR", "ET": "ETB",
-            "BY": "BYN", "AM": "AMD", "AZ": "AZN", "GE": "GEL", "RU": "RUB"}
+            "NG": "NGN", "GH": "GHS", "ZA": "ZAR", "BY": "BYN", "AM": "AMD", "AZ": "AZN"}
 ABROAD = ("PK", "GB", "FR")    # far reference countries: last, only for molecules nothing nearer prices, Pakistan first
 OTHERS = NEARBY["africa"] + NEARBY["cis"] + ABROAD
 RANK = {"retail": 0, "cap": 1, "reimbursement": 2, "tender": 3}
@@ -27,8 +26,8 @@ MIN_OVERLAP = 15          # molecules priced in both markets before their price 
 INJ = re.compile(r"injectable|perfusion|инъек|инфуз|ампул|амп\.|\bфл\.|д/ин|в/в|в/м|флак.*(инъ|инф)|лиофил|inject|infusion|ampoule|\bamps?\b|\bvials?\b|\binj\b|i\.v\.", re.I)
 SOLID = re.compile(r"comprim|gélule|табл|таб\.|капс|драже|супп|свеч|пастил|саше|пакет|гранул.*пакет|tablet|\btabs?\b|capsul|\bcaps?\b|sachet|"
                    r"supposit|pessar|lozeng|\bsupp\b|\b\d+\s*'?s\b", re.I)
-STRENGTH = re.compile(r"(\d+(?:[.,]\d+)?)\s*(mg|мг|mcg|мкг|µg|gm|g|г|ml|мл|iu|ме|ед|%)(?![a-zа-я])", re.I)
-UNIT_EN = {"мг": "mg", "мкг": "mcg", "µg": "mcg", "г": "g", "gm": "g", "мл": "ml", "ме": "IU", "ед": "IU", "iu": "IU"}
+STRENGTH = re.compile(r"(\d+(?:[.,]\d+)?)\s*(mg|mq|мг|mcg|мкг|µg|gm|g|г|ml|мл|iu|ме|ед|%)(?![a-zа-я])", re.I)
+UNIT_EN = {"мг": "mg", "mq": "mg", "мкг": "mcg", "µg": "mcg", "г": "g", "gm": "g", "мл": "ml", "ме": "IU", "ед": "IU", "iu": "IU"}
 
 
 def unit_of(text):
@@ -42,6 +41,12 @@ def units_in(text):
     m = re.search(r"№\s*(\d+)(?:\s*x\s*(\d+))?", t)
     if m:
         return int(m.group(1)) * int(m.group(2) or 1)
+    po = re.findall(r"по\s*(\d+)\s*(?:шт|амп|фл|пак)", t)                # 'по 10 шт ... по 3 шт' = 30
+    if po:
+        n = 1
+        for x in po:
+            n *= int(x)
+        return n
     m = (re.search(r"(\d+)\s*x\s*(\d+)\s*(?:tab|cap|amp|vial|sachet|supp|блист)", t)
          or re.search(r"(?:pack|box|strip|bottle) of\s*(\d+)()", t)
          or re.search(r"(\d+)()\s*(?:tablets?|tabs?|capsules?|caps?|sachets?|ampoules?|amps?|vials?|suppositories|pessaries|lozenges)\b", t)
@@ -364,7 +369,7 @@ def due_items(cur, source, per_run, list_items, every_days=7):
                                          order by checked_at nulls first limit %s""", (source, every_days, per_run)).fetchall()]
 
 
-ITEM_SOURCES = {"KZ": ("prices_KZ", "prices_KZ_ep"), "TZ": ("prices_TZ",), "INTL": ("prices_INTL_pk",)}
+ITEM_SOURCES = {"KZ": ("prices_KZ", "prices_KZ_ep"), "TZ": ("prices_TZ",), "INTL": ("prices_INTL_pk", "prices_INTL_by")}
 
 
 def catching_up(cur, country):
@@ -625,6 +630,24 @@ def english_molecule(cur, names, generics, text):
     return names.find(text) if names.inn.find(text) else generics.molecule(cur, text)
 
 
+RCETH = "https://www.rceth.by/Refbank/reestr_drugregpricenew/results"
+RCETH_LETTERS = "абвгдежзийклмнопрстуфхцчшэюя"
+
+
+def rceth_search(s, letter, page=1, qs=None):
+    """One page of Belarus' maximum-price register for INNs containing a letter (the site's own search form)."""
+    form = [("QueryStringFind", qs or ""), ("IsPostBack", "True" if page > 1 else ""), ("PropSubmit", "FOpt_PageN" if page > 1 else ""),
+            ("ValueSubmit", str(page) if page > 1 else ""), ("VFiles", "")]
+    for i, name in enumerate(["DrugTradeName", "mnn", "PackageName", "Manufacture", "Holder", "NREG"]):
+        form += [(f"FProps[{i}].IsText", "True"), (f"FProps[{i}].Name", name), (f"FProps[{i}].CritElems[0].Num", "1"),
+                 (f"FProps[{i}].CritElems[0].Val", letter if name == "mnn" else ""), (f"FProps[{i}].CritElems[0].Crit", "Like"),
+                 (f"FProps[{i}].CritElems[0].Excl", "false")]
+    for i, name in ((6, "DateResolutionMH"), (7, "ReestrDate")):
+        form += [(f"FProps[{i}].IsDate", "True"), (f"FProps[{i}].Name", name), (f"FProps[{i}].CritElemsD.Val1", ""),
+                 (f"FProps[{i}].CritElemsD.Crit", "Equal"), (f"FProps[{i}].CritElemsD.Val2", "")]
+    return s.post(RCETH, data=form, timeout=180).text
+
+
 FR_SALT = re.compile(r"^(?:di|hémi|mono)?(?:chlorhydrate|bromhydrate|fumarate|maléate|succinate|tartrate|sulfate|citrate|acétate|"
                      r"mésilate|mésylate|bésilate|bésylate|tosilate|phosphate|lactate|gluconate|valérate|propionate|butyrate|"
                      r"chlorure|bromure|nitrate|oxalate|malate|énanthate|décanoate|palmitate|pamoate|furoate|xinafoate)"
@@ -645,6 +668,7 @@ def prices_INTL(cur, s):
     from urllib.parse import urljoin
     import pandas as pd
     names, generics, n = Names(cur, "KE"), Generics(cur), 0
+    by_ru = Molecules(cur, "BY")
     # UK Drug Tariff Part VIIIA (monthly CSV; prices in pence)
     page = s.get(NHS_TARIFF, timeout=60).text
     link = next(iter(re.findall(r'href="([^"]*Part%20VIIIA[^"]*\.csv)"', page)), None)
@@ -691,6 +715,27 @@ def prices_INTL(cur, s):
         cur.execute("""insert into source_items (source, ref, checked_at) values ('prices_INTL', 'bdpm', now())
                        on conflict (source, ref) do update set checked_at = now()""")
 
+    # Belarus: the register of maximum selling prices, searched letter by letter (it has no full download)
+    for letter in due_items(cur, "prices_INTL_by", 40, lambda: list(RCETH_LETTERS), every_days=30):
+        page, last, qs = 1, 1, None
+        while page <= last:
+            html_ = rceth_search(s, letter, page, qs)
+            qs = (re.search(r'name="QueryStringFind" type="hidden" value="([^"]*)"', html_) or [None, qs])[1]
+            last = int((re.search(r"Страница\s*(?:&nbsp;)?\s*\d+\s*из\s*(\d+)", html_) or [0, 1])[1])
+            for t in pd.read_html(io.StringIO(html_)):
+                if "МНН" not in t.columns:
+                    continue
+                for _, x in t.iterrows():
+                    price = num(str(x.get("Предельная отпускная цена") or "").replace("BYN", "").replace(",", ".").strip())
+                    form, inn = str(x.get("Лекарственная форма") or ""), str(x.get("МНН") or "")
+                    if price:
+                        save_listing(cur, "BY", "rceth", "cap", f"{x.get('Номер регистрационного удостоверения')}|{form[:120]}",
+                                     x.get("Торговое наименование"), f"{inn} {form}", by_ru.find(cur, None, inn), None, price, "BYN")
+                        n += 1
+            page += 1
+            time.sleep(2)
+        checked(cur, "prices_INTL_by", letter)
+
     # Pakistan: notified maximum retail prices of essential medicines, a page at a time
     def pages():
         first = s.get(DRAP, params={"category": "Essential Drugs", "page": 1}, timeout=60).text
@@ -711,4 +756,115 @@ def prices_INTL(cur, s):
                     n += 1
         checked(cur, "prices_INTL_pk", str(p))
         time.sleep(2)
+    return n
+
+
+
+# Nearby countries (second tier, beside our own markets): official lists and one pharmacy catalogue, read in bulk.
+SA_MEDIA = "https://www.health.gov.za/wp-json/wp/v2/media"
+GHANA = "https://www.nhis.gov.gh/medlist.aspx"
+HEALTHPLUS = "https://healthplusnigeria.com/products.json"
+AZ_TARIFF = "https://tariff.gov.az/derman-vasiteleri/qiymet"
+NATALI = "https://natalipharm.am/ups/files/natali_price.xls"
+
+
+def new_version(cur, ref, version):
+    """True when a source published something we have not read yet (a new file name or date)."""
+    got = cur.execute("select state from source_items where source = 'prices_NEAR' and ref = %s", (ref,)).fetchone()
+    return bool(version) and (not got or got[0] != version)
+
+
+def read_version(cur, ref, version):
+    cur.execute("""insert into source_items (source, ref, checked_at, state) values ('prices_NEAR', %s, now(), %s)
+                   on conflict (source, ref) do update set checked_at = now(), state = excluded.state""", (ref, version))
+
+
+def prices_NEAR(cur, s):
+    import io
+    import pandas as pd
+    from catalogue import Generics
+    from urllib.parse import urljoin
+    names, generics, n = Names(cur, "KE"), Generics(cur), 0
+    ru = Molecules(cur, "AM")
+    # South Africa: Single Exit Price database (regulated retail ceiling per pack, ZAR)
+    files = s.get(SA_MEDIA, params={"search": "database of medicine prices", "per_page": 10, "_fields": "source_url,date"}, timeout=60).json()
+    url = next((f["source_url"] for f in files if str(f.get("source_url", "")).endswith(".xlsx")), None)
+    if new_version(cur, "za", url):
+        rows = pd.read_excel(io.BytesIO(s.get(url, timeout=300).content), dtype=str).fillna("").values.tolist()
+        for i, r in enumerate(rows):
+            if not r[3]:
+                continue                                  # a combination's extra ingredient, read with its product
+            inn = [r[7]]
+            for x in rows[i + 1:]:                    # a combination's other ingredients follow on rows without a code
+                if x[3]:
+                    break
+                if x[7]:
+                    inn.append(x[7])
+            price, form = num(r[16]), r[10].upper()
+            if not price:
+                continue
+            solid = form in ("TAB", "CAP", "TBC", "TBD", "TBE", "CPS", "TAF")
+            units = (num(r[11]) or 1) * (num(r[12]) or 1) if solid else (num(r[12]) or 1)
+            text = " + ".join(inn)
+            save_listing(cur, "ZA", "sep", "cap", r[3], text, f"{text} {r[8]} {r[9]} {'tablet' if solid else form}", english_molecule(cur, names, generics, text),
+                         units, price, "ZAR")
+            n += 1
+        read_version(cur, "za", url)
+    # Ghana: NHIS medicines list (price per tablet, vial or bottle, GHS)
+    page = s.get(GHANA, timeout=60).text
+    pdf = next((urljoin(GHANA, h) for h in re.findall(r'href="([^"]+\.pdf)"', page) if "ML" in h.upper() or "MEDICINE" in h.upper()), None)
+    if new_version(cur, "gh", pdf):
+        import pypdf
+        lines = [ln for pg in pypdf.PdfReader(io.BytesIO(s.get(pdf, timeout=300).content)).pages
+                 for ln in pg.extract_text(extraction_mode="layout").splitlines()]
+        for i, ln in enumerate(lines):
+            m = re.match(r"^([A-Z0-9]{6,12})\s{2,}(.+?)\s{2,}(\S[\w ]*?)\s*$", ln)
+            nxt = next((x for x in lines[i + 1:i + 3] if x.strip()), "")
+            p_ = re.match(r"^\s+([\d,]+\.\d+)\s+\S+\s*$", nxt)
+            if m and p_:
+                save_listing(cur, "GH", "nhis", "reimbursement", m.group(1), m.group(2), f"{m.group(2)} · per {m.group(3)}",
+                             english_molecule(cur, names, generics, m.group(2)), 1, num(p_.group(1)), "GHS")
+                n += 1
+        read_version(cur, "gh", pdf)
+    # Nigeria: a pharmacy chain's catalogue (NGN)
+    for page_no in range(1, 20):
+        items = s.get(HEALTHPLUS, params={"limit": 250, "page": page_no}, timeout=120).json().get("products", [])
+        for x in items:
+            v = (x.get("variants") or [{}])[0]
+            mol = names.find(x.get("title") or "")
+            if mol and num(v.get("price")):
+                save_listing(cur, "NG", "healthplus", "retail", x["id"], x.get("title"), x.get("title"), mol, None, num(v["price"]), "NGN")
+                n += 1
+        if len(items) < 250:
+            break
+    # Azerbaijan: Tariff Council maximum prices (PDF; AZN incl. VAT, retail)
+    page = s.get(AZ_TARIFF, timeout=60).text
+    pdfs = re.findall(r'href="([^"]+/storage/media/(\d+)/[^"]+\.pdf)"', page)
+    pdf = urljoin(AZ_TARIFF, max(pdfs, key=lambda x: int(x[1]))[0]) if pdfs else None     # the newest upload is the full list
+    if new_version(cur, "az", pdf):
+        import pypdf
+        for pg in pypdf.PdfReader(io.BytesIO(s.get(pdf, timeout=600).content)).pages:
+            for ln in pg.extract_text(extraction_mode="layout").splitlines():
+                c = re.split(r"\s{2,}", ln.strip())
+                if len(c) >= 11 and c[0].isdigit() and re.match(r"\d+(?:[.,]\d+)?$", c[9].replace(",", "")):
+                    inn, dose, form, qty, retail = c[2], c[3], c[4], c[6], num(c[9].replace(",", ""))
+                    save_listing(cur, "AZ", "tariff_az", "cap", f"{c[0]}", c[1], f"{inn} {dose.replace('mq', 'mg')} {form} №{qty}",
+                                 english_molecule(cur, names, generics, inn), None, retail, "AZN")
+                    n += 1
+        read_version(cur, "az", pdf)
+    # Armenia: a wholesaler's weekly price list (AMD); the INN is stated in Russian
+    head = s.head(NATALI, timeout=60)
+    if new_version(cur, "am", head.headers.get("last-modified")):
+        sheets = pd.read_excel(io.BytesIO(s.get(NATALI, timeout=300).content), header=None, sheet_name=None, dtype=str)
+        for sheet in sheets.values():
+            rows = sheet.fillna("").values.tolist()
+            h = next((i for i, r in enumerate(rows[:10]) if "Международное название" in r), None)
+            if h is None:
+                continue
+            for r in rows[h + 2:]:
+                price = num(r[5])
+                if price and r[3]:
+                    save_listing(cur, "AM", "natali", "cap", r[0], r[1], f"{r[1]} {r[2]}", ru.find(cur, None, r[3]), None, price, "AMD")
+                    n += 1
+        read_version(cur, "am", head.headers.get("last-modified"))
     return n
