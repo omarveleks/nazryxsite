@@ -79,6 +79,11 @@ def observations(cur):
     return rows
 
 
+def pct(xs, q):
+    """The q-th percentile of sorted values (nearest rank)."""
+    return xs[min(len(xs) - 1, max(0, round(q * (len(xs) - 1))))]
+
+
 def trimmed(xs):
     xs = sorted(xs)
     if len(xs) >= 5:
@@ -114,28 +119,46 @@ def rebuild(cur):
                 strengths.setdefault(o[3], []).append((o[4] / o[6], o[5] / o[6]))
         by = sorted(({"strength": k, "unit": round(sum(u for u, _ in v) / len(v), 4), "pack": round(sum(p for _, p in v) / len(v), 2),
                       "n": len(v)} for k, v in strengths.items()), key=lambda x: -x["n"])[:6]
-        local = [o[4] / o[6] for o in obs if (o[2], o[3]) == (unit, usual)]      # in the market's own currency
+        local = sorted(o[4] / o[6] for o in obs if (o[2], o[3]) == (unit, usual))      # in the market's own currency
         t = trimmed(local)
         avg = sum(t) / len(t)
         out[(c, m)] = dict(basis="listings", kinds=sorted({o[1] for o in obs}), unit=unit, strength=usual, unit_price=avg,
-                           unit_usd=avg / float(fx[CURRENCY[c]]), lo=t[0], hi=t[-1], n=len(local), by=by)
-    # estimates for what a market lacks, from its neighbours
+                           unit_usd=avg / float(fx[CURRENCY[c]]), lo=pct(local, 0.1), hi=pct(local, 0.9), n=len(local), by=by)
+    # estimates for what a market lacks: from the market whose prices compare best with it (neighbours first, then the
+    # market sharing the most priced molecules), adjusted by the median price ratio between the two markets
+    direct = dict(out)
+    factors = {}
     for c in MARKETS:
-        have = {m for (cc, m) in out if cc == c}
-        for n in NEIGHBOURS[c]:
-            both = [(out[(c, m)]["unit_usd"], out[(n, m)]["unit_usd"]) for m in have
-                    if (n, m) in out and out[(n, m)]["basis"] == "listings"
-                    and (out[(n, m)]["unit"], out[(n, m)]["strength"]) == (out[(c, m)]["unit"], out[(c, m)]["strength"])]
-            ratios = [a / b for a, b in both if b > 0]
-            factor = statistics.median(ratios) if len(ratios) >= MIN_OVERLAP else 1.0
-            for (nn, m), v in list(out.items()):
-                if nn != n or v["basis"] != "listings" or (c, m) in out:
+        for n in MARKETS:
+            if n == c:
+                continue
+            ratios = [direct[(c, m)]["unit_usd"] / direct[(n, m)]["unit_usd"] for (cc, m) in direct
+                      if cc == c and (n, m) in direct and direct[(n, m)]["unit_usd"] > 0
+                      and (direct[(n, m)]["unit"], direct[(n, m)]["strength"]) == (direct[(c, m)]["unit"], direct[(c, m)]["strength"])]
+            factors[(c, n)] = (statistics.median(ratios) if len(ratios) >= MIN_OVERLAP else 1.0, len(ratios))
+    def gap(c, n):
+        """(factor, molecules behind it, how good): measured between the two markets, else borrowed from a neighbour of
+        c that has it measured (neighbours price alike), else none (1.0)."""
+        f, k = factors[(c, n)]
+        if k >= MIN_OVERLAP:
+            return f, k, 0 if n in NEIGHBOURS[c] else 1
+        if n in NEIGHBOURS[c]:
+            return 1.0, k, 2
+        via = [factors[(nb, n)] for nb in NEIGHBOURS[c] if nb != n and factors[(nb, n)][1] >= MIN_OVERLAP]
+        return (max(via, key=lambda x: x[1]) + (3,)) if via else (1.0, k, 4)
+
+    for c in MARKETS:
+        order = sorted((n for n in MARKETS if n != c), key=lambda n: (gap(c, n)[2], -gap(c, n)[1]))
+        for n in order:
+            factor, overlap, _ = gap(c, n)
+            rate, rate_n = float(fx[CURRENCY[c]]), float(fx[CURRENCY[n]])
+            for (nn, m), v in direct.items():
+                if nn != n or (c, m) in out:
                     continue
-                usd = v["unit_usd"] * factor
-                rate = float(fx[CURRENCY[c]])
-                out[(c, m)] = dict(basis="estimate", kinds=v["kinds"], unit=v["unit"], strength=v["strength"], unit_price=usd * rate, unit_usd=usd,
-                                   lo=v["lo"] / float(fx[CURRENCY[n]]) * factor * rate, hi=v["hi"] / float(fx[CURRENCY[n]]) * factor * rate,
-                                   n=v["n"], by=[], from_country=n, factor=factor, overlap=len(ratios))
+                out[(c, m)] = dict(basis="estimate", kinds=v["kinds"], unit=v["unit"], strength=v["strength"],
+                                   unit_price=v["unit_usd"] * factor * rate, unit_usd=v["unit_usd"] * factor,
+                                   lo=v["lo"] / rate_n * factor * rate, hi=v["hi"] / rate_n * factor * rate,
+                                   n=v["n"], by=[], from_country=n, factor=factor, overlap=overlap)
     import json
     cur.execute("delete from molecule_prices")
     with cur.copy("""copy molecule_prices (country, molecule_id, basis, kinds, currency, unit, strength, unit_price, unit_usd, lo, hi, n,
@@ -209,6 +232,15 @@ def due_items(cur, source, per_run, list_items, every_days=7):
                                          order by checked_at nulls first limit %s""", (source, every_days, per_run)).fetchall()]
 
 
+ITEM_SOURCES = {"KZ": ("prices_KZ", "prices_KZ_ep"), "TZ": ("prices_TZ",)}
+
+
+def catching_up(cur, country):
+    """True while a source read one record at a time has records it has never read: it then runs again straight away."""
+    return bool(cur.execute("""select 1 from source_items where source = any(%s) and ref <> '*list' and checked_at is null
+                               limit 1""", (list(ITEM_SOURCES.get(country, ())),)).fetchone())
+
+
 def checked(cur, source, ref, state=None):
     cur.execute("update source_items set checked_at = now(), state = coalesce(%s, state) where source = %s and ref = %s",
                 (state, source, ref))
@@ -223,7 +255,7 @@ def save_listing(cur, country, source, kind, ref, name, pack, molecule, units, p
 
 
 NDDA = "https://register.ndda.kz/register/api/v1/PharmaRegister"
-KZ_PER_RUN = 400          # registrations checked per run (one request each), so a full pass takes about three days
+KZ_PER_RUN = 800          # registrations checked per run, about one a second (runs back to back until the first pass is done)
 
 
 def prices_KZ(cur, s):
@@ -236,7 +268,8 @@ def prices_KZ(cur, s):
         while True:
             d = s.post(f"{NDDA}/list/paged", json={"currentPage": page, "perPage": 200}, timeout=120).json()
             for x in d.get("data", []):
-                if not (x.get("expirationDate") and x["expirationDate"][:10] < today):   # lapsed ones carry no price
+                # lapsed registrations carry no price, and an EAEU registration's price sits on the national one
+                if x.get("sourceType") != "Eaes" and not (x.get("expirationDate") and x["expirationDate"][:10] < today):
                     yield x["id"]
             if page >= int(d.get("lastPage") or 0) or not d.get("data"):
                 return
@@ -254,7 +287,7 @@ def prices_KZ(cur, s):
                          x["maxPrice"], "KZT")
             n += 1
         checked(cur, "prices_KZ", rid)
-        time.sleep(0.3)
+        time.sleep(0.5)
     return n + europharma(cur, s)
 
 
@@ -285,7 +318,7 @@ def ld_products(page):
 
 
 EUROPHARMA = "https://europharma.kz/sitemap_ru.xml"
-EP_PER_RUN = 150          # product pages a run, one a second: the whole chain about every five days
+EP_PER_RUN = 300          # product pages a run, one a second
 
 
 def europharma(cur, s):
@@ -422,7 +455,7 @@ def prices_KE(cur, s):
 
 # Tanzania: no official or survey price list is public; an online pharmacy's product pages (schema.org prices).
 AFYADEPO = "https://afyadepot.co.tz"
-TZ_PER_RUN = 120
+TZ_PER_RUN = 300
 
 
 def prices_TZ(cur, s):

@@ -8,7 +8,7 @@ import { requireUser } from '@/lib/auth';
 import { one, rows, withUser } from '@/lib/db';
 import { BE_STATUS, beSuggestion, fmtDate, fmtMoney, levelLabel, registeredLine } from '@/lib/format';
 import { REQ_SQL, forProduct, type Requirement } from '@/lib/regulatory';
-import { PRICE_SQL, perUnit, priceBasis, usd, type MoleculePrice } from '@/lib/prices';
+import { PRICE_SQL, priceBasis, unitShort, unitWord, usd, type MoleculePrice } from '@/lib/prices';
 import { AGENCY_KINDS, LAUNCH_STAGES, MFR_PLANS, NEEDS_PLAN, SERVICES, canUse, tierIn, countryName, mfrProductsSql, productClass, reasons } from '@/lib/mfr';
 
 export const metadata = { title: 'Product' };
@@ -56,7 +56,7 @@ export default async function MfrProduct({ params, searchParams }: { params: Pro
         from reference_prices where molecule_id = $1 and country = $2 and max_retail > 0`, [p.molecule_id, market]) : null;
     // the molecule's average price in this market: listings, or an estimate from a neighbouring market
     const avg = canUse(t, 'market') ? await one(db, `${PRICE_SQL} where molecule_id = $1 and country = $2`, [p.molecule_id, market]) as MoleculePrice | null : null;
-    return { ...base, origin, lapsed, route, price, open, tenders, caps, avg };
+    return { ...base, origin, lapsed, route, price, open, tenders, caps, ...(canUse(t, 'market') ? { avg } : {}) };
   });
   if (!d) notFound();
   const { p, market } = d;
@@ -113,22 +113,25 @@ export default async function MfrProduct({ params, searchParams }: { params: Pro
               {'caps' in d && d.caps?.n ? <p className="small">Official maximum retail price in {countryName(market)}: <b>{d.caps.cur} {fmtMoney(d.caps.lo)}{d.caps.hi !== d.caps.lo ? `–${fmtMoney(d.caps.hi)}` : ''}</b> across {d.caps.n} registered {d.caps.n === 1 ? 'pack' : 'packs'}.</p> : null}
             </section>
           </>)}
-          {'avg' in d && d.avg && (
+          {'avg' in d && (d.avg ? (
             <section className="card stack">
-              <div className="card-h"><h2>Price in {countryName(market)}</h2>{d.avg.basis === 'estimate' && <span className="pill peach">Estimate</span>}</div>
+              <div className="card-h"><h2>Price in {countryName(market)}</h2>
+                <span className={`pill ${d.avg.basis === 'estimate' ? 'peach' : 'mint'}`}>{d.avg.basis === 'estimate' ? 'Estimate' : 'Market data'}</span></div>
               <div className="grid g3">
-                <div className="tile t-blue"><span className="k">Average price</span><span className="v num" style={{ fontSize: 22 }}>{perUnit(d.avg)}</span>
-                  <span className="small">{usd(d.avg.unit_usd)}{d.avg.strength ? ` · ${d.avg.strength}` : ''}</span></div>
-                <div className="tile t-mint"><span className="k">Usual range</span><span className="v num" style={{ fontSize: 22 }}>{d.avg.lo != null && d.avg.hi != null ? `${fmtMoney(d.avg.lo)}–${fmtMoney(d.avg.hi)}` : '—'}</span>
-                  <span className="small">{d.avg.currency} per {d.avg.unit}</span></div>
-                <div className="tile t-lav"><span className="k">Based on</span><span className="v num" style={{ fontSize: 22 }}>{d.avg.n}</span>
-                  <span className="small">{d.avg.basis === 'estimate' ? `prices in ${countryName(d.avg.from_country)}` : d.avg.n === 1 ? 'price' : 'prices'}</span></div>
+                {([['Low', d.avg.lo, 't-mint'], ['Average', d.avg.unit_price, 't-blue'], ['Premium', d.avg.hi, 't-lav']] as const).map(([k, v, tone]) => (
+                  <div key={k} className={`tile ${tone}`}><span className="k">{k}</span>
+                    <span className="v num" style={{ fontSize: 22 }}>{v != null ? `${d.avg!.currency} ${fmtMoney(v)}` : '—'}</span>
+                    <span className="small">per {unitWord(d.avg!)}{k === 'Average' ? ` · ${usd(d.avg!.unit_usd)}` : ''}</span></div>))}
               </div>
               <p className="small muted">{priceBasis(d.avg)}</p>
               {d.avg.by_strength.length > 1 && (
-                <div className="tbl-wrap"><table className="tbl"><thead><tr><th>Strength</th><th className="r">Per {d.avg.unit}</th><th className="r">Per pack</th><th className="r">Prices</th></tr></thead>
+                <div className="tbl-wrap"><table className="tbl"><thead><tr><th>Strength</th><th className="r">Per {unitShort(d.avg)}</th><th className="r">Per pack</th><th className="r">Prices</th></tr></thead>
                   <tbody>{d.avg.by_strength.map((x) => <tr key={x.strength}><td>{x.strength}</td><td className="r num">{fmtMoney(x.unit)}</td><td className="r num">{fmtMoney(x.pack)}</td><td className="r num">{x.n}</td></tr>)}</tbody></table></div>)}
-            </section>)}
+            </section>) : (
+            <section className="card between" style={{ flexWrap: 'wrap', gap: 12 }}>
+              <span><b>Price in {countryName(market)}</b><div className="small muted">No public price for this medicine yet. We check it for you within 24 hours.</div></span>
+              <Link className="btn btn-ghost btn-sm" href="/m/call?topic=market_entry">Ask for a price</Link>
+            </section>))}
           {'tenders' in d && d.tenders.length > 0 && (
             <section className="card stack">
               <div className="card-h"><h2>Public tenders in {countryName(market)}</h2><Link className="btn-link" href={`/m/tenders?market=${market}`}>All tenders</Link></div>

@@ -553,6 +553,8 @@ def run(conn, only=None):
             elif kind == "prices":
                 n = PRICES[country](cur, s)
                 pricing.refresh_fx(cur, s)
+                if pricing.catching_up(cur, country):         # first pass not finished: go again on the next free tick
+                    cur.execute("update data_sources set run_now = true where key = %s", (key,))
             if kind in ("prices", "tenders"):
                 pricing.rebuild(cur)                    # averages per molecule and market, and neighbour estimates
         cur.execute("""update data_sources set last_rows = %s, last_error = %s, last_ok = case when %s then last_ok else now() end
