@@ -225,15 +225,15 @@ def spelling_variants(counts, known=(), min_len=7):
     return out
 
 
-FORMS = [
+FORMS = [   # order matters: eye drops are not an oral liquid, a nasal spray is not a skin spray, a vaginal tablet is a pessary
     ("injection", r"inject|infusion|vial|ampoul|for reconstitution|powder for (solution|inj)"),
+    ("eye/ear/nose", r"eye|ophthalm|ear\b|otic|nasal|nose"),
+    ("inhalation", r"inhal|aerosol|nebul|respules"),
+    ("suppository/pessary", r"suppos|pessar|enema|rectal|vaginal"),
     ("tablet", r"tablet|tab\b|caplet|lozenge|dispersible|chewable"),
     ("capsule", r"capsule|softgel|caps\b"),
     ("oral liquid", r"syrup|suspension|oral solution|oral liquid|elixir|drops|emulsion|solution for oral|powder for oral"),
     ("topical", r"cream|ointment|gel|lotion|paste|topical|shampoo|spray|patch|foam"),
-    ("eye/ear/nose", r"eye|ophthalm|ear\b|otic|nasal"),
-    ("inhalation", r"inhal|aerosol|nebul|respules"),
-    ("suppository/pessary", r"suppos|pessar|enema|rectal|vaginal"),
 ]
 
 

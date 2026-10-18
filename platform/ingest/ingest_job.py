@@ -44,6 +44,17 @@ def team_decisions(cur):
     return aliases, separate, matches
 
 
+def classes(cur):
+    """Settles every molecule's therapeutic class from its ATC codes and the forms now registered. Never fails a load."""
+    import classify
+    cur.execute("savepoint classes")
+    try:
+        classify.run(cur)
+    except Exception:
+        cur.execute("rollback to savepoint classes")
+        log.exception("classes not refreshed")
+
+
 def run(job_id):
     with connect() as conn:
         job = conn.execute("select id, kind, file_path, file_name, country from registry_uploads where id = %s for update", (job_id,)).fetchone()
@@ -80,6 +91,7 @@ def run(job_id):
                 cur.execute("""update registry_uploads set status = 'applied', finished_at = now(), rows = %s,
                                diff = %s, summary = %s where id = %s""",
                             (summary["registry_rows"], json.dumps(diff), json.dumps(summary), job_id))
+                classes(cur)
                 conn.commit()
                 log.info("job %s (%s) applied: %s", job_id, country, diff)
                 return diff
@@ -99,6 +111,7 @@ def run(job_id):
             cur.execute("""update registry_uploads set status = 'applied', finished_at = now(), rows = %s,
                            diff = %s, summary = %s where id = %s""",
                         (summary["registry_rows"], json.dumps(diff), json.dumps(summary), job_id))
+            classes(cur)
             conn.commit()   # the only commit: everything above is one transaction
         log.info("job %s applied: %s", job_id, diff)
         return diff

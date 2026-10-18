@@ -28,6 +28,8 @@ def run():
         cur = conn.cursor()
         import regulatory
         regulatory.load(cur)                      # researched requirements, routes and checklists, when they changed
+        import ingest_job
+        ingest_job.classes(cur)                   # therapeutic classes from ATC codes and registered forms
         for kind, pattern in (("national_list", "*nemlit*.txt"), ("global_list", "*who*.txt")):
             files = sorted(glob.glob(os.path.join(raw, pattern)))
             if files and not cur.execute("select 1 from reference_files where kind = %s", (kind,)).fetchone():

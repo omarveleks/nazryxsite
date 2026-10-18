@@ -116,7 +116,7 @@ def strip_address(text):
 
 RU_FORMS = [("инъекц|инфуз|внутривен|внутримыш|ампул|флакон|лиофилизат", "injection"), ("таблет|драже|пастилк", "tablet"),
             ("капсул", "capsule"), ("сироп|суспенз|для приема внутрь|капли для приема|эмульс|эликсир", "syrup"),
-            ("глазн", "eye drops"), ("назальн|в нос|ушн", "nasal spray"), ("ингаля|аэрозол|небулай", "inhaler"),
+            ("глазн", "eye drops"), ("ушн", "ear drops"), ("назальн|в нос", "nasal spray"), ("ингаля|аэрозол|небулай", "inhaler"),
             ("суппозит|вагинальн|ректальн|свеч", "suppository"),
             ("крем|мазь|гель|лосьон|наружн|пластыр|шампун|линимент", "cream"), ("порошок|гранул|саше", "powder"), ("раствор", "solution")]
 
@@ -476,26 +476,10 @@ class Matcher:
         return mid
 
 
-ATC_CLASS = [("A10", "Medicines for Diabetes and Related Disorders"), ("A11", "Vitamins and Minerals"), ("A12", "Vitamins and Minerals"),
-             ("A09", "Digestive and Pancreatic Enzymes"), ("A", "Gastro-intestinal Medicines"),
-             ("B05", "Solutions Correcting Water, Electrolyte and Acid-Base Disturbances"), ("B", "Medicines Affecting the Blood"),
-             ("C", "Cardiovascular Medicines"), ("D", "Dermatological Medicines"), ("G02", "Oxytocics and Anti-oxytocics"),
-             ("G01", "Anti-infective Medicines"), ("G", "Hormones and Antihormones"), ("H", "Hormones and Antihormones"),
-             ("J07", "Immunological Agents"), ("J06", "Immunological Agents"), ("J", "Anti-infective Medicines"),
-             ("L", "Antineoplastics, Immunosuppressives and Immunomodulators"), ("M03", "Muscle Relaxants and Cholinesterase Inhibitors"),
-             ("M05", "Bisphosphonates"), ("M", "Medicines for Pain and Palliative Care"),
-             ("N01", "Anaesthetics, Preoperative Medicines and Medical Gases"), ("N02C", "Antimigraine Medicines"),
-             ("N02", "Medicines for Pain and Palliative Care"), ("N03", "Anticonvulsants and Antiepileptics"),
-             ("N04", "Anti-Parkinsonism and Anti-prolactinoma Medicines"), ("N", "Psychotherapeutic and Related Medicines"),
-             ("P", "Anti-infective Medicines"), ("R06", "Anti-allergies and Medicines Used in Anaphylaxis"),
-             ("R01", "Ear, Nose and Throat Medicines"), ("R02", "Ear, Nose and Throat Medicines"), ("R", "Medicines Acting on the Respiratory Tract"),
-             ("S01", "Ophthalmological Preparations"), ("S", "Ear, Nose and Throat Medicines"),
-             ("V03AB", "Antidotes and Other Substances Used in Poisonings"), ("V", None)]
-
-
 def atc_class(atc):
-    atc = (atc or "").strip().upper()
-    return next((c for p, c in ATC_CLASS if atc.startswith(p)), None) if atc else None
+    """First guess from a registry's ATC code; classify.run settles the class from every use after the load."""
+    from classify import atc_class as cls
+    return cls(atc)
 
 
 HYDRATES = re.compile(r"\s+(dihydrate|monohydrate|trihydrate|hemihydrate|sesquihydrate|heptahydrate|hexahydrate|pentahydrate|"
