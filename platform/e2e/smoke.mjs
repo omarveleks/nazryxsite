@@ -234,6 +234,16 @@ for (let i = 0; i < 15 && !billed; i++) { await t.waitForTimeout(1000); await t.
 const invHref = await t.locator('a:has-text("NZX-")').first().getAttribute('href');
 const invDoc = await (await t.request.get(B + invHref)).text();
 check(billed && invDoc.includes('Smoke dossier review') && invDoc.includes('Smoke Bank, account 123'), 'Admin > Billing writes an invoice with our details');
+await t.goto(B + '/admin/invoice-maker'); await t.waitForLoadState('networkidle');
+await t.getByLabel('Company').first().fill('Outside Buyer LLC');
+await t.getByLabel('Item 1').fill('Market study, Kenya'); await t.getByLabel('Price').first().fill('1200');
+await t.getByLabel('Tax % (all lines)').fill('10');
+check((await t.locator('main').innerText()).includes('USD 1,320.00'), 'invoice maker totals as you type');
+await t.click('button:has-text("Save")');
+await t.locator('text=Saved as').waitFor({ timeout: 15000 });
+const made = (await t.locator('[role=status]').innerText()).match(/Saved as (\S+?)\./)[1];
+const page4 = await (await t.request.get(B + '/admin/invoice/' + encodeURIComponent(made))).text();
+check(page4.includes('Outside Buyer LLC') && page4.includes('size:A4') && page4.includes('USD 1,320.00'), 'invoice maker saves an A4 invoice for a customer outside the portal');
 await k.goto(B + '/m/products');
 check((await k.locator('main').innerText()).includes('By therapeutic class'), 'active plan unlocks the portfolio analysis');
 await k.goto(B + '/m/products');

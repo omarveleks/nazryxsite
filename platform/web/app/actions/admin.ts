@@ -6,6 +6,7 @@ import { back, int, str } from '@/lib/forms';
 import { BE_STATUS, DOSSIER_ITEMS, DOSSIER_STATUS, GMP_BY, ORDER_STATUSES, SHIPMENT_DOCS, STAGES } from '@/lib/format';
 import { hashPassword } from '@/lib/password';
 import { SERVICES } from '@/lib/mfr';
+import { renderInvoice, totals, money, type InvoiceData } from '@/lib/invoice';
 
 // Every action re-checks the team member's permission here, and the team role in the database (RLS policies / definer functions).
 
@@ -436,5 +437,57 @@ export async function markInvoicePaid(f: FormData) {
   const paid = f.get('paid') === '1';
   await team((db) => db.query(`update invoices set status = $2, paid_at = case when $2 = 'paid' then now() else null end where number = $1`,
     [str(f, 'number', 40), paid ? 'paid' : 'due']), '/admin?tab=billing');
+  redirect('/admin?tab=billing&saved=1');
+}
+
+/** The invoice maker: saves the invoice (any customer, in or outside the portal) with its A4 page; optionally files it
+ *  in a portal account's documents. Returns the number it was saved under. */
+export async function saveMadeInvoice(data: InvoiceData, opts: { file: boolean; status: 'due' | 'paid' }): Promise<{ number?: string; error?: string }> {
+  const u = await requireTeam('accounts');
+  if (!data?.to?.name?.trim() && !data?.to?.company?.trim()) return { error: 'Add who it is for.' };
+  if (!data.lines?.some((l) => l.text?.trim())) return { error: 'Add at least one line.' };
+  try {
+    return await withUser(u.id, async (db) => {
+      const st = await one(db, 'select prefix from invoice_settings where id = 1');
+      let number = (data.number || '').trim().slice(0, 40);
+      const year = (data.issued || new Date().toISOString()).slice(0, 4);
+      if (!number) {
+        const n = await one(db, `select count(*)::int + 1 as n from invoices where extract(year from issued_at) = $1`, [Number(year)]);
+        number = `${st?.prefix ?? 'NZX'}-${year}-${String(n.n).padStart(4, '0')}`;
+        while (await one(db, 'select 1 from invoices where number = $1', [number])) number = number.replace(/(\d+)$/, (m) => String(Number(m) + 1).padStart(4, '0'));
+      } else if (await one(db, 'select 1 from invoices where number = $1', [number])) {
+        return { error: `Number ${number} is already used. Change it, or leave it empty for the next one.` };
+      }
+      const doc = { ...data, number };
+      const html = renderInvoice(doc);
+      const t = totals(doc);
+      const acc = data.to.email ? await one(db, 'select id from users where lower(email) = lower($1)', [data.to.email.trim()]) : null;
+      let docId: number | null = null;
+      if (opts.file && acc) {
+        const f = await one(db, 'insert into stored_files (name, size, data, uploaded_by) values ($1, $2, $3, $4) returning id',
+          [`${data.kind} ${number}.html`, Buffer.byteLength(html), Buffer.from(html), u.id]);
+        docId = (await one(db, `insert into account_documents (user_id, kind, title, file_path, file_name, uploaded_by)
+                                values ($1, 'invoice', $2, $3, $4, $5) returning id`,
+          [acc.id, `${data.kind} ${number}`, `db:${f.id}`, `${data.kind} ${number}.html`, u.id])).id;
+        await db.query(`insert into notifications (user_id, channel, subject, body) values ($1, 'email', $2, $3)`,
+          [acc.id, `${data.kind} ${number}`, `${data.kind} ${number} for ${money(t.balance, doc)} is in Settings, Documents.`]);
+      }
+      await db.query(`insert into invoices (number, user_id, plan, amount_cents, currency, status, issued_at, due_at, document_id, lines,
+                        paid_at, kind, bill_to, data, html, created_by)
+                      values ($1, $2, null, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)`,
+        [number, acc?.id ?? null, Math.round(t.total * 100), data.currency.toLowerCase().slice(0, 3), opts.status,
+          data.issued || new Date().toISOString().slice(0, 10), data.due || null, docId, JSON.stringify(data.lines),
+          opts.status === 'paid' ? new Date() : null, data.kind.slice(0, 40), (data.to.company || data.to.name).slice(0, 200),
+          JSON.stringify(doc), html, u.id]);
+      return { number };
+    });
+  } catch (e) {
+    return { error: dbMessage(e) };
+  }
+}
+
+export async function deleteInvoice(f: FormData) {
+  await requireTeam('accounts');
+  await team((db) => db.query("delete from invoices where number = $1 and plan is null and created_by is not null", [str(f, 'number', 40)]), '/admin?tab=billing');
   redirect('/admin?tab=billing&saved=1');
 }

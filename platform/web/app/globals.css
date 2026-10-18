@@ -274,3 +274,8 @@ details.more[open] > summary { display: none; }
 details.card > summary { cursor: pointer; list-style: none; }
 details.card > summary::before { content: '▸ '; color: var(--ink-3); }
 details.card[open] > summary::before { content: '▾ '; }
+.maker { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; }
+.maker-preview { display: flex; flex-direction: column; gap: 10px; }
+.a4-wrap { width: 100%; aspect-ratio: 210 / 297; overflow: hidden; border: 1px solid var(--line); border-radius: 12px; background: #fff; }
+.a4 { width: 794px; height: 1123px; border: 0; transform-origin: 0 0; }
+@media (min-width: 1100px) { .maker { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } .maker-preview { position: sticky; top: 16px; align-self: start; } }

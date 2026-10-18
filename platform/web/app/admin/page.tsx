@@ -7,7 +7,7 @@ import { addTeamMember, removeTeamMember, updateTeamMember } from '@/app/actions
 import { one, rows, withUser } from '@/lib/db';
 import { STAGES, ago, fmtDate, title } from '@/lib/format';
 import { MFR_PLANS, SERVICES, countryName } from '@/lib/mfr';
-import { createInvoice, markInvoicePaid, saveInvoiceSettings, saveMarketCosts } from '@/app/actions/admin';
+import { createInvoice, deleteInvoice, markInvoicePaid, saveInvoiceSettings, saveMarketCosts } from '@/app/actions/admin';
 import { answerQuestion, reviewManufacturer, grantCredits, keepSeparate, saveRoutes, setMoleculeRoute, matchMolecule, mergeCompanies, postRegulatory, addPrice, editUseCase, queueRecompute,
   rejectSuggestion, resetPassword, resetTwoStep, reviewClaim, setPlan, updateSource } from '@/app/actions/admin';
 import { StagePill } from '@/components/ui';
@@ -151,9 +151,10 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
     }
     if (tab === 'billing') {
       out.inv = await one(db, 'select * from invoice_settings where id = 1');
-      out.invoices = await rows(db, `select i.number, i.amount_cents, i.currency, i.status, i.issued_at, i.due_at, i.document_id, i.plan,
-                                     u.email, coalesce(p.company_name, u.name, u.email) as company
-                                     from invoices i join users u on u.id = i.user_id left join manufacturer_profiles p on p.user_id = i.user_id
+      out.invoices = await rows(db, `select i.number, i.amount_cents, i.currency, i.status, i.issued_at, i.due_at, i.document_id, i.plan, i.kind,
+                                     i.html is not null as made, coalesce(u.email, i.data->'to'->>'email') as email,
+                                     coalesce(i.bill_to, p.company_name, u.name, u.email) as company
+                                     from invoices i left join users u on u.id = i.user_id left join manufacturer_profiles p on p.user_id = i.user_id
                                      order by i.issued_at desc limit 100`);
       out.pending = await rows(db, `select o.id, o.error, u.email from invoice_orders o join users u on u.id = o.user_id
                                     where o.processed_at is null order by o.id`);
@@ -509,6 +510,10 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
         </section>
       </>)}
       {tab === 'billing' && (<>
+        <section className="tile t-blue row" style={{ justifyContent: 'space-between', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+          <span><b>Invoice maker</b><br /><span className="small">Any customer, in the portal or not. Every detail is yours to set; A4, print or save as PDF.</span></span>
+          <Link className="btn btn-blue" href="/admin/invoice-maker">Make an invoice</Link>
+        </section>
         {sp.queued && <div className="ok" role="status">Invoice queued. It is written and filed in the customer's documents within a minute.</div>}
         <div className="grid g2">
           <section className="card stack">
@@ -553,14 +558,18 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
             <div className="tbl-wrap"><table className="tbl"><thead><tr><th>Number</th><th>Customer</th><th>Issued</th><th className="r">Amount</th><th>Status</th><th /></tr></thead>
               <tbody>{d.invoices.map((i: any) => (
                 <tr key={i.number}>
-                  <td>{i.document_id ? <a href={`/files/account/${i.document_id}`}>{i.number}</a> : i.number}</td>
+                  <td>{i.made ? <a href={`/admin/invoice/${encodeURIComponent(i.number)}`} target="_blank" rel="noopener">{i.number}</a>
+                    : i.document_id ? <a href={`/files/account/${i.document_id}`}>{i.number}</a> : i.number}{i.kind && i.kind !== 'Invoice' && <div className="sub2">{i.kind}</div>}</td>
                   <td><b>{i.company}</b><div className="sub2">{i.email}</div></td>
                   <td className="small">{fmtDate(i.issued_at)}</td>
                   <td className="r num">{i.amount_cents != null ? `${i.currency.toUpperCase()} ${(i.amount_cents / 100).toLocaleString('en', { minimumFractionDigits: 2 })}` : '—'}</td>
                   <td>{i.status === 'paid' ? <span className="pill mint">Paid</span>
                     : i.due_at && new Date(i.due_at) < new Date() ? <span className="pill peach">Overdue</span> : <span className="pill blue">Due {i.due_at ? fmtDate(i.due_at) : ''}</span>}</td>
-                  <td className="r"><form action={markInvoicePaid}><input type="hidden" name="number" value={i.number} /><input type="hidden" name="paid" value={i.status === 'paid' ? '0' : '1'} />
-                    <button className="btn btn-ghost btn-sm" type="submit">{i.status === 'paid' ? 'Mark unpaid' : 'Mark paid'}</button></form></td>
+                  <td className="r"><div className="row" style={{ justifyContent: 'flex-end', gap: 6 }}>
+                    {i.made && <Link className="btn btn-ghost btn-sm" href={`/admin/invoice-maker?from=${encodeURIComponent(i.number)}`}>Copy</Link>}
+                    {i.made && <form action={deleteInvoice}><input type="hidden" name="number" value={i.number} /><button className="btn btn-ghost btn-sm" type="submit">Delete</button></form>}
+                    <form action={markInvoicePaid}><input type="hidden" name="number" value={i.number} /><input type="hidden" name="paid" value={i.status === 'paid' ? '0' : '1'} />
+                    <button className="btn btn-ghost btn-sm" type="submit">{i.status === 'paid' ? 'Mark unpaid' : 'Mark paid'}</button></form></div></td>
                 </tr>))}</tbody></table></div>)}
         </section>
       </>)}
