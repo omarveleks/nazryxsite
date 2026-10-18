@@ -29,6 +29,7 @@ export type InvoiceData = {
   layout: 'classic' | 'bold' | 'minimal';
   stamp: '' | 'PAID' | 'DRAFT' | 'COPY';
   logoText?: string;
+  logo?: boolean;               // the Nazryx mark next to the name
   decimals: number;
   footer?: string;
 };
@@ -69,12 +70,14 @@ function party(p: Party) {
     p.taxId ? `Tax / reg. no. ${esc(p.taxId)}` : ''].filter(Boolean).join('<br>');
 }
 
+const MARK = '<svg viewBox="0 0 837 346" width="34" height="14" aria-hidden="true"><path d="M171 0 L403 0 L613 210 L613 0 L837 0 L837 198 L689 346 L461 346 L295 179 L131 346 L0 346 L0 174 Z" fill="#0066FF"/></svg>';
+
 export function renderInvoice(d: InvoiceData): string {
   const t = totals(d);
   const a = /^#[0-9a-fA-F]{6}$/.test(d.accent) ? d.accent : '#0066FF';
   const bold = d.layout === 'bold', minimal = d.layout === 'minimal';
   const anyDisc = t.rows.some((r) => Number(r.discount)), anyTax = t.rows.some((r) => r.rate);
-  const sums: [string, number, boolean?][] = [['Subtotal', t.sub]];
+  const sums: [string, number, boolean?][] = t.sub !== t.total ? [['Subtotal', t.sub]] : [];
   if (t.disc) sums.push([d.discountType === 'percent' ? `Discount (${d.discount}%)` : 'Discount', -t.disc]);
   if (t.tax) sums.push([d.taxLabel || 'Tax', t.tax]);
   if (Number(d.shipping)) sums.push([d.shippingLabel || 'Shipping', Number(d.shipping)]);
@@ -88,20 +91,21 @@ export function renderInvoice(d: InvoiceData): string {
 *{box-sizing:border-box}html,body{margin:0;background:#fff}
 body{font-family:Inter,Arial,Helvetica,sans-serif;color:#141413;font-size:10pt;line-height:1.45;-webkit-print-color-adjust:exact;print-color-adjust:exact}
 .page{width:210mm;min-height:297mm;padding:18mm 16mm;margin:0 auto;position:relative;display:flex;flex-direction:column}
-.band{${bold ? `background:${a};color:#fff;margin:-18mm -16mm 10mm;padding:14mm 16mm 10mm;` : `border-bottom:${minimal ? '1px solid #ECEAE3' : `3px solid ${a}`};padding-bottom:8mm;margin-bottom:8mm;`}display:flex;justify-content:space-between;gap:10mm}
-.logo{font-weight:800;font-size:18pt;color:${bold ? '#fff' : a};letter-spacing:-.02em}
-h1{font-size:${minimal ? 18 : 24}pt;margin:0;font-weight:700;text-align:right;color:${bold ? '#fff' : '#141413'}}
+.band{${bold ? `background:${a};color:#fff;margin:-18mm -16mm 12mm;padding:14mm 16mm 10mm;` : 'padding-bottom:10mm;margin-bottom:10mm;border-bottom:1px solid #ECEAE3;'}display:flex;justify-content:space-between;align-items:flex-start;gap:10mm}
+.logo{display:flex;align-items:center;gap:2.5mm;font-weight:700;font-size:16pt;color:${bold ? '#fff' : '#141413'};letter-spacing:-.02em}.logo svg{width:12mm;height:auto}${bold ? '.logo svg path{fill:#fff}' : ''}
+h1{font-size:${minimal ? 16 : 20}pt;margin:0;font-weight:600;letter-spacing:-.01em;text-align:right;color:${bold ? '#fff' : '#141413'}}
 .meta{text-align:right;margin-top:3mm;font-size:9.5pt}.meta td{padding:0 0 0 6mm}.meta td:first-child{color:${bold ? 'rgba(255,255,255,.75)' : '#5E5E58'}}
 .parties{display:grid;grid-template-columns:repeat(${d.shipTo ? 3 : 2},1fr);gap:8mm;margin-bottom:8mm}
 .lbl{font-size:8pt;text-transform:uppercase;letter-spacing:.06em;color:#5E5E58;margin-bottom:1.5mm}
 table.items{width:100%;border-collapse:collapse}
-.items th{font-size:8pt;text-transform:uppercase;letter-spacing:.05em;text-align:left;padding:2.5mm 2mm;${minimal ? 'border-bottom:1px solid #141413' : `background:${a}14;color:#141413`}}
-.items td{padding:2.5mm 2mm;border-bottom:1px solid #ECEAE3;vertical-align:top}.r{text-align:right;white-space:nowrap}
+.items th{font-size:7.5pt;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:#5E5E58;text-align:left;padding:0 2mm 2.5mm;border-bottom:1px solid #141413}
+.items th.r{text-align:right}.items th:first-child,.items td:first-child{padding-left:0}.items th:last-child,.items td:last-child{padding-right:0}
+.items td{padding:3mm 2mm;border-bottom:1px solid #ECEAE3;vertical-align:top}.r{text-align:right;white-space:nowrap}
 .detail{color:#5E5E58;font-size:8.5pt}
-.sums{margin-left:auto;width:78mm;margin-top:4mm;border-collapse:collapse}.sums td{padding:1.6mm 2mm}
-.sums tr.big td{font-weight:700;font-size:11.5pt;border-top:1.5px solid #141413}
-.sums tr.big:last-child td{${minimal ? '' : `color:${a}`}}
-.box{background:#F7F6F2;border-radius:3mm;padding:4mm 5mm;margin-top:6mm;break-inside:avoid}
+.sums{margin-left:auto;width:75mm;margin-top:5mm;border-collapse:collapse}.sums td{padding:1.4mm 0}
+.sums tr.big td{font-weight:600;font-size:12pt;border-top:1px solid #141413;padding-top:2.5mm}
+.sums tr.big:last-child td{color:${bold ? a : '#141413'}}
+.box{background:#F7F6F2;border-radius:2mm;padding:4mm 5mm;margin-top:10mm;break-inside:avoid}
 .foot{margin-top:auto;padding-top:8mm;color:#5E5E58;font-size:8.5pt;display:flex;justify-content:space-between;gap:8mm;align-items:flex-end}
 .sign{border-top:1px solid #141413;padding-top:1.5mm;width:60mm;text-align:center;color:#141413}
 .stamp{position:absolute;top:70mm;right:22mm;transform:rotate(-14deg);border:3px solid ${d.stamp === 'PAID' ? '#0E7C66' : '#C2410C'};color:${d.stamp === 'PAID' ? '#0E7C66' : '#C2410C'};
@@ -109,7 +113,7 @@ table.items{width:100%;border-collapse:collapse}
 @media screen{body{background:#ECEAE3}.page{box-shadow:none;margin:0 auto;background:#fff}}
 </style></head><body><div class="page">
 ${d.stamp ? `<div class="stamp">${esc(d.stamp)}</div>` : ''}
-<div class="band"><div><div class="logo">${esc(d.logoText || d.from.company || d.from.name)}</div></div>
+<div class="band"><div><div class="logo">${d.logo === false ? '' : MARK}<span>${esc(d.logoText || d.from.company || d.from.name)}</span></div></div>
 <div><h1>${esc(d.kind)}</h1><table class="meta">${meta.map(([k, v]) => `<tr><td>${k}</td><td><b>${v}</b></td></tr>`).join('')}</table></div></div>
 <div class="parties"><div><div class="lbl">From</div>${party(d.from)}</div><div><div class="lbl">${d.kind === 'Quotation' ? 'For' : 'Bill to'}</div>${party(d.to)}</div>
 ${d.shipTo ? `<div><div class="lbl">Ship to</div>${br(d.shipTo)}</div>` : ''}</div>

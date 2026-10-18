@@ -57,8 +57,8 @@ def page(title, body, st=None):
 h1{{font-size:28px;margin:24px 0 4px}}.muted{{color:#5E5E58}}table{{width:100%;border-collapse:collapse;margin:20px 0}}
 td,th{{text-align:left;padding:10px 0;border-bottom:1px solid #ECEAE3}}td.r,th.r{{text-align:right}}
 .brand{{color:#0066FF;font-weight:700;font-size:20px}}.box{{background:#F7F6F2;border-radius:12px;padding:16px;margin:20px 0}}
-@media print{{body{{margin:0 auto}}}}</style>
-</head><body><div class="brand">Nazryx</div>{body}{f'<p class="muted" style="margin-top:24px">{esc(st.get("footer"))}</p>' if st.get("footer") else ''}
+@page{{size:A4;margin:16mm}}@media print{{body{{margin:0 auto}}}}</style>
+</head><body><div class="brand"><svg viewBox="0 0 837 346" width="40" height="17" aria-hidden="true" style="vertical-align:-2px;margin-right:8px"><path d="M171 0 L403 0 L613 210 L613 0 L837 0 L837 198 L689 346 L461 346 L295 179 L131 346 L0 346 L0 174 Z" fill="#0066FF"/></svg><span style="color:#141413">Nazryx</span></div>{body}{f'<p class="muted" style="margin-top:24px">{esc(st.get("footer"))}</p>' if st.get("footer") else ''}
 <p class="muted" style="margin-top:40px">{who}</p></body></html>"""
 
 

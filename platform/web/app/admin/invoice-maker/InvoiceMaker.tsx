@@ -153,6 +153,7 @@ export default function InvoiceMaker({ start, people }: { start: InvoiceData; pe
           <div className="row" style={{ gap: 8, flexWrap: 'wrap' }}>
             <F label="Layout"><select className="input" value={d.layout} onChange={(e) => set({ layout: e.target.value as InvoiceData['layout'] })}>
               <option value="classic">Classic</option><option value="bold">Bold header</option><option value="minimal">Minimal</option></select></F>
+            <label className="row small" style={{ gap: 6, alignSelf: 'flex-end', paddingBottom: 10 }}><input type="checkbox" checked={d.logo !== false} onChange={(e) => set({ logo: e.target.checked })} /> Nazryx logo</label>
             <F label="Name at the top"><input className="input" value={d.logoText ?? ''} onChange={(e) => set({ logoText: e.target.value })} /></F>
             <F label="Stamp"><select className="input" value={d.stamp} onChange={(e) => set({ stamp: e.target.value as InvoiceData['stamp'] })}>
               <option value="">None</option><option>PAID</option><option>DRAFT</option><option>COPY</option></select></F>

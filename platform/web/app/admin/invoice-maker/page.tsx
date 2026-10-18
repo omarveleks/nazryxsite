@@ -29,7 +29,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ f
     lines: [{ text: '', detail: '', qty: 1, unit: '', price: 0 }],
     discountType: 'none', discount: 0, taxLabel: 'VAT', taxRate: 0, shipping: 0, shippingLabel: 'Shipping', paid: 0,
     notes: '', terms: '', payment: st.payment_details ?? '', signature: '', accent: '#0066FF', layout: 'classic', stamp: '',
-    logoText: 'Nazryx', decimals: 2, footer: st.footer ?? '',
+    logoText: 'Nazryx', logo: true, decimals: 2, footer: st.footer ?? '',
   };
   const start = d.copy?.data ? { ...d.copy.data, number: '', issued: today, due, stamp: '' } : base;
   const people = [
