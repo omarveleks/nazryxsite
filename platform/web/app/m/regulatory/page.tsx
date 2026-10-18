@@ -22,7 +22,14 @@ export default async function MfrRegulatory({ searchParams }: { searchParams: Pr
     const reqs = await rows(db, REQ_SQL, [market]) as Requirement[];
     const products = await rows(db, `select p.id, p.name, p.dosage_form, coalesce(p.atc, '') as atc, m.inn, m.category
         from mfr_products p left join molecules m on m.id = p.molecule_id where p.user_id = $1 order by coalesce(m.inn, p.name)`, [u.id]);
-    return { targets, market, reqs, products, sample: prof?.sample_product_id as number | null };
+    const routes = await rows(db, `select key, label, description, months_low, months_high, fee_usd_low, fee_usd_high, eligibility
+        from country_routes where country = $1 order by sort`, [market]);
+    const checked = (await one(db, `select max(checked) as d from reg_requirements where country = $1 and status = 'published'`, [market]))?.d;
+    // the regulator's latest notices (in English), those naming one of the user's molecules first
+    const news = await rows(db, `select n.id, coalesce(n.title_en, n.title) as title, n.url, n.found_at,
+        exists (select 1 from mfr_products p where p.user_id = $2 and p.molecule_id = any(n.molecule_ids)) as mine
+        from reg_news n where n.country = $1 and not n.baseline order by mine desc, n.found_at desc limit 8`, [market, u.id]);
+    return { targets, market, reqs, products, routes, checked, news, sample: prof?.sample_product_id as number | null };
   });
   const m = d.market;
   const general = d.reqs.filter((r) => r.applies === 'all');
@@ -31,6 +38,10 @@ export default async function MfrRegulatory({ searchParams }: { searchParams: Pr
   const withExtra = perProduct.filter((p) => p.extra.length > 0);
   const open = canUse(tierIn(u, m), 'requirements');
   const focus = sp.product ? perProduct.find((p) => String(p.id) === sp.product) : undefined;
+  const fullRoute = d.routes.find((r) => r.key === 'full') ?? d.routes[0];
+  const fastest = [...d.routes].filter((r) => r.months_low != null).sort((a, b) => a.months_low - b.months_low)[0];
+  const usd = (lo: string | null, hi: string | null) => lo == null ? '—' : `$${Number(lo).toLocaleString('en')}${hi && hi !== lo ? `–${Number(hi).toLocaleString('en')}` : ''}`;
+  const WHO: Record<string, string> = { all: 'Any product', sra_or_pq: 'Approved by a strict regulator or WHO-prequalified', eaeu: 'Filed under EAEU rules', eac: 'Filed through the EAC joint procedure' };
 
   return (
     <Shell user={u} title="Regulatory" sub={`${countryName(m)}: what it takes to register, and to stay registered`}
@@ -42,8 +53,10 @@ export default async function MfrRegulatory({ searchParams }: { searchParams: Pr
           <div className="tile t-blue"><span className="k">For every product</span><span className="v num">{general.length}</span><span className="small">requirements in {countryName(m)}</span></div>
           <div className="tile t-peach"><span className="k">Your products with extra steps</span><span className="v num">{withExtra.length}</span>
             <span className="small">of {perProduct.length} in your catalogue</span></div>
-          <div className="tile t-mint"><span className="k">Route</span>
-            <span className="small" style={{ fontSize: 14 }}>{general.find((r) => r.topic === 'Route')?.body ?? 'Confirmed for your product when we review it.'}</span></div>
+          <div className="tile t-mint"><span className="k">Standard route</span>
+            {fullRoute?.months_low != null ? <span className="v num">{fullRoute.months_low}–{fullRoute.months_high} mo</span> : null}
+            <span className="small">{fullRoute ? `${fullRoute.label}${fastest && fastest !== fullRoute ? ` · fastest: ${fastest.label}, ${fastest.months_low}–${fastest.months_high} months` : ''}`
+              : general.find((r) => r.topic === 'Route')?.body ?? 'Confirmed for your product when we review it.'}</span></div>
         </div>
 
         <section className="card stack">
@@ -72,12 +85,35 @@ export default async function MfrRegulatory({ searchParams }: { searchParams: Pr
               })}</tbody></table></div>)}
         </section>
 
+        {d.routes.length > 0 && (
+          <section className="card stack">
+            <div className="card-h"><div><h2>Routes to registration</h2><p className="note">Realistic time from filing to approval, and the official fees per product.</p></div></div>
+            <div className="tbl-wrap"><table className="tbl">
+              <thead><tr><th>Route</th><th className="hide-m">Who can use it</th><th className="r">Time</th><th className="r">Official fees</th></tr></thead>
+              <tbody>{d.routes.map((r) => (
+                <tr key={r.key}><td><b>{r.label}</b><div className="sub2">{r.description}</div></td>
+                  <td className="small hide-m">{WHO[r.eligibility] ?? r.eligibility}</td>
+                  <td className="r num">{r.months_low != null ? `${r.months_low}–${r.months_high} months` : '—'}</td>
+                  <td className="r num">{usd(r.fee_usd_low, r.fee_usd_high)}</td></tr>))}</tbody></table></div>
+          </section>)}
+
+        {d.news.length > 0 && (
+          <section className="card stack">
+            <h2>Latest from the regulator</h2>
+            {d.news.map((n, i) => (
+              <a key={n.id} href={n.url} target="_blank" rel="noopener noreferrer" className="between small"
+                style={{ borderTop: i ? '1px solid var(--line)' : undefined, paddingTop: i ? 8 : 0, gap: 12, textDecoration: 'none', color: 'inherit' }}>
+                <span style={{ minWidth: 0 }}>{n.title}{n.mine && <span className="pill blue" style={{ marginLeft: 6 }}>Your product</span>}</span>
+                <span className="muted" style={{ whiteSpace: 'nowrap' }}>{new Date(n.found_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })} ↗</span>
+              </a>))}
+          </section>)}
+
         <div className="grid g2">{byTopic(general).map(([topic, list]) => (
           <section key={topic} className="card stack" style={{ gap: 8 }}>
             <span className="lbl">{topic}</span>
             {list.map((r) => <div key={r.id}><b>{r.title}</b><div className="small muted">{r.body}</div></div>)}
           </section>))}</div>
-        <p className="note">Kept current by the Nazryx regulatory team. Before anything is filed, we confirm every point for your product.</p>
+        <p className="note">Kept current by the Nazryx regulatory team{d.checked ? `, last checked ${new Date(d.checked).toLocaleDateString('en-GB', { month: 'long', year: 'numeric' })}` : ''}. Before anything is filed, we confirm every point for your product.</p>
       </>)}
     </Shell>
   );

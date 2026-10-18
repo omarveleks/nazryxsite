@@ -48,15 +48,17 @@ def ask(client, texts):
 
 
 def apply(cur):
-    """Copy known translations onto every tender that uses the same text."""
+    """Copy known translations onto every tender and regulator notice that uses the same text."""
     for col in ("title", "buyer"):
         cur.execute(f"""update tenders t set {col}_en = tr.en from translations tr
                         where t.{col}_en is null and tr.src = t.{col}""")
+    cur.execute("""update reg_news n set title_en = tr.en from translations tr where n.title_en is null and tr.src = n.title""")
 
 
 def pending(cur, limit):
     rows = cur.execute("""select distinct x from (select title as x, country from tenders where title_en is null
-                            union all select buyer, country from tenders where buyer is not null and buyer_en is null) s
+                            union all select buyer, country from tenders where buyer is not null and buyer_en is null
+                            union all select title, country from reg_news where title_en is null and not baseline) s
                           where (x ~ '[Ѐ-ӿ]' or country = any(%s))
                             and not exists (select 1 from translations tr where tr.src = s.x)
                           limit %s""", (list(LOCAL_LATIN), limit)).fetchall()

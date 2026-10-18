@@ -1,0 +1,698 @@
+{
+ "country": "KG",
+ "regulator": "Department of Medicines and Medical Devices (DLSiMI) under the Ministry of Health of the Kyrgyz Republic - https://dlsmi.kg",
+ "checked": "2026-10",
+ "facts": [
+  {
+   "topic": "Route",
+   "applies": "all",
+   "match": null,
+   "title": "Regulator and legal basis",
+   "body": "The Department of Medicines and Medical Devices (DLSiMI) under the Ministry of Health registers medicines. The legal basis is Law No. 13 of 12 Jan 2024 'On circulation of medicines', the national Procedure approved by Cabinet Resolution No. 541 of 12 Aug 2026, and the EAEU rules (EEC Council Decision No. 78).",
+   "source": "https://dlsmi.kg/ru/registration/",
+   "confidence": "high"
+  },
+  {
+   "topic": "Route",
+   "applies": "all",
+   "match": null,
+   "title": "New national procedure from Aug 2026",
+   "body": "Resolution No. 541 of 12 Aug 2026 replaced Resolution No. 136 (2023) and its amendments. National registration and variations under it are allowed only until 31 Dec 2027. After that, only the EAEU route remains.",
+   "source": "https://dlsmi.kg/upload/%D0%9F%D0%BE%D1%81%D1%82%D0%B0%D0%BD%D0%BE%D0%B2%D0%BB%D0%B5%D0%BD%D0%B8%D0%B5%20541%20%D0%BE%20%D1%80%D0%B5%D0%B3%D0%B8%D1%81%D1%82%D1%80%D0%B0%D1%86%D0%B8%D0%B8%20%D0%9B%D0%A1.pdf",
+   "confidence": "high"
+  },
+  {
+   "topic": "Route",
+   "applies": "all",
+   "match": null,
+   "title": "EAEU route runs in parallel",
+   "body": "Kyrgyzstan is an EAEU member. Products can be registered under EAEU Decision 78 with Kyrgyzstan as the reference state or as a recognition state. EAEU registration is the long-term route, because national registration closes at the end of 2027.",
+   "source": "https://dlsmi.kg/ru/registration/",
+   "confidence": "high"
+  },
+  {
+   "topic": "Route",
+   "applies": "all",
+   "match": null,
+   "title": "Reliance on EU and other listed authorities",
+   "body": "Products approved in Australia, Canada, South Korea or 27 listed European countries (EU members) need a notarised registration proof with translation. Review takes up to 90 days, with no lab testing. Turkey was on the old list (Res. 136) but is not on the 2026 list.",
+   "source": "https://dlsmi.kg/upload/%D0%9F%D1%80%D0%B8%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D0%B5%20%D0%BA%20%D0%BF%D0%BE%D1%81%D1%82%D0%B0%D0%BD%D0%BE%D0%B2%D0%BB%D0%B5%D0%BD%D0%B8%D1%8E%20%D1%81%20%D0%BF%D1%80%D0%B8%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D1%8F%D0%BC%D0%B8.pdf",
+   "confidence": "high"
+  },
+  {
+   "topic": "Route",
+   "applies": "all",
+   "match": null,
+   "title": "Automatic route (WHO PQ, FDA, EMA, MHRA)",
+   "body": "Products that are WHO-prequalified or approved by the FDA, EMA (centralised procedure), PMDA, Swissmedic or MHRA get automatic registration. The applicant files Modules 1-2 and proof of approval, and the review takes up to 10 days after payment. Orphan and UN-procured products also qualify.",
+   "source": "https://dlsmi.kg/upload/%D0%9F%D1%80%D0%B8%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D0%B5%20%D0%BA%20%D0%BF%D0%BE%D1%81%D1%82%D0%B0%D0%BD%D0%BE%D0%B2%D0%BB%D0%B5%D0%BD%D0%B8%D1%8E%20%D1%81%20%D0%BF%D1%80%D0%B8%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D1%8F%D0%BC%D0%B8.pdf",
+   "confidence": "high"
+  },
+  {
+   "topic": "Route",
+   "applies": "all",
+   "match": null,
+   "title": "Accelerated route is narrow",
+   "body": "The accelerated procedure takes up to 80 days and covers only 'strategically important' medicines and products made in Kyrgyzstan. A typical foreign generic does not qualify.",
+   "source": "https://dlsmi.kg/upload/%D0%9F%D1%80%D0%B8%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D0%B5%20%D0%BA%20%D0%BF%D0%BE%D1%81%D1%82%D0%B0%D0%BD%D0%BE%D0%B2%D0%BB%D0%B5%D0%BD%D0%B8%D1%8E%20%D1%81%20%D0%BF%D1%80%D0%B8%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D1%8F%D0%BC%D0%B8.pdf",
+   "confidence": "high"
+  },
+  {
+   "topic": "Fees",
+   "applies": "all",
+   "match": null,
+   "title": "National registration fee (generic)",
+   "body": "The fee for a single-component generic is 138,846-151,267 KGS (about USD 1,590-1,730) per dosage form. Injections are 143,110-145,893 KGS (about USD 1,640-1,670). Each extra strength costs about 115,000-127,000 KGS, and each extra pack size 6,320 KGS (USD 72). The schedule dates from 2021 and is the latest one published for registration.",
+   "source": "https://dlsmi.kg/upload/27.04.21%D0%B3.-%20%D0%9F%D1%80%D0%B5%D0%B9%D1%81%D0%BA%D1%83%D1%80%D0%B0%D0%BD%D1%82.pdf",
+   "confidence": "medium"
+  },
+  {
+   "topic": "Fees",
+   "applies": "all",
+   "match": null,
+   "title": "EAEU registration fee in Kyrgyzstan",
+   "body": "The fee for a single-component generic under EAEU rules (reference or recognition state) is 144,850-157,271 KGS (about USD 1,660-1,800). EAEU alignment of a national dossier is 52,772 KGS (about USD 600). Rate used: 87.45 KGS/USD (NBKR, Oct 2026).",
+   "source": "https://dlsmi.kg/upload/27.04.21%D0%B3.-%20%D0%9F%D1%80%D0%B5%D0%B9%D1%81%D0%BA%D1%83%D1%80%D0%B0%D0%BD%D1%82.pdf",
+   "confidence": "medium"
+  },
+  {
+   "topic": "Fees",
+   "applies": "all",
+   "match": null,
+   "title": "Payment rules and exemptions",
+   "body": "DLSiMI issues an invoice within 5 working days of filing. The applicant must pay within 45 calendar days or the file is not reviewed, and fees are not refunded. Orphan drugs and humanitarian-aid medicines are exempt.",
+   "source": "https://dlsmi.kg/upload/%D0%9F%D1%80%D0%B8%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D0%B5%20%D0%BA%20%D0%BF%D0%BE%D1%81%D1%82%D0%B0%D0%BD%D0%BE%D0%B2%D0%BB%D0%B5%D0%BD%D0%B8%D1%8E%20%D1%81%20%D0%BF%D1%80%D0%B8%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D1%8F%D0%BC%D0%B8.pdf",
+   "confidence": "high"
+  },
+  {
+   "topic": "Fees",
+   "applies": "all",
+   "match": null,
+   "title": "No annual fee found",
+   "body": "No annual or retention fee for registered medicines appears in the law, Res. 541 or the published price lists. Costs after approval come from variations, batch quality checks at import and inspections.",
+   "source": "https://dlsmi.kg/upload/27.04.21%D0%B3.-%20%D0%9F%D1%80%D0%B5%D0%B9%D1%81%D0%BA%D1%83%D1%80%D0%B0%D0%BD%D1%82.pdf",
+   "confidence": "medium"
+  },
+  {
+   "topic": "Timeline",
+   "applies": "all",
+   "match": null,
+   "title": "National statutory timelines",
+   "body": "Full national registration takes up to 180 calendar days from payment. Lab testing runs within that time, up to 120 days. The listed-country route takes 90 days and the automatic route 10 days. Clock stops for questions (up to 90 + 60 days) are excluded.",
+   "source": "https://dlsmi.kg/upload/%D0%9F%D1%80%D0%B8%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D0%B5%20%D0%BA%20%D0%BF%D0%BE%D1%81%D1%82%D0%B0%D0%BD%D0%BE%D0%B2%D0%BB%D0%B5%D0%BD%D0%B8%D1%8E%20%D1%81%20%D0%BF%D1%80%D0%B8%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D1%8F%D0%BC%D0%B8.pdf",
+   "confidence": "high"
+  },
+  {
+   "topic": "Timeline",
+   "applies": "all",
+   "match": null,
+   "title": "EAEU statutory timelines",
+   "body": "Under Decision 78, registration in the reference state is limited to 140 working days from filing. A recognition state must decide within 60 working days of getting access to the assessment report. Applicant response time is excluded.",
+   "source": "https://www.alta.ru/tamdoc/16sr0078/",
+   "confidence": "high"
+  },
+  {
+   "topic": "Local representative",
+   "applies": "all",
+   "match": null,
+   "title": "Local representative and pharmacovigilance",
+   "body": "The MAH must have a person qualified for pharmacovigilance and a contact person living in Kyrgyzstan. The leaflet must name the MAH's representative, a legal entity in Kyrgyzstan. An applicant can be any authorised legal or natural person.",
+   "source": "https://dlsmi.kg/upload/%D0%9F%D1%80%D0%B8%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D0%B5%20%D0%BA%20%D0%BF%D0%BE%D1%81%D1%82%D0%B0%D0%BD%D0%BE%D0%B2%D0%BB%D0%B5%D0%BD%D0%B8%D1%8E%20%D1%81%20%D0%BF%D1%80%D0%B8%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D1%8F%D0%BC%D0%B8.pdf",
+   "confidence": "high"
+  },
+  {
+   "topic": "Local representative",
+   "applies": "all",
+   "match": null,
+   "title": "Who may import",
+   "body": "Only licensed pharmaceutical importers, manufacturers and a few other entities can import medicines. A foreign MAH's branch or authorised representative can import only for registration or testing. Commercial supply needs a licensed local distributor.",
+   "source": "https://dlsmi.kg/upload/%D0%97%D0%B0%D0%BA%D0%BE%D0%BD%20%D0%9A%D0%A0%20%D0%BE%D1%82%2012%20%D1%8F%D0%BD%D0%B2%D0%B0%D1%80%D1%8F%202024%20%D0%B3%D0%BE%D0%B4%D0%B0%20%E2%84%96%2013%20_%D0%9E%D0%B1%20%D0%BE%D0%B1%D1%80%D0%B0%D1%89%D0%B5%D0%BD%D0%B8%D0%B8%20%D0%BB%D0%B5%D0%BA%D0%B0%D1%80%D1%81%D1%82%D0%B2%D0%B5%D0%BD%D0%BD%D1%8B%D1%85%20%D1%81%D1%80%D0%B5%D0%B4%D1%81%D1%82%D0%B2___%20%285%29.docx",
+   "confidence": "high"
+  },
+  {
+   "topic": "Site and GMP",
+   "applies": "all",
+   "match": null,
+   "title": "GMP evidence for national route",
+   "body": "The applicant files certified copies of the GMP certificate from the country where each site is located, plus the manufacturing licence. A link to EudraGMP or a similar database helps. The applicant also gives written consent to an EAEU-GMP inspection.",
+   "source": "https://dlsmi.kg/upload/%D0%9F%D1%80%D0%B8%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D0%B5%20%D0%BA%20%D0%BF%D0%BE%D1%81%D1%82%D0%B0%D0%BD%D0%BE%D0%B2%D0%BB%D0%B5%D0%BD%D0%B8%D1%8E%20%D1%81%20%D0%BF%D1%80%D0%B8%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D1%8F%D0%BC%D0%B8.pdf",
+   "confidence": "high"
+  },
+  {
+   "topic": "Site and GMP",
+   "applies": "all",
+   "match": null,
+   "title": "Inspection only if data are doubtful",
+   "body": "Under the national route, DLSiMI starts a GMP inspection only if review finds facts that cast doubt on the dossier. Inspection time is outside the review clock. Refusing an inspection is a ground for refusal.",
+   "source": "https://dlsmi.kg/upload/%D0%9F%D1%80%D0%B8%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D0%B5%20%D0%BA%20%D0%BF%D0%BE%D1%81%D1%82%D0%B0%D0%BD%D0%BE%D0%B2%D0%BB%D0%B5%D0%BD%D0%B8%D1%8E%20%D1%81%20%D0%BF%D1%80%D0%B8%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D1%8F%D0%BC%D0%B8.pdf",
+   "confidence": "high"
+  },
+  {
+   "topic": "Site and GMP",
+   "applies": "all",
+   "match": null,
+   "title": "GMP inspection fee",
+   "body": "One GMP inspection of a foreign medicine manufacturer costs 333,036 KGS (about USD 3,810), plus 99,876 KGS (about USD 1,140) per extra line or site. Travel, visas, interpreters and daily allowances are paid on top. Price list approved July 2025.",
+   "source": "https://dlsmi.kg/upload/%D0%9F%D1%80%D0%B5%D0%B9%D1%81%D0%BA%D1%83%D1%80%D0%B0%D0%BD%D1%82%20%D0%B4%D0%B5%D0%BF%D0%B0%D1%80%D1%82%D0%B0%D0%BC%D0%B5%D0%BD%D1%82.PDF",
+   "confidence": "high"
+  },
+  {
+   "topic": "Site and GMP",
+   "applies": "all",
+   "match": null,
+   "title": "EAEU route GMP",
+   "body": "The EAEU route normally needs an EAEU GMP certificate. Since June 2025, an applicant may file a set of GMP documents instead, with a commitment to pass an EAEU inspection within 3 years of approval. Kyrgyz inspectors are on the EAEU inspector register.",
+   "source": "https://dlsmi.kg/ru/registration/",
+   "confidence": "high"
+  },
+  {
+   "topic": "Dossier",
+   "applies": "all",
+   "match": null,
+   "title": "CTD dossier, mostly electronic",
+   "body": "The dossier is in CTD Modules 1-5 and is filed electronically through the 'Electronic database of medicines and medical devices' (EBD) system. Module 1 is also filed as 2 paper copies. Kyrgyz quality standard (ND) and leaflet templates are used.",
+   "source": "https://dlsmi.kg/upload/%D0%9F%D1%80%D0%B8%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D0%B5%20%D0%BA%20%D0%BF%D0%BE%D1%81%D1%82%D0%B0%D0%BD%D0%BE%D0%B2%D0%BB%D0%B5%D0%BD%D0%B8%D1%8E%20%D1%81%20%D0%BF%D1%80%D0%B8%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D1%8F%D0%BC%D0%B8.pdf",
+   "confidence": "high"
+  },
+  {
+   "topic": "Dossier",
+   "applies": "all",
+   "match": null,
+   "title": "Language of the dossier",
+   "body": "Module 1 documents and the draft quality standard are in Russian, and the leaflet is in both Kyrgyz and Russian. Modules 3-5 may be in English, but the specification, test methods and specification justification need a Russian translation.",
+   "source": "https://dlsmi.kg/upload/%D0%9F%D1%80%D0%B8%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D0%B5%20%D0%BA%20%D0%BF%D0%BE%D1%81%D1%82%D0%B0%D0%BD%D0%BE%D0%B2%D0%BB%D0%B5%D0%BD%D0%B8%D1%8E%20%D1%81%20%D0%BF%D1%80%D0%B8%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D1%8F%D0%BC%D0%B8.pdf",
+   "confidence": "high"
+  },
+  {
+   "topic": "Dossier",
+   "applies": "all",
+   "match": null,
+   "title": "One dossier per dosage form",
+   "body": "Each dosage form needs its own application and dossier. Strengths, concentrations and fill volumes of one form share one application, with pack mock-ups for each.",
+   "source": "https://dlsmi.kg/upload/%D0%9F%D1%80%D0%B8%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D0%B5%20%D0%BA%20%D0%BF%D0%BE%D1%81%D1%82%D0%B0%D0%BD%D0%BE%D0%B2%D0%BB%D0%B5%D0%BD%D0%B8%D1%8E%20%D1%81%20%D0%BF%D1%80%D0%B8%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D1%8F%D0%BC%D0%B8.pdf",
+   "confidence": "high"
+  },
+  {
+   "topic": "Bioequivalence",
+   "applies": "form",
+   "match": "oral solid",
+   "title": "BE per EAEU Decision 85",
+   "body": "A generic must prove bioequivalence to the originator or reference product under the EAEU bioequivalence rules (EEC Decision No. 85). The BE report must include the protocol, ethics approval, insurance and chromatograms. Biowaivers follow the same Decision 85 rules.",
+   "source": "https://dlsmi.kg/upload/%D0%9F%D1%80%D0%B8%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D0%B5%20%D0%BA%20%D0%BF%D0%BE%D1%81%D1%82%D0%B0%D0%BD%D0%BE%D0%B2%D0%BB%D0%B5%D0%BD%D0%B8%D1%8E%20%D1%81%20%D0%BF%D1%80%D0%B8%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D1%8F%D0%BC%D0%B8.pdf",
+   "confidence": "high"
+  },
+  {
+   "topic": "Bioequivalence",
+   "applies": "all",
+   "match": null,
+   "title": "SmPC must match the originator",
+   "body": "The generic's SmPC and leaflet must match the originator's. The applicant files a side-by-side comparison and a declaration of no differences, except manufacturer, shelf life and excipients. Any added indications need clinical data.",
+   "source": "https://dlsmi.kg/upload/%D0%9F%D1%80%D0%B8%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D0%B5%20%D0%BA%20%D0%BF%D0%BE%D1%81%D1%82%D0%B0%D0%BD%D0%BE%D0%B2%D0%BB%D0%B5%D0%BD%D0%B8%D1%8E%20%D1%81%20%D0%BF%D1%80%D0%B8%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D1%8F%D0%BC%D0%B8.pdf",
+   "confidence": "high"
+  },
+  {
+   "topic": "Stability",
+   "applies": "all",
+   "match": null,
+   "title": "Stability conditions",
+   "body": "Stability follows the EAEU stability requirements (EEC Board Decision No. 69), which mirror ICH Q1A. Kyrgyzstan falls in climatic zone II, so long-term data at 25°C/60% RH and accelerated data at 40°C/75% RH are expected.",
+   "source": "https://www.alta.ru/tamdoc/18kr0069/",
+   "confidence": "medium"
+  },
+  {
+   "topic": "Samples",
+   "applies": "all",
+   "match": null,
+   "title": "Samples and reference standards",
+   "body": "Within 45 days of payment, the applicant supplies samples, reference standards and specific reagents. Quantities must be enough for at least a triple analysis per the quality standard. DLSiMI tests within 120 days, and an ISO 17025 lab in the EAEU may test some parameters.",
+   "source": "https://dlsmi.kg/upload/%D0%9F%D1%80%D0%B8%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D0%B5%20%D0%BA%20%D0%BF%D0%BE%D1%81%D1%82%D0%B0%D0%BD%D0%BE%D0%B2%D0%BB%D0%B5%D0%BD%D0%B8%D1%8E%20%D1%81%20%D0%BF%D1%80%D0%B8%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D1%8F%D0%BC%D0%B8.pdf",
+   "confidence": "high"
+  },
+  {
+   "topic": "Samples",
+   "applies": "all",
+   "match": null,
+   "title": "No lab test for listed-country route",
+   "body": "Products filed under the listed-country route (EU and others) are not lab tested at registration. If samples are hard to ship, testing can be witnessed at the manufacturer's lab or by video.",
+   "source": "https://dlsmi.kg/upload/%D0%9F%D1%80%D0%B8%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D0%B5%20%D0%BA%20%D0%BF%D0%BE%D1%81%D1%82%D0%B0%D0%BD%D0%BE%D0%B2%D0%BB%D0%B5%D0%BD%D0%B8%D1%8E%20%D1%81%20%D0%BF%D1%80%D0%B8%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D1%8F%D0%BC%D0%B8.pdf",
+   "confidence": "high"
+  },
+  {
+   "topic": "Labelling",
+   "applies": "all",
+   "match": null,
+   "title": "Labelling languages",
+   "body": "Packs must carry text in Kyrgyz (state language) and/or Russian (official language). The patient leaflet must be in both Kyrgyz and Russian. Pack content follows the EAEU labelling requirements (Decision No. 76).",
+   "source": "https://dlsmi.kg/upload/%D0%9F%D1%80%D0%B8%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D0%B5%20%D0%BA%20%D0%BF%D0%BE%D1%81%D1%82%D0%B0%D0%BD%D0%BE%D0%B2%D0%BB%D0%B5%D0%BD%D0%B8%D1%8E%20%D1%81%20%D0%BF%D1%80%D0%B8%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D1%8F%D0%BC%D0%B8.pdf",
+   "confidence": "high"
+  },
+  {
+   "topic": "Labelling",
+   "applies": "all",
+   "match": null,
+   "title": "English packs with sticker",
+   "body": "Under the listed-country and automatic routes, English packs are allowed. They need a self-adhesive sticker in Kyrgyz and/or Russian (name, INN, MAH or maker, form, strength, route) and a QR code linking to the Kyrgyz-language pack texts.",
+   "source": "https://dlsmi.kg/upload/%D0%9F%D1%80%D0%B8%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D0%B5%20%D0%BA%20%D0%BF%D0%BE%D1%81%D1%82%D0%B0%D0%BD%D0%BE%D0%B2%D0%BB%D0%B5%D0%BD%D0%B8%D1%8E%20%D1%81%20%D0%BF%D1%80%D0%B8%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D1%8F%D0%BC%D0%B8.pdf",
+   "confidence": "high"
+  },
+  {
+   "topic": "Marking",
+   "applies": "all",
+   "match": null,
+   "title": "DataMatrix serialisation required",
+   "body": "Medicines must carry a GS1 DataMatrix code with GTIN (01) and a unique serial (21), and expiry (17) and batch (10) are recommended. Codes can be generated by the maker or issued free by the EBD system, and applied in production or by sticker. Wholesale or retail sale of traceable medicines without a code is banned.",
+   "source": "https://dlsmi.kg/upload/%D0%BF%D0%BE%D1%81%D1%82%D0%B0%D0%BD%D0%BE%D0%B2%20%D0%B0%D0%BD%D0%B3%D0%BB.pdf",
+   "confidence": "medium"
+  },
+  {
+   "topic": "Marking",
+   "applies": "all",
+   "match": null,
+   "title": "Who reports codes",
+   "body": "The MAH, the maker, its local office or the importer applies the codes. The importer enters codes into the EBD system when goods clear customs. All medicines on the market were phased into traceability from 1 Mar 2024.",
+   "source": "https://dlsmi.kg/ru/proslejivaemost_ls/",
+   "confidence": "medium"
+  },
+  {
+   "topic": "Pricing",
+   "applies": "all",
+   "match": null,
+   "title": "Price registration before sale",
+   "body": "Prescription medicines on the National Essential Medicines List (EML) with a delivery price above 100 KGS need registered prices. The MAH files within 10 working days of first import, and DLSiMI decides within 30 working days. Selling without a registered price is banned.",
+   "source": "https://dlsmi.kg/upload/%D1%81%20%D0%B8%D0%B7%D0%BC_%D0%9F%D0%9A%D0%9C%20%D0%9A%D0%A0%20%D0%BE%D1%82%2031%20%D0%BC%D0%B0%D1%8F%202023%20%D0%B3%D0%BE%D0%B4%D0%B0%20%E2%84%96%20292.doc",
+   "confidence": "high"
+  },
+  {
+   "topic": "Pricing",
+   "applies": "all",
+   "match": null,
+   "title": "How the price cap is set",
+   "body": "The base price is the lower of the 12-month weighted average delivery price and the median price in Russia, Kazakhstan, Belarus, Ukraine, Moldova, Turkey and Uzbekistan. Customs costs and taxes are added. Regressive mark-ups then give the maximum wholesale (9-19%) and retail prices.",
+   "source": "https://dlsmi.kg/upload/%D1%81%20%D0%B8%D0%B7%D0%BC_%D0%9F%D0%9A%D0%9C%20%D0%9A%D0%A0%20%D0%BE%D1%82%2031%20%D0%BC%D0%B0%D1%8F%202023%20%D0%B3%D0%BE%D0%B4%D0%B0%20%E2%84%96%20292.doc",
+   "confidence": "high"
+  },
+  {
+   "topic": "Pricing",
+   "applies": "all",
+   "match": null,
+   "title": "Price validity and register",
+   "body": "Registered prices are valid 1 year and renew automatically. DLSiMI publishes the price register as an Excel file and issues new price orders every few weeks. A new EML for 2026-2028 was approved on 6 Oct 2026 (Res. No. 670).",
+   "source": "https://dlsmi.kg/ru/price_regulation/",
+   "confidence": "high"
+  },
+  {
+   "topic": "After approval",
+   "applies": "all",
+   "match": null,
+   "title": "Validity and renewal",
+   "body": "A first registration is valid 5 years, and after confirmation an unlimited certificate follows. Res. 541 has no national renewal step, so renewal will in practice go through the EAEU route. Products may be sold until expiry if made before the certificate lapsed.",
+   "source": "https://dlsmi.kg/upload/%D0%97%D0%B0%D0%BA%D0%BE%D0%BD%20%D0%9A%D0%A0%20%D0%BE%D1%82%2012%20%D1%8F%D0%BD%D0%B2%D0%B0%D1%80%D1%8F%202024%20%D0%B3%D0%BE%D0%B4%D0%B0%20%E2%84%96%2013%20_%D0%9E%D0%B1%20%D0%BE%D0%B1%D1%80%D0%B0%D1%89%D0%B5%D0%BD%D0%B8%D0%B8%20%D0%BB%D0%B5%D0%BA%D0%B0%D1%80%D1%81%D1%82%D0%B2%D0%B5%D0%BD%D0%BD%D1%8B%D1%85%20%D1%81%D1%80%D0%B5%D0%B4%D1%81%D1%82%D0%B2___%20%285%29.docx",
+   "confidence": "medium"
+  },
+  {
+   "topic": "After approval",
+   "applies": "all",
+   "match": null,
+   "title": "Variations",
+   "body": "DLSiMI decides on national variations within 50 days of payment, allowing one question with 30 days to reply. The fee is 16,748 KGS (USD 190) without lab testing and 18,328 KGS (USD 210) with it. Old packs may still be made and imported for 180 days after a pack or leaflet change.",
+   "source": "https://dlsmi.kg/upload/%D0%9F%D1%80%D0%B8%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D0%B5%20%D0%BA%20%D0%BF%D0%BE%D1%81%D1%82%D0%B0%D0%BD%D0%BE%D0%B2%D0%BB%D0%B5%D0%BD%D0%B8%D1%8E%20%D1%81%20%D0%BF%D1%80%D0%B8%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D1%8F%D0%BC%D0%B8.pdf",
+   "confidence": "high"
+  },
+  {
+   "topic": "After approval",
+   "applies": "all",
+   "match": null,
+   "title": "EAEU variation fees",
+   "body": "In Kyrgyzstan as reference state, EAEU variation fees per change are: type IA 11,692 KGS (USD 134), type IB 43,292 KGS (USD 495) and type II 55,932-94,800 KGS (USD 640-1,084). As a recognition state the fees are 7,900-28,440 KGS (USD 90-325).",
+   "source": "https://dlsmi.kg/upload/27.04.21%D0%B3.-%20%D0%9F%D1%80%D0%B5%D0%B9%D1%81%D0%BA%D1%83%D1%80%D0%B0%D0%BD%D1%82.pdf",
+   "confidence": "medium"
+  },
+  {
+   "topic": "After approval",
+   "applies": "form",
+   "match": "sterile",
+   "title": "Changes that need new registration",
+   "body": "Changing the active substance, strength, dosage form, route or bioavailability needs a new registration, as does adding indications in another therapeutic area. So does adding or moving a site for sterile or biological products.",
+   "source": "https://dlsmi.kg/upload/%D0%9F%D1%80%D0%B8%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D0%B5%20%D0%BA%20%D0%BF%D0%BE%D1%81%D1%82%D0%B0%D0%BD%D0%BE%D0%B2%D0%BB%D0%B5%D0%BD%D0%B8%D1%8E%20%D1%81%20%D0%BF%D1%80%D0%B8%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D1%8F%D0%BC%D0%B8.pdf",
+   "confidence": "high"
+  },
+  {
+   "topic": "After approval",
+   "applies": "all",
+   "match": null,
+   "title": "National certificates and EAEU deadline",
+   "body": "EAEU law required national registrations to be aligned with EAEU rules by 31 Dec 2025. Decision 34 (May 2025) extends national certificates for up to 3 years (reference state) or 2 years (recognition state) if an alignment application was filed by that date.",
+   "source": "https://dlsmi.kg/ru/registration/",
+   "confidence": "medium"
+  },
+  {
+   "topic": "Import",
+   "applies": "all",
+   "match": null,
+   "title": "Batch quality check at import",
+   "body": "Each imported batch needs a DLSiMI quality conclusion, filed via the EBD 'Import and quality' module, for 843 KGS per product plus any lab tests. Batches are exempt if the distributor has GDP and the site has EAEU GMP or ICH-region GMP.",
+   "source": "https://dlsmi.kg/upload/%D0%97%D0%B0%D0%BA%D0%BE%D0%BD%20%D0%9A%D0%A0%20%D0%BE%D1%82%2012%20%D1%8F%D0%BD%D0%B2%D0%B0%D1%80%D1%8F%202024%20%D0%B3%D0%BE%D0%B4%D0%B0%20%E2%84%96%2013%20_%D0%9E%D0%B1%20%D0%BE%D0%B1%D1%80%D0%B0%D1%89%D0%B5%D0%BD%D0%B8%D0%B8%20%D0%BB%D0%B5%D0%BA%D0%B0%D1%80%D1%81%D1%82%D0%B2%D0%B5%D0%BD%D0%BD%D1%8B%D1%85%20%D1%81%D1%80%D0%B5%D0%B4%D1%81%D1%82%D0%B2___%20%285%29.docx",
+   "confidence": "medium"
+  },
+  {
+   "topic": "Import",
+   "applies": "all",
+   "match": null,
+   "title": "Shelf life at import",
+   "body": "Medicines with under 3 years' total shelf life need at least one third of it left at import. Those with 3 years or more need at least 12 months left.",
+   "source": "https://dlsmi.kg/upload/%D0%97%D0%B0%D0%BA%D0%BE%D0%BD%20%D0%9A%D0%A0%20%D0%BE%D1%82%2012%20%D1%8F%D0%BD%D0%B2%D0%B0%D1%80%D1%8F%202024%20%D0%B3%D0%BE%D0%B4%D0%B0%20%E2%84%96%2013%20_%D0%9E%D0%B1%20%D0%BE%D0%B1%D1%80%D0%B0%D1%89%D0%B5%D0%BD%D0%B8%D0%B8%20%D0%BB%D0%B5%D0%BA%D0%B0%D1%80%D1%81%D1%82%D0%B2%D0%B5%D0%BD%D0%BD%D1%8B%D1%85%20%D1%81%D1%80%D0%B5%D0%B4%D1%81%D1%82%D0%B2___%20%285%29.docx",
+   "confidence": "high"
+  },
+  {
+   "topic": "Import",
+   "applies": "all",
+   "match": null,
+   "title": "Import licence and unregistered imports",
+   "body": "From 31 Dec 2025 at the latest, imports need an import licence (before that, a wholesale licence). Unregistered medicines enter only with a DLSiMI permit, for example as registration samples or for named patients.",
+   "source": "https://dlsmi.kg/upload/%D0%97%D0%B0%D0%BA%D0%BE%D0%BD%20%D0%9A%D0%A0%20%D0%BE%D1%82%2012%20%D1%8F%D0%BD%D0%B2%D0%B0%D1%80%D1%8F%202024%20%D0%B3%D0%BE%D0%B4%D0%B0%20%E2%84%96%2013%20_%D0%9E%D0%B1%20%D0%BE%D0%B1%D1%80%D0%B0%D1%89%D0%B5%D0%BD%D0%B8%D0%B8%20%D0%BB%D0%B5%D0%BA%D0%B0%D1%80%D1%81%D1%82%D0%B2%D0%B5%D0%BD%D0%BD%D1%8B%D1%85%20%D1%81%D1%80%D0%B5%D0%B4%D1%81%D1%82%D0%B2___%20%285%29.docx",
+   "confidence": "high"
+  },
+  {
+   "topic": "Import",
+   "applies": "class",
+   "match": "controlled",
+   "title": "Controlled substances",
+   "body": "Narcotic and psychotropic medicines follow the national control lists (Cabinet Res. No. 152 of 26 Mar 2025) and need separate import permits. They are also exempt from price regulation.",
+   "source": "https://dlsmi.kg/ru/legislation/",
+   "confidence": "medium"
+  }
+ ],
+ "routes": [
+  {
+   "key": "full",
+   "label": "National full registration",
+   "description": "Any foreign generic can file a full CTD dossier under Res. 541, with lab testing in Kyrgyzstan. The legal limit is 180 days from payment, excluding clock stops. The route is open only until 31 Dec 2027.",
+   "months_low": 7,
+   "months_high": 14,
+   "fee_usd_low": 1588,
+   "fee_usd_high": 2200,
+   "source": "https://dlsmi.kg/upload/%D0%9F%D1%80%D0%B8%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D0%B5%20%D0%BA%20%D0%BF%D0%BE%D1%81%D1%82%D0%B0%D0%BD%D0%BE%D0%B2%D0%BB%D0%B5%D0%BD%D0%B8%D1%8E%20%D1%81%20%D0%BF%D1%80%D0%B8%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D1%8F%D0%BC%D0%B8.pdf",
+   "confidence": "medium"
+  },
+  {
+   "key": "reliance",
+   "label": "Listed-country reliance",
+   "description": "For products approved in an EU member state, Australia, Canada or South Korea. The applicant files the same dossier with notarised proof of approval, and there is no lab testing. The legal limit is 90 days. The fee is assumed to follow the national schedule.",
+   "months_low": 4,
+   "months_high": 7,
+   "fee_usd_low": 1588,
+   "fee_usd_high": 2200,
+   "source": "https://dlsmi.kg/upload/%D0%9F%D1%80%D0%B8%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D0%B5%20%D0%BA%20%D0%BF%D0%BE%D1%81%D1%82%D0%B0%D0%BD%D0%BE%D0%B2%D0%BB%D0%B5%D0%BD%D0%B8%D1%8E%20%D1%81%20%D0%BF%D1%80%D0%B8%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D1%8F%D0%BC%D0%B8.pdf",
+   "confidence": "low"
+  },
+  {
+   "key": "who_crp",
+   "label": "Automatic (WHO PQ / SRA)",
+   "description": "For WHO-prequalified products and those approved by the FDA, EMA (centralised), PMDA, Swissmedic or MHRA. Only Modules 1-2 are filed. The legal limit is 10 days from payment. No separate published fee was found.",
+   "months_low": 1,
+   "months_high": 3,
+   "fee_usd_low": null,
+   "fee_usd_high": null,
+   "source": "https://dlsmi.kg/upload/%D0%9F%D1%80%D0%B8%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D0%B5%20%D0%BA%20%D0%BF%D0%BE%D1%81%D1%82%D0%B0%D0%BD%D0%BE%D0%B2%D0%BB%D0%B5%D0%BD%D0%B8%D1%8E%20%D1%81%20%D0%BF%D1%80%D0%B8%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D1%8F%D0%BC%D0%B8.pdf",
+   "confidence": "medium"
+  },
+  {
+   "key": "eaeu",
+   "label": "EAEU, Kyrgyzstan as reference",
+   "description": "The full EAEU dossier is assessed by DLSiMI under Decision 78, with an EAEU GMP certificate or GMP documents plus a commitment to inspection. The legal limit is 140 working days excluding clock stops. EAEU GMP inspection costs come on top (about USD 3,800 plus travel).",
+   "months_low": 12,
+   "months_high": 24,
+   "fee_usd_low": 1656,
+   "fee_usd_high": 1800,
+   "source": "https://www.alta.ru/tamdoc/16sr0078/",
+   "confidence": "medium"
+  },
+  {
+   "key": "recognition",
+   "label": "EAEU, Kyrgyzstan as recognition state",
+   "description": "Kyrgyzstan is added to an EAEU registration led by another member, such as Russia or Kazakhstan, by mutual recognition or the decentralised procedure. The legal limit is 60 working days after access to the reference assessment report.",
+   "months_low": 4,
+   "months_high": 9,
+   "fee_usd_low": 1656,
+   "fee_usd_high": 1800,
+   "source": "https://www.alta.ru/tamdoc/16sr0078/",
+   "confidence": "medium"
+  },
+  {
+   "key": "accelerated",
+   "label": "Accelerated (strategic or local only)",
+   "description": "Only for medicines the government deems strategically important, or products made in Kyrgyzstan. The legal limit is 80 days, with lab testing in 60 days.",
+   "months_low": 3,
+   "months_high": 6,
+   "fee_usd_low": null,
+   "fee_usd_high": null,
+   "source": "https://dlsmi.kg/upload/%D0%9F%D1%80%D0%B8%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D0%B5%20%D0%BA%20%D0%BF%D0%BE%D1%81%D1%82%D0%B0%D0%BD%D0%BE%D0%B2%D0%BB%D0%B5%D0%BD%D0%B8%D1%8E%20%D1%81%20%D0%BF%D1%80%D0%B8%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D1%8F%D0%BC%D0%B8.pdf",
+   "confidence": "medium"
+  }
+ ],
+ "documents": [
+  {
+   "name": "Application form (DLSiMI template)",
+   "applies": "all",
+   "match": null,
+   "source": "https://dlsmi.kg/upload/%D0%9F%D1%80%D0%B8%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D0%B5%20%D0%BA%20%D0%BF%D0%BE%D1%81%D1%82%D0%B0%D0%BD%D0%BE%D0%B2%D0%BB%D0%B5%D0%BD%D0%B8%D1%8E%20%D1%81%20%D0%BF%D1%80%D0%B8%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D1%8F%D0%BC%D0%B8.pdf",
+   "note": "Filed with an acceptance act. Separate form for automatic route."
+  },
+  {
+   "name": "Cover letter and table of contents",
+   "applies": "all",
+   "match": null,
+   "source": "https://dlsmi.kg/upload/%D0%9F%D1%80%D0%B8%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D0%B5%20%D0%BA%20%D0%BF%D0%BE%D1%81%D1%82%D0%B0%D0%BD%D0%BE%D0%B2%D0%BB%D0%B5%D0%BD%D0%B8%D1%8E%20%D1%81%20%D0%BF%D1%80%D0%B8%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D1%8F%D0%BC%D0%B8.pdf"
+  },
+  {
+   "name": "Certificate of Pharmaceutical Product (WHO format) or home-country registration certificate",
+   "applies": "all",
+   "match": null,
+   "source": "https://dlsmi.kg/upload/%D0%9F%D1%80%D0%B8%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D0%B5%20%D0%BA%20%D0%BF%D0%BE%D1%81%D1%82%D0%B0%D0%BD%D0%BE%D0%B2%D0%BB%D0%B5%D0%BD%D0%B8%D1%8E%20%D1%81%20%D0%BF%D1%80%D0%B8%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D1%8F%D0%BC%D0%B8.pdf",
+   "note": "Notarised where available."
+  },
+  {
+   "name": "Proof of registration in the home, ICH or EAEU countries",
+   "applies": "all",
+   "match": null,
+   "source": "https://dlsmi.kg/upload/%D0%9F%D1%80%D0%B8%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D0%B5%20%D0%BA%20%D0%BF%D0%BE%D1%81%D1%82%D0%B0%D0%BD%D0%BE%D0%B2%D0%BB%D0%B5%D0%BD%D0%B8%D1%8E%20%D1%81%20%D0%BF%D1%80%D0%B8%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D1%8F%D0%BC%D0%B8.pdf"
+  },
+  {
+   "name": "Notarised registration proof from a listed country",
+   "applies": "all",
+   "match": null,
+   "source": "https://dlsmi.kg/upload/%D0%9F%D1%80%D0%B8%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D0%B5%20%D0%BA%20%D0%BF%D0%BE%D1%81%D1%82%D0%B0%D0%BD%D0%BE%D0%B2%D0%BB%D0%B5%D0%BD%D0%B8%D1%8E%20%D1%81%20%D0%BF%D1%80%D0%B8%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D1%8F%D0%BC%D0%B8.pdf",
+   "note": "Listed-country route only. Translated into Kyrgyz and/or Russian."
+  },
+  {
+   "name": "SmPC with date of last revision",
+   "applies": "all",
+   "match": null,
+   "source": "https://dlsmi.kg/upload/%D0%9F%D1%80%D0%B8%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D0%B5%20%D0%BA%20%D0%BF%D0%BE%D1%81%D1%82%D0%B0%D0%BD%D0%BE%D0%B2%D0%BB%D0%B5%D0%BD%D0%B8%D1%8E%20%D1%81%20%D0%BF%D1%80%D0%B8%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D1%8F%D0%BC%D0%B8.pdf"
+  },
+  {
+   "name": "Draft patient leaflet in Kyrgyz and Russian",
+   "applies": "all",
+   "match": null,
+   "source": "https://dlsmi.kg/upload/%D0%9F%D1%80%D0%B8%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D0%B5%20%D0%BA%20%D0%BF%D0%BE%D1%81%D1%82%D0%B0%D0%BD%D0%BE%D0%B2%D0%BB%D0%B5%D0%BD%D0%B8%D1%8E%20%D1%81%20%D0%BF%D1%80%D0%B8%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D1%8F%D0%BC%D0%B8.pdf",
+   "note": "Uses the Annex 2 template. Must name the local MAH representative."
+  },
+  {
+   "name": "Pack texts and colour mock-ups (JPEG 1:1)",
+   "applies": "all",
+   "match": null,
+   "source": "https://dlsmi.kg/upload/%D0%9F%D1%80%D0%B8%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D0%B5%20%D0%BA%20%D0%BF%D0%BE%D1%81%D1%82%D0%B0%D0%BD%D0%BE%D0%B2%D0%BB%D0%B5%D0%BD%D0%B8%D1%8E%20%D1%81%20%D0%BF%D1%80%D0%B8%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D1%8F%D0%BC%D0%B8.pdf",
+   "note": "Kyrgyz and/or Russian. English allowed with sticker and QR code on listed-country or automatic routes."
+  },
+  {
+   "name": "Side-by-side SmPC/leaflet comparison with originator and no-difference declaration",
+   "applies": "class",
+   "match": "generic",
+   "source": "https://dlsmi.kg/upload/%D0%9F%D1%80%D0%B8%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D0%B5%20%D0%BA%20%D0%BF%D0%BE%D1%81%D1%82%D0%B0%D0%BD%D0%BE%D0%B2%D0%BB%D0%B5%D0%BD%D0%B8%D1%8E%20%D1%81%20%D0%BF%D1%80%D0%B8%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D1%8F%D0%BC%D0%B8.pdf"
+  },
+  {
+   "name": "Generic justification summary (up to 5 pages)",
+   "applies": "class",
+   "match": "generic",
+   "source": "https://dlsmi.kg/upload/%D0%9F%D1%80%D0%B8%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D0%B5%20%D0%BA%20%D0%BF%D0%BE%D1%81%D1%82%D0%B0%D0%BD%D0%BE%D0%B2%D0%BB%D0%B5%D0%BD%D0%B8%D1%8E%20%D1%81%20%D0%BF%D1%80%D0%B8%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D1%8F%D0%BC%D0%B8.pdf"
+  },
+  {
+   "name": "List of countries where filed, approved, refused or suspended",
+   "applies": "all",
+   "match": null,
+   "source": "https://dlsmi.kg/upload/%D0%9F%D1%80%D0%B8%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D0%B5%20%D0%BA%20%D0%BF%D0%BE%D1%81%D1%82%D0%B0%D0%BD%D0%BE%D0%B2%D0%BB%D0%B5%D0%BD%D0%B8%D1%8E%20%D1%81%20%D0%BF%D1%80%D0%B8%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D1%8F%D0%BC%D0%B8.pdf"
+  },
+  {
+   "name": "Draft quality standard (ND) in Russian",
+   "applies": "all",
+   "match": null,
+   "source": "https://dlsmi.kg/upload/%D0%9F%D1%80%D0%B8%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D0%B5%20%D0%BA%20%D0%BF%D0%BE%D1%81%D1%82%D0%B0%D0%BD%D0%BE%D0%B2%D0%BB%D0%B5%D0%BD%D0%B8%D1%8E%20%D1%81%20%D0%BF%D1%80%D0%B8%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D1%8F%D0%BC%D0%B8.pdf",
+   "note": "Uses the Annex 3 template. Spec and method may replace it on the automatic route."
+  },
+  {
+   "name": "API master file holder letters (change notification, access to closed part)",
+   "applies": "all",
+   "match": null,
+   "source": "https://dlsmi.kg/upload/%D0%9F%D1%80%D0%B8%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D0%B5%20%D0%BA%20%D0%BF%D0%BE%D1%81%D1%82%D0%B0%D0%BD%D0%BE%D0%B2%D0%BB%D0%B5%D0%BD%D0%B8%D1%8E%20%D1%81%20%D0%BF%D1%80%D0%B8%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D1%8F%D0%BC%D0%B8.pdf"
+  },
+  {
+   "name": "Ph. Eur. CEP for the API",
+   "applies": "all",
+   "match": null,
+   "source": "https://dlsmi.kg/upload/%D0%9F%D1%80%D0%B8%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D0%B5%20%D0%BA%20%D0%BF%D0%BE%D1%81%D1%82%D0%B0%D0%BD%D0%BE%D0%B2%D0%BB%D0%B5%D0%BD%D0%B8%D1%8E%20%D1%81%20%D0%BF%D1%80%D0%B8%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D1%8F%D0%BC%D0%B8.pdf",
+   "note": "If available."
+  },
+  {
+   "name": "TSE certificate for materials of animal origin",
+   "applies": "class",
+   "match": "animal origin",
+   "source": "https://dlsmi.kg/upload/%D0%9F%D1%80%D0%B8%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D0%B5%20%D0%BA%20%D0%BF%D0%BE%D1%81%D1%82%D0%B0%D0%BD%D0%BE%D0%B2%D0%BB%D0%B5%D0%BD%D0%B8%D1%8E%20%D1%81%20%D0%BF%D1%80%D0%B8%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D1%8F%D0%BC%D0%B8.pdf"
+  },
+  {
+   "name": "Plasma or vaccine antigen master file certificate",
+   "applies": "form",
+   "match": "biolog",
+   "source": "https://dlsmi.kg/upload/%D0%9F%D1%80%D0%B8%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D0%B5%20%D0%BA%20%D0%BF%D0%BE%D1%81%D1%82%D0%B0%D0%BD%D0%BE%D0%B2%D0%BB%D0%B5%D0%BD%D0%B8%D1%8E%20%D1%81%20%D0%BF%D1%80%D0%B8%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D1%8F%D0%BC%D0%B8.pdf"
+  },
+  {
+   "name": "GMP certificates for all sites from the national authority (certified copies)",
+   "applies": "all",
+   "match": null,
+   "source": "https://dlsmi.kg/upload/%D0%9F%D1%80%D0%B8%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D0%B5%20%D0%BA%20%D0%BF%D0%BE%D1%81%D1%82%D0%B0%D0%BD%D0%BE%D0%B2%D0%BB%D0%B5%D0%BD%D0%B8%D1%8E%20%D1%81%20%D0%BF%D1%80%D0%B8%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D1%8F%D0%BC%D0%B8.pdf"
+  },
+  {
+   "name": "Manufacturing licence with annexes (certified copy)",
+   "applies": "all",
+   "match": null,
+   "source": "https://dlsmi.kg/upload/%D0%9F%D1%80%D0%B8%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D0%B5%20%D0%BA%20%D0%BF%D0%BE%D1%81%D1%82%D0%B0%D0%BD%D0%BE%D0%B2%D0%BB%D0%B5%D0%BD%D0%B8%D1%8E%20%D1%81%20%D0%BF%D1%80%D0%B8%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D1%8F%D0%BC%D0%B8.pdf"
+  },
+  {
+   "name": "Contracts on GMP duties between MAH and manufacturer or contract sites",
+   "applies": "all",
+   "match": null,
+   "source": "https://dlsmi.kg/upload/%D0%9F%D1%80%D0%B8%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D0%B5%20%D0%BA%20%D0%BF%D0%BE%D1%81%D1%82%D0%B0%D0%BD%D0%BE%D0%B2%D0%BB%D0%B5%D0%BD%D0%B8%D1%8E%20%D1%81%20%D0%BF%D1%80%D0%B8%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D1%8F%D0%BC%D0%B8.pdf",
+   "note": "If applicable."
+  },
+  {
+   "name": "Consent to EAEU GMP inspection",
+   "applies": "all",
+   "match": null,
+   "source": "https://dlsmi.kg/upload/%D0%9F%D1%80%D0%B8%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D0%B5%20%D0%BA%20%D0%BF%D0%BE%D1%81%D1%82%D0%B0%D0%BD%D0%BE%D0%B2%D0%BB%D0%B5%D0%BD%D0%B8%D1%8E%20%D1%81%20%D0%BF%D1%80%D0%B8%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D1%8F%D0%BC%D0%B8.pdf"
+  },
+  {
+   "name": "Site master file",
+   "applies": "all",
+   "match": null,
+   "source": "https://dlsmi.kg/upload/%D0%9F%D1%80%D0%B8%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D0%B5%20%D0%BA%20%D0%BF%D0%BE%D1%81%D1%82%D0%B0%D0%BD%D0%BE%D0%B2%D0%BB%D0%B5%D0%BD%D0%B8%D1%8E%20%D1%81%20%D0%BF%D1%80%D0%B8%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D1%8F%D0%BC%D0%B8.pdf",
+   "note": "If applicable."
+  },
+  {
+   "name": "Manufacturing flow chart with all sites incl. batch release",
+   "applies": "all",
+   "match": null,
+   "source": "https://dlsmi.kg/upload/%D0%9F%D1%80%D0%B8%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D0%B5%20%D0%BA%20%D0%BF%D0%BE%D1%81%D1%82%D0%B0%D0%BD%D0%BE%D0%B2%D0%BB%D0%B5%D0%BD%D0%B8%D1%8E%20%D1%81%20%D0%BF%D1%80%D0%B8%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D1%8F%D0%BC%D0%B8.pdf"
+  },
+  {
+   "name": "Pharmacovigilance system master file summary and QPPV details",
+   "applies": "all",
+   "match": null,
+   "source": "https://dlsmi.kg/upload/%D0%9F%D1%80%D0%B8%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D0%B5%20%D0%BA%20%D0%BF%D0%BE%D1%81%D1%82%D0%B0%D0%BD%D0%BE%D0%B2%D0%BB%D0%B5%D0%BD%D0%B8%D1%8E%20%D1%81%20%D0%BF%D1%80%D0%B8%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D1%8F%D0%BC%D0%B8.pdf"
+  },
+  {
+   "name": "Confirmation of PV contact person living in Kyrgyzstan",
+   "applies": "all",
+   "match": null,
+   "source": "https://dlsmi.kg/upload/%D0%9F%D1%80%D0%B8%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D0%B5%20%D0%BA%20%D0%BF%D0%BE%D1%81%D1%82%D0%B0%D0%BD%D0%BE%D0%B2%D0%BB%D0%B5%D0%BD%D0%B8%D1%8E%20%D1%81%20%D0%BF%D1%80%D0%B8%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D1%8F%D0%BC%D0%B8.pdf"
+  },
+  {
+   "name": "Risk management plan",
+   "applies": "form",
+   "match": "biolog",
+   "source": "https://dlsmi.kg/upload/%D0%9F%D1%80%D0%B8%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D0%B5%20%D0%BA%20%D0%BF%D0%BE%D1%81%D1%82%D0%B0%D0%BD%D0%BE%D0%B2%D0%BB%D0%B5%D0%BD%D0%B8%D1%8E%20%D1%81%20%D0%BF%D1%80%D0%B8%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D1%8F%D0%BC%D0%B8.pdf",
+   "note": "For originators, biologics and biosimilars."
+  },
+  {
+   "name": "Trademark registration copy",
+   "applies": "all",
+   "match": null,
+   "source": "https://dlsmi.kg/upload/%D0%9F%D1%80%D0%B8%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D0%B5%20%D0%BA%20%D0%BF%D0%BE%D1%81%D1%82%D0%B0%D0%BD%D0%BE%D0%B2%D0%BB%D0%B5%D0%BD%D0%B8%D1%8E%20%D1%81%20%D0%BF%D1%80%D0%B8%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D1%8F%D0%BC%D0%B8.pdf",
+   "note": "If available."
+  },
+  {
+   "name": "CTD Module 2 summaries",
+   "applies": "all",
+   "match": null,
+   "source": "https://dlsmi.kg/upload/%D0%9F%D1%80%D0%B8%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D0%B5%20%D0%BA%20%D0%BF%D0%BE%D1%81%D1%82%D0%B0%D0%BD%D0%BE%D0%B2%D0%BB%D0%B5%D0%BD%D0%B8%D1%8E%20%D1%81%20%D0%BF%D1%80%D0%B8%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D1%8F%D0%BC%D0%B8.pdf"
+  },
+  {
+   "name": "CTD Module 3 quality data incl. stability (zone II)",
+   "applies": "all",
+   "match": null,
+   "source": "https://dlsmi.kg/upload/%D0%9F%D1%80%D0%B8%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D0%B5%20%D0%BA%20%D0%BF%D0%BE%D1%81%D1%82%D0%B0%D0%BD%D0%BE%D0%B2%D0%BB%D0%B5%D0%BD%D0%B8%D1%8E%20%D1%81%20%D0%BF%D1%80%D0%B8%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D1%8F%D0%BC%D0%B8.pdf",
+   "note": "Russian translation of 3.2.P.5.1, P.5.2 and P.5.6."
+  },
+  {
+   "name": "Bioequivalence study report with protocol, ethics approval, insurance and chromatograms",
+   "applies": "form",
+   "match": "oral solid",
+   "source": "https://dlsmi.kg/upload/%D0%9F%D1%80%D0%B8%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D0%B5%20%D0%BA%20%D0%BF%D0%BE%D1%81%D1%82%D0%B0%D0%BD%D0%BE%D0%B2%D0%BB%D0%B5%D0%BD%D0%B8%D1%8E%20%D1%81%20%D0%BF%D1%80%D0%B8%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D1%8F%D0%BC%D0%B8.pdf"
+  },
+  {
+   "name": "Process validation incl. media fill simulation",
+   "applies": "form",
+   "match": "sterile",
+   "source": "https://dlsmi.kg/upload/%D0%9F%D1%80%D0%B8%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D0%B5%20%D0%BA%20%D0%BF%D0%BE%D1%81%D1%82%D0%B0%D0%BD%D0%BE%D0%B2%D0%BB%D0%B5%D0%BD%D0%B8%D1%8E%20%D1%81%20%D0%BF%D1%80%D0%B8%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D1%8F%D0%BC%D0%B8.pdf"
+  },
+  {
+   "name": "Samples, reference standards and reagents for triple analysis",
+   "applies": "all",
+   "match": null,
+   "source": "https://dlsmi.kg/upload/%D0%9F%D1%80%D0%B8%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D0%B5%20%D0%BA%20%D0%BF%D0%BE%D1%81%D1%82%D0%B0%D0%BD%D0%BE%D0%B2%D0%BB%D0%B5%D0%BD%D0%B8%D1%8E%20%D1%81%20%D0%BF%D1%80%D0%B8%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D1%8F%D0%BC%D0%B8.pdf",
+   "note": "Within 45 days of payment. Not required on the listed-country route."
+  },
+  {
+   "name": "Power of attorney for the local applicant or representative",
+   "applies": "all",
+   "match": null,
+   "source": "https://dlsmi.kg/upload/%D0%9F%D1%80%D0%B8%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D0%B5%205%20%28%D0%90%D0%BA%D1%82%20%D0%BF%D1%80%D0%B8%D0%B5%D0%BC%D0%B0%20%D0%B4%D0%BE%D0%BA%D1%83%D0%BC%D0%B5%D0%BD%D1%82%D0%BE%D0%B2%20%D0%BF%D0%BE%20%D0%BF%D1%80%D0%BE%D1%86%D0%B5%D0%B4%D1%83%D1%80%D0%B0%D0%BC%20%D1%80%D0%B5%D0%B3%D0%B8%20%D0%B8%20%D0%BF%D0%B5%D1%80%D0%B5%2C%20%D1%81%D0%BE%D0%B3%D0%BB%D0%B0%D1%81%D0%BD%D0%BE%20%D0%9F%D0%9A%D0%9C%20%D0%9A%D0%A0%20%E2%84%96136%29.pdf"
+  },
+  {
+   "name": "Price registration application with 12-month invoices and reference-country prices",
+   "applies": "class",
+   "match": "eml",
+   "source": "https://dlsmi.kg/upload/%D1%81%20%D0%B8%D0%B7%D0%BC_%D0%9F%D0%9A%D0%9C%20%D0%9A%D0%A0%20%D0%BE%D1%82%2031%20%D0%BC%D0%B0%D1%8F%202023%20%D0%B3%D0%BE%D0%B4%D0%B0%20%E2%84%96%20292.doc"
+  }
+ ],
+ "news": [
+  {
+   "name": "DLSiMI news RSS",
+   "url": "https://dlsmi.kg/ru/news-rss2",
+   "format": "rss",
+   "notes": "Valid RSS 2.0, but pubDate is broken (shows 1970) and items are often only a title plus a PDF link. A few items per month."
+  },
+  {
+   "name": "DLSiMI legal acts page",
+   "url": "https://dlsmi.kg/ru/legislation/",
+   "format": "html",
+   "notes": "Static HTML list of Cabinet resolutions and orders, mostly scanned PDFs. New acts are added at the top, several per month. Res. 541 (Aug 2026) appeared here first."
+  },
+  {
+   "name": "DLSiMI price regulation orders",
+   "url": "https://dlsmi.kg/price_regulation_order1",
+   "format": "html",
+   "notes": "HTML list of price-registration orders (PDF), updated every 1-3 weeks. The price register is a separate Excel file on the price regulation page."
+  },
+  {
+   "name": "DLSiMI registration page",
+   "url": "https://dlsmi.kg/ru/registration/",
+   "format": "html",
+   "notes": "Rules, timelines and forms. Updated rarely and lagged the Aug 2026 change (still cited Res. 136 in Oct 2026)."
+  },
+  {
+   "name": "EAEU legal portal (EEC decisions)",
+   "url": "https://docs.eaeunion.org/",
+   "format": "html",
+   "notes": "Official EEC decisions, including Decision 78 amendments. Searchable HTML, no stable feed."
+  }
+ ]
+}

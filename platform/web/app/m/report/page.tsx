@@ -29,7 +29,7 @@ export default async function MarketRead({ searchParams }: { searchParams: Promi
         (select count(*)::int from country_molecules where country = $1 and on_national_list and registrants = 0 and rankable) as open`, [market]);
     const products = await rows(db, `${mfrProductsSql(market)} where p.user_id = $1 order by g.score desc nulls last, p.name`, [u.id]);
     const partners = canUse(tierIn(u, market), 'matching') ? await rows(db, `select code, products, open_to, top_classes from partner_search($1) limit 5`, [market]) : [];
-    const route = canUse(tierIn(u, market), 'pathway') ? await rows(db, 'select label, months_low, months_high from registration_routes where months_low is not null order by sort') : [];
+    const route = canUse(tierIn(u, market), 'pathway') ? await rows(db, 'select label, months_low, months_high from country_routes where country = $1 and months_low is not null order by sort', [market]) : [];
     return { p, market, h, products, partners, route };
   });
   const m = countryName(d.market);

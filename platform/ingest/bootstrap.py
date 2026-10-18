@@ -26,6 +26,8 @@ def run():
     raw = os.path.join(DATA_DIR, "raw")
     with connect() as conn:
         cur = conn.cursor()
+        import regulatory
+        regulatory.load(cur)                      # researched requirements, routes and checklists, when they changed
         for kind, pattern in (("national_list", "*nemlit*.txt"), ("global_list", "*who*.txt")):
             files = sorted(glob.glob(os.path.join(raw, pattern)))
             if files and not cur.execute("select 1 from reference_files where kind = %s", (kind,)).fetchone():

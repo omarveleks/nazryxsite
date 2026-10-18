@@ -1272,6 +1272,33 @@ def test_molecule_prices_from_listings_and_neighbour_estimates(env, monkeypatch)
         c.rollback()
 
 
+
+def test_researched_regulatory_detail_replaces_starter_rules(env, tmp_path):
+    """Researched rules replace the generic starter rules (team-written ones stay); low-confidence ones are drafts;
+    routes, the document checklist and regulator news pages load; an unchanged file is not reloaded."""
+    import regulatory
+    (tmp_path / "TZ.json").write_text(json.dumps({"country": "TZ", "checked": "2026-10", "facts": [
+        {"topic": "Fees", "applies": "all", "match": None, "title": "Registration fee", "body": "USD 2,000 per product.", "source": "https://x", "confidence": "high"},
+        {"topic": "Marking", "applies": "all", "match": None, "title": "No serialization", "body": "None found.", "source": "https://x", "confidence": "low"},
+        {"topic": "Dossier", "applies": "form", "match": "sterile", "title": "Sterility", "body": "Validation.", "source": "https://x", "confidence": "high"}],
+        "routes": [{"key": "full", "label": "Full", "months_low": 9, "months_high": 18, "fee_usd_low": 2000, "fee_usd_high": 3000},
+                   {"key": "abridged", "label": "Abridged", "months_low": 5, "months_high": 10}],
+        "documents": [{"name": "Cover letter", "applies": "all"}, {"name": "Sterility validation", "applies": "form", "match": "sterile"}],
+        "news": [{"name": "Announcements", "url": "https://www.tmda.go.tz/announcements"}, {"name": "App", "url": "https://x/#/y"}]}))
+    with psycopg.connect(URL) as c:
+        cur = c.cursor()
+        cur.execute("insert into reg_requirements (country, topic, title, body, origin) values ('TZ', 'Other', 'Team note', 'Kept.', 'team')")
+        assert regulatory.load(cur, str(tmp_path)) == 1
+        got = dict(cur.execute("select title, status from reg_requirements where country = 'TZ' and origin <> 'team'").fetchall())
+        assert got == {"Registration fee": "published", "No serialization": "draft", "Sterility": "published"}
+        assert cur.execute("select count(*) from reg_requirements where country = 'TZ' and origin = 'team'").fetchone()[0] >= 1
+        assert dict(cur.execute("select key, eligibility from country_routes where country = 'TZ'").fetchall()) == {"full": "all", "abridged": "sra_or_pq"}
+        assert cur.execute("select count(*) from reg_checklist where country = 'TZ'").fetchone()[0] == 2
+        assert [r[0] for r in cur.execute("select url from data_sources where kind = 'news' and country = 'TZ'")] == ["https://www.tmda.go.tz/announcements"]
+        assert regulatory.load(cur, str(tmp_path)) == 0                 # unchanged: not reloaded over the team's edits
+        c.rollback()
+
+
 def test_only_the_team_sees_partner_names(env):
     team = q("select id from users where role = 'team' limit 1")[0][0]
     with psycopg.connect(URL) as c:

@@ -550,11 +550,21 @@ def run(conn, only=None):
                 except Exception:
                     cur.execute("rollback to savepoint tr")
                     log.exception("translation failed")
+            elif kind == "news":
+                import reg_news
+                url = cur.execute("select url from data_sources where key = %s", (key,)).fetchone()[0]
+                n = reg_news.collect(cur, s, key, country, url)
             elif kind == "prices":
                 n = PRICES[country](cur, s)
                 pricing.refresh_fx(cur, s)
                 if pricing.catching_up(cur, country):         # first pass not finished: go again on the next free tick
                     cur.execute("update data_sources set run_now = true where key = %s", (key,))
+            if kind in ("tenders", "news"):
+                cur.execute("savepoint tr2")
+                try:
+                    translate.run(cur)                      # titles in English
+                except Exception:
+                    cur.execute("rollback to savepoint tr2")
             if kind in ("prices", "tenders"):
                 pricing.rebuild(cur)                    # averages per molecule and market, and neighbour estimates
         cur.execute("""update data_sources set last_rows = %s, last_error = %s, last_ok = case when %s then last_ok else now() end

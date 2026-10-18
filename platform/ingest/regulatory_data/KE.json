@@ -1,0 +1,698 @@
+{
+ "country": "KE",
+ "regulator": "Pharmacy and Poisons Board (PPB) – https://web.pharmacyboardkenya.org",
+ "checked": "2026-10",
+ "facts": [
+  {
+   "topic": "Route",
+   "applies": "all",
+   "match": null,
+   "title": "Regulator and legal basis",
+   "body": "The Pharmacy and Poisons Board (PPB) grants marketing authorisation under the Pharmacy and Poisons Act (Cap. 244) and the Registration of Health Products and Technologies Rules, 2022 (Legal Notice 100 of 2022). Applications go through the online portal (products.pharmacyboardkenya.org / PRIMS).",
+   "source": "https://web.pharmacyboardkenya.org/download/pharmacy-and-poisons-registration-of-health-products-and-technologies-rules-2022/",
+   "confidence": "high"
+  },
+  {
+   "topic": "Route",
+   "applies": "all",
+   "match": null,
+   "title": "Four evaluation pathways",
+   "body": "PPB uses full review, abridged review, verified review and recognition. The last three are reliance routes and replace the old Abbreviated Medicines Review Process. Even reliance routes need the full CTD Modules 1-5.",
+   "source": "https://web.pharmacyboardkenya.org/download/guidelines-on-medicines-evaluation-and-registration/",
+   "confidence": "high"
+  },
+  {
+   "topic": "Route",
+   "applies": "all",
+   "match": null,
+   "title": "Reference authorities for reliance",
+   "body": "PPB's reference authorities are EMA (centralised and decentralised), Health Canada, MHRA, Japan MHLW, Swissmedic, TGA and US FDA. WHO PQ, WHO/SRA CRP, EAC-MRH, IGAD, AMA, ZAZIBONA, EU-M4all and MAGHP opinions can also be relied on.",
+   "source": "https://web.pharmacyboardkenya.org/download/guidelines-on-medicines-evaluation-and-registration/",
+   "confidence": "high"
+  },
+  {
+   "topic": "Route",
+   "applies": "all",
+   "match": null,
+   "title": "Recognition route not yet live",
+   "body": "Direct recognition needs a signed recognition agreement with a reference authority. PPB says it is still negotiating these, so in practice the reliance routes are abridged or verified review.",
+   "source": "https://web.pharmacyboardkenya.org/download/guidelines-on-reliance-mechanisms-for-marketing-authorization-of-health-products-and-technologies-in-kenya/",
+   "confidence": "medium"
+  },
+  {
+   "topic": "Route",
+   "applies": "all",
+   "match": null,
+   "title": "Regulator transition still pending",
+   "body": "A bill to replace PPB with a Kenya Health Products and Technologies Regulatory Authority (first drafted as the Kenya Drugs Authority Bill, 2022) passed the National Assembly and had its first Senate reading on 4 Dec 2024. As of Oct 2026 PPB still issues all approvals; we found no proof the bill has been signed into law.",
+   "source": "https://www.parliament.go.ke/sites/default/files/2025-02/Bill%20Digest%20-%20Kenya%20Health%20Products%20and%20Technologies%20Regulatory%20Authority%20Bill,%202022%20(1).pdf",
+   "confidence": "medium"
+  },
+  {
+   "topic": "Fees",
+   "applies": "all",
+   "match": null,
+   "title": "Registration fee: USD 1,000",
+   "body": "New registration of an imported medicine costs USD 1,000 per product (about KES 129,000), or USD 500 if made in Kenya. PPB applied the 2022 Rules fee schedule in full from 1 Jan 2026. Pay by electronic transfer and upload the invoice and receipt.",
+   "source": "https://web.pharmacyboardkenya.org/download/schedule-of-fees-for-regulatory-activities-2/",
+   "confidence": "high"
+  },
+  {
+   "topic": "Fees",
+   "applies": "all",
+   "match": null,
+   "title": "Fast-track evaluation fee: USD 2,000",
+   "body": "The 2022 Rules list USD 2,000 (about KES 258,000) for fast-tracked evaluation of a product made outside Kenya. The service charter gives no separate fast-track timeline.",
+   "source": "https://web.pharmacyboardkenya.org/download/schedule-of-fees-for-regulatory-activities-2/",
+   "confidence": "medium"
+  },
+  {
+   "topic": "Fees",
+   "applies": "all",
+   "match": null,
+   "title": "Annual retention fee: USD 300",
+   "body": "Every registered product must be retained in the register each year by 31 December. The fee is USD 300 for imported products (about KES 38,700) and USD 150 for local ones. An older 2010 schedule also lists a USD 100 late-retention penalty.",
+   "source": "https://web.pharmacyboardkenya.org/download/customers-service-delivery-charter/",
+   "confidence": "high"
+  },
+  {
+   "topic": "Fees",
+   "applies": "all",
+   "match": null,
+   "title": "Renewal and variation fees",
+   "body": "Five-year renewal costs USD 1,000 for an imported product (USD 500 local). Minor and major variations cost USD 300 each. Appeals against a rejection cost USD 300.",
+   "source": "https://web.pharmacyboardkenya.org/download/customers-service-delivery-charter/",
+   "confidence": "high"
+  },
+  {
+   "topic": "Fees",
+   "applies": "all",
+   "match": null,
+   "title": "GMP inspection of a foreign site: USD 4,000",
+   "body": "A PPB GMP inspection of a foreign site costs USD 4,000 per site (about KES 516,000); a Kenyan site costs USD 1,000. The charter does not say whether inspector travel is charged on top.",
+   "source": "https://web.pharmacyboardkenya.org/download/customers-service-delivery-charter/",
+   "confidence": "medium"
+  },
+  {
+   "topic": "Fees",
+   "applies": "all",
+   "match": null,
+   "title": "Pre-registration lab testing (KES)",
+   "body": "Samples are tested in a PPB-recognised lab, and the applicant pays. One recognised Kenyan lab publishes guide prices: HPLC assay KES 83,000-165,000, dissolution KES 68,000-91,000, related substances KES 99,000-350,000 per product.",
+   "source": "https://web.pharmacyboardkenya.org/download/meds-fees/",
+   "confidence": "medium"
+  },
+  {
+   "topic": "Timeline",
+   "applies": "all",
+   "match": null,
+   "title": "Full review: 80 + 540 days target",
+   "body": "Screening is targeted within 80 days of payment. After the CTD number is issued, evaluation, decision and certificate are targeted within 540 days. Clock stops for questions are not counted.",
+   "source": "https://web.pharmacyboardkenya.org/download/customers-service-delivery-charter/",
+   "confidence": "high"
+  },
+  {
+   "topic": "Timeline",
+   "applies": "all",
+   "match": null,
+   "title": "Query deadlines and lapse rules",
+   "body": "New applications: answer screening queries in 28 days, then 14 days (up to 3 rounds). Answer the first evaluation query in 180 days and later ones in 120 days (up to 4 rounds). Missing a deadline closes the file, and you must reapply and pay again (notice of 25 Sep 2026).",
+   "source": "https://web.pharmacyboardkenya.org/download/query-response-timelines-and-review-cycles-for-new-and-renewal-marketing-authorisation-applications/",
+   "confidence": "high"
+  },
+  {
+   "topic": "Timeline",
+   "applies": "all",
+   "match": null,
+   "title": "Reliance targets",
+   "body": "SRA/WHO-PQ reliance: 10 days screening, 10 days for screening answers, 40 days evaluation (service charter, July 2026). The reliance guideline gives longer targets for SRA products: 10 + 30 + 90 + 15 working days. For CRP: 10 + 10 + 70 working days.",
+   "source": "https://web.pharmacyboardkenya.org/download/customers-service-delivery-charter/",
+   "confidence": "medium"
+  },
+  {
+   "topic": "Timeline",
+   "applies": "all",
+   "match": null,
+   "title": "Validity and renewal",
+   "body": "A registration is valid 5 years. Apply to renew at least 3 months before expiry, in Form 4 with an updated CTD, a list of variations, a product quality review and safety reports. Annual retention must be up to date before you can renew.",
+   "source": "https://web.pharmacyboardkenya.org/download/guideline-for-renewal-and-re-registration-of-marketing-authorization/",
+   "confidence": "high"
+  },
+  {
+   "topic": "Local representative",
+   "applies": "all",
+   "match": null,
+   "title": "Local representative is mandatory",
+   "body": "A foreign applicant must appoint a local representative: a Kenyan citizen, a permanent resident or a company incorporated in Kenya. Include the appointment agreement with the application, and report any change to it within 7 days.",
+   "source": "https://web.pharmacyboardkenya.org/download/pharmacy-and-poisons-registration-of-health-products-and-technologies-rules-2022/",
+   "confidence": "high"
+  },
+  {
+   "topic": "Local representative",
+   "applies": "all",
+   "match": null,
+   "title": "LTR must hold a PPB licence",
+   "body": "The application must prove a valid PPB licence, normally a wholesale dealer's licence (or a manufacturing licence). In practice the Local Technical Representative (LTR), named in section 1.16 of the form, holds it. PPB sends queries to both the MAH and the LTR.",
+   "source": "https://web.pharmacyboardkenya.org/download/pharmacy-and-poisons-registration-of-health-products-and-technologies-rules-2022/",
+   "confidence": "medium"
+  },
+  {
+   "topic": "Site and GMP",
+   "applies": "all",
+   "match": null,
+   "title": "PPB GMP needed for every site",
+   "body": "Every finished-product site, including secondary packers, needs PPB GMP approval before registration. Also submit the home-authority GMP certificate, a WHO-type CPP, the manufacturing licence and the API maker's GMP certificate.",
+   "source": "https://web.pharmacyboardkenya.org/download/applicants-screening-checklist-for-registration-of-human-medicines-chemical-entities-products/",
+   "confidence": "high"
+  },
+  {
+   "topic": "Site and GMP",
+   "applies": "all",
+   "match": null,
+   "title": "On-site, desk review or recognition",
+   "body": "Sites approved by an SRA/WLA, WHO PQ or an EAC joint inspection can get recognition or a desk review (90-day target). New sites not approved by a reference authority get an on-site inspection, targeted within 360 days of application. Reference certificates need at least 6 months of remaining validity.",
+   "source": "https://web.pharmacyboardkenya.org/download/guidelines-on-the-reliance-and-recognition-of-good-manufacturing-practices-gmp-decisions/",
+   "confidence": "high"
+  },
+  {
+   "topic": "Site and GMP",
+   "applies": "all",
+   "match": null,
+   "title": "GMP inspection steps and validity",
+   "body": "On-site inspection needs a site master file. PPB targets the preliminary report within 30 working days and each CAPA review within 15 working days. The certificate is paid on a 3-year basis, but under reliance it cannot outlast the reference certificate.",
+   "source": "https://web.pharmacyboardkenya.org/download/guidelines-on-the-reliance-and-recognition-of-good-manufacturing-practices-gmp-decisions/",
+   "confidence": "medium"
+  },
+  {
+   "topic": "Dossier",
+   "applies": "all",
+   "match": null,
+   "title": "CTD in English, submitted online",
+   "body": "Submit Modules 1-5 in ICH CTD format electronically, in UK English. Documents in other languages need a certified or notarised English translation. Module 2 (QOS-PD) and the QIS also go in Word.",
+   "source": "https://web.pharmacyboardkenya.org/download/guidelines-on-medicines-evaluation-and-registration/",
+   "confidence": "high"
+  },
+  {
+   "topic": "Dossier",
+   "applies": "all",
+   "match": null,
+   "title": "API documentation options",
+   "body": "API data can be given as a CEP, a WHO-prequalified API, an APIMF (with a letter of access) or full data in the dossier, in that order of preference. With a CEP you still add polymorph and particle-size data and two pilot batch analyses.",
+   "source": "https://web.pharmacyboardkenya.org/download/guidelines-on-medicines-evaluation-and-registration/",
+   "confidence": "high"
+  },
+  {
+   "topic": "Dossier",
+   "applies": "all",
+   "match": null,
+   "title": "Batch and validation records",
+   "body": "Include the executed BMR of a real batch made within 6 months before submission (or of the BE batch), a blank master record, and process validation for 3 consecutive batches or a protocol with a commitment.",
+   "source": "https://web.pharmacyboardkenya.org/download/applicants-screening-checklist-for-registration-of-human-medicines-chemical-entities-products/",
+   "confidence": "high"
+  },
+  {
+   "topic": "Bioequivalence",
+   "applies": "all",
+   "match": null,
+   "title": "BE mandatory for generics",
+   "body": "PPB phased in mandatory therapeutic equivalence for generics: new local applications from 1 Jan 2024, already-registered products from 1 Jan 2025. Submit BE reports in Module 5 with the BTIF form. Acceptance range is 80-125% (90% CI) for AUC and Cmax.",
+   "source": "https://web.pharmacyboardkenya.org/download/notice-on-commencement-of-mandatory-therapeutic-equivalence-demonstration-for-multisource-generic-medical-products-in-kenya/",
+   "confidence": "high"
+  },
+  {
+   "topic": "Bioequivalence",
+   "applies": "all",
+   "match": null,
+   "title": "Reference product rules",
+   "body": "Use the innovator product, bought on an ICH/SRA market. If none is available, use an SRA-approved product or the WHO comparator. Prove origin with the label, the purchase invoice and shipping records. Ask PPB before starting if no suitable comparator exists.",
+   "source": "https://web.pharmacyboardkenya.org/download/guidelines-on-medicines-evaluation-and-registration/",
+   "confidence": "high"
+  },
+  {
+   "topic": "Bioequivalence",
+   "applies": "all",
+   "match": null,
+   "title": "Biowaivers",
+   "body": "BCS-based biowaivers are possible for immediate-release BCS Class I and III products (ICH M9), backed by dissolution data at pH 1.2, 4.5 and 6.8. Additional strengths can be waived with proportional composition and comparative dissolution.",
+   "source": "https://web.pharmacyboardkenya.org/download/applicants-screening-checklist-for-registration-of-human-medicines-chemical-entities-products/",
+   "confidence": "high"
+  },
+  {
+   "topic": "Stability",
+   "applies": "all",
+   "match": null,
+   "title": "Zone IVb: 30°C/75% RH",
+   "body": "Finished products: long-term 30°C ± 2°C / 75% RH ± 5% and accelerated 40°C / 75% RH. At submission give at least 12 months long-term and 6 months accelerated data on 3 primary batches, for each pack type. Reliance routes also need zone IVb data.",
+   "source": "https://web.pharmacyboardkenya.org/download/guidelines-on-medicines-evaluation-and-registration/",
+   "confidence": "high"
+  },
+  {
+   "topic": "Samples",
+   "applies": "all",
+   "match": null,
+   "title": "Samples and pre-registration testing",
+   "body": "Provide 3 samples of the unit pack after screening, enough for full specification testing plus one repeat. The CTD number is issued only after samples arrive. Add a certificate of analysis from a PPB-recognised Kenyan QC lab. This is waived for WHO CRP but required for SRA and EAC reliance.",
+   "source": "https://web.pharmacyboardkenya.org/download/guidelines-on-medicines-evaluation-and-registration/",
+   "confidence": "high"
+  },
+  {
+   "topic": "Samples",
+   "applies": "all",
+   "match": null,
+   "title": "State lab under renovation",
+   "body": "Since June 2026 the National Quality Control Laboratory has been under renovation. PPB sends regulatory (PMS) samples to contracted external labs, including WHO-prequalified labs in East Africa.",
+   "source": "https://web.pharmacyboardkenya.org/download/regulatory-notice-interim-arrangements-for-regulatory-laboratory-testing/",
+   "confidence": "high"
+  },
+  {
+   "topic": "Labelling",
+   "applies": "all",
+   "match": null,
+   "title": "English labels, dynamic batch data",
+   "body": "Labels and leaflets must be at least in English. Batch number, manufacturing date and expiry date must be printed during packaging; pre-printed values are not accepted. Blisters must show name, strength, batch, expiry and the release site.",
+   "source": "https://web.pharmacyboardkenya.org/download/guidelines-on-medicines-evaluation-and-registration/",
+   "confidence": "high"
+  },
+  {
+   "topic": "Labelling",
+   "applies": "all",
+   "match": null,
+   "title": "Required outer-pack items",
+   "body": "The outer pack must show INN and strength, excipients of concern, MAH name and address, the release site address and the legal class (e.g. POM, OTC). It also needs name, strength and expiry in braille, plus a unique identifier such as a barcode or PPB registration number.",
+   "source": "https://web.pharmacyboardkenya.org/download/guideline-on-summary-of-product-characteristics-patient-information-leaflet-and-labelling/",
+   "confidence": "high"
+  },
+  {
+   "topic": "Labelling",
+   "applies": "all",
+   "match": null,
+   "title": "SmPC and patient leaflet",
+   "body": "Prescription medicines need an SmPC. A patient leaflet is required for long-term use, self-injected and OTC products, in at least 9-point type. Labelling changes must be notified to PPB before use.",
+   "source": "https://web.pharmacyboardkenya.org/download/guideline-on-summary-of-product-characteristics-patient-information-leaflet-and-labelling/",
+   "confidence": "high"
+  },
+  {
+   "topic": "Marking",
+   "applies": "all",
+   "match": null,
+   "title": "GS1 DataMatrix traceability",
+   "body": "PPB's Authentication and Traceability Standards (Sep 2025) adopt GS1: GTIN-14 plus serial number, batch and expiry in a DataMatrix on saleable units, and SSCC on shipping cases. Rollout is phased (batch level first, then high-risk products, then everything), and the standard sets no fixed dates.",
+   "source": "https://web.pharmacyboardkenya.org/download/standards-for-authentication-and-traceability-of-health-products-and-technologies/",
+   "confidence": "medium"
+  },
+  {
+   "topic": "Marking",
+   "applies": "all",
+   "match": null,
+   "title": "Unique ID on imports from 2027",
+   "body": "Kenya's Digital Health Agency, working with PPB, said all imported medicines need a global unique identifier (data matrix) from 1 Jan 2027. This was said at a summit and reported in the press; we found no gazette notice.",
+   "source": "https://www.kenyans.co.ke/news/126289-imported-medicines-face-new-identification-requirement-january-moh-confirms",
+   "confidence": "low"
+  },
+  {
+   "topic": "Pricing",
+   "applies": "all",
+   "match": null,
+   "title": "No price approval before sale",
+   "body": "We found no price-registration or price-cap step for medicines in PPB rules or guidelines. The Board weighs the 'economic value' of a product when deciding on registration, but it does not approve a price.",
+   "source": "https://web.pharmacyboardkenya.org/download/pharmacy-and-poisons-registration-of-health-products-and-technologies-rules-2022/",
+   "confidence": "medium"
+  },
+  {
+   "topic": "After approval",
+   "applies": "all",
+   "match": null,
+   "title": "Variation categories",
+   "body": "Annual notification: file within 12 months of making the change. Immediate notification: accepted if PPB does not object within 30 working days. Minor variation: 60-day target. Major variation: prior approval needed, 90-day target. Every type pays a fee.",
+   "source": "https://web.pharmacyboardkenya.org/download/guideline-for-submission-of-variation-applications-for-registered-human-products/",
+   "confidence": "high"
+  },
+  {
+   "topic": "After approval",
+   "applies": "all",
+   "match": null,
+   "title": "Reliance variations: 90 working days",
+   "body": "Products registered through WHO PQ, CRP or an SRA must file each variation approved by that body with PPB within 90 working days, with the approval letter attached.",
+   "source": "https://web.pharmacyboardkenya.org/download/guidelines-on-reliance-mechanisms-for-marketing-authorization-of-health-products-and-technologies-in-kenya/",
+   "confidence": "high"
+  },
+  {
+   "topic": "After approval",
+   "applies": "all",
+   "match": null,
+   "title": "Annual retention data",
+   "body": "The yearly retention form covers product summary, FPP and API sites, approved presentations, batch formula, specifications and post-approval changes. Attach a valid GMP certificate and pay the fee.",
+   "source": "https://web.pharmacyboardkenya.org/download/pharmacy-and-poisons-registration-of-health-products-and-technologies-rules-2022/",
+   "confidence": "high"
+  },
+  {
+   "topic": "Import",
+   "applies": "all",
+   "match": null,
+   "title": "Import permit: 0.75% of FOB",
+   "body": "Each commercial shipment needs a PPB import permit, applied for via the KenTrade single window. The fee is 0.75% of FOB value. You need the registration or retention certificate, a pro-forma invoice and the importer's wholesale licence. Permits last 1 year.",
+   "source": "https://web.pharmacyboardkenya.org/download/guideline-on-import-and-export-of-health-products-and-technologies/",
+   "confidence": "high"
+  },
+  {
+   "topic": "Import",
+   "applies": "class",
+   "match": "controlled",
+   "title": "Controlled substances",
+   "body": "Narcotics, psychotropics and precursors also need a Dangerous Drugs Authorisation (DDA) and an NPP import permit, valid 6 months, within INCB estimates.",
+   "source": "https://web.pharmacyboardkenya.org/download/guideline-on-import-and-export-of-health-products-and-technologies/",
+   "confidence": "high"
+  },
+  {
+   "topic": "Dossier",
+   "applies": "form",
+   "match": "sterile",
+   "title": "Sterile products: extra data",
+   "body": "For sterile products add filter compatibility, retention and integrity studies, media fills, and sterilisation validation for vials and stoppers. Parenteral and topical labels must list all excipients.",
+   "source": "https://web.pharmacyboardkenya.org/download/applicants-screening-checklist-for-registration-of-human-medicines-chemical-entities-products/",
+   "confidence": "high"
+  }
+ ],
+ "routes": [
+  {
+   "key": "full",
+   "label": "Full review (national)",
+   "description": "Default route for any generic not approved by a PPB reference authority. Charter targets: 80 days screening and 540 days evaluation after the CTD number, excluding clock stops. A PPB GMP inspection runs in parallel (on-site target 360 days).",
+   "months_low": 18,
+   "months_high": 36,
+   "fee_usd_low": 1000,
+   "fee_usd_high": 1000,
+   "source": "https://web.pharmacyboardkenya.org/download/customers-service-delivery-charter/",
+   "confidence": "medium"
+  },
+  {
+   "key": "reliance",
+   "label": "SRA/WLA reliance (abridged)",
+   "description": "For a product approved by a reference authority (EMA, FDA, MHRA, Swissmedic, Health Canada, TGA, Japan) with the same formula, sites and specs. Needs unredacted assessment reports, zone IVb stability, pre-registration lab testing and a PPB GMP certificate. Statutory target is about 60 days (charter) to about 145 working days (guideline).",
+   "months_low": 6,
+   "months_high": 12,
+   "fee_usd_low": 1000,
+   "fee_usd_high": 1000,
+   "source": "https://web.pharmacyboardkenya.org/download/guidelines-on-reliance-mechanisms-for-marketing-authorization-of-health-products-and-technologies-in-kenya/",
+   "confidence": "medium"
+  },
+  {
+   "key": "who_crp",
+   "label": "WHO / SRA Collaborative Registration",
+   "description": "For WHO-prequalified or SRA-approved products whose maker notifies WHO or the SRA. The dossier must match the PQ/SRA file exactly. Verified or abridged review with a 90-working-day target. No pre-registration lab test, but samples, a PPB GMP certificate and zone IVb data are still required.",
+   "months_low": 3,
+   "months_high": 8,
+   "fee_usd_low": 1000,
+   "fee_usd_high": 1000,
+   "source": "https://web.pharmacyboardkenya.org/download/guidelines-on-reliance-mechanisms-for-marketing-authorization-of-health-products-and-technologies-in-kenya/",
+   "confidence": "medium"
+  },
+  {
+   "key": "eac",
+   "label": "EAC joint assessment (EAC-MRH)",
+   "description": "One dossier is assessed jointly by EAC regulators. After a positive EAC recommendation, Kenya uses verification review (charter target about 60 days). The EAC target is 465 days overall plus 116 days to national approval, and a study found real times beyond both targets. National fees still apply.",
+   "months_low": 18,
+   "months_high": 30,
+   "fee_usd_low": 1000,
+   "fee_usd_high": 1000,
+   "source": "https://uhra.herts.ac.uk/id/eprint/10333/",
+   "confidence": "low"
+  },
+  {
+   "key": "priority",
+   "label": "Priority / fast-track review",
+   "description": "PPB may prioritise products for serious or life-threatening disease or unmet need. The 2022 Rules set a USD 2,000 fast-track fee for imported products. No separate timeline is published.",
+   "months_low": 6,
+   "months_high": 18,
+   "fee_usd_low": 2000,
+   "fee_usd_high": 2000,
+   "source": "https://web.pharmacyboardkenya.org/download/schedule-of-fees-for-regulatory-activities-2/",
+   "confidence": "low"
+  }
+ ],
+ "documents": [
+  {
+   "name": "Cover letter signed by the MAH",
+   "applies": "all",
+   "match": null,
+   "note": null,
+   "source": "https://web.pharmacyboardkenya.org/download/guidelines-on-medicines-evaluation-and-registration/"
+  },
+  {
+   "name": "Application form (Form 1) and declaration",
+   "applies": "all",
+   "match": null,
+   "note": "Dated, signed and stamped; filed on the PPB portal",
+   "source": "https://web.pharmacyboardkenya.org/download/guidelines-on-medicines-evaluation-and-registration/"
+  },
+  {
+   "name": "Proof of fee payment (invoice and receipt)",
+   "applies": "all",
+   "match": null,
+   "note": null,
+   "source": "https://web.pharmacyboardkenya.org/download/guidelines-on-medicines-evaluation-and-registration/"
+  },
+  {
+   "name": "Local representative appointment agreement",
+   "applies": "all",
+   "match": null,
+   "note": "Representative must be a Kenyan citizen, a permanent resident or a Kenyan company",
+   "source": "https://web.pharmacyboardkenya.org/download/pharmacy-and-poisons-registration-of-health-products-and-technologies-rules-2022/"
+  },
+  {
+   "name": "LTR's PPB licence (wholesale dealer's licence)",
+   "applies": "all",
+   "match": null,
+   "note": null,
+   "source": "https://web.pharmacyboardkenya.org/download/pharmacy-and-poisons-registration-of-health-products-and-technologies-rules-2022/"
+  },
+  {
+   "name": "WHO-type Certificate of Pharmaceutical Product (CPP)",
+   "applies": "all",
+   "match": null,
+   "note": null,
+   "source": "https://web.pharmacyboardkenya.org/download/guidelines-on-medicines-evaluation-and-registration/"
+  },
+  {
+   "name": "Manufacturing licence of the FPP site",
+   "applies": "all",
+   "match": null,
+   "note": null,
+   "source": "https://web.pharmacyboardkenya.org/download/guidelines-on-medicines-evaluation-and-registration/"
+  },
+  {
+   "name": "PPB GMP certificate for each FPP site (incl. packers)",
+   "applies": "all",
+   "match": null,
+   "note": "Or proof of an application for GMP inspection",
+   "source": "https://web.pharmacyboardkenya.org/download/applicants-screening-checklist-for-registration-of-human-medicines-chemical-entities-products/"
+  },
+  {
+   "name": "Home-authority GMP certificate (FPP and API sites)",
+   "applies": "all",
+   "match": null,
+   "note": null,
+   "source": "https://web.pharmacyboardkenya.org/download/pharmacy-and-poisons-registration-of-health-products-and-technologies-rules-2022/"
+  },
+  {
+   "name": "Site master file",
+   "applies": "all",
+   "match": null,
+   "note": "Required for a PPB on-site GMP inspection",
+   "source": "https://web.pharmacyboardkenya.org/download/customers-service-delivery-charter/"
+  },
+  {
+   "name": "Registration status in SRA and other countries",
+   "applies": "all",
+   "match": null,
+   "note": "Include approvals, rejections and withdrawals with reasons",
+   "source": "https://web.pharmacyboardkenya.org/download/guidelines-on-medicines-evaluation-and-registration/"
+  },
+  {
+   "name": "CEP or APIMF letter of access",
+   "applies": "all",
+   "match": null,
+   "note": "Or WHO-PQ API confirmation, or full API data",
+   "source": "https://web.pharmacyboardkenya.org/download/guidelines-on-medicines-evaluation-and-registration/"
+  },
+  {
+   "name": "SmPC",
+   "applies": "all",
+   "match": null,
+   "note": null,
+   "source": "https://web.pharmacyboardkenya.org/download/guideline-on-summary-of-product-characteristics-patient-information-leaflet-and-labelling/"
+  },
+  {
+   "name": "Patient information leaflet",
+   "applies": "all",
+   "match": null,
+   "note": null,
+   "source": "https://web.pharmacyboardkenya.org/download/guideline-on-summary-of-product-characteristics-patient-information-leaflet-and-labelling/"
+  },
+  {
+   "name": "Label mock-ups (primary and secondary)",
+   "applies": "all",
+   "match": null,
+   "note": null,
+   "source": "https://web.pharmacyboardkenya.org/download/guidelines-on-medicines-evaluation-and-registration/"
+  },
+  {
+   "name": "Quality Information Summary (QIS, Word)",
+   "applies": "all",
+   "match": null,
+   "note": null,
+   "source": "https://web.pharmacyboardkenya.org/download/guidelines-on-medicines-evaluation-and-registration/"
+  },
+  {
+   "name": "Module 2 summaries (QOS-PD in Word and PDF)",
+   "applies": "all",
+   "match": null,
+   "note": null,
+   "source": "https://web.pharmacyboardkenya.org/download/applicants-screening-checklist-for-registration-of-human-medicines-chemical-entities-products/"
+  },
+  {
+   "name": "Module 3 quality data",
+   "applies": "all",
+   "match": null,
+   "note": null,
+   "source": "https://web.pharmacyboardkenya.org/download/guidelines-on-medicines-evaluation-and-registration/"
+  },
+  {
+   "name": "Zone IVb stability data (3 batches, 30°C/75% RH)",
+   "applies": "all",
+   "match": null,
+   "note": "At least 12 months long-term and 6 months accelerated",
+   "source": "https://web.pharmacyboardkenya.org/download/guidelines-on-medicines-evaluation-and-registration/"
+  },
+  {
+   "name": "Executed BMR (batch within 6 months) and blank master BMR",
+   "applies": "all",
+   "match": null,
+   "note": null,
+   "source": "https://web.pharmacyboardkenya.org/download/applicants-screening-checklist-for-registration-of-human-medicines-chemical-entities-products/"
+  },
+  {
+   "name": "Process validation report or protocol",
+   "applies": "all",
+   "match": null,
+   "note": null,
+   "source": "https://web.pharmacyboardkenya.org/download/applicants-screening-checklist-for-registration-of-human-medicines-chemical-entities-products/"
+  },
+  {
+   "name": "Bioequivalence study report and BTIF form",
+   "applies": "class",
+   "match": "bioequivalence",
+   "note": "With CRO GCP/GLP evidence, ethics approval and the bioanalytical report",
+   "source": "https://web.pharmacyboardkenya.org/download/applicants-screening-checklist-for-registration-of-human-medicines-chemical-entities-products/"
+  },
+  {
+   "name": "Comparator purchase proof (label, invoice, shipping)",
+   "applies": "class",
+   "match": "bioequivalence",
+   "note": null,
+   "source": "https://web.pharmacyboardkenya.org/download/guidelines-on-medicines-evaluation-and-registration/"
+  },
+  {
+   "name": "Biowaiver application with dissolution profiles",
+   "applies": "class",
+   "match": "bioequivalence",
+   "note": "pH 1.2, 4.5 and 6.8",
+   "source": "https://web.pharmacyboardkenya.org/download/applicants-screening-checklist-for-registration-of-human-medicines-chemical-entities-products/"
+  },
+  {
+   "name": "Three samples of the commercial pack",
+   "applies": "all",
+   "match": null,
+   "note": null,
+   "source": "https://web.pharmacyboardkenya.org/download/guidelines-on-medicines-evaluation-and-registration/"
+  },
+  {
+   "name": "Certificate of analysis from PPB-recognised Kenyan lab",
+   "applies": "all",
+   "match": null,
+   "note": "Not required on the WHO CRP route",
+   "source": "https://web.pharmacyboardkenya.org/download/applicants-screening-checklist-for-registration-of-human-medicines-chemical-entities-products/"
+  },
+  {
+   "name": "SRA approval and unredacted assessment reports",
+   "applies": "all",
+   "match": null,
+   "note": "Reliance routes only",
+   "source": "https://web.pharmacyboardkenya.org/download/guidelines-on-reliance-mechanisms-for-marketing-authorization-of-health-products-and-technologies-in-kenya/"
+  },
+  {
+   "name": "Sameness declaration and RRA info-sharing consent",
+   "applies": "all",
+   "match": null,
+   "note": "Reliance routes only",
+   "source": "https://web.pharmacyboardkenya.org/download/guidelines-on-reliance-mechanisms-for-marketing-authorization-of-health-products-and-technologies-in-kenya/"
+  },
+  {
+   "name": "WHO/SRA CRP expression of interest form",
+   "applies": "all",
+   "match": null,
+   "note": "CRP route only",
+   "source": "https://web.pharmacyboardkenya.org/download/guidelines-on-reliance-mechanisms-for-marketing-authorization-of-health-products-and-technologies-in-kenya/"
+  },
+  {
+   "name": "EAC joint assessment approval letter",
+   "applies": "all",
+   "match": null,
+   "note": "EAC route only",
+   "source": "https://web.pharmacyboardkenya.org/download/guidelines-on-reliance-mechanisms-for-marketing-authorization-of-health-products-and-technologies-in-kenya/"
+  },
+  {
+   "name": "Sterility assurance data (media fills, filter studies)",
+   "applies": "form",
+   "match": "sterile",
+   "note": null,
+   "source": "https://web.pharmacyboardkenya.org/download/applicants-screening-checklist-for-registration-of-human-medicines-chemical-entities-products/"
+  },
+  {
+   "name": "BSE/TSE certificate for animal-origin excipients",
+   "applies": "all",
+   "match": null,
+   "note": null,
+   "source": "https://web.pharmacyboardkenya.org/download/applicants-screening-checklist-for-registration-of-human-medicines-chemical-entities-products/"
+  },
+  {
+   "name": "Dangerous Drugs Authorisation and NPP permit",
+   "applies": "class",
+   "match": "controlled",
+   "note": "For narcotics, psychotropics and precursors",
+   "source": "https://web.pharmacyboardkenya.org/download/guidelines-for-management-of-narcotics-psychotropics-and-precursor-chemical-substances/"
+  }
+ ],
+ "news": [
+  {
+   "name": "PPB website RSS feed",
+   "url": "https://web.pharmacyboardkenya.org/feed/",
+   "format": "rss",
+   "notes": "WordPress RSS of news posts; updated a few times a month."
+  },
+  {
+   "name": "PPB downloads sitemap (guidelines, notices, forms)",
+   "url": "https://web.pharmacyboardkenya.org/wpdmpro-sitemap.xml",
+   "format": "html",
+   "notes": "XML sitemap of about 340 downloadable documents with lastmod dates. Best way to spot new guidelines and notices; updated weekly or more often."
+  },
+  {
+   "name": "PPB marketing authorisation page",
+   "url": "https://web.pharmacyboardkenya.org/registrationretentionvariations/",
+   "format": "html",
+   "notes": "Links to registered products, suspensions, guidelines and regulatory notices. HTML only."
+  },
+  {
+   "name": "PPB GMP-compliant foreign sites list",
+   "url": "https://web.pharmacyboardkenya.org/gmp-foreign/",
+   "format": "html",
+   "notes": "HTML table of inspected foreign sites and lines. Scrapable; no feed."
+  },
+  {
+   "name": "Kenya Law – Pharmacy and Poisons Act and rules",
+   "url": "https://new.kenyalaw.org/akn/ke/act/1956/17/eng@2023-12-11",
+   "format": "html",
+   "notes": "Official consolidated law. Blocks automated fetching (HTTP 403); check by hand."
+  }
+ ]
+}

@@ -1,0 +1,709 @@
+{
+ "country": "UZ",
+ "regulator": "Center for Safety of Pharmaceutical Products under the Ministry of Health of Uzbekistan (registration; https://uzpharm-control.uz). Pricing: Pharmaceutical Industry Development Agency (https://uzpharmagency.uz, https://pharm.gov.uz). GMP certificates: state 'Center of Good Practices'.",
+ "checked": "2026-10",
+ "facts": [
+  {
+   "topic": "Route",
+   "applies": "all",
+   "match": null,
+   "title": "Legal basis: Resolution 738 (in force 26 Feb 2026)",
+   "body": "Cabinet of Ministers Resolution No. 738 of 24 Nov 2025 sets the registration rules, issued under Presidential Decree PF-137 of 19 Aug 2025. It replaced the 2018 rules (Resolution 213) and has been amended several times in 2026. The registering body is the Center for Safety of Pharmaceutical Products under the Ministry of Health.",
+   "source": "https://lex.uz/ru/docs/7853907",
+   "confidence": "high"
+  },
+  {
+   "topic": "Route",
+   "applies": "all",
+   "match": null,
+   "title": "Two routes: general or recognition",
+   "body": "Medicines are registered either in the general (full) procedure or by recognition. Recognition is open to products registered by a WHO Listed Authority (WLA) or by a regulator at WHO Global Benchmarking Tool Maturity Level 4. The older fixed list of reference countries (2018-2022 decrees) was repealed by PF-137.",
+   "source": "https://lex.uz/ru/docs/7853907",
+   "confidence": "high"
+  },
+  {
+   "topic": "Route",
+   "applies": "all",
+   "match": null,
+   "title": "Recognition: no lab tests, no local trials, no national GMP",
+   "body": "Products filed by recognition skip laboratory testing, local clinical trials and the national GMP certificate. Labels may stay in the language used for the reference market. Reviewers rely on the data the foreign regulator already verified.",
+   "source": "https://lex.uz/ru/docs/7853907",
+   "confidence": "high"
+  },
+  {
+   "topic": "Route",
+   "applies": "all",
+   "match": null,
+   "title": "WHO-prequalified products: 60-day route",
+   "body": "WHO-prequalified medicines registered in cooperation with WHO follow the same 60-day schedule as recognition. They are exempt from lab testing, samples for triple testing, local trials and the national GMP certificate.",
+   "source": "https://lex.uz/ru/docs/7853907",
+   "confidence": "high"
+  },
+  {
+   "topic": "Route",
+   "applies": "all",
+   "match": null,
+   "title": "WHO CRP in use since 2021",
+   "body": "Uzbekistan has registered medicines through the WHO Collaborative Registration Procedure since 2021, starting with TB medicines. Several WHO-PQ products went through it in 2021-2022.",
+   "source": "https://jch.kun.uz/en/news/2022/10/06/usaid-facilitates-access-to-six-tuberculosis-medicines-in-uzbekistan",
+   "confidence": "medium"
+  },
+  {
+   "topic": "Route",
+   "applies": "all",
+   "match": null,
+   "title": "Priority review categories",
+   "body": "Priority registration applies to products with no registered analogue in Uzbekistan, orphan drugs, products the Ministry of Health says are in high demand, and the first generic of an original. The Center must publish the priority list on its website.",
+   "source": "https://lex.uz/ru/docs/7853907",
+   "confidence": "high"
+  },
+  {
+   "topic": "Timeline",
+   "applies": "all",
+   "match": null,
+   "title": "General route: 210 days on the clock",
+   "body": "The statutory clock is 210 days: 30 for primary screening, 75 for lab testing, 90 for specialist review, and 15 for the decision. Clock stops are not counted: 45 days to fix screening gaps, 90 days to answer review questions, the time for GMP assessment, and any local clinical trial (up to 1 year for generics).",
+   "source": "https://lex.uz/ru/docs/7853907",
+   "confidence": "high"
+  },
+  {
+   "topic": "Timeline",
+   "applies": "all",
+   "match": null,
+   "title": "Recognition and WHO PQ: 60 days on the clock",
+   "body": "Recognition and WHO-PQ files run 13 days of screening, 45 days of review and 2 days for the decision. In practice, recognition has taken about 4-5 months, and the general route 7-9 months plus the time for the GMP inspection.",
+   "source": "https://mspcorporate.com/registration-medicinal-products-uzbekistan.html",
+   "confidence": "medium"
+  },
+  {
+   "topic": "Fees",
+   "applies": "all",
+   "match": null,
+   "title": "Registration fee set by Ministry of Health order",
+   "body": "An application review fee is charged and paid to the Center's treasury account. The amounts are set by the Ministry of Health, agreed with the Ministry of Economy and Finance, the Business Ombudsman and the Chamber of Commerce. We could not find the current published schedule, so check the amount with the Center before you file. The fee is not refunded if you withdraw or are refused.",
+   "source": "https://lex.uz/ru/docs/7853907",
+   "confidence": "low"
+  },
+  {
+   "topic": "Fees",
+   "applies": "all",
+   "match": null,
+   "title": "Old fee rule (repealed) for reference only",
+   "body": "Under the repealed 2018 rules, the application review fee was 10 times the minimum wage, and expert work was billed on top. Fees under the new rules are tied to the base calculation value (BRV), which is 440,000 UZS from 1 Sep 2026. Treat these figures only as an order of magnitude.",
+   "source": "https://my.gov.uz/ru/news/208",
+   "confidence": "low"
+  },
+  {
+   "topic": "Fees",
+   "applies": "all",
+   "match": null,
+   "title": "No annual retention fee found",
+   "body": "Resolution 738 sets no annual or retention fee for a registered medicine. Variations carry a separate fee that the Ministry of Health approves. Re-issuing a certificate after a name change or reorganisation is free.",
+   "source": "https://lex.uz/ru/docs/7853907",
+   "confidence": "medium"
+  },
+  {
+   "topic": "After approval",
+   "applies": "all",
+   "match": null,
+   "title": "Certificate valid 5 years; renew 9 months early",
+   "body": "A registration certificate is valid for 5 years. Apply to renew within the 9 months before it expires. Renewal follows the registration procedure: about 135 days with no lab testing if manufacturing and quality are unchanged, or 210 days with lab testing if they have changed.",
+   "source": "https://lex.uz/ru/docs/7853907",
+   "confidence": "high"
+  },
+  {
+   "topic": "After approval",
+   "applies": "all",
+   "match": null,
+   "title": "180-day sell-off after expiry or change",
+   "body": "Stock made while the certificate was valid may be imported, quality-tested and sold for 180 calendar days after the certificate expires, and then used until its expiry date. The same 180-day window applies to the old format after a variation or a renewal.",
+   "source": "https://lex.uz/ru/docs/7853907",
+   "confidence": "high"
+  },
+  {
+   "topic": "After approval",
+   "applies": "all",
+   "match": null,
+   "title": "Variations: reviewed in half the registration time",
+   "body": "File variations through the Center's information system, with documents and, if needed, samples and reference standards. Review takes no more than 50% of the registration timeline for that route. Variations likely to harm quality, safety or efficacy are refused.",
+   "source": "https://lex.uz/ru/docs/7853907",
+   "confidence": "high"
+  },
+  {
+   "topic": "After approval",
+   "applies": "all",
+   "match": null,
+   "title": "Must launch within 3 years; report safety issues",
+   "body": "The holder must place the product on the Uzbek market within 3 years of registration. The holder must also report adverse reactions and notify the Center at once of any suspension, withdrawal or refusal abroad. Gross breaches can lead to cancellation of the certificate.",
+   "source": "https://lex.uz/ru/docs/7853907",
+   "confidence": "high"
+  },
+  {
+   "topic": "Local representative",
+   "applies": "all",
+   "match": null,
+   "title": "Applicant and e-signature holder",
+   "body": "The applicant is the manufacturer, the certificate holder or a legal entity acting for them under a power of attorney. Documents are uploaded to the Center's system (Darmon) and signed with an electronic digital signature. The signature must belong to the applicant's authorised representative, who holds a higher degree in pharmacy, medicine, chemistry or biology.",
+   "source": "https://lex.uz/ru/docs/7853907",
+   "confidence": "high"
+  },
+  {
+   "topic": "Local representative",
+   "applies": "all",
+   "match": null,
+   "title": "Local pharmacovigilance person in Uzbekistan",
+   "body": "The dossier must name a pharmacovigilance responsible person based in Uzbekistan who holds a higher medical or pharmacy degree and a pharmacovigilance qualification certificate. A PSMF and a risk management plan built to the national GVP standard are also required.",
+   "source": "https://lex.uz/ru/docs/7853907",
+   "confidence": "high"
+  },
+  {
+   "topic": "Site and GMP",
+   "applies": "all",
+   "match": null,
+   "title": "National GMP certificate needed to register",
+   "body": "Since 1 Jan 2026, every finished-product site needs a national (Uzbek) GMP certificate for registration and renewal. Products on the recognition route and WHO-prequalified products are exempt. A foreign site's inspection may run in parallel with the review, but the certificate must be in hand before approval. The time spent on GMP assessment does not count toward the 210 days.",
+   "source": "https://lex.uz/ru/docs/7697210",
+   "confidence": "high"
+  },
+  {
+   "topic": "Site and GMP",
+   "applies": "all",
+   "match": null,
+   "title": "From 2027: GMP also needed for batch certificates",
+   "body": "From 1 Jan 2027, the manufacturer's national GMP certificate for the dosage-form type is also required to obtain conformity certificates, which every batch needs before it can be sold. Recognition-route, WHO-PQ, orphan and epidemic products are exempt.",
+   "source": "https://lex.uz/ru/docs/7697210",
+   "confidence": "high"
+  },
+  {
+   "topic": "Site and GMP",
+   "applies": "all",
+   "match": null,
+   "title": "Inspection is on-site; certificate about 3 years",
+   "body": "National GMP inspections are carried out by the state Center of Good Practices against the PIC/S-aligned standard O'zDSt 2766. They are on-site, and remote inspections are not available now (one report says remote inspection ends on 1 Jan 2027). Certificates are reported to be valid for 3 years. We found no public figure for the inspection fee.",
+   "source": "https://dengi.ua/business/9762898-ukraina-riskuet-poteryat-30-procent-valyutnykh-postuplenij-farmrynka-chto-proizoshlo",
+   "confidence": "medium"
+  },
+  {
+   "topic": "Site and GMP",
+   "applies": "all",
+   "match": null,
+   "title": "Foreign GMP evidence still required",
+   "body": "The dossier must include, for each finished-product site, the foreign GMP certificate or inspection outcome from the home authority or a WLA/ML4 regulator. Include the full last inspection report with deficiencies and CAPA, and the manufacturing licence. A negative GMP finding is grounds for refusal.",
+   "source": "https://lex.uz/ru/docs/7853907",
+   "confidence": "high"
+  },
+  {
+   "topic": "Dossier",
+   "applies": "all",
+   "match": null,
+   "title": "ICH CTD, electronic, via the Darmon system",
+   "body": "Submit the dossier electronically in ICH CTD format (Modules 1-5). Upload each document separately in the order the rules set out, and e-sign them. A Module 1 checklist applies: application, power of attorney, payment proof, CPP, Uzbek texts, quality documents, GMP evidence, GVP files and IP documents.",
+   "source": "https://lex.uz/ru/docs/7853907",
+   "confidence": "high"
+  },
+  {
+   "topic": "Dossier",
+   "applies": "all",
+   "match": null,
+   "title": "Languages: Uzbek M1, English/Russian M2-5",
+   "body": "Module 1 texts (product summary, SmPC, leaflet, labels) must be in Uzbek. Foreign applicants may file Modules 2-5, and some Module 1 parts (prion data, quality documents, GMO statement, GVP files), in English or Russian.",
+   "source": "https://lex.uz/ru/docs/7853907",
+   "confidence": "high"
+  },
+  {
+   "topic": "Dossier",
+   "applies": "all",
+   "match": null,
+   "title": "Apostille or consular legalisation",
+   "body": "The CPP or registration certificate, the GMP certificates and the manufacturing licences must be apostilled or consular-legalised. The Center also checks foreign certificates against the issuing regulator's online registers. If a certificate cannot be verified online, the clock stops while the Center waits for the foreign regulator's reply.",
+   "source": "https://lex.uz/ru/docs/7853907",
+   "confidence": "high"
+  },
+  {
+   "topic": "Dossier",
+   "applies": "all",
+   "match": null,
+   "title": "CEP replaces 3.2.S; one dossier per API source",
+   "body": "If you hold a CEP, you may omit the 3.2.S API data. The Center checks the CEP in the EDQM database. If the product uses APIs from several manufacturers, submit full 3.2.S documents for each API source.",
+   "source": "https://lex.uz/ru/docs/7853907",
+   "confidence": "high"
+  },
+  {
+   "topic": "Dossier",
+   "applies": "all",
+   "match": null,
+   "title": "6-year data exclusivity",
+   "body": "For products with a new chemical entity, confidential dossier data are protected for 6 years from registration. A generic may not rely on the originator's data during that period without the holder's consent.",
+   "source": "https://lex.uz/ru/docs/7853907",
+   "confidence": "high"
+  },
+  {
+   "topic": "Bioequivalence",
+   "applies": "form",
+   "match": "oral solid",
+   "title": "BE vs reference product required for generics",
+   "body": "A generic file must include human bioavailability and bioequivalence reports against the reference (original) product. The SmPC must match the reference product's, with a comparison table. Oral generics with BE proven in vivo or in vitro need no local clinical trial.",
+   "source": "https://lex.uz/ru/docs/7853907",
+   "confidence": "high"
+  },
+  {
+   "topic": "Bioequivalence",
+   "applies": "all",
+   "match": null,
+   "title": "BCS biowaiver for Class I and III",
+   "body": "For APIs in BCS Class I or III, bioequivalence may be shown by a biowaiver instead of an in vivo study. The Center can order a GCP inspection of the BE study if the data look unsupported, the values look implausible, or the PK results do not confirm BE.",
+   "source": "https://lex.uz/ru/docs/7853907",
+   "confidence": "high"
+  },
+  {
+   "topic": "Bioequivalence",
+   "applies": "all",
+   "match": null,
+   "title": "ICH-based BE mandatory from 2029",
+   "body": "From 1 Jan 2029, bioequivalence studies for generics must meet ICH requirements. The Ministry of Health sets the detailed procedure for BE studies and clinical trials.",
+   "source": "https://lex.uz/ru/docs/7853907",
+   "confidence": "high"
+  },
+  {
+   "topic": "Bioequivalence",
+   "applies": "form",
+   "match": "injection",
+   "title": "Non-oral generics may need local trials",
+   "body": "The waiver from local clinical trials covers oral generics with proven BE, recognition and WHO-PQ products, products already trialled in Uzbekistan, and items on a Ministry of Health list. Other generics, such as some injectables and topicals, may be asked for a local trial, which pauses the clock for up to 1 year.",
+   "source": "https://lex.uz/ru/docs/7853907",
+   "confidence": "medium"
+  },
+  {
+   "topic": "Stability",
+   "applies": "all",
+   "match": null,
+   "title": "Long-term condition 25°C/60% RH (Zone II)",
+   "body": "WHO's table lists Uzbekistan at 25°C/60% RH long-term, based on IFPMA climate data rather than a regulator notice. Provide stability data in 3.2.P.8 together with a post-approval stability commitment.",
+   "source": "https://www.who.int/publications/m/item/trs953-annex2-appendix1",
+   "confidence": "medium"
+  },
+  {
+   "topic": "Samples",
+   "applies": "all",
+   "match": null,
+   "title": "Samples for triple testing (general route)",
+   "body": "On the general route, submit samples from one industrial batch, enough for three full tests against the draft specification, with at least 50% of shelf life left and a CoA. Add reference standards for the API and impurities, and any special reagents, columns or test strains. Deliver them to the Center under proper storage conditions.",
+   "source": "https://lex.uz/ru/docs/7853907",
+   "confidence": "high"
+  },
+  {
+   "topic": "Samples",
+   "applies": "all",
+   "match": null,
+   "title": "Recognition route: one pack, no lab test",
+   "body": "On the recognition route, submit one consumer pack with its CoA. The product is not lab-tested and no reference standards are needed. WHO-PQ products are also exempt from testing.",
+   "source": "https://lex.uz/ru/docs/7853907",
+   "confidence": "high"
+  },
+  {
+   "topic": "Labelling",
+   "applies": "all",
+   "match": null,
+   "title": "Uzbek on all packs; other languages allowed",
+   "body": "Primary, secondary and intermediate pack labels must be in Uzbek, and other languages such as Russian may be added. Text must be clear, legible and indelible for the whole shelf life. The Center approves the pack and label design and the leaflet when it registers the product.",
+   "source": "https://lex.uz/ru/docs/7853907",
+   "confidence": "high"
+  },
+  {
+   "topic": "Labelling",
+   "applies": "all",
+   "match": null,
+   "title": "SmPC and leaflet in Uzbek; Rx status set at review",
+   "body": "The SmPC and patient leaflet must be submitted in Uzbek and may be duplicated in other languages, Russian in practice. The review sets prescription or OTC status, and the approved instructions must show it.",
+   "source": "https://lex.uz/ru/docs/7853907",
+   "confidence": "high"
+  },
+  {
+   "topic": "Marking",
+   "applies": "all",
+   "match": null,
+   "title": "Mandatory Asl Belgisi DataMatrix on every pack",
+   "body": "Medicines must carry a GS1 DataMatrix code from the national Asl Belgisi system, run by CRPT Turon, on the secondary pack (or on the primary pack if there is no carton). Imports cannot clear customs without the aggregated import code in the customs declaration. Unmarked products cannot be certified.",
+   "source": "https://lex.uz/ru/docs/5936145",
+   "confidence": "high"
+  },
+  {
+   "topic": "Marking",
+   "applies": "all",
+   "match": null,
+   "title": "Foreign makers register in Asl Belgisi",
+   "body": "Foreign manufacturers get a tax ID (with no tax obligations) and an e-signature to register in Asl Belgisi and order codes. Since March 2026, importers may order codes too, under a power of attorney from the manufacturer legalised in the home country. Codes are free for drugs whose capped manufacturer price is no more than 2% of BRV, which is about 8,800 UZS.",
+   "source": "https://lex.uz/ru/docs/8076453",
+   "confidence": "high"
+  },
+  {
+   "topic": "Pricing",
+   "applies": "all",
+   "match": null,
+   "title": "Register a reference price before Rx sales",
+   "body": "Prescription medicines need a registered reference (maximum) price before they are imported or sold. The rules are in Ministry of Health Order No. 23 (Ministry of Justice reg. No. 3735, 25 Dec 2025), filed through an automated system run by the Pharmaceutical Industry Development Agency. The applicant is checked within 2 working days. Note: lex.uz gives the start date as 28 Mar 2026, a law news site gives 28 Dec 2025.",
+   "source": "https://lex.uz/ru/docs/7952213",
+   "confidence": "medium"
+  },
+  {
+   "topic": "Pricing",
+   "applies": "all",
+   "match": null,
+   "title": "How the reference price is set",
+   "body": "The system takes the lowest of three values: a generalised average of ex-factory prices in the reference countries, the origin-country base price plus up to 15% for freight and insurance, and the average CIP import price over 12 months from customs data. The applicant chooses USD, EUR or RUB, converted at the central bank rate on the day of filing.",
+   "source": "https://www.norma.uz/novoe_v_zakonodatelstve/kak_rasschityvayutsya_referentnye_ceny_na_recepturnye_lekarstva",
+   "confidence": "medium"
+  },
+  {
+   "topic": "Pricing",
+   "applies": "all",
+   "match": null,
+   "title": "10 reference countries; Rx markups capped",
+   "body": "The reference basket has 10 countries. After the 2025 changes it includes Hungary, Russia, Ukraine, Poland, Kazakhstan, Bulgaria, Romania, Turkey and Egypt, and sources disagree on the tenth (Belarus or Moldova). Wholesale markups on prescription drugs are capped at 15% and retail at 20%, and OTC prices have been free since April 2025.",
+   "source": "https://www.legal500.com/developments/press-releases/overview-of-key-amendments-to-the-regulation-of-medicine-prices-in-uzbekistan/",
+   "confidence": "medium"
+  },
+  {
+   "topic": "Pricing",
+   "applies": "all",
+   "match": null,
+   "title": "Big 2026 price cuts and e-prescriptions",
+   "body": "Reference prices were revised in early 2026, cutting wholesale prices of about 2,000 imported Rx medicines by 40-60%. Since 10 Dec 2025, about 12,815 Rx products can be sold only against a QR-coded e-prescription in pilot regions.",
+   "source": "https://kun.uz/en/news/2026/01/22/uzbekistan-expands-pharmaceutical-reforms-with-price-cuts-and-digital-prescriptions",
+   "confidence": "medium"
+  },
+  {
+   "topic": "Import",
+   "applies": "all",
+   "match": null,
+   "title": "State tenders: Farma.xarid / UzEx platform",
+   "body": "State purchases of medicines are moving to a single e-platform. It was announced as farma.xarid.uz and has run as farma.uzex.uz in pilot regions since March 2026. Only GMP/GDP-certified suppliers may bid, and the system blocks prices above the reference price.",
+   "source": "https://kun.uz/en/news/2025/11/04/govt-to-cut-prices-for-2600-prescription-medicines-starting-january",
+   "confidence": "medium"
+  },
+  {
+   "topic": "Import",
+   "applies": "all",
+   "match": null,
+   "title": "Import: conformity certificate and licence",
+   "body": "Imported batches enter circulation only after mandatory conformity certification and are subject to post-marketing control. Products renewed without lab tests always get post-marketing quality checks. The importer must be a licensed pharmaceutical wholesaler.",
+   "source": "https://lex.uz/ru/docs/7697210",
+   "confidence": "medium"
+  },
+  {
+   "topic": "Import",
+   "applies": "class",
+   "match": "controlled",
+   "title": "Narcotic and psychotropic products",
+   "body": "Medicines that contain narcotic drugs, psychotropics or precursors get an extra expert review under the Law on Narcotic Drugs and Psychotropic Substances. Their import also needs the separate permits that this law requires.",
+   "source": "https://lex.uz/ru/docs/7853907",
+   "confidence": "medium"
+  },
+  {
+   "topic": "Import",
+   "applies": "all",
+   "match": null,
+   "title": "Unregistered import: orphan, epidemic, aid",
+   "body": "Orphan drugs and products for dangerous or epidemic infections may be imported without registration on a Ministry of Health order. Humanitarian aid needs a positive opinion from the Ministry. A list of products allowed in without registration until 2030, subject to certification, is planned.",
+   "source": "https://lex.uz/ru/docs/7853907",
+   "confidence": "high"
+  }
+ ],
+ "routes": [
+  {
+   "key": "full",
+   "label": "General (full) registration",
+   "description": "For any foreign generic not eligible for recognition. Requires the full CTD dossier, lab testing of samples, a national GMP certificate for every finished-product site, and BE data (local trials for some non-oral generics). The statutory clock is 210 days, excluding clock stops and GMP inspection time.",
+   "months_low": 9,
+   "months_high": 18,
+   "fee_usd_low": null,
+   "fee_usd_high": null,
+   "source": "https://lex.uz/ru/docs/7853907",
+   "confidence": "medium"
+  },
+  {
+   "key": "recognition",
+   "label": "Recognition (WLA / WHO ML4)",
+   "description": "For products already registered by a WHO Listed Authority or a WHO GBT Maturity Level 4 regulator. Same CTD dossier, but no lab testing, no local trials and no national GMP certificate. The statutory clock is 60 days, about 4-5 months in practice.",
+   "months_low": 3,
+   "months_high": 6,
+   "fee_usd_low": null,
+   "fee_usd_high": null,
+   "source": "https://lex.uz/ru/docs/7853907",
+   "confidence": "medium"
+  },
+  {
+   "key": "who_crp",
+   "label": "WHO-prequalified / CRP",
+   "description": "For WHO-prequalified products registered in cooperation with WHO (Collaborative Registration Procedure). The statutory clock is 60 days, with no lab testing, no triple-test samples and no national GMP certificate.",
+   "months_low": 2,
+   "months_high": 6,
+   "fee_usd_low": null,
+   "fee_usd_high": null,
+   "source": "https://lex.uz/ru/docs/7853907",
+   "confidence": "medium"
+  },
+  {
+   "key": "priority",
+   "label": "Priority review",
+   "description": "The general or recognition procedure, handled ahead of the queue for products with no registered analogue, orphan drugs, high-demand products named by the Ministry of Health, and first generics. It has no separate statutory clock, so the duration shown is an estimate.",
+   "months_low": 6,
+   "months_high": 12,
+   "fee_usd_low": null,
+   "fee_usd_high": null,
+   "source": "https://lex.uz/ru/docs/7853907",
+   "confidence": "low"
+  }
+ ],
+ "documents": [
+  {
+   "name": "Application form (Annex 2 of Resolution 738)",
+   "applies": "all",
+   "match": null,
+   "note": null,
+   "source": "https://lex.uz/ru/docs/7853907"
+  },
+  {
+   "name": "Power of attorney for the applicant's representative",
+   "applies": "all",
+   "match": null,
+   "note": "Needed when filing through a representative.",
+   "source": "https://lex.uz/ru/docs/7853907"
+  },
+  {
+   "name": "Proof of payment of the review fee",
+   "applies": "all",
+   "match": null,
+   "note": null,
+   "source": "https://lex.uz/ru/docs/7853907"
+  },
+  {
+   "name": "CPP (WHO format) or registration certificate",
+   "applies": "all",
+   "match": null,
+   "note": "Apostilled or legalised. If the product is not registered in the country of origin, add certified registration certificates from other countries.",
+   "source": "https://lex.uz/ru/docs/7853907"
+  },
+  {
+   "name": "General product description in Uzbek",
+   "applies": "all",
+   "match": null,
+   "note": "Use, status in other countries, any suspensions abroad, known adverse reactions.",
+   "source": "https://lex.uz/ru/docs/7853907"
+  },
+  {
+   "name": "Label texts for primary, secondary and intermediate packs in Uzbek",
+   "applies": "all",
+   "match": null,
+   "note": "Other languages may be added. On the recognition route, the foreign-market label language is accepted.",
+   "source": "https://lex.uz/ru/docs/7853907"
+  },
+  {
+   "name": "Colour mock-ups of carton, label and stickers",
+   "applies": "all",
+   "match": null,
+   "note": null,
+   "source": "https://lex.uz/ru/docs/7853907"
+  },
+  {
+   "name": "Draft SmPC and patient leaflet in Uzbek",
+   "applies": "all",
+   "match": null,
+   "note": "For generics, add a comparison table against the reference product's SmPC.",
+   "source": "https://lex.uz/ru/docs/7853907"
+  },
+  {
+   "name": "Draft specification (enterprise pharmacopoeial monograph) with explanatory note",
+   "applies": "all",
+   "match": null,
+   "note": null,
+   "source": "https://lex.uz/ru/docs/7853907"
+  },
+  {
+   "name": "CEP copy (if held) and DMF holder's letter of access",
+   "applies": "all",
+   "match": null,
+   "note": "With a CEP, the 3.2.S data may be omitted.",
+   "source": "https://lex.uz/ru/docs/7853907"
+  },
+  {
+   "name": "National (Uzbek) GMP certificate for each finished-product site",
+   "applies": "all",
+   "match": null,
+   "note": "Must be presented before approval. Not needed on the recognition or WHO-PQ routes.",
+   "source": "https://lex.uz/ru/docs/7697210"
+  },
+  {
+   "name": "Foreign GMP certificate with full last inspection report and CAPA",
+   "applies": "all",
+   "match": null,
+   "note": "Issued by the home authority or a WLA/ML4 regulator, for each finished-product site. Apostilled.",
+   "source": "https://lex.uz/ru/docs/7853907"
+  },
+  {
+   "name": "Manufacturing licence for each site",
+   "applies": "all",
+   "match": null,
+   "note": "Apostilled or legalised.",
+   "source": "https://lex.uz/ru/docs/7853907"
+  },
+  {
+   "name": "TSE/prion statement for animal-derived materials",
+   "applies": "all",
+   "match": null,
+   "note": null,
+   "source": "https://lex.uz/ru/docs/7853907"
+  },
+  {
+   "name": "GMO statement",
+   "applies": "all",
+   "match": null,
+   "note": null,
+   "source": "https://lex.uz/ru/docs/7853907"
+  },
+  {
+   "name": "Pharmacovigilance System Master File (national GVP)",
+   "applies": "all",
+   "match": null,
+   "note": null,
+   "source": "https://lex.uz/ru/docs/7853907"
+  },
+  {
+   "name": "Details of the local pharmacovigilance responsible person in Uzbekistan",
+   "applies": "all",
+   "match": null,
+   "note": "Higher medical or pharmacy degree plus a pharmacovigilance certificate.",
+   "source": "https://lex.uz/ru/docs/7853907"
+  },
+  {
+   "name": "Risk management plan (national GVP)",
+   "applies": "all",
+   "match": null,
+   "note": null,
+   "source": "https://lex.uz/ru/docs/7853907"
+  },
+  {
+   "name": "Trademark or design protection documents, or licence agreement",
+   "applies": "all",
+   "match": null,
+   "note": "If any IP objects are used. Checked against the industrial property portal.",
+   "source": "https://lex.uz/ru/docs/7853907"
+  },
+  {
+   "name": "CTD Module 2 summaries (quality, nonclinical, clinical)",
+   "applies": "all",
+   "match": null,
+   "note": "May be in English or Russian.",
+   "source": "https://lex.uz/ru/docs/7853907"
+  },
+  {
+   "name": "CTD Module 3 quality data",
+   "applies": "all",
+   "match": null,
+   "note": "Full 3.2.S for each API manufacturer.",
+   "source": "https://lex.uz/ru/docs/7853907"
+  },
+  {
+   "name": "Stability data and post-approval stability commitment (3.2.P.8)",
+   "applies": "all",
+   "match": null,
+   "note": "Long-term condition: 25°C/60% RH.",
+   "source": "https://www.who.int/publications/m/item/trs953-annex2-appendix1"
+  },
+  {
+   "name": "Bioavailability/bioequivalence study report vs reference product",
+   "applies": "class",
+   "match": "bioequivalence",
+   "note": null,
+   "source": "https://lex.uz/ru/docs/7853907"
+  },
+  {
+   "name": "BCS biowaiver justification (Class I or III APIs)",
+   "applies": "class",
+   "match": "bioequivalence",
+   "note": null,
+   "source": "https://lex.uz/ru/docs/7853907"
+  },
+  {
+   "name": "Microbiological attributes and sterilisation process validation (3.2.P.2.5, 3.2.P.3.5)",
+   "applies": "form",
+   "match": "sterile",
+   "note": "Part of standard CTD Module 3 for sterile products.",
+   "source": "https://lex.uz/ru/docs/7853907"
+  },
+  {
+   "name": "Comparative quality, efficacy and safety studies vs reference biologic",
+   "applies": "form",
+   "match": "biolog",
+   "note": "Biosimilars are exempt from the BE report but must show similarity.",
+   "source": "https://lex.uz/ru/docs/7853907"
+  },
+  {
+   "name": "Samples from one industrial batch for triple testing, with CoA",
+   "applies": "all",
+   "match": null,
+   "note": "At least 50% of shelf life left. General route only.",
+   "source": "https://lex.uz/ru/docs/7853907"
+  },
+  {
+   "name": "Reference standards, impurity standards, special reagents and columns",
+   "applies": "all",
+   "match": null,
+   "note": "General route only.",
+   "source": "https://lex.uz/ru/docs/7853907"
+  },
+  {
+   "name": "One consumer pack with CoA (recognition route)",
+   "applies": "all",
+   "match": null,
+   "note": null,
+   "source": "https://lex.uz/ru/docs/7853907"
+  },
+  {
+   "name": "Documents required under the narcotics law",
+   "applies": "class",
+   "match": "controlled",
+   "note": null,
+   "source": "https://lex.uz/ru/docs/7853907"
+  },
+  {
+   "name": "Asl Belgisi registration (tax ID and e-signature) for code ordering",
+   "applies": "all",
+   "match": null,
+   "note": "Needed before the first import.",
+   "source": "https://lex.uz/ru/docs/5936145"
+  }
+ ],
+ "news": [
+  {
+   "name": "lex.uz national legislation database - new acts RSS",
+   "url": "https://lex.uz/ru/rss",
+   "format": "rss",
+   "notes": "Official RSS of all new legal acts, machine-readable and updated daily. Filter for 'дори воситалари' or 'лекарств'. Document pages are HTML with a version history."
+  },
+  {
+   "name": "Center for Safety of Pharmaceutical Products - news",
+   "url": "https://uzpharm-control.uz/news",
+   "format": "html",
+   "notes": "Regulator news and notices. A JavaScript single-page app with no static HTML, so it needs a headless browser. Several posts a week."
+  },
+  {
+   "name": "Center for Safety of Pharmaceutical Products - documents",
+   "url": "https://www.uzpharm-control.uz/ru/documents/category/4",
+   "format": "html",
+   "notes": "Ministry of Health and Center legal acts and guidance. A JavaScript-rendered page, updated irregularly."
+  },
+  {
+   "name": "Pharmaceutical Industry Development Agency - reference price register",
+   "url": "https://pharm.gov.uz/ru/reference-prices",
+   "format": "html",
+   "notes": "Registered reference (maximum) prices, updated on each revision (several in 2026). A JavaScript-rendered page."
+  },
+  {
+   "name": "Ministry of Health news (gov.uz)",
+   "url": "https://gov.uz/uz/ssv/news",
+   "format": "html",
+   "notes": "Ministry press releases on reforms, in static HTML. Daily updates."
+  }
+ ]
+}

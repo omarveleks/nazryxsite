@@ -1,0 +1,712 @@
+{
+ "country": "TZ",
+ "regulator": "Tanzania Medicines and Medical Devices Authority (TMDA), https://www.tmda.go.tz",
+ "checked": "2026-10",
+ "facts": [
+  {
+   "topic": "Route",
+   "applies": "all",
+   "match": null,
+   "title": "Regulator and legal basis",
+   "body": "The Tanzania Medicines and Medical Devices Authority (TMDA) registers medicines under the Tanzania Medicines and Medical Devices Act, Cap. 219, the Registration of Medicinal Products Regulations 2015 (GN 314) and the Fees and Charges Regulations 2021 (GN 686). TMDA's April 2025 list of governing documents still names these as current.",
+   "source": "https://www.tmda.go.tz/uploads/publications/en1769069214-List%20of%20Documents%20Governing%20Medicines%20Review%20Process-April-2025.docx",
+   "confidence": "high"
+  },
+  {
+   "topic": "Route",
+   "applies": "all",
+   "match": null,
+   "title": "TMDA is WHO Maturity Level 3",
+   "body": "TMDA was the first African regulator to reach WHO Maturity Level 3, in 2018. It kept ML3 after WHO re-benchmarking in 2023, as announced in October 2025.",
+   "source": "https://www.tmda.go.tz/news/tmda-maintains-who-maturity-level-3-ml3-status",
+   "confidence": "high"
+  },
+  {
+   "topic": "Route",
+   "applies": "all",
+   "match": null,
+   "title": "Covers Tanzania Mainland only",
+   "body": "TMDA's mandate covers Tanzania Mainland. Zanzibar has its own regulator, the Zanzibar Food and Drug Agency (ZFDA), so a separate filing is needed to sell in Zanzibar.",
+   "source": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11544740",
+   "confidence": "medium"
+  },
+  {
+   "topic": "Route",
+   "applies": "all",
+   "match": null,
+   "title": "Full review: 240 working days on paper",
+   "body": "Screening for completeness takes up to 30 working days, and incomplete dossiers are refused. The guideline allows 240 working days for evaluation, and the 2020 Client Service Charter targets 200 days for imported products. Applications are handled first in, first out.",
+   "source": "https://www.tmda.go.tz/uploads/publications/en1755005202-en1599042165-en1597226062-COMPENDIUM%20GUIDELINES%20FOR%20MARKETING%20AUTHORIZATION%20OF%20MEDICINAL%20PRODUCTS%20JULY%202020.pdf",
+   "confidence": "high"
+  },
+  {
+   "topic": "Route",
+   "applies": "all",
+   "match": null,
+   "title": "Real review times are shorter than the targets",
+   "body": "A 2024 study of EAC regulators reports TMDA mean approval times for generics on full review of 202 days (2020), 93 (2021), 61 (2022) and 85 (2023). The time for a GMP inspection and the applicant's query responses can add many months.",
+   "source": "https://www.frontiersin.org/journals/medicine/articles/10.3389/fmed.2024.1438041/full",
+   "confidence": "medium"
+  },
+  {
+   "topic": "Route",
+   "applies": "all",
+   "match": null,
+   "title": "Reliance routes (2025 guideline)",
+   "body": "The July 2025 reliance guideline sets out four routes: abridged review, verification of sameness, recognition and work-sharing. It applies to generics approved by EMA, WHO PQ, WHO-Listed Authorities, ML3/ML4 regulators, AMA and the EAC, SADC and IGAD harmonisation schemes.",
+   "source": "https://www.tmda.go.tz/uploads/publications/en1753251583-The%20Guidelines%20on%20Regulatory%20Reliance%20for%20Marketing%20Authorisation%20of%20Human%20Medicinal%20Products%20July,%202025.pdf",
+   "confidence": "high"
+  },
+  {
+   "topic": "Route",
+   "applies": "all",
+   "match": null,
+   "title": "Reliance needs a full unredacted report",
+   "body": "Verification of sameness needs the full unredacted assessment report from the reference authority and its latest approved CTD dossier. If the report does not arrive within 3 months of a request (60 days via the consent route), TMDA switches to full review. Pending variations at the reference authority also disqualify the application.",
+   "source": "https://www.tmda.go.tz/uploads/publications/en1753251583-The%20Guidelines%20on%20Regulatory%20Reliance%20for%20Marketing%20Authorisation%20of%20Human%20Medicinal%20Products%20July,%202025.pdf",
+   "confidence": "high"
+  },
+  {
+   "topic": "Route",
+   "applies": "all",
+   "match": null,
+   "title": "Priority review and fast track",
+   "body": "Priority review is available for products treating serious or life-threatening disease, with evaluation within 120 working days. The fast-track fee is double the normal fee (USD 4,000 for a non-biological import). Orphan, emergency and unmet-need medicines can also use the non-routine procedure.",
+   "source": "https://www.tmda.go.tz/uploads/publications/en1755005202-en1599042165-en1597226062-COMPENDIUM%20GUIDELINES%20FOR%20MARKETING%20AUTHORIZATION%20OF%20MEDICINAL%20PRODUCTS%20JULY%202020.pdf",
+   "confidence": "high"
+  },
+  {
+   "topic": "Fees",
+   "applies": "all",
+   "match": null,
+   "title": "Registration fee: USD 2,000 per product",
+   "body": "The registration fee for an imported non-biological medicine is USD 2,000 (USD 3,000 for biologicals). It is paid when the application is submitted and is not refundable. Fees may be paid in USD or the TZS equivalent on the day of payment.",
+   "source": "https://www.tmda.go.tz/uploads/publications/en1755066519-en1663931599-en1651219222-GN%20NO.%20686%20FEES%20REG%20(1).pdf",
+   "confidence": "high"
+  },
+  {
+   "topic": "Fees",
+   "applies": "all",
+   "match": null,
+   "title": "Annual retention fee: USD 300 per product",
+   "body": "Each registered imported medicine costs USD 300 a year to keep on the register, due by 31 January. Late payment carries a 15% penalty.",
+   "source": "https://www.tmda.go.tz/uploads/publications/en1755066519-en1663931599-en1651219222-GN%20NO.%20686%20FEES%20REG%20(1).pdf",
+   "confidence": "high"
+  },
+  {
+   "topic": "Fees",
+   "applies": "all",
+   "match": null,
+   "title": "Unpaid retention leads to suspension",
+   "body": "For 2027, TMDA sends proforma invoices by October 2026, and MAHs must declare by 1 November 2026 which products they will keep. Payment is due by 31 January 2027, or by 31 March with a penalty. Unpaid products are suspended from 1 April 2027 and get no import permits, and registrations suspended for over 12 months are cancelled.",
+   "source": "https://www.tmda.go.tz/announcements/payment-annual-retention-fees-for-the-year-2027",
+   "confidence": "high"
+  },
+  {
+   "topic": "Fees",
+   "applies": "all",
+   "match": null,
+   "title": "GMP inspection fee for foreign sites",
+   "body": "The fee is charged per production block: East Africa USD 4,000, SADC USD 4,500, rest of Africa USD 5,000, Asia USD 6,000, Europe USD 6,500, and the Americas or Australia/NZ USD 7,500. Each extra block adds 25%, and so does each line beyond four in a single block.",
+   "source": "https://www.tmda.go.tz/uploads/publications/en1755066519-en1663931599-en1651219222-GN%20NO.%20686%20FEES%20REG%20(1).pdf",
+   "confidence": "high"
+  },
+  {
+   "topic": "Fees",
+   "applies": "all",
+   "match": null,
+   "title": "Other fees for foreign companies",
+   "body": "Major variation USD 1,000; minor variation USD 300; renewal USD 2,000 (USD 3,000 for biologicals); change of local technical representative USD 2,000; promotional material USD 100; import fee 2% of FOB value. The 2022 amendment (GN 5 of 2023) changed only domestic clinical-trial fees.",
+   "source": "https://commons.laws.africa/akn/tz/act/gn/2023/5/media/publication/tz-act-gn-2023-5-publication-document.pdf",
+   "confidence": "high"
+  },
+  {
+   "topic": "Timeline",
+   "applies": "all",
+   "match": null,
+   "title": "Query response deadlines",
+   "body": "After the first round of queries the applicant has 180 calendar days to respond, and 120 days in later rounds. Missed deadlines cancel the application unless an extension was requested. An application may go through at most five evaluation rounds.",
+   "source": "https://www.tmda.go.tz/uploads/publications/en1755005202-en1599042165-en1597226062-COMPENDIUM%20GUIDELINES%20FOR%20MARKETING%20AUTHORIZATION%20OF%20MEDICINAL%20PRODUCTS%20JULY%202020.pdf",
+   "confidence": "high"
+  },
+  {
+   "topic": "Timeline",
+   "applies": "all",
+   "match": null,
+   "title": "Validity 5 years; renew 90 days before expiry",
+   "body": "Full registration is valid for 5 years, provided retention fees are paid, and provisional registration for up to 3 years. Renewal must be filed at least 90 days before expiry. A 90-day grace period after expiry applies, with a penalty.",
+   "source": "https://www.tmda.go.tz/uploads/publications/en1573544130-GN%20314%20-%20Registration%20medicines.pdf",
+   "confidence": "high"
+  },
+  {
+   "topic": "Local representative",
+   "applies": "all",
+   "match": null,
+   "title": "Local technical representative required",
+   "body": "The application form asks for a local technical representative (LTR) in Tanzania. TMDA forms require the LTR or local responsible person to be resident in Tanzania and, if a company, incorporated there. Changing the LTR is a separate application costing USD 2,000.",
+   "source": "https://www.tmda.go.tz/uploads/publications/en1639384815-Guidelines%20on%20Submission%20of%20Documentation%20for%20Renewal%20of%20Marketing%20Authorization%20of%20Human%20and%20Veterinary%20Medicinal%20Products,%20January%202021.pdf",
+   "confidence": "high"
+  },
+  {
+   "topic": "Local representative",
+   "applies": "all",
+   "match": null,
+   "title": "Importer must hold a TMDA permit",
+   "body": "Only importers whose premises are registered with TMDA may import, through authorised ports of entry. A pharmaceutical importer's annual permit costs TZS 300,000.",
+   "source": "https://www.tmda.go.tz/uploads/publications/en1657888502-en1623839100-GUIDELINE%20FOR%20IMPORTATION%20,AND%20EXPORTATION%20final%20most%20(1).pdf",
+   "confidence": "high"
+  },
+  {
+   "topic": "Site and GMP",
+   "applies": "all",
+   "match": null,
+   "title": "GMP compliance is required before approval",
+   "body": "A product gets marketing authorisation only if its manufacturing site is GMP compliant. GMP inspection is applied for through the TMDA online trader portal, with the Site Master File and fee. Sites are inspected every 3 years, and an inspection normally lasts 2 days.",
+   "source": "https://www.tmda.go.tz/uploads/publications/en1752353017-TMDA%20Guidelines%20for%20Good%20Manufacturing%20Practices%20inpection-%203rd%20Edn%20July%202025-%20FinalX.pdf",
+   "confidence": "high"
+  },
+  {
+   "topic": "Site and GMP",
+   "applies": "all",
+   "match": null,
+   "title": "Desk assessment for reference-inspected sites",
+   "body": "Sites inspected and approved by an SRA (EU, US, Japan, Canada, Swissmedic, Singapore HSA, TGA, ANVISA), by WHO PQ or by EAC/SADC joint inspection can get a desk assessment instead of a visit. The desk certificate is valid 3 years. Two consecutive desk reviews trigger an on-site inspection.",
+   "source": "https://www.tmda.go.tz/uploads/publications/en1657888880-en1618481356-GMP-DESK%20REVIEW%20GUIDELINES%26Temporary%20waiver%20With%20Virtual%20Inspection%20Final%20for%20Printing.pdf",
+   "confidence": "high"
+  },
+  {
+   "topic": "Site and GMP",
+   "applies": "all",
+   "match": null,
+   "title": "Most India/Pakistan sites get an on-site visit",
+   "body": "A site that has not been inspected by an SRA, WHO PQ or an EAC/SADC joint team needs an on-site TMDA inspection (USD 6,000 per block for Asia). The report comes within 45 working days. A CAPA plan is due within 30 days and proof of implementation within 60, with at most two CAPA rounds.",
+   "source": "https://www.tmda.go.tz/uploads/publications/en1752353017-TMDA%20Guidelines%20for%20Good%20Manufacturing%20Practices%20inpection-%203rd%20Edn%20July%202025-%20FinalX.pdf",
+   "confidence": "medium"
+  },
+  {
+   "topic": "Dossier",
+   "applies": "all",
+   "match": null,
+   "title": "CTD format, in English",
+   "body": "The dossier follows the EAC-harmonised CTD in Modules 1 to 5 and is submitted electronically through the TMDA online portal. The guideline makes English mandatory, while the 2015 regulations also accept Kiswahili. Documents in other languages need a certified English translation.",
+   "source": "https://www.tmda.go.tz/uploads/publications/en1755005202-en1599042165-en1597226062-COMPENDIUM%20GUIDELINES%20FOR%20MARKETING%20AUTHORIZATION%20OF%20MEDICINAL%20PRODUCTS%20JULY%202020.pdf",
+   "confidence": "high"
+  },
+  {
+   "topic": "Dossier",
+   "applies": "all",
+   "match": null,
+   "title": "One application per strength and site",
+   "body": "Each active ingredient, strength, dosage form, manufacturing site and proprietary name needs its own application. Parenterals need a separate application for each pack size.",
+   "source": "https://www.tmda.go.tz/uploads/publications/en1573544130-GN%20314%20-%20Registration%20medicines.pdf",
+   "confidence": "high"
+  },
+  {
+   "topic": "Dossier",
+   "applies": "all",
+   "match": null,
+   "title": "Word templates and nitrosamine check",
+   "body": "The QOS-PD, QIS, SmPC and screening checklist must be submitted as Word files, with a photo of the unpacked product. The checklist also asks for a nitrosamine risk assessment and a protocol or data for validation of 3 consecutive production-scale batches.",
+   "source": "https://www.tmda.go.tz/uploads/publications/en1769437517-Applicant%20Self%20Screening%20Checklist%20Before%20Submission%20of%20Application%20for%20Registration%20to%20TMDA-July-2022.doc",
+   "confidence": "high"
+  },
+  {
+   "topic": "Bioequivalence",
+   "applies": "all",
+   "match": null,
+   "title": "BE against an SRA or innovator comparator",
+   "body": "Generics need in vivo BE (normally a 2x2 crossover) against the innovator, a product marketed under an SRA, or the WHO-recommended comparator, in that order of preference. The comparator must come from an ICH-region market, with proof of purchase and labels. If none fits, consult TMDA before the study.",
+   "source": "https://www.tmda.go.tz/uploads/publications/en1755005202-en1599042165-en1597226062-COMPENDIUM%20GUIDELINES%20FOR%20MARKETING%20AUTHORIZATION%20OF%20MEDICINAL%20PRODUCTS%20JULY%202020.pdf",
+   "confidence": "high"
+  },
+  {
+   "topic": "Bioequivalence",
+   "applies": "form",
+   "match": "oral solid",
+   "title": "BCS and strength biowaivers",
+   "body": "BCS biowaivers are possible for immediate-release oral forms with BCS class I or III APIs, with very rapid or rapid dissolution. Additional strengths can be waived using the TMDA biowaiver form. Simple aqueous solutions (IV, oral, otic, eye) with the same API and concentration are exempt.",
+   "source": "https://www.tmda.go.tz/uploads/publications/en1755005202-en1599042165-en1597226062-COMPENDIUM%20GUIDELINES%20FOR%20MARKETING%20AUTHORIZATION%20OF%20MEDICINAL%20PRODUCTS%20JULY%202020.pdf",
+   "confidence": "high"
+  },
+  {
+   "topic": "Bioequivalence",
+   "applies": "form",
+   "match": "inhal",
+   "title": "Inhalation and nasal products",
+   "body": "Generic inhalation and nasal products must show therapeutic equivalence (in vitro, then PK or clinical as needed) under TMDA's May 2024 guidance.",
+   "source": "https://www.tmda.go.tz/uploads/publications/en1717501815-GUIDANCE%20ON%20INHALATION%20AND%20NASAL%20MEDICINES%20May%202024_Final.pdf",
+   "confidence": "medium"
+  },
+  {
+   "topic": "Stability",
+   "applies": "all",
+   "match": null,
+   "title": "Zone IVb: 30°C/75% RH",
+   "body": "Long-term studies run at 30°C ±2 / 75% RH ±5, and accelerated studies at 40°C/75% RH for 6 months. Submission needs at least 12 months of long-term data (6 months for stable APIs with no significant change), normally on 3 primary batches (2 for stable conventional forms). Refrigerated products use 5±3°C.",
+   "source": "https://www.tmda.go.tz/uploads/publications/en1755005202-en1599042165-en1597226062-COMPENDIUM%20GUIDELINES%20FOR%20MARKETING%20AUTHORIZATION%20OF%20MEDICINAL%20PRODUCTS%20JULY%202020.pdf",
+   "confidence": "high"
+  },
+  {
+   "topic": "Samples",
+   "applies": "all",
+   "match": null,
+   "title": "Two commercial packs with the dossier",
+   "body": "Applications must include two samples of the finished product as packed for sale, and TMDA may ask for more. The regulations require enough for a full specification analysis plus one repeat. TMDA lab fees apply (e.g. HPLC identification TZS 1,000,000 per API).",
+   "source": "https://www.tmda.go.tz/uploads/publications/en1755005202-en1599042165-en1597226062-COMPENDIUM%20GUIDELINES%20FOR%20MARKETING%20AUTHORIZATION%20OF%20MEDICINAL%20PRODUCTS%20JULY%202020.pdf",
+   "confidence": "medium"
+  },
+  {
+   "topic": "Labelling",
+   "applies": "all",
+   "match": null,
+   "title": "English and/or Swahili labels",
+   "body": "Labels must be in English and/or Swahili. If both are used, the content must be identical. The import guideline also requires leaflets in English or Swahili.",
+   "source": "https://www.tmda.go.tz/uploads/publications/en1755005202-en1599042165-en1597226062-COMPENDIUM%20GUIDELINES%20FOR%20MARKETING%20AUTHORIZATION%20OF%20MEDICINAL%20PRODUCTS%20JULY%202020.pdf",
+   "confidence": "high"
+  },
+  {
+   "topic": "Labelling",
+   "applies": "all",
+   "match": null,
+   "title": "Required label particulars",
+   "body": "Labels must show INN and strength, batch number, manufacturing and expiry dates, storage conditions, MAH and release-site addresses, and distribution class. The TMDA registration number must appear on outer and inner packs.",
+   "source": "https://www.tmda.go.tz/uploads/publications/en1657888502-en1623839100-GUIDELINE%20FOR%20IMPORTATION%20,AND%20EXPORTATION%20final%20most%20(1).pdf",
+   "confidence": "high"
+  },
+  {
+   "topic": "Labelling",
+   "applies": "all",
+   "match": null,
+   "title": "Batch and dates printed, not pre-printed",
+   "body": "Batch number, manufacturing date and expiry date must be printed dynamically on packs, not pre-printed. Blisters must carry the name, strength, batch, expiry and release-site details.",
+   "source": "https://www.tmda.go.tz/uploads/publications/en1755005202-en1599042165-en1597226062-COMPENDIUM%20GUIDELINES%20FOR%20MARKETING%20AUTHORIZATION%20OF%20MEDICINAL%20PRODUCTS%20JULY%202020.pdf",
+   "confidence": "high"
+  },
+  {
+   "topic": "Labelling",
+   "applies": "all",
+   "match": null,
+   "title": "Patient leaflet rules",
+   "body": "A PIL is required for medicines for long-term use, self-administered injections and OTC products. Note that one CTD section of the 2020 compendium says 'English and French', which looks like an EAC template carry-over; the labelling part says English and/or Swahili.",
+   "source": "https://www.tmda.go.tz/uploads/publications/en1755005202-en1599042165-en1597226062-COMPENDIUM%20GUIDELINES%20FOR%20MARKETING%20AUTHORIZATION%20OF%20MEDICINAL%20PRODUCTS%20JULY%202020.pdf",
+   "confidence": "medium"
+  },
+  {
+   "topic": "Marking",
+   "applies": "all",
+   "match": null,
+   "title": "No serialization mandate found",
+   "body": "No TMDA DataMatrix or serialization mandate for medicines was found. The labelling guideline asks for a unique identifier such as a product barcode, a unique code or the TMDA registration number.",
+   "source": "https://www.tmda.go.tz/uploads/publications/en1755005202-en1599042165-en1597226062-COMPENDIUM%20GUIDELINES%20FOR%20MARKETING%20AUTHORIZATION%20OF%20MEDICINAL%20PRODUCTS%20JULY%202020.pdf",
+   "confidence": "low"
+  },
+  {
+   "topic": "Pricing",
+   "applies": "all",
+   "match": null,
+   "title": "No general price registration found",
+   "body": "No price-approval step for generics was found. The fee schedule lists a USD 200 pricing application only for innovator products.",
+   "source": "https://www.tmda.go.tz/uploads/publications/en1755066519-en1663931599-en1651219222-GN%20NO.%20686%20FEES%20REG%20(1).pdf",
+   "confidence": "low"
+  },
+  {
+   "topic": "After approval",
+   "applies": "all",
+   "match": null,
+   "title": "Variations: 4 categories",
+   "body": "Annual notification is filed within 12 months of implementation. Immediate notification is filed at implementation. A minor variation may be implemented if there is no objection within 3 months. A major variation needs prior approval, decided within 6 months.",
+   "source": "https://www.tmda.go.tz/uploads/publications/en1669709654-en1654249199-TMDA%20VARIATIONS%20GUIDELINES%20MARCH%202020.pdf",
+   "confidence": "high"
+  },
+  {
+   "topic": "After approval",
+   "applies": "all",
+   "match": null,
+   "title": "Variations for reliance-approved products",
+   "body": "For products approved through reliance, variation applications must include proof that the reference authority approved the same change.",
+   "source": "https://www.tmda.go.tz/uploads/publications/en1753251583-The%20Guidelines%20on%20Regulatory%20Reliance%20for%20Marketing%20Authorisation%20of%20Human%20Medicinal%20Products%20July,%202025.pdf",
+   "confidence": "high"
+  },
+  {
+   "topic": "After approval",
+   "applies": "all",
+   "match": null,
+   "title": "Renewal dossier",
+   "body": "Renewal needs the batch record of the largest batch made in the last 6 months, current specifications, 2 samples of the smallest pack, specimens, PSUR and stability data at 30°C/75% RH. The 2020 charter targets 30 days for imported renewals.",
+   "source": "https://www.tmda.go.tz/uploads/publications/en1639384815-Guidelines%20on%20Submission%20of%20Documentation%20for%20Renewal%20of%20Marketing%20Authorization%20of%20Human%20and%20Veterinary%20Medicinal%20Products,%20January%202021.pdf",
+   "confidence": "medium"
+  },
+  {
+   "topic": "After approval",
+   "applies": "all",
+   "match": null,
+   "title": "New scheduling regulations 2026",
+   "body": "The Scheduling of Medicines Regulations 2026 (GN 150 of 19 June 2026) reclassified human and veterinary medicines by dispensing level. Check that the distribution class on the label matches.",
+   "source": "https://www.tmda.go.tz/announcements/kuidhinishwa-na-kuanza-kutumika-kwa-kanuni-za-maku",
+   "confidence": "medium"
+  },
+  {
+   "topic": "Import",
+   "applies": "all",
+   "match": null,
+   "title": "Import permit for each shipment",
+   "body": "Importers apply through the TMDA online trader portal at least 14 days before arrival, with a proforma invoice showing the TMDA registration number and batch numbers. Permits are issued within 24 hours, are valid 6 months for one shipment (two partial shipments allowed) and can be extended once by up to 3 months. The fee is 2% of FOB value.",
+   "source": "https://www.tmda.go.tz/uploads/publications/en1657888502-en1623839100-GUIDELINE%20FOR%20IMPORTATION%20,AND%20EXPORTATION%20final%20most%20(1).pdf",
+   "confidence": "high"
+  },
+  {
+   "topic": "Import",
+   "applies": "all",
+   "match": null,
+   "title": "Minimum remaining shelf life",
+   "body": "Products with a shelf life over 24 months must have at least 60% of it left on import. Products with a shelf life of 24 months or less need at least 80% left.",
+   "source": "https://www.tmda.go.tz/uploads/publications/en1657888502-en1623839100-GUIDELINE%20FOR%20IMPORTATION%20,AND%20EXPORTATION%20final%20most%20(1).pdf",
+   "confidence": "high"
+  },
+  {
+   "topic": "Import",
+   "applies": "class",
+   "match": "controlled",
+   "title": "Controlled drugs",
+   "body": "Narcotics and psychotropics need a TMDA Certificate of Official Approval of Import, applied for at least 30 days before arrival. It is valid 9 months and allows up to 3 partial shipments, within the INCB framework.",
+   "source": "https://www.tmda.go.tz/uploads/publications/en1626772669-en1626163951-GUIDELINES%20FOR%20DEALING%20IN%20CONTROLLED%20DRUGSpdf.pdf",
+   "confidence": "high"
+  },
+  {
+   "topic": "Dossier",
+   "applies": "form",
+   "match": "biolog",
+   "title": "Biologicals and vaccines use separate guidelines",
+   "body": "Biotherapeutics, biosimilars and vaccines follow their own TMDA guidelines from 2020. The registration fee is USD 3,000.",
+   "source": "https://www.tmda.go.tz/uploads/publications/en1769069214-List%20of%20Documents%20Governing%20Medicines%20Review%20Process-April-2025.docx",
+   "confidence": "high"
+  }
+ ],
+ "routes": [
+  {
+   "key": "full",
+   "label": "Full review (standard)",
+   "description": "Any generic with a full CTD dossier. The guideline allows 240 working days for evaluation plus up to 30 for screening, and the charter targets 200 days for imports. The GMP inspection queue and query rounds usually decide the real time.",
+   "months_low": 9,
+   "months_high": 18,
+   "fee_usd_low": 2000,
+   "fee_usd_high": 3000,
+   "source": "https://www.tmda.go.tz/uploads/publications/en1755005202-en1599042165-en1597226062-COMPENDIUM%20GUIDELINES%20FOR%20MARKETING%20AUTHORIZATION%20OF%20MEDICINAL%20PRODUCTS%20JULY%202020.pdf",
+   "confidence": "medium"
+  },
+  {
+   "key": "abridged",
+   "label": "Abridged review (SRA/WLA/EMA approved)",
+   "description": "For products already approved by EMA, a WHO-Listed Authority or another reference authority. TMDA re-checks key quality data (manufacture, specs, stability, BE, Module 1). The 2024 EAC study reports a TMDA target of 126 days.",
+   "months_low": 5,
+   "months_high": 10,
+   "fee_usd_low": 2000,
+   "fee_usd_high": 3000,
+   "source": "https://www.tmda.go.tz/uploads/publications/en1753251583-The%20Guidelines%20on%20Regulatory%20Reliance%20for%20Marketing%20Authorisation%20of%20Human%20Medicinal%20Products%20July,%202025.pdf",
+   "confidence": "medium"
+  },
+  {
+   "key": "reliance",
+   "label": "Verification of sameness",
+   "description": "For the same product as one approved by an RRA (EMA, WLA, ML3/ML4, WHO PQ, AMA, TMDA). It needs the unredacted assessment report, consent form, sameness form and the RRA-approved dossier, with TMDA's zone IVb and label rules met. The 2020 charter target is 90 days for WLA-approved products.",
+   "months_low": 3,
+   "months_high": 8,
+   "fee_usd_low": 2000,
+   "fee_usd_high": 3000,
+   "source": "https://www.tmda.go.tz/uploads/publications/en1753251583-The%20Guidelines%20on%20Regulatory%20Reliance%20for%20Marketing%20Authorisation%20of%20Human%20Medicinal%20Products%20July,%202025.pdf",
+   "confidence": "medium"
+  },
+  {
+   "key": "who_crp",
+   "label": "WHO Collaborative Registration (PQ/SRA CRP)",
+   "description": "For WHO-prequalified or SRA-approved products, with WHO sharing assessment and inspection reports. The WHO target is 90 working days of regulator time, and the 2024 study reports a mean of 13-14 days for TMDA abridged review of PQ products in 2021-22.",
+   "months_low": 3,
+   "months_high": 6,
+   "fee_usd_low": 2000,
+   "fee_usd_high": 2000,
+   "source": "https://www.who.int/teams/regulation-prequalification/regulation-and-safety/facilitated-product-introduction/collaborative-registration-procedure/crp-for-medicines-and-vaccines-approved-by-the-stringent-regulatory-authorities",
+   "confidence": "medium"
+  },
+  {
+   "key": "eac",
+   "label": "EAC MRH joint assessment",
+   "description": "The EAC regulators review the dossier jointly, and TMDA has often been the lead. Each country then has 3 months to grant its own registration, and the fee is paid in each country. Joint assessments have had a median of 240-372 days.",
+   "months_low": 12,
+   "months_high": 18,
+   "fee_usd_low": 2000,
+   "fee_usd_high": 2000,
+   "source": "https://pmc.ncbi.nlm.nih.gov/articles/PMC6583972",
+   "confidence": "medium"
+  },
+  {
+   "key": "fast_track",
+   "label": "Priority / fast track",
+   "description": "For serious or life-threatening disease, unmet need, orphan or emergency use, on written request. Evaluation within 120 working days, and the fast-track fee is double (USD 4,000, or USD 6,000 for biologicals).",
+   "months_low": 4,
+   "months_high": 8,
+   "fee_usd_low": 4000,
+   "fee_usd_high": 6000,
+   "source": "https://www.tmda.go.tz/uploads/publications/en1686031778-Guidelines%20for%20processing%20of%20applications%20for%20registration%20of%20medicinal%20products%20through%20Non-Routine%20Procedures.pdf",
+   "confidence": "medium"
+  }
+ ],
+ "documents": [
+  {
+   "name": "Cover letter signed by the MAH",
+   "applies": "all",
+   "match": null,
+   "note": null,
+   "source": "https://www.tmda.go.tz/uploads/publications/en1755005202-en1599042165-en1597226062-COMPENDIUM%20GUIDELINES%20FOR%20MARKETING%20AUTHORIZATION%20OF%20MEDICINAL%20PRODUCTS%20JULY%202020.pdf"
+  },
+  {
+   "name": "Application form for MA of human medicinal product (Oct 2022 version)",
+   "applies": "all",
+   "match": null,
+   "note": "Signed, dated and stamped; LTR details in section 1.6.",
+   "source": "https://www.tmda.go.tz/uploads/publications/en1769435858-Application%20form%20for%20MA%20of%20Human%20Medicinal%20Product-October-2022.doc"
+  },
+  {
+   "name": "Applicant self-screening checklist (Word)",
+   "applies": "all",
+   "match": null,
+   "note": null,
+   "source": "https://www.tmda.go.tz/uploads/publications/en1769437517-Applicant%20Self%20Screening%20Checklist%20Before%20Submission%20of%20Application%20for%20Registration%20to%20TMDA-July-2022.doc"
+  },
+  {
+   "name": "Comprehensive table of contents for all modules",
+   "applies": "all",
+   "match": null,
+   "note": null,
+   "source": "https://www.tmda.go.tz/uploads/publications/en1755005202-en1599042165-en1597226062-COMPENDIUM%20GUIDELINES%20FOR%20MARKETING%20AUTHORIZATION%20OF%20MEDICINAL%20PRODUCTS%20JULY%202020.pdf"
+  },
+  {
+   "name": "Certificate of Pharmaceutical Product (WHO format), original",
+   "applies": "all",
+   "match": null,
+   "note": "Issued by the exporting country's regulator.",
+   "source": "https://www.tmda.go.tz/uploads/publications/en1573544130-GN%20314%20-%20Registration%20medicines.pdf"
+  },
+  {
+   "name": "Manufacturing licence of the FPP manufacturer",
+   "applies": "all",
+   "match": null,
+   "note": null,
+   "source": "https://www.tmda.go.tz/uploads/publications/en1755005202-en1599042165-en1597226062-COMPENDIUM%20GUIDELINES%20FOR%20MARKETING%20AUTHORIZATION%20OF%20MEDICINAL%20PRODUCTS%20JULY%202020.pdf"
+  },
+  {
+   "name": "GMP certificate for FPP and API sites",
+   "applies": "all",
+   "match": null,
+   "note": "WHO-type GMP certificate, or proof of an application for TMDA GMP inspection.",
+   "source": "https://www.tmda.go.tz/uploads/publications/en1755005202-en1599042165-en1597226062-COMPENDIUM%20GUIDELINES%20FOR%20MARKETING%20AUTHORIZATION%20OF%20MEDICINAL%20PRODUCTS%20JULY%202020.pdf"
+  },
+  {
+   "name": "Site Master File (no older than 1 year)",
+   "applies": "all",
+   "match": null,
+   "note": "For the GMP inspection or desk assessment.",
+   "source": "https://www.tmda.go.tz/uploads/publications/en1657888880-en1618481356-GMP-DESK%20REVIEW%20GUIDELINES%26Temporary%20waiver%20With%20Virtual%20Inspection%20Final%20for%20Printing.pdf"
+  },
+  {
+   "name": "Local technical representative details",
+   "applies": "all",
+   "match": null,
+   "note": "Must be resident in Tanzania; a company must be incorporated there.",
+   "source": "https://www.tmda.go.tz/uploads/publications/en1769435858-Application%20form%20for%20MA%20of%20Human%20Medicinal%20Product-October-2022.doc"
+  },
+  {
+   "name": "SmPC (Word)",
+   "applies": "all",
+   "match": null,
+   "note": null,
+   "source": "https://www.tmda.go.tz/uploads/publications/en1769437517-Applicant%20Self%20Screening%20Checklist%20Before%20Submission%20of%20Application%20for%20Registration%20to%20TMDA-July-2022.doc"
+  },
+  {
+   "name": "Label artwork and mock-ups (primary and secondary)",
+   "applies": "all",
+   "match": null,
+   "note": "English and/or Swahili; specimens before approval.",
+   "source": "https://www.tmda.go.tz/uploads/publications/en1755005202-en1599042165-en1597226062-COMPENDIUM%20GUIDELINES%20FOR%20MARKETING%20AUTHORIZATION%20OF%20MEDICINAL%20PRODUCTS%20JULY%202020.pdf"
+  },
+  {
+   "name": "Patient information leaflet / package insert",
+   "applies": "all",
+   "match": null,
+   "note": null,
+   "source": "https://www.tmda.go.tz/uploads/publications/en1755005202-en1599042165-en1597226062-COMPENDIUM%20GUIDELINES%20FOR%20MARKETING%20AUTHORIZATION%20OF%20MEDICINAL%20PRODUCTS%20JULY%202020.pdf"
+  },
+  {
+   "name": "Photo of the unpacked product (png/jpg)",
+   "applies": "all",
+   "match": null,
+   "note": null,
+   "source": "https://www.tmda.go.tz/uploads/publications/en1769437517-Applicant%20Self%20Screening%20Checklist%20Before%20Submission%20of%20Application%20for%20Registration%20to%20TMDA-July-2022.doc"
+  },
+  {
+   "name": "Regulatory status: SRA/WLA approvals and refusals",
+   "applies": "all",
+   "match": null,
+   "note": "List of countries, with evidence.",
+   "source": "https://www.tmda.go.tz/uploads/publications/en1755005202-en1599042165-en1597226062-COMPENDIUM%20GUIDELINES%20FOR%20MARKETING%20AUTHORIZATION%20OF%20MEDICINAL%20PRODUCTS%20JULY%202020.pdf"
+  },
+  {
+   "name": "Expert declarations and CVs",
+   "applies": "all",
+   "match": null,
+   "note": null,
+   "source": "https://www.tmda.go.tz/uploads/publications/en1755005202-en1599042165-en1597226062-COMPENDIUM%20GUIDELINES%20FOR%20MARKETING%20AUTHORIZATION%20OF%20MEDICINAL%20PRODUCTS%20JULY%202020.pdf"
+  },
+  {
+   "name": "CEP or APIMF with letters of access",
+   "applies": "all",
+   "match": null,
+   "note": "Or WHO PQ API confirmation.",
+   "source": "https://www.tmda.go.tz/uploads/publications/en1755005202-en1599042165-en1597226062-COMPENDIUM%20GUIDELINES%20FOR%20MARKETING%20AUTHORIZATION%20OF%20MEDICINAL%20PRODUCTS%20JULY%202020.pdf"
+  },
+  {
+   "name": "QOS-PD and QIS (Word, latest TMDA template)",
+   "applies": "all",
+   "match": null,
+   "note": null,
+   "source": "https://www.tmda.go.tz/uploads/publications/en1769437517-Applicant%20Self%20Screening%20Checklist%20Before%20Submission%20of%20Application%20for%20Registration%20to%20TMDA-July-2022.doc"
+  },
+  {
+   "name": "Module 3 data for API (3.2.S) and FPP (3.2.P)",
+   "applies": "all",
+   "match": null,
+   "note": null,
+   "source": "https://www.tmda.go.tz/uploads/publications/en1755005202-en1599042165-en1597226062-COMPENDIUM%20GUIDELINES%20FOR%20MARKETING%20AUTHORIZATION%20OF%20MEDICINAL%20PRODUCTS%20JULY%202020.pdf"
+  },
+  {
+   "name": "Nitrosamine risk assessment",
+   "applies": "all",
+   "match": null,
+   "note": null,
+   "source": "https://www.tmda.go.tz/uploads/publications/en1769437517-Applicant%20Self%20Screening%20Checklist%20Before%20Submission%20of%20Application%20for%20Registration%20to%20TMDA-July-2022.doc"
+  },
+  {
+   "name": "Process validation protocol/report, 3 production batches",
+   "applies": "all",
+   "match": null,
+   "note": null,
+   "source": "https://www.tmda.go.tz/uploads/publications/en1769437517-Applicant%20Self%20Screening%20Checklist%20Before%20Submission%20of%20Application%20for%20Registration%20to%20TMDA-July-2022.doc"
+  },
+  {
+   "name": "Executed biobatch record and blank master production record",
+   "applies": "all",
+   "match": null,
+   "note": "Section 3.2.R.",
+   "source": "https://www.tmda.go.tz/uploads/publications/en1769437517-Applicant%20Self%20Screening%20Checklist%20Before%20Submission%20of%20Application%20for%20Registration%20to%20TMDA-July-2022.doc"
+  },
+  {
+   "name": "Stability data at 30°C/75% RH",
+   "applies": "all",
+   "match": null,
+   "note": "At least 12 months long-term plus 6 months accelerated; normally 3 primary batches.",
+   "source": "https://www.tmda.go.tz/uploads/publications/en1755005202-en1599042165-en1597226062-COMPENDIUM%20GUIDELINES%20FOR%20MARKETING%20AUTHORIZATION%20OF%20MEDICINAL%20PRODUCTS%20JULY%202020.pdf"
+  },
+  {
+   "name": "BE study protocol, report and BTIF (Word)",
+   "applies": "form",
+   "match": "bioequivalence",
+   "note": null,
+   "source": "https://www.tmda.go.tz/uploads/publications/en1769437517-Applicant%20Self%20Screening%20Checklist%20Before%20Submission%20of%20Application%20for%20Registration%20to%20TMDA-July-2022.doc"
+  },
+  {
+   "name": "Comparator purchase evidence and labels",
+   "applies": "form",
+   "match": "bioequivalence",
+   "note": "Bought in an ICH-region market.",
+   "source": "https://www.tmda.go.tz/uploads/publications/en1755005202-en1599042165-en1597226062-COMPENDIUM%20GUIDELINES%20FOR%20MARKETING%20AUTHORIZATION%20OF%20MEDICINAL%20PRODUCTS%20JULY%202020.pdf"
+  },
+  {
+   "name": "GCP/GLP evidence for the BE study sites",
+   "applies": "form",
+   "match": "bioequivalence",
+   "note": null,
+   "source": "https://www.tmda.go.tz/uploads/publications/en1755005202-en1599042165-en1597226062-COMPENDIUM%20GUIDELINES%20FOR%20MARKETING%20AUTHORIZATION%20OF%20MEDICINAL%20PRODUCTS%20JULY%202020.pdf"
+  },
+  {
+   "name": "Biowaiver application form and comparative dissolution data",
+   "applies": "form",
+   "match": "oral solid",
+   "note": "BCS or additional-strength waiver; 12 units per profile, f2.",
+   "source": "https://www.tmda.go.tz/uploads/publications/en1769437517-Applicant%20Self%20Screening%20Checklist%20Before%20Submission%20of%20Application%20for%20Registration%20to%20TMDA-July-2022.doc"
+  },
+  {
+   "name": "Two commercial sample packs with CoA",
+   "applies": "all",
+   "match": null,
+   "note": "TMDA may request more for lab testing.",
+   "source": "https://www.tmda.go.tz/uploads/publications/en1755005202-en1599042165-en1597226062-COMPENDIUM%20GUIDELINES%20FOR%20MARKETING%20AUTHORIZATION%20OF%20MEDICINAL%20PRODUCTS%20JULY%202020.pdf"
+  },
+  {
+   "name": "Proof of payment of registration fee",
+   "applies": "all",
+   "match": null,
+   "note": "USD 2,000 (USD 3,000 for biologicals).",
+   "source": "https://www.tmda.go.tz/uploads/publications/en1755066519-en1663931599-en1651219222-GN%20NO.%20686%20FEES%20REG%20(1).pdf"
+  },
+  {
+   "name": "Declaration of sameness letter (reliance route)",
+   "applies": "all",
+   "match": null,
+   "note": "Module 1.2, naming the proposed pathway.",
+   "source": "https://www.tmda.go.tz/uploads/publications/en1753251583-The%20Guidelines%20on%20Regulatory%20Reliance%20for%20Marketing%20Authorisation%20of%20Human%20Medicinal%20Products%20July,%202025.pdf"
+  },
+  {
+   "name": "Unredacted RRA assessment report and consent to share",
+   "applies": "all",
+   "match": null,
+   "note": "Reliance routes only.",
+   "source": "https://www.tmda.go.tz/uploads/publications/en1753251583-The%20Guidelines%20on%20Regulatory%20Reliance%20for%20Marketing%20Authorisation%20of%20Human%20Medicinal%20Products%20July,%202025.pdf"
+  },
+  {
+   "name": "Summary of Quality and BE Review - Verification of Sameness form",
+   "applies": "all",
+   "match": null,
+   "note": "Reliance routes only, in Word.",
+   "source": "https://www.tmda.go.tz/uploads/publications/en1769066820-Summary%20of%20Quality%20and%20Bioequivalence%20Review%20template-Verification%20of%20the%20Sameness%20filled%20by%20the%20Applicant-July-2025.docx"
+  },
+  {
+   "name": "Aseptic process / media fill validation reports",
+   "applies": "form",
+   "match": "sterile",
+   "note": "For GMP desk assessment of sterile sites.",
+   "source": "https://www.tmda.go.tz/uploads/publications/en1657888880-en1618481356-GMP-DESK%20REVIEW%20GUIDELINES%26Temporary%20waiver%20With%20Virtual%20Inspection%20Final%20for%20Printing.pdf"
+  },
+  {
+   "name": "Certificate of Official Approval of Import (controlled drugs)",
+   "applies": "class",
+   "match": "controlled",
+   "note": null,
+   "source": "https://www.tmda.go.tz/uploads/publications/en1626772669-en1626163951-GUIDELINES%20FOR%20DEALING%20IN%20CONTROLLED%20DRUGSpdf.pdf"
+  }
+ ],
+ "news": [
+  {
+   "name": "TMDA announcements (public notices)",
+   "url": "https://www.tmda.go.tz/announcements",
+   "format": "html",
+   "notes": "HTML list, no RSS found; several notices a month (retention fees, new regulations, safety alerts)."
+  },
+  {
+   "name": "TMDA medicines registration guidelines",
+   "url": "https://www.tmda.go.tz/publications/42",
+   "format": "html",
+   "notes": "HTML list of PDF/Word links; updated a few times a year; file names carry upload timestamps."
+  },
+  {
+   "name": "TMDA news",
+   "url": "https://www.tmda.go.tz/news",
+   "format": "html",
+   "notes": "HTML; infrequent updates."
+  },
+  {
+   "name": "TMDA public register of registered medicines",
+   "url": "https://imis2.tmda.go.tz/portal/#/public/registered-medicines",
+   "format": "html",
+   "notes": "JavaScript single-page app; data loads from a backend API, not a simple static page."
+  }
+ ]
+}

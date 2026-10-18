@@ -601,3 +601,15 @@ export async function addMarket(f: FormData) {
   });
   back(to, { saved: 'market' });
 }
+
+
+/** Tick a document on a product's checklist for a market, or untick it. */
+export async function toggleChecklist(f: FormData) {
+  const u = await requireUser({ manufacturer: true });
+  const product = int(f, 'product_id'), country = str(f, 'country', 2), item = str(f, 'item', 200);
+  await withUser(u.id, (db) => str(f, 'done', 1) === '1'
+    ? db.query(`insert into product_checklist (product_id, country, item, user_id) select id, $2, $3, $4 from mfr_products
+        where id = $1 and user_id = $4 on conflict do nothing`, [product, country, item, u.id])
+    : db.query('delete from product_checklist where product_id = $1 and country = $2 and item = $3 and user_id = $4', [product, country, item, u.id]));
+  redirect(`/m/products/${product}?market=${country}#documents`);
+}

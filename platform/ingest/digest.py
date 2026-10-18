@@ -37,6 +37,14 @@ def summary(cur, user_id, countries):
         if tenders and tenders[1]:
             lines.append(f"{tenders[1]} public {'tender' if tenders[1] == 1 else 'tenders'} for your molecules this week"
                          + (f", {tenders[0]} still open." if tenders[0] else "."))
+        notices = cur.execute("""
+            select count(*), count(*) filter (where exists (select 1 from mfr_products p where p.user_id = %s
+                                                         and p.molecule_id = any(n.molecule_ids)))
+            from reg_news n where n.country = any(%s) and not n.baseline and n.found_at > now() - interval '7 days'""",
+            (user_id, countries)).fetchone()
+        if notices and notices[0]:
+            lines.append(f"{notices[0]} new regulator {'notice' if notices[0] == 1 else 'notices'} in your markets"
+                         + (f", {notices[1]} naming your products." if notices[1] else ".") + " See Regulatory.")
     moved = cur.execute("""select count(*) from engagements where user_id = %s and updated_at > now() - interval '7 days'""",
                         (user_id,)).fetchone()[0]
     if moved:

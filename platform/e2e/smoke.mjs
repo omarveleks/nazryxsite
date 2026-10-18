@@ -188,8 +188,8 @@ check((await k.goto(B + '/m/tenders')).status() === 200 && (await k.locator('nav
   && (await k.locator('main').innerText()).includes('Unlock with Basic Market Data'), 'tenders page in the menu, locked without a plan');
 await k.goto(B + '/m/regulatory');
 const regFree = await k.locator('main').innerText();
-check(regFree.includes('Regulator and route') && regFree.includes('Local technical representative') && regFree.includes('Unlock with Complete Market Access'),
-  'regulatory page: every requirement for the market, per-product requirements locked');
+check(regFree.includes('Routes to registration') && regFree.includes('Local representative') && regFree.includes('Unlock with Complete Market Access'),
+  'regulatory page: routes, every requirement for the market, per-product requirements locked');
 await k.goto(B + '/m/products?tab=watch');
 check((await k.locator('main').innerText()).includes('Unlock with Basic Market Data'), 'competitor watch is locked without a plan');
 await k.goto(B + '/m/products'); await k.waitForLoadState('networkidle');

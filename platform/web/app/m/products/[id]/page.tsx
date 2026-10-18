@@ -3,11 +3,11 @@ import { notFound } from 'next/navigation';
 import Shell from '@/components/Shell';
 import MarketPicker, { AgencyMarket, hasData, loadLive, pickMarket, targetMarkets } from '@/components/MarketPicker';
 import { Badges, Empty, Flash, LockIcon, PlanLock } from '@/components/ui';
-import { deleteMfrProduct, saveLaunch, unwatchMolecule, updateProductChecks, watchMolecule } from '@/app/actions/mfr';
+import { deleteMfrProduct, saveLaunch, toggleChecklist, unwatchMolecule, updateProductChecks, watchMolecule } from '@/app/actions/mfr';
 import { requireUser } from '@/lib/auth';
 import { one, rows, withUser } from '@/lib/db';
 import { BE_STATUS, beSuggestion, fmtDate, fmtMoney, levelLabel, registeredLine } from '@/lib/format';
-import { REQ_SQL, forProduct, type Requirement } from '@/lib/regulatory';
+import { REQ_SQL, appliesTo, forProduct, type Requirement } from '@/lib/regulatory';
 import { PRICE_SQL, packOf, priceBasis, unitShort, unitWord, usd, type MoleculePrice } from '@/lib/prices';
 import { AGENCY_KINDS, LAUNCH_STAGES, MFR_PLANS, NEEDS_PLAN, SERVICES, canUse, tierIn, countryName, mfrProductsSql, productClass, reasons } from '@/lib/mfr';
 
@@ -43,6 +43,15 @@ export default async function MfrProduct({ params, searchParams }: { params: Pro
     const routeKey = (await one(db, 'select route_key from molecule_routes where molecule_id = $1', [p.molecule_id]))?.route_key
       ?? (p.who_pq || p.sra_approved ? 'abridged' : 'full');
     const route = canUse(t, 'pathway') ? await one(db, 'select label, description, months_low, months_high from registration_routes where key = $1', [routeKey]) : null;
+    // this market's routes this product can use, fastest first (fast-track and priority need their own criteria)
+    const allRoutes = canUse(t, 'pathway') ? await rows(db, `select key, label, description, months_low, months_high, fee_usd_low, fee_usd_high, eligibility
+        from country_routes where country = $1 order by sort`, [market]) : [];
+    const routes = allRoutes.filter((r) => r.eligibility !== 'sra_or_pq' || p.who_pq || p.sra_approved)
+      .filter((r) => !/fast|priority/.test(r.key)).sort((a, b) => (a.months_low ?? 99) - (b.months_low ?? 99));
+    // the documents this market asks for, the ones that apply to this product, and which the manufacturer has ready
+    const checklist = canUse(t, 'requirements') ? (await rows(db, 'select id, name, applies, match, note from reg_checklist where country = $1 order by sort', [market]))
+      .filter((c) => c.applies === 'all' || appliesTo({ ...c, topic: '', title: c.name, body: '' } as Requirement, { ...p, category: productClass(p) })) : null;
+    const ready = checklist ? (await rows(db, 'select item from product_checklist where product_id = $1 and country = $2', [id, market])).map((r) => r.item as string) : [];
     // distributors strong in the class who do not carry this molecule yet (codes only; names stay with Nazryx)
     const open = canUse(t, 'matching') && p.category ? (await rows(db, 'select carries from partner_search($1, $2, $3)', [market, p.category, p.molecule_id]))
       .filter((x) => !x.carries).length : null;
@@ -56,7 +65,7 @@ export default async function MfrProduct({ params, searchParams }: { params: Pro
     const costs = avg ? await one(db, 'select freight, duty, distributor, pharmacy, vat from market_costs where country = $1', [market]) : null;
     const brands = avg ? await one(db, `select (select registrants from country_molecules where molecule_id = $1 and country = $2) as registrants,
         (select value from price_factors where key = 'generic_vs_originator') as generic`, [p.molecule_id, market]) : null;
-    return { ...base, origin, lapsed, route, open, tenders, brands, costs, ...(canUse(t, 'market') ? { avg } : {}) };
+    return { ...base, origin, lapsed, route, routes, checklist, ready, open, tenders, brands, costs, ...(canUse(t, 'market') ? { avg } : {}) };
   });
   if (!d) notFound();
   const { p, market } = d;
@@ -100,12 +109,37 @@ export default async function MfrProduct({ params, searchParams }: { params: Pro
                 : <PlanLock need="access" title="Distributor matching for this product" u={u} market={market}>Which distributors are strong in this class and do not carry it yet, ready for an introduction.</PlanLock>}
             </section>
             <section className="card stack">
-              <h2>Pathway to approval</h2>
-              {'route' in d && d.route ? <p><b>{d.route.label}</b>{d.route.months_low != null ? `: about ${d.route.months_low}–${d.route.months_high ?? d.route.months_low} months` : ''}. <span className="muted">{d.route.description}</span></p>
+              <h2>Time and cost to register</h2>
+              {'routes' in d && d.routes.length > 0 ? (<>
+                <p><b>{d.routes[0].label}</b>: about <b>{d.routes[0].months_low}–{d.routes[0].months_high} months</b>
+                  {d.routes[0].fee_usd_low != null ? <>, official fees <b>${Number(d.routes[0].fee_usd_low).toLocaleString('en')}{d.routes[0].fee_usd_high && d.routes[0].fee_usd_high !== d.routes[0].fee_usd_low ? `–${Number(d.routes[0].fee_usd_high).toLocaleString('en')}` : ''}</b></> : null}.
+                  <span className="muted"> {d.routes[0].description}</span></p>
+                {d.routes.length > 1 && <p className="small muted">Also open to you: {d.routes.slice(1).map((r) => `${r.label} (${r.months_low}–${r.months_high} months)`).join(', ')}.</p>}
+                {!(p.who_pq || p.sra_approved) && <p className="small muted">Approved by a strict regulator or WHO-prequalified? Tick it below and faster routes open up.</p>}
+              </>) : 'route' in d && d.route ? <p><b>{d.route.label}</b>{d.route.months_low != null ? `: about ${d.route.months_low}–${d.route.months_high ?? d.route.months_low} months` : ''}. <span className="muted">{d.route.description}</span></p>
                 : <PlanLock need="access" title="Route and timeline" u={u} market={market}>The registration route for this product, what it needs and how long it takes.</PlanLock>}
               <p className="muted">{p.be_study ? 'You have a bioequivalence study.' : be ? `${BE_STATUS[be]}.` : 'Whether a bioequivalence study is needed: we confirm it when we check your dossier.'}</p>
             </section>
           </>)}
+          {'checklist' in d && d.checklist && d.checklist.length > 0 && (
+            <section className="card stack" id="documents">
+              <div className="card-h"><div><h2>Documents for {countryName(market)}</h2>
+                <p className="note">What {countryName(market)} asks for with this product. Tick what you have ready.</p></div>
+                <span className="pill mint">{d.ready.filter((x) => d.checklist!.some((c) => c.name === x)).length} of {d.checklist.length} ready</span></div>
+              <div className="stack" style={{ gap: 4 }}>{d.checklist.map((c) => {
+                const done = d.ready.includes(c.name);
+                return (
+                  <form key={c.id} action={toggleChecklist} style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+                    <input type="hidden" name="product_id" value={id} /><input type="hidden" name="country" value={market} />
+                    <input type="hidden" name="item" value={c.name} /><input type="hidden" name="done" value={done ? '0' : '1'} />
+                    <button type="submit" aria-label={done ? 'Mark as not ready' : 'Mark as ready'}
+                      style={{ flex: '0 0 20px', width: 20, height: 20, marginTop: 1, borderRadius: 6, cursor: 'pointer', padding: 0, lineHeight: '18px',
+                        fontSize: 13, color: '#fff', border: `1.5px solid ${done ? 'var(--blue)' : 'var(--line)'}`, background: done ? 'var(--blue)' : '#fff' }}>{done ? '✓' : ''}</button>
+                    <span className="small" style={{ textDecoration: done ? 'line-through' : undefined, opacity: done ? 0.6 : 1 }}>{c.name}
+                      {c.note && <span className="muted"> · {c.note}</span>}</span>
+                  </form>);
+              })}</div>
+            </section>)}
           {'avg' in d && (d.avg ? (
             <section className="card stack">
               <div className="card-h"><h2>Price in {countryName(market)}</h2>

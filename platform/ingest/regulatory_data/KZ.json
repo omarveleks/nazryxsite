@@ -1,0 +1,685 @@
+{
+ "country": "KZ",
+ "regulator": "National Center for Expertise of Medicines and Medical Devices (NDDA / НЦЭЛС и МИ), under the MoH Committee of Medical and Pharmaceutical Control - https://www.ndda.kz",
+ "checked": "2026-10",
+ "facts": [
+  {
+   "topic": "Route",
+   "applies": "all",
+   "match": null,
+   "title": "Two live routes: EAEU and national",
+   "body": "New products can be registered under EAEU rules (Decision No. 78) or, until 31 Dec 2027, under Kazakhstan's national rules. The EEC Council extended national registration and national variations to that date (Decision No. 29 of 14 May 2025). NDDA reports national filings falling and EAEU filings rising.",
+   "source": "https://bes.media/amp/eaes-prodlil-registratsiyu-lekarstv-po-natspravilam-do-kontsa-2027-goda-c90071/",
+   "confidence": "high"
+  },
+  {
+   "topic": "Route",
+   "applies": "all",
+   "match": null,
+   "title": "Legal basis: Health Code, Article 23",
+   "body": "Registration is governed by the Code 'On public health and the healthcare system' (No. 360-VI, 2020), Art. 23. NDDA (НЦЭЛС) runs the expert review. The Committee of Medical and Pharmaceutical Control of the Ministry of Health then issues the certificate. Detailed national rules: registration order ҚР ДСМ-16 (2021) and expertise order ҚР ДСМ-10 (2021).",
+   "source": "https://zakon.uchet.kz/rus/docs/K2000000360",
+   "confidence": "high"
+  },
+  {
+   "topic": "Route",
+   "applies": "all",
+   "match": null,
+   "title": "National transition ended 31 Dec 2025",
+   "body": "Old national certificates stay valid past 2025 only if an EAEU alignment application was filed by 31 Dec 2025. Then they last up to 3 years from filing in the reference state and up to 2 years in recognition states. In Jan 2026 NDDA listed 1,304 non-aligned certificates for annulment. India-held certificates were the second-largest group (201).",
+   "source": "https://pharmvestnik.ru/content/news/kazahstan-i-armeniya-nazvali-ne-proshedshie-pereregistraciu-lekarstva.html",
+   "confidence": "high"
+  },
+  {
+   "topic": "Route",
+   "applies": "all",
+   "match": null,
+   "title": "Fast track: 15 working days for SRA-approved",
+   "body": "Under the 2026 'single window' composite service, products registered by the FDA, EMA (EU), MHRA or PMDA can be registered in up to 15 working days. NDDA says Turkey and South Korea will be added to this list. The pilot runs under MoH order No. 30 of 11 Mar 2026; check the current text before relying on it.",
+   "source": "https://www.ndda.kz/news/Edinoe-okno",
+   "confidence": "medium"
+  },
+  {
+   "topic": "Route",
+   "applies": "all",
+   "match": null,
+   "title": "Composite 'single window': 100 working days",
+   "body": "Since 2026 one application on eo.ehealth.kz covers expert review, registration, price registration and inclusion in the Kazakhstan National Formulary. The total limit is 100 working days, instead of running each step one after another. Price registration within it takes 10 working days.",
+   "source": "https://www.ndda.kz/news/composite",
+   "confidence": "medium"
+  },
+  {
+   "topic": "Route",
+   "applies": "all",
+   "match": null,
+   "title": "WHO PQ products: collaborative procedure",
+   "body": "Kazakhstan is on WHO's list of countries in the Collaborative Registration Procedure (CRP) for prequalified medicines (June 2024). National rules cap that expert review at 65 working days. No laboratory testing is done for WHO-prequalified products.",
+   "source": "https://cdn.who.int/media/docs/default-source/medicines/regulatory-updates/fpi/pq-crp---medicines-and-vaccines_-partcipating-countries_june-2024.pdf",
+   "confidence": "high"
+  },
+  {
+   "topic": "Route",
+   "applies": "all",
+   "match": null,
+   "title": "Accelerated review: 60 days, narrow cases",
+   "body": "National accelerated review (max 60 working days) is decided by the Ministry. It covers rare diseases, epidemics and pandemics, emergencies, and technology transfer to a Kazakh site. It is not a general route for ordinary generics.",
+   "source": "https://zakon.uchet.kz/rus/docs/V2100022144",
+   "confidence": "high"
+  },
+  {
+   "topic": "Timeline",
+   "applies": "all",
+   "match": null,
+   "title": "National: 140 working days, plus clock stops",
+   "body": "The national limit is 140 working days: 20 initial review, 60 specialised review, 50 lab testing, 10 conclusion. The clock stops while the applicant answers, and the applicant has up to 45 working days for the consolidated reply. Inspection (up to 90 working days) and Expert Council time (up to 30 days) are also excluded.",
+   "source": "https://zakon.uchet.kz/rus/docs/V2100022144",
+   "confidence": "high"
+  },
+  {
+   "topic": "Timeline",
+   "applies": "all",
+   "match": null,
+   "title": "EAEU: 140 WD reference + 50-60 WD recognition",
+   "body": "Under EAEU rules, review in the reference state takes up to 140 working days. Recognition states then decide within 60 working days (mutual recognition) or 50 working days (decentralised). Clock stops and any GMP inspection come on top. Industry has reported recognition taking about 2 years in practice.",
+   "source": "https://www.ndda.kz/news/EAEC-principles",
+   "confidence": "medium"
+  },
+  {
+   "topic": "Fees",
+   "applies": "all",
+   "match": null,
+   "title": "National review fee: generic, foreign maker",
+   "body": "The 2026 national fee for a foreign single-active product is KZT 748,079 excl. VAT (KZT 867,772 incl. 16% VAT, about USD 1,650 / 1,910). Each extra strength costs KZT 590,192 and each extra pack size KZT 14,840. Multi-active products: KZT 1,401,552 excl. VAT (about USD 3,090).",
+   "source": "https://www.ndda.kz/services/calculator",
+   "confidence": "high"
+  },
+  {
+   "topic": "Fees",
+   "applies": "form",
+   "match": "biolog",
+   "title": "National fee: biologics and biosimilars",
+   "body": "For foreign single-component immunobiologicals or biosimilars the fee is KZT 1,234,878 excl. VAT (about USD 2,720); multi-component costs KZT 1,648,097 (about USD 3,630). Each extra dose costs about KZT 993,000 to 1,273,000.",
+   "source": "https://www.ndda.kz/services/calculator",
+   "confidence": "high"
+  },
+  {
+   "topic": "Fees",
+   "applies": "all",
+   "match": null,
+   "title": "EAEU-procedure review fee in Kazakhstan",
+   "body": "Under ҚР ДСМ-7 Annex 1, the EAEU review of a single-active generic costs KZT 1,344,801 excl. VAT (about USD 2,960, or about USD 3,435 with VAT). Each extra dose costs KZT 1,221,583, a multi-active generic KZT 1,652,951 and a single-component biosimilar KZT 1,552,514. The annex does not set separate prices for reference and recognition roles.",
+   "source": "https://zakon.uchet.kz/rus/docs/V2100022096",
+   "confidence": "medium"
+  },
+  {
+   "topic": "Fees",
+   "applies": "all",
+   "match": null,
+   "title": "State registration duty: 11 MRP",
+   "body": "On top of the review fee there is a budget duty of 11 MRP for registration (KZT 47,575 in 2026, about USD 105) and 5 MRP for re-registration (about USD 48). It is paid under the Tax Code.",
+   "source": "https://mybuh.kz/news/registratsiya-lekarstvennykh-sredstv-i-medizdeliy-po-printsipu-edinogo-okna/",
+   "confidence": "medium"
+  },
+  {
+   "topic": "Fees",
+   "applies": "all",
+   "match": null,
+   "title": "No annual retention fee found",
+   "body": "Neither the Health Code nor the fee orders set an annual maintenance fee for a registration certificate. Fees apply per review event: registration, re-registration, variations and inspections.",
+   "source": "https://zakon.uchet.kz/rus/docs/V2100022096",
+   "confidence": "medium"
+  },
+  {
+   "topic": "Site and GMP",
+   "applies": "all",
+   "match": null,
+   "title": "GMP inspection fee and timing",
+   "body": "An NDDA GMP inspection, on-site or remote, costs KZT 3,538,607 excl. VAT (KZT 4,104,784 incl. VAT, about USD 9,040). Each additional site costs KZT 1,928,412 excl. VAT. The applicant has 30 working days to consent after notice, and the inspection must finish within 90 working days. Travel costs are not shown in the price list and are usually set in the contract.",
+   "source": "https://www.ndda.kz/services/calculator",
+   "confidence": "medium"
+  },
+  {
+   "topic": "Site and GMP",
+   "applies": "all",
+   "match": null,
+   "title": "EAEU: GMP certificate or 3-year commitment",
+   "body": "An EAEU GMP certificate is required for EAEU registration. Since Decision No. 34 (2025) there is no end date for the alternative package. It contains: the existing GMP certificate, the last authority inspection report (within 3 years), all inspections and complaints over 3 years, the site master file, and consent to inspection. The applicant must pass an EAEU inspection within 3 years of approval.",
+   "source": "https://www.alta.ru/tamdoc/16sr0078/",
+   "confidence": "high"
+  },
+  {
+   "topic": "Site and GMP",
+   "applies": "all",
+   "match": null,
+   "title": "When an EAEU inspection is triggered",
+   "body": "The reference state decides on a GMP inspection based on risk. Sites making the finished form or doing batch release that the reference state has never inspected are the typical trigger. Kazakh GMP certificates are valid for 3 years.",
+   "source": "https://www.alta.ru/tamdoc/16sr0078/",
+   "confidence": "high"
+  },
+  {
+   "topic": "Site and GMP",
+   "applies": "all",
+   "match": null,
+   "title": "National route: notarised GMP certificate",
+   "body": "For a national CTD dossier, the foreign maker gives a notarised GMP certificate showing the date and outcome of the last inspection, or a link to a public register such as EudraGMP. NDDA may still order an inspection; the inspection fee then applies.",
+   "source": "https://zakon.uchet.kz/rus/docs/V2100022144",
+   "confidence": "high"
+  },
+  {
+   "topic": "Dossier",
+   "applies": "all",
+   "match": null,
+   "title": "Format: CTD (national) or eCTD (EAEU)",
+   "body": "Foreign makers file a CTD dossier (Modules 1-5) as PDF through the NDDA portal or egov.kz for national review. The EAEU route needs eCTD with numbered sequences for the whole product lifecycle. Module 1 differs for each country.",
+   "source": "https://www.ndda.kz/news/EAEC-principles",
+   "confidence": "high"
+  },
+  {
+   "topic": "Dossier",
+   "applies": "all",
+   "match": null,
+   "title": "Language: Russian; parts of Modules 3-5 in English",
+   "body": "EAEU dossiers are in Russian. Modules 3-5 may be in English, but key Module 3 sections must be translated into Russian (manufacturing process, validation, impurities, analytical methods, specifications). Kazakh texts are reviewed or translated by NDDA during the specialised review.",
+   "source": "https://www.alta.ru/tamdoc/16sr0078/",
+   "confidence": "high"
+  },
+  {
+   "topic": "Dossier",
+   "applies": "all",
+   "match": null,
+   "title": "Pharmacovigilance person and PSMF",
+   "body": "The national Module 1 needs: the PV system master file, a global QPPV, a named PV contact person in Kazakhstan, and a risk management plan for biologics and biosimilars. Under EAEU GVP the holder must keep a qualified QPPV in the EAEU member states.",
+   "source": "https://zakon.uchet.kz/rus/docs/V2100022144",
+   "confidence": "high"
+  },
+  {
+   "topic": "Local representative",
+   "applies": "all",
+   "match": null,
+   "title": "No local company needed to apply",
+   "body": "A foreign manufacturer or certificate holder can apply directly or through an authorised representative with a power of attorney. A local entity is still needed in practice: imports go through licensed wholesalers or manufacturers, and pharmacovigilance needs a contact person in Kazakhstan.",
+   "source": "https://zakon.uchet.kz/rus/docs/K2000000360",
+   "confidence": "high"
+  },
+  {
+   "topic": "Bioequivalence",
+   "applies": "all",
+   "match": null,
+   "title": "BE per EAEU Decision No. 85",
+   "body": "Generics must show bioequivalence under the EAEU BE rules (Decision No. 85), submitted in Module 5. You must submit the protocol, report, regulator approval (if any), ethics approval and insurance contract. A summary (up to 5 pages) shows sameness with the reference product.",
+   "source": "https://zakon.uchet.kz/rus/docs/V2100022144",
+   "confidence": "high"
+  },
+  {
+   "topic": "Bioequivalence",
+   "applies": "all",
+   "match": null,
+   "title": "Reference product hierarchy",
+   "body": "Use the originator registered in the EAEU first. If it is unavailable, use the originator from an ICH country, or with justification a BE-proven generic registered in an EAEU state. Products approved by the EAEU Expert Committee come next, then products with 20+ years of use in an EAEU state.",
+   "source": "https://zakon.uchet.kz/rus/docs/H16EV000085",
+   "confidence": "high"
+  },
+  {
+   "topic": "Bioequivalence",
+   "applies": "all",
+   "match": null,
+   "title": "Biowaivers: BCS and additional strengths",
+   "body": "Decision No. 85 allows a BCS-based biowaiver and waivers for additional strengths. Both need comparative dissolution tests. Each of the first three commercial batches must be dissolution-tested against the BE batch before release.",
+   "source": "https://zakon.uchet.kz/rus/docs/H16EV000085",
+   "confidence": "high"
+  },
+  {
+   "topic": "Stability",
+   "applies": "all",
+   "match": null,
+   "title": "Stability: 12 months long-term at filing",
+   "body": "EAEU stability rules (Decision No. 69, based on ICH Q1) need at least 12 months of long-term data on 3 primary batches and 6 months accelerated (40°C/75% RH) at filing. Long-term conditions depend on the target climatic zone (25°C/60% RH, or 30°C/65% or 75%). Kazakhstan is usually treated as Zone II (25/60).",
+   "source": "https://zakon.uchet.kz/rus/docs/H18EK000069",
+   "confidence": "medium"
+  },
+  {
+   "topic": "Samples",
+   "applies": "all",
+   "match": null,
+   "title": "Samples for triple testing, 9+ months shelf life",
+   "body": "On the national route, send samples, reference standards and specific reagents enough for three complete tests, with at least 9 months of shelf life left. Testing is skipped for ICH-GMP products with a CTD dossier, WHO-PQ products, accelerated reviews and re-registration. Under EAEU rules, samples are agreed with the expert body (up to 3 tests).",
+   "source": "https://zakon.uchet.kz/rus/docs/V2100022144",
+   "confidence": "high"
+  },
+  {
+   "topic": "Labelling",
+   "applies": "all",
+   "match": null,
+   "title": "Kazakh and Russian packaging and leaflet",
+   "body": "Packaging must be clearly printed in Kazakh and Russian, and the patient leaflet must be in both languages (Health Code Art. 242). Registered products may be imported with Kazakh/Russian stickers. The approved summary of product characteristics is published for health professionals.",
+   "source": "https://zakon.uchet.kz/rus/docs/K2000000360",
+   "confidence": "high"
+  },
+  {
+   "topic": "Labelling",
+   "applies": "all",
+   "match": null,
+   "title": "Packaging materials: EAEU Pharmacopoeia",
+   "body": "Since 2026 NDDA checks packaging materials against EAEU Pharmacopoeia Vol. I Part 2. Colour mock-ups at 1:1 scale (JPEG) are required for every strength.",
+   "source": "https://www.ndda.kz/news/trebovaniya-k-upakovke-eaes",
+   "confidence": "medium"
+  },
+  {
+   "topic": "Marking",
+   "applies": "all",
+   "match": null,
+   "title": "DataMatrix on every pack since 1 July 2024",
+   "body": "All medicines produced from 1 July 2024 must carry a unique DataMatrix code (GTIN plus serial number) on the secondary pack, and be reported to the national tracking system (IS MPT, ismet.kz). Stock made before that date may be sold unmarked.",
+   "source": "https://www.gov.kz/memleket/entities/dsm/press/news/details/992798?lang=ru",
+   "confidence": "high"
+  },
+  {
+   "topic": "Marking",
+   "applies": "all",
+   "match": null,
+   "title": "Who applies codes; imports from EAEU",
+   "body": "Codes are applied by the holder, the foreign maker or its local subsidiary or branch. Without a local presence, the importer applies them, abroad or in a customs warehouse. For goods coming from EAEU states, codes must be applied before crossing the Kazakh border. The single operator is Kazakhtelecom JSC.",
+   "source": "https://zakon.uchet.kz/rus/docs/V2100022146",
+   "confidence": "high"
+  },
+  {
+   "topic": "Marking",
+   "applies": "all",
+   "match": null,
+   "title": "Code cost about KZT 2.4 per pack",
+   "body": "The maximum price of one identification code is reported as KZT 2.4 excl. VAT (under USD 0.01). Check the current government price before budgeting.",
+   "source": "https://www.1cbit.kz/blog/obyazatelnaya-markirovka-lekarstv-v-kazakhstane-i-stoimost-kodov-markirovki/",
+   "confidence": "low"
+  },
+  {
+   "topic": "Pricing",
+   "applies": "all",
+   "match": null,
+   "title": "Manufacturer price registration before sale",
+   "body": "Prescription medicines on the regulated list cannot be sold wholesale or retail without a registered maximum price (Health Code Art. 245). Approved maximum prices are published in order ҚР ДСМ-94; the rules are order ҚР ДСМ-247/2020. Files are due by 10 April or 10 October for the next half-year's price list. NDDA reviews in 10 working days for a fee of KZT 28,776 excl. VAT (about USD 63).",
+   "source": "https://zakon.uchet.kz/rus/docs/V2000021766",
+   "confidence": "high"
+  },
+  {
+   "topic": "Pricing",
+   "applies": "all",
+   "match": null,
+   "title": "Reference pricing: average of 3 lowest of 10",
+   "body": "The manufacturer's price may not exceed the average of the three lowest prices in 10 reference countries: Azerbaijan, Belarus, Bulgaria, Hungary, Kyrgyzstan, Poland, Russia, Slovenia, Turkey, Uzbekistan. It is also capped by the contract, invoice and customs declaration price. Retail markups fall from 30% to 10%; wholesale from 25% to 10%.",
+   "source": "https://www.ndda.kz/news/reforms",
+   "confidence": "high"
+  },
+  {
+   "topic": "Pricing",
+   "applies": "all",
+   "match": null,
+   "title": "Deregulation: OTC and cheap Rx removed",
+   "body": "OTC medicines left price regulation in Aug 2025. In Sept 2026 more than 1,200 prescription medicines priced up to 1 MRP (KZT 4,325) were removed, leaving 1,827 regulated items. State-funded supply (GOBMP/OSMS) keeps separate price caps.",
+   "source": "https://www.ndda.kz/news/reforms",
+   "confidence": "high"
+  },
+  {
+   "topic": "After approval",
+   "applies": "all",
+   "match": null,
+   "title": "Validity: 5 years, then unlimited",
+   "body": "A national certificate for an imported product is valid for 5 years; re-registration gives an unlimited certificate. EAEU certificates likewise run 5 years, then become unlimited after confirmation. Apply for re-registration before expiry. The national re-registration fee for a foreign single-active product is KZT 555,610 excl. VAT (about USD 1,220).",
+   "source": "https://zakon.uchet.kz/rus/docs/V2100022175",
+   "confidence": "high"
+  },
+  {
+   "topic": "After approval",
+   "applies": "all",
+   "match": null,
+   "title": "Variations: IA/IB/II, 20-80 working days",
+   "body": "National variation review takes 20 working days (IA, admin only), 45 (no lab testing) or 80 (with lab testing). Fees for foreign products are KZT 111,220 or 194,128 excl. VAT. EAEU variations in Kazakhstan cost KZT 126,954 (IA) to KZT 1,135,006 (Type II with lab testing), about USD 280-2,500.",
+   "source": "https://zakon.uchet.kz/rus/docs/V2100022144",
+   "confidence": "high"
+  },
+  {
+   "topic": "After approval",
+   "applies": "all",
+   "match": null,
+   "title": "PV inspection and PSURs",
+   "body": "Holders must report adverse reactions and changes to the dossier. NDDA may inspect the pharmacovigilance system for KZT 3,754,657 excl. VAT (about USD 8,270). Re-registration needs PSURs covering the last 5 years on the Kazakh market.",
+   "source": "https://www.ndda.kz/services/calculator",
+   "confidence": "medium"
+  },
+  {
+   "topic": "Import",
+   "applies": "all",
+   "match": null,
+   "title": "Import: licensed importers only",
+   "body": "Only licensed manufacturers, licensed wholesalers, research labs and healthcare organisations may import (Code Art. 252). A foreign maker may import directly only samples for review, trials and exhibitions. Registered products from non-EAEU countries need no import permit per shipment. From EAEU states, an e-approval is issued in 3 working days.",
+   "source": "https://zakon.uchet.kz/rus/docs/V2000021749",
+   "confidence": "high"
+  },
+  {
+   "topic": "Import",
+   "applies": "all",
+   "match": null,
+   "title": "Unregistered imports need a permit",
+   "body": "Unregistered medicines may be imported only with an authority permit, for example for trials, review samples, named-patient or rare-disease use, humanitarian aid, or UN/WHO-PQ supply bought by the single distributor. The permit is issued in 3 working days.",
+   "source": "https://zakon.uchet.kz/rus/docs/K2000000360",
+   "confidence": "high"
+  },
+  {
+   "topic": "Import",
+   "applies": "class",
+   "match": "controlled",
+   "title": "Narcotics and psychotropics: annual permit",
+   "body": "Controlled substances can be imported only by legal entities licensed for narcotics and psychotropics. Each consignment needs an import permit (certificate), valid for the calendar year it was issued and not transferable. A report is filed after import.",
+   "source": "https://www.alta.ru/tamdoc/14kz1315/",
+   "confidence": "medium"
+  },
+  {
+   "topic": "Route",
+   "applies": "all",
+   "match": null,
+   "title": "Regulator is WHO Maturity Level 3",
+   "body": "In April 2026 WHO confirmed Kazakhstan's medicines regulatory system at Maturity Level 3 (Global Benchmarking Tool), the first in the CIS. This also covers imported vaccines.",
+   "source": "https://www.ndda.kz/news/benchmarking",
+   "confidence": "high"
+  }
+ ],
+ "routes": [
+  {
+   "key": "eaeu",
+   "label": "EAEU mutual recognition / decentralised",
+   "description": "One registration valid across the EAEU (Kazakhstan as reference or recognition state), using an eCTD dossier, an EAEU GMP certificate (or a 3-year inspection commitment) and BE under Decision No. 85. Statutory: 140 working days in the reference state plus 50-60 in recognition states, excluding clock stops and inspection.",
+   "months_low": 12,
+   "months_high": 24,
+   "fee_usd_low": 2961,
+   "fee_usd_high": 3966,
+   "source": "https://www.ndda.kz/news/EAEC-principles",
+   "confidence": "medium"
+  },
+  {
+   "key": "full",
+   "label": "National registration (Kazakhstan only)",
+   "description": "Open to new products until 31 Dec 2027 (EEC Decision No. 96 as amended). A CTD dossier is reviewed by NDDA with lab testing, unless the product is ICH-GMP with CTD. Statutory 140 working days. The certificate is valid in Kazakhstan only and will likely need EAEU alignment later.",
+   "months_low": 9,
+   "months_high": 18,
+   "fee_usd_low": 1647,
+   "fee_usd_high": 3629,
+   "source": "https://zakon.uchet.kz/rus/docs/V2100022144",
+   "confidence": "medium"
+  },
+  {
+   "key": "composite",
+   "label": "Composite 'single window' service",
+   "description": "A 2026 pilot (MoH order No. 30, 11 Mar 2026) that runs national review, registration, price registration and formulary listing in parallel through eo.ehealth.kz. Statutory limit is 100 working days; fees are the same as for each underlying step.",
+   "months_low": 6,
+   "months_high": 12,
+   "fee_usd_low": 1650,
+   "fee_usd_high": 3700,
+   "source": "https://www.ndda.kz/news/Edinoe-okno",
+   "confidence": "medium"
+  },
+  {
+   "key": "reliance",
+   "label": "SRA reliance (15 working days)",
+   "description": "For products already approved by the FDA, EMA, MHRA or PMDA (Turkey and South Korea announced as next). Fast registration of up to 15 working days within the composite service. New in 2026; practice and fees are not yet well documented.",
+   "months_low": 2,
+   "months_high": 5,
+   "fee_usd_low": null,
+   "fee_usd_high": null,
+   "source": "https://www.ndda.kz/news/Turkestan",
+   "confidence": "low"
+  },
+  {
+   "key": "who_crp",
+   "label": "WHO Collaborative Registration (PQ)",
+   "description": "For products identical to a WHO-prequalified product. WHO shares its assessment and inspection reports; there is no lab testing. The national expert review limit is 65 working days, and the national fee schedule applies.",
+   "months_low": 4,
+   "months_high": 8,
+   "fee_usd_low": 1647,
+   "fee_usd_high": 3086,
+   "source": "https://cdn.who.int/media/docs/default-source/medicines/regulatory-updates/fpi/pq-crp---medicines-and-vaccines_-partcipating-countries_june-2024.pdf",
+   "confidence": "medium"
+  }
+ ],
+ "documents": [
+  {
+   "name": "Application form (e-form via NDDA portal / egov.kz)",
+   "applies": "all",
+   "match": null,
+   "note": "Signed with a digital signature (EDS); one application per dosage form.",
+   "source": "https://zakon.uchet.kz/rus/docs/V2100022144"
+  },
+  {
+   "name": "Proof of payment of NDDA review fee",
+   "applies": "all",
+   "match": null,
+   "note": "Paid before filing; the 11 MRP state duty is paid separately.",
+   "source": "https://zakon.uchet.kz/rus/docs/V2100022144"
+  },
+  {
+   "name": "Power of attorney for the applicant's representative",
+   "applies": "all",
+   "match": null,
+   "note": "Needed if a representative files for the manufacturer or holder.",
+   "source": "https://zakon.uchet.kz/rus/docs/V2100022175"
+  },
+  {
+   "name": "CPP (WHO format) or home-country registration certificate",
+   "applies": "all",
+   "match": null,
+   "note": "Notarised.",
+   "source": "https://zakon.uchet.kz/rus/docs/V2100022144"
+  },
+  {
+   "name": "GMP certificate for each manufacturing site",
+   "applies": "all",
+   "match": null,
+   "note": "Notarised, showing the date and outcome of the last inspection, or a link to a register such as EudraGMP.",
+   "source": "https://zakon.uchet.kz/rus/docs/V2100022144"
+  },
+  {
+   "name": "EAEU GMP certificate or clause-30 package",
+   "applies": "all",
+   "match": null,
+   "note": "EAEU route: last inspection report, 3-year inspection history, complaints, site master file, consent to inspection.",
+   "source": "https://www.alta.ru/tamdoc/16sr0078/"
+  },
+  {
+   "name": "QP letter on GMP compliance (Module 1.6.7)",
+   "applies": "all",
+   "match": null,
+   "note": "EAEU route.",
+   "source": "https://www.alta.ru/tamdoc/16sr0078/"
+  },
+  {
+   "name": "Licence agreement (if originator patent still valid)",
+   "applies": "all",
+   "match": null,
+   "note": null,
+   "source": "https://zakon.uchet.kz/rus/docs/V2100022144"
+  },
+  {
+   "name": "List of registrations in other countries",
+   "applies": "all",
+   "match": null,
+   "note": "With certificate numbers and dates, or copies.",
+   "source": "https://zakon.uchet.kz/rus/docs/V2100022144"
+  },
+  {
+   "name": "Trademark certificate copy",
+   "applies": "all",
+   "match": null,
+   "note": null,
+   "source": "https://zakon.uchet.kz/rus/docs/V2100022144"
+  },
+  {
+   "name": "Generic sameness summary (up to 5 pages)",
+   "applies": "all",
+   "match": null,
+   "note": "Shows sameness with the reference product: composition, form, BE.",
+   "source": "https://zakon.uchet.kz/rus/docs/V2100022144"
+  },
+  {
+   "name": "Declaration that SmPC/leaflet match the reference product",
+   "applies": "all",
+   "match": null,
+   "note": null,
+   "source": "https://zakon.uchet.kz/rus/docs/V2100022144"
+  },
+  {
+   "name": "SmPC with date of last revision",
+   "applies": "all",
+   "match": null,
+   "note": null,
+   "source": "https://zakon.uchet.kz/rus/docs/V2100022144"
+  },
+  {
+   "name": "Draft SmPC and patient leaflet in Kazakh and Russian",
+   "applies": "all",
+   "match": null,
+   "note": null,
+   "source": "https://zakon.uchet.kz/rus/docs/V2100022144"
+  },
+  {
+   "name": "Pack and label text in Kazakh and Russian",
+   "applies": "all",
+   "match": null,
+   "note": "For primary and secondary packs and stickers.",
+   "source": "https://zakon.uchet.kz/rus/docs/V2100022144"
+  },
+  {
+   "name": "Colour mock-ups of packs (JPEG, 1:1)",
+   "applies": "all",
+   "match": null,
+   "note": "For each strength and pack size.",
+   "source": "https://zakon.uchet.kz/rus/docs/V2100022144"
+  },
+  {
+   "name": "Side-by-side comparison with reference SmPC/leaflet",
+   "applies": "all",
+   "match": null,
+   "note": null,
+   "source": "https://zakon.uchet.kz/rus/docs/V2100022144"
+  },
+  {
+   "name": "Expert reports (quality, nonclinical, clinical)",
+   "applies": "all",
+   "match": null,
+   "note": "Module 1.4.",
+   "source": "https://zakon.uchet.kz/rus/docs/V2100022144"
+  },
+  {
+   "name": "PV system master file and QPPV details",
+   "applies": "all",
+   "match": null,
+   "note": "Plus a PV contact person in Kazakhstan.",
+   "source": "https://zakon.uchet.kz/rus/docs/V2100022144"
+  },
+  {
+   "name": "Risk management plan",
+   "applies": "form",
+   "match": "biolog",
+   "note": "For biologics, biosimilars and immunologicals.",
+   "source": "https://zakon.uchet.kz/rus/docs/V2100022144"
+  },
+  {
+   "name": "CTD Modules 2-5 (eCTD for EAEU)",
+   "applies": "all",
+   "match": null,
+   "note": "Russian, or English with key Module 3 sections translated into Russian.",
+   "source": "https://www.alta.ru/tamdoc/16sr0078/"
+  },
+  {
+   "name": "ASMF holder commitment letter",
+   "applies": "all",
+   "match": null,
+   "note": "If an Active Substance Master File is used.",
+   "source": "https://www.alta.ru/tamdoc/16sr0078/"
+  },
+  {
+   "name": "Bioequivalence study report and protocol",
+   "applies": "form",
+   "match": "bioequivalence",
+   "note": "Per Decision No. 85, with ethics approval, regulator approval and insurance.",
+   "source": "https://zakon.uchet.kz/rus/docs/V2100022144"
+  },
+  {
+   "name": "Biowaiver justification and dissolution data",
+   "applies": "form",
+   "match": "oral solid",
+   "note": "For BCS-based or additional-strength waivers.",
+   "source": "https://zakon.uchet.kz/rus/docs/H16EV000085"
+  },
+  {
+   "name": "Stability data",
+   "applies": "all",
+   "match": null,
+   "note": "3 batches; 12 months long-term and 6 months accelerated at filing.",
+   "source": "https://zakon.uchet.kz/rus/docs/H18EK000069"
+  },
+  {
+   "name": "Samples, reference standards and reagents",
+   "applies": "all",
+   "match": null,
+   "note": "Enough for 3 tests, with at least 9 months shelf life left; controlled or cold-chain items are handed directly to the lab.",
+   "source": "https://zakon.uchet.kz/rus/docs/V2100022144"
+  },
+  {
+   "name": "Plasma/blood source and centre inspection data",
+   "applies": "form",
+   "match": "biolog",
+   "note": "For plasma-derived products.",
+   "source": "https://zakon.uchet.kz/rus/docs/V2100022144"
+  },
+  {
+   "name": "Price file: contract, invoice, customs declaration",
+   "applies": "all",
+   "match": null,
+   "note": "Plus prices in reference countries over the past 12 months; for regulated Rx products.",
+   "source": "https://zakon.uchet.kz/rus/docs/V2000021766"
+  },
+  {
+   "name": "Narcotics/psychotropics import permit and licence",
+   "applies": "class",
+   "match": "controlled",
+   "note": "Annual, non-transferable.",
+   "source": "https://www.alta.ru/tamdoc/14kz1315/"
+  }
+ ],
+ "news": [
+  {
+   "name": "NDDA news (JSON API)",
+   "url": "https://www.ndda.kz/api/news/list/?page=1",
+   "format": "json",
+   "notes": "Machine-readable list (id, slug, published_at, title_ru/kk); the full item is at /api/news/{slug}/. Updated several times a week. The site is a JS app, so plain HTML scraping returns an empty shell."
+  },
+  {
+   "name": "NDDA announcements for applicants (JSON API)",
+   "url": "https://www.ndda.kz/api/announcements/list/?page=1",
+   "format": "json",
+   "notes": "Paginated JSON (count, next) with fee-schedule changes, portal changes and procedure notices. Updated weekly."
+  },
+  {
+   "name": "NDDA fee calculator (JSON)",
+   "url": "https://www.ndda.kz/api/services/calculator/",
+   "format": "json",
+   "notes": "Current national fee schedule with and without VAT, per service. The EAEU section is marked unavailable; use order ҚР ДСМ-7 for EAEU fees."
+  },
+  {
+   "name": "Ministry of Health / Pharmacy Committee press (gov.kz)",
+   "url": "https://www.gov.kz/memleket/entities/kmfk/press/news?lang=ru",
+   "format": "html",
+   "notes": "Official news on registration, pricing and marking. Pages render with JS; not easily machine-readable."
+  },
+  {
+   "name": "Kazakh legal acts mirror (zakon.uchet.kz)",
+   "url": "https://zakon.uchet.kz/rus/docs/V2100022144",
+   "format": "html",
+   "notes": "Consolidated texts with an 'updated as of' date (adilet.zan.kz blocks ClaudeBot). Check orders ҚР ДСМ-10, ҚР ДСМ-16, ҚР ДСМ-7 and ҚР ДСМ-247/2020 for amendments."
+  },
+  {
+   "name": "EEC legal portal (EAEU decisions)",
+   "url": "https://docs.eaeunion.org/",
+   "format": "html",
+   "notes": "Source for amendments to Decisions No. 78, 85 and 96; changes several times a year."
+  }
+ ]
+}

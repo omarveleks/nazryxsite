@@ -55,8 +55,8 @@ export default async function MfrMarket({ searchParams }: { searchParams: Promis
         from registrations where country = $1 and active group by 1 order by n desc limit 8`, [market]);
     const years = await rows(db, `select reg_year as year, count(*)::int as n from registrations
         where country = $1 and active and reg_year between 2000 and extract(year from now())::int group by reg_year order by reg_year`, [market]);
-    // the routes table describes Tanzania; other markets show their requirements card instead
-    const routes = market === 'TZ' ? await rows(db, 'select label, description, months_low, months_high from registration_routes order by sort') : [];
+    // this market's registration routes with realistic timelines
+    const routes = await rows(db, 'select label, description, months_low, months_high from country_routes where country = $1 order by sort', [market]);
     // medicine tenders collected from the market's procurement portals; the user's molecules first
     const tenders = await rows(db, `select t.id, coalesce(t.title_en, t.title) as title, coalesce(t.buyer_en, t.buyer) as buyer, t.stage, coalesce(t.awarded, t.closing, t.published) as at, t.quantity, t.unit_price, t.value,
         t.currency, t.bidders, exists (select 1 from mfr_products p where p.user_id = $2 and p.molecule_id = any(t.molecule_ids)) as mine
