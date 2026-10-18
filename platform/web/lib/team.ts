@@ -16,7 +16,8 @@ export type TeamPermission = 'requests' | 'manufacturers' | 'accounts' | 'claims
 /** Admin tabs and the permission each needs ('team' = owners only). */
 export const TAB_PERMISSION: Record<string, TeamPermission | 'team'> = {
   data: 'data', review: 'data', claims: 'claims', requests: 'requests', questions: 'questions', manufacturers: 'manufacturers',
-  documents: 'documents', regulatory: 'regulatory', calls: 'manufacturers', accounts: 'accounts', content: 'content', activity: 'activity', team: 'team',
+  documents: 'documents', regulatory: 'regulatory', calls: 'manufacturers', accounts: 'accounts', billing: 'accounts', content: 'content',
+  activity: 'activity', team: 'team',
 };
 
 export function teamCan(u: { role: string; team_owner?: boolean; team_permissions?: string[] | null }, perm: TeamPermission | 'team') {

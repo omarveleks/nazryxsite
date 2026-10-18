@@ -269,3 +269,8 @@ details.more[open] > summary { display: none; }
   transform-origin: left; animation: nav-progress 8s cubic-bezier(.1, .7, .2, 1) forwards; }
 @keyframes nav-progress { from { transform: scaleX(.05); } to { transform: scaleX(.95); } }
 @media (prefers-reduced-motion: reduce) { .nav-progress { animation: none; transform: scaleX(.6); } }
+.sub-tabs .tabs { border-bottom: 0; gap: 16px; margin-top: -6px; }
+.sub-tabs .tabs a { font-size: 13.5px; padding: 6px 0 8px; }
+details.card > summary { cursor: pointer; list-style: none; }
+details.card > summary::before { content: '▸ '; color: var(--ink-3); }
+details.card[open] > summary::before { content: '▾ '; }

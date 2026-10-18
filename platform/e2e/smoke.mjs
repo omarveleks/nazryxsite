@@ -66,7 +66,7 @@ check(tm.includes('My products') && tm.includes('Regulatory') && tm.includes('Ad
 await t.goto(B + '/m/market?market=TZ'); await t.waitForLoadState('networkidle');
 const mkt = await t.locator('main').innerText();
 check(!mkt.includes('Uganda') && mkt.includes('Add your products'), 'manufacturer market has one market switch and no empty catalogue line');
-for (const tab of ['', '?tab=review', '?tab=documents', '?tab=manufacturers', '?tab=accounts', '?tab=content', '?tab=activity', '?tab=regulatory', '?tab=calls', '?tab=team']) {
+for (const tab of ['', '?tab=review', '?tab=documents', '?tab=manufacturers', '?tab=accounts', '?tab=content', '?tab=billing', '?tab=activity', '?tab=regulatory', '?tab=calls', '?tab=team']) {
   const r = await t.goto(B + '/admin' + tab); check(r.status() === 200, `admin ${tab || 'data updates'}`);
 }
 await t.goto(B + '/admin'); await t.waitForLoadState('networkidle');
@@ -74,10 +74,10 @@ await Promise.all([t.waitForURL(/partners\?names=1/), t.click('a:has-text("Distr
 const named = await t.locator('main').innerText();
 check(/Ltd|Limited|Pharm/i.test(named) && named.includes('Hide names'), 'admin sees distributor names with one click');
 await t.goto(B + '/admin?tab=data');
-const src = await t.locator('#sources').innerText();
+const src = await t.locator('#sources').textContent();
 check(src.includes('Kazakhstan medicine register') && src.includes('Tanzania public tenders') && src.includes('Run now'), 'Admin lists the data sources with their health');
 await t.goto(B + '/admin?tab=team');
-const atabs = await t.locator('.tabs').innerText();
+const atabs = await t.locator('.tabs').allInnerTexts().then((x) => x.join(' '));
 check(!atabs.includes('Claims') && !atabs.includes('Requests') && !atabs.includes('Questions'), 'Admin has no distributor tabs');
 const teamTab = await t.locator('main').innerText();
 check(teamTab.includes('Last sign-in') && !teamTab.includes('Last sign-in never') && teamTab.includes('last active') && teamTab.includes('changes this week'), 'Admin > Team shows last sign-in, last active and changes');
@@ -100,9 +100,9 @@ const mb = await page();
 await mb.goto(B + '/signup?mode=signin'); await mb.fill('#email', memberMail); await mb.fill('#password', 'member-password-123');
 await Promise.all([mb.waitForURL(/\/m/), mb.click('button[type=submit]')]);
 await mb.goto(B + '/admin');
-const mtabs = await mb.locator('.tabs').innerText();
+const mtabs = await mb.locator('.tabs').allInnerTexts().then((x) => x.join(' '));
 check(mtabs.includes('Manufacturers') && !mtabs.includes('Accounts') && !mtabs.includes('Team'), 'a team member sees only the areas they were given');
-check((await mb.goto(B + '/admin?tab=accounts')) && !(await mb.locator('.tabs').innerText()).includes('Accounts'), 'other areas stay closed');
+check((await mb.goto(B + '/admin?tab=accounts')) && !(await mb.locator('.tabs').allInnerTexts()).join(' ').includes('Accounts'), 'other areas stay closed');
 check((await mb.goto(B + '/admin?tab=manufacturers')).status() === 200 && (await mb.locator('main').innerText()).includes('Manufacturers'), 'the member works on manufacturers');
 const t2 = await page();
 await signin(t2, process.env.SEED_TEAM_EMAIL || 'team@nazryx.test', process.env.SEED_TEAM_PASSWORD, secret);
@@ -224,6 +224,16 @@ for (let i = 0; i < 15 && !invoiced; i++) { await k.waitForTimeout(1000); await 
 const settingsText = await k.locator('main').innerText();
 check(settingsText.includes('Smoke services agreement'), 'customer finds account documents in Settings');
 check(invoiced && settingsText.includes('Order confirmation'), 'switching a plan on issues the order confirmation and invoice');
+await t.goto(B + '/admin?tab=billing');
+await t.fill('textarea[name=payment_details]', 'Smoke Bank, account 123');
+await Promise.all([t.waitForURL(/saved=1/), t.click('button:has-text("Save details")')]);
+await t.fill('input[name=account]', kmail); await t.fill('input[name=text_0]', 'Smoke dossier review'); await t.fill('input[name=unit_0]', '250');
+await Promise.all([t.waitForURL(/queued=1/), t.click('button:has-text("Create and send invoice")')]);
+let billed = false;
+for (let i = 0; i < 15 && !billed; i++) { await t.waitForTimeout(1000); await t.goto(B + '/admin?tab=billing'); billed = (await t.locator('main').innerText()).includes('USD 250.00'); }
+const invHref = await t.locator('a:has-text("NZX-")').first().getAttribute('href');
+const invDoc = await (await t.request.get(B + invHref)).text();
+check(billed && invDoc.includes('Smoke dossier review') && invDoc.includes('Smoke Bank, account 123'), 'Admin > Billing writes an invoice with our details');
 await k.goto(B + '/m/products');
 check((await k.locator('main').innerText()).includes('By therapeutic class'), 'active plan unlocks the portfolio analysis');
 await k.goto(B + '/m/products');

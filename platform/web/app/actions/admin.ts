@@ -396,3 +396,45 @@ export async function saveMarketCosts(f: FormData) {
     where country = $1`, [str(f, 'country', 2), share('freight'), share('duty'), share('distributor'), share('pharmacy'), share('vat')]), '/admin?tab=data');
   redirect('/admin?tab=data&saved=1#costs');
 }
+
+// ---------------------------------------------------------------- billing
+/** Our details printed on every invoice and order confirmation, and how invoices go out. */
+export async function saveInvoiceSettings(f: FormData) {
+  await requireTeam('accounts');
+  const prefix = str(f, 'prefix', 10).toUpperCase().replace(/[^A-Z0-9-]/g, '') || 'NZX';
+  await team((db) => db.query(`update invoice_settings set issuer = $1, address = nullif($2, ''), tax_id = nullif($3, ''), email = $4,
+      phone = nullif($5, ''), payment_details = nullif($6, ''), footer = nullif($7, ''), terms_days = $8, prefix = $9, recurring = $10,
+      updated_at = now() where id = 1`,
+    [str(f, 'issuer', 200) || 'Nazryx', str(f, 'address', 400), str(f, 'tax_id', 80), str(f, 'email', 120) || 'contact@nazryx.com',
+      str(f, 'phone', 60), str(f, 'payment_details', 1000), str(f, 'footer', 600), Math.min(120, Math.max(0, int(f, 'terms_days') ?? 14)),
+      prefix, f.get('recurring') === 'on']), '/admin?tab=billing');
+  redirect('/admin?tab=billing&saved=1');
+}
+
+/** An invoice for any account: written out by the worker within a minute and filed in the customer's documents. */
+export async function createInvoice(f: FormData) {
+  await requireTeam('accounts');
+  const to = '/admin?tab=billing';
+  const lines = [0, 1, 2, 3, 4].map((i) => ({
+    text: str(f, `text_${i}`, 200), qty: Number(str(f, `qty_${i}`, 10) || 1), unit: Number(str(f, `unit_${i}`, 20).replace(/,/g, '')),
+  })).filter((l) => l.text);
+  if (!lines.length) back(to, { error: 'Add at least one line.' });
+  if (lines.some((l) => !Number.isFinite(l.unit) || l.unit < 0 || !Number.isFinite(l.qty) || l.qty <= 0)) back(to, { error: 'Check the quantities and prices.' });
+  const currency = ['usd', 'eur', 'gbp'].includes(str(f, 'currency', 3)) ? str(f, 'currency', 3) : 'usd';
+  await team(async (db, uid) => {
+    const who = await one(db, 'select id from users where id::text = $1 or lower(email) = lower($1)', [str(f, 'account', 200)]);
+    if (!who) back(to, { error: 'No account with that email.' });
+    await db.query(`insert into invoice_orders (user_id, lines, currency, note, paid, created_by) values ($1, $2, $3, nullif($4, ''), $5, $6)`,
+      [who.id, JSON.stringify(lines.map((l) => ({ text: l.text, qty: l.qty, unit_cents: Math.round(l.unit * 100) }))), currency,
+        str(f, 'note', 600), f.get('paid') === 'on', uid]);
+  }, to);
+  redirect(`${to}&queued=1`);
+}
+
+export async function markInvoicePaid(f: FormData) {
+  await requireTeam('accounts');
+  const paid = f.get('paid') === '1';
+  await team((db) => db.query(`update invoices set status = $2, paid_at = case when $2 = 'paid' then now() else null end where number = $1`,
+    [str(f, 'number', 40), paid ? 'paid' : 'due']), '/admin?tab=billing');
+  redirect('/admin?tab=billing&saved=1');
+}

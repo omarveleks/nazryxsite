@@ -2,6 +2,7 @@
 documents that go with them: an order confirmation when a plan starts, an invoice for every payment. Documents are
 stored like any upload and appear in the customer's Settings > Documents. No card data ever reaches this code."""
 import html
+import json
 import logging
 from datetime import datetime, timedelta, timezone
 
@@ -9,6 +10,26 @@ log = logging.getLogger("billing")
 
 ISSUER = "Nazryx, a company of Nazir & Company International (PVT) Limited"
 CONTACT = "contact@nazryx.com"
+
+
+def settings(cur):
+    """Our details as the team set them in Admin > Billing (defaults when the table is not there yet)."""
+    try:
+        cur.execute("savepoint st")
+        r = cur.execute("""select issuer, address, tax_id, email, phone, payment_details, footer, terms_days, prefix, recurring
+                           from invoice_settings where id = 1""").fetchone()
+        cur.execute("release savepoint st")
+    except Exception:
+        cur.execute("rollback to savepoint st")
+        r = None
+    keys = ("issuer", "address", "tax_id", "email", "phone", "payment_details", "footer", "terms_days", "prefix", "recurring")
+    return dict(zip(keys, r)) if r else dict(zip(keys, (ISSUER, None, None, CONTACT, None, None, None, 14, "NZX", True)))
+
+
+def esc(t):
+    return html.escape(t or "").replace("\n", "<br>")
+
+
 PLANS = {
     "data": ("Basic Market Data", ["Complete market data", "Target distributor lists", "Portfolio analysis", "Market watch on your molecules"]),
     "access": ("Complete Market Access", ["Everything in Basic Market Data",
@@ -26,14 +47,19 @@ def money(cents, currency="usd"):
     return f"{currency.upper()} {cents / 100:,.2f}"
 
 
-def page(title, body):
-    """A self-contained, printable HTML document in the Nazryx style (flat, Inter, blue)."""
+def page(title, body, st=None):
+    """A self-contained, printable HTML document in the Nazryx style (flat, Inter, blue), with our details."""
+    st = st or {"issuer": ISSUER, "email": CONTACT}
+    who = " · ".join(x for x in (esc(st["issuer"]), esc(st.get("address")), (f"Tax / registration no. {esc(st['tax_id'])}" if st.get("tax_id") else ""),
+                                 esc(st["email"]), esc(st.get("phone"))) if x)
     return f"""<!doctype html><html lang="en"><head><meta charset="utf-8"><title>{html.escape(title)}</title>
 <style>body{{font-family:Inter,Arial,sans-serif;color:#141413;max-width:720px;margin:40px auto;padding:0 24px;line-height:1.5}}
 h1{{font-size:28px;margin:24px 0 4px}}.muted{{color:#5E5E58}}table{{width:100%;border-collapse:collapse;margin:20px 0}}
 td,th{{text-align:left;padding:10px 0;border-bottom:1px solid #ECEAE3}}td.r,th.r{{text-align:right}}
-.brand{{color:#0066FF;font-weight:700;font-size:20px}}.box{{background:#F7F6F2;border-radius:12px;padding:16px;margin:20px 0}}</style>
-</head><body><div class="brand">Nazryx</div>{body}<p class="muted" style="margin-top:40px">{html.escape(ISSUER)} · {CONTACT}</p></body></html>"""
+.brand{{color:#0066FF;font-weight:700;font-size:20px}}.box{{background:#F7F6F2;border-radius:12px;padding:16px;margin:20px 0}}
+@media print{{body{{margin:0 auto}}}}</style>
+</head><body><div class="brand">Nazryx</div>{body}{f'<p class="muted" style="margin-top:24px">{esc(st.get("footer"))}</p>' if st.get("footer") else ''}
+<p class="muted" style="margin-top:40px">{who}</p></body></html>"""
 
 
 def store_document(cur, user_id, kind, title, file_name, content, team_id=None):
@@ -51,9 +77,11 @@ def customer(cur, user_id):
     return {"email": r[0], "name": r[1], "company": r[2], "country": r[3] or ""} if r else None
 
 
-def next_number(cur, when):
+def next_number(cur, when, prefix="NZX"):
     n = cur.execute("select count(*) + 1 from invoices where extract(year from issued_at) = %s", (when.year,)).fetchone()[0]
-    return f"NZX-{when.year}-{n:04d}"
+    while cur.execute("select 1 from invoices where number = %s", (f"{prefix}-{when.year}-{n:04d}",)).fetchone():
+        n += 1
+    return f"{prefix}-{when.year}-{n:04d}"
 
 
 def country_names(cur, codes):
@@ -80,29 +108,80 @@ def order_confirmation(cur, user_id, plan, amount_cents, paid_by_card, when, mar
 <tr><td>Billing</td><td class="r">{('Annual' if interval == 'year' else 'Monthly') + (', by card' if paid_by_card else ', invoiced by Nazryx')}</td></tr>
 <tr><td>Starts</td><td class="r">{when:%d %B %Y}</td></tr></table>
 <div class="box"><b>What is included</b><ul>{items}</ul></div>
-<p class="muted">Government and regulator fees are paid by you, at cost. Questions about this order: {CONTACT}.</p>"""
+<p class="muted">Government and regulator fees are paid by you, at cost. Questions about this order: {esc(settings(cur)["email"])}.</p>"""
     title = f"Order confirmation: {name}"
-    return store_document(cur, user_id, "agreement", title, f"Order confirmation {name} {when:%Y-%m-%d}.html", page(title, body))
+    return store_document(cur, user_id, "agreement", title, f"Order confirmation {name} {when:%Y-%m-%d}.html", page(title, body, settings(cur)))
 
 
-def invoice(cur, user_id, plan, amount_cents, currency, paid, when, markets=None):
+def invoice(cur, user_id, plan, amount_cents, currency, paid, when, markets=None, lines=None, note=None, period=None):
+    """Writes the invoice, files it in the customer's documents and records it. `lines`: [{text, qty, unit_cents}]."""
+    st = settings(cur)
     c = customer(cur, user_id)
-    name = (f"Extra market: {', '.join(country_names(cur, markets))}" if plan == "market"
-            else PLANS.get(plan, (plan or "Nazryx services",))[0])
-    number = next_number(cur, when)
-    due = None if paid else when + timedelta(days=14)
-    status = "Paid by card" if paid else f"Due by {due:%d %B %Y}"
+    if not lines:
+        name = (f"Extra market: {', '.join(country_names(cur, markets))}" if plan == "market"
+                else PLANS.get(plan, (plan or "Nazryx services",))[0])
+        lines = [{"text": f"{name}, {when:%B %Y}", "qty": 1, "unit_cents": amount_cents}]
+    if all(x.get("unit_cents") is not None for x in lines):
+        amount_cents = sum(round(float(x.get("qty") or 1) * x["unit_cents"]) for x in lines)
+    number = next_number(cur, when, st["prefix"])
+    due = None if paid else when + timedelta(days=st["terms_days"])
+    status = "Paid" if paid else f"Due by {due:%d %B %Y}"
+    rows = "".join(f"""<tr><td>{esc(x['text'])}</td><td class="r">{float(x.get('qty') or 1):g}</td>
+<td class="r">{money(x.get('unit_cents'), currency)}</td>
+<td class="r">{money(None if x.get('unit_cents') is None else round(float(x.get('qty') or 1) * x['unit_cents']), currency)}</td></tr>""" for x in lines)
+    pay = (f'<div class="box"><b>How to pay</b><br>{esc(st["payment_details"])}<br><span class="muted">Please quote {number}.</span></div>'
+           if st.get("payment_details") else '<p>Your Nazryx contact sends the payment details.</p>')
     body = f"""<h1>Invoice {number}</h1><p class="muted">Issued {when:%d %B %Y} · {status}</p>
-<table><tr><td>Billed to</td><td class="r">{html.escape(c['company'])}<br><span class="muted">{html.escape(c['email'])}{(' · ' + html.escape(c['country'])) if c['country'] else ''}</span></td></tr></table>
-<table><tr><th>Item</th><th class="r">Amount</th></tr>
-<tr><td>{html.escape(name)}, {when:%B %Y}</td><td class="r">{money(amount_cents, currency)}</td></tr>
-<tr><td><b>Total</b></td><td class="r"><b>{money(amount_cents, currency)}</b></td></tr></table>
-{'' if paid else f'<p>Please pay by {due:%d %B %Y}. Your Nazryx contact sends the payment details.</p>'}"""
-    doc = store_document(cur, user_id, "invoice", f"Invoice {number}", f"Invoice {number}.html", page(f"Invoice {number}", body))
-    cur.execute("""insert into invoices (number, user_id, plan, amount_cents, currency, status, issued_at, due_at, document_id)
-                   values (%s, %s, %s, %s, %s, %s, %s, %s, %s)""",
-                (number, user_id, plan, amount_cents, currency, "paid" if paid else "due", when, due, doc))
+<table><tr><td>From</td><td class="r">{esc(st['issuer'])}{('<br><span class="muted">' + esc(st['address']) + '</span>') if st.get('address') else ''}{('<br><span class="muted">Tax / registration no. ' + esc(st['tax_id']) + '</span>') if st.get('tax_id') else ''}</td></tr>
+<tr><td>Billed to</td><td class="r">{html.escape(c['company'])}<br><span class="muted">{html.escape(c['email'])}{(' · ' + html.escape(c['country'])) if c['country'] else ''}</span></td></tr></table>
+<table><tr><th>Item</th><th class="r">Qty</th><th class="r">Unit</th><th class="r">Amount</th></tr>{rows}
+<tr><td colspan="3"><b>Total</b></td><td class="r"><b>{money(amount_cents, currency)}</b></td></tr></table>
+{f'<p>{esc(note)}</p>' if note else ''}{'' if paid else pay}"""
+    doc = store_document(cur, user_id, "invoice", f"Invoice {number}", f"Invoice {number}.html", page(f"Invoice {number}", body, st))
+    cur.execute("""insert into invoices (number, user_id, plan, amount_cents, currency, status, issued_at, due_at, document_id, lines,
+                   paid_at, interval_key) values (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)""",
+                (number, user_id, plan, amount_cents, currency, "paid" if paid else "due", when, due, doc, json.dumps(lines),
+                 when if paid else None, period))
+    notify(cur, user_id, f"Invoice {number}", f"Invoice {number} for {money(amount_cents, currency)} is in Settings, Documents."
+           + ("" if paid else f" Due by {due:%d %B %Y}."))
     return number
+
+
+def orders(cur):
+    """Invoices the team wrote in Admin > Billing."""
+    for oid, uid, lines, currency, note, paid in cur.execute("""select id, user_id, lines, currency, note, paid from invoice_orders
+                                                               where processed_at is null and error is null order by id limit 20""").fetchall():
+        try:
+            cur.execute("savepoint io")
+            n = invoice(cur, uid, None, None, currency, paid, datetime.now(timezone.utc), lines=lines, note=note)
+            cur.execute("update invoice_orders set processed_at = now(), number = %s where id = %s", (n, oid))
+            cur.execute("release savepoint io")
+        except Exception as e:
+            cur.execute("rollback to savepoint io")
+            cur.execute("update invoice_orders set error = %s where id = %s", (str(e)[:500], oid))
+            log.exception("invoice order %s failed", oid)
+
+
+def recurring(cur):
+    """Invoiced plans (not paid by card): the next invoice when a billing period has passed since the last one,
+    for the same amount. A plan with no invoice yet waits for the team's first one."""
+    if not settings(cur)["recurring"]:
+        return 0
+    due = cur.execute("""select p.user_id, p.active_plan, i.amount_cents, i.currency, coalesce(p.billing_interval, 'month')
+                         from manufacturer_profiles p
+                         join lateral (select amount_cents, currency, issued_at from invoices x where x.user_id = p.user_id
+                                       and x.plan = p.active_plan order by issued_at desc limit 1) i on true
+                         where p.active_plan is not null and p.stripe_subscription is null and i.amount_cents is not null
+                           and i.issued_at + case when p.billing_interval = 'year' then interval '1 year' else interval '1 month' end
+                               <= now()""").fetchall()
+    now = datetime.now(timezone.utc)
+    for uid, plan, cents, currency, per in due:
+        period = f"{now:%Y}" if per == "year" else f"{now:%Y-%m}"
+        if cur.execute("select 1 from invoices where user_id = %s and plan = %s and interval_key = %s", (uid, plan, period)).fetchone():
+            continue
+        label = f"{PLANS.get(plan, (plan,))[0]}, {now:%Y}" if per == "year" else f"{PLANS.get(plan, (plan,))[0]}, {now:%B %Y}"
+        invoice(cur, uid, plan, cents, currency, False, now, lines=[{"text": label, "qty": 1, "unit_cents": cents}], period=period)
+    return len(due)
 
 
 def notify(cur, user_id, subject, body):
@@ -192,4 +271,11 @@ def process(cur):
             cur.execute("rollback to savepoint ev")
             cur.execute("update payment_events set error = %s where id = %s", (str(e)[:500], ev[0]))
             log.exception("payment event %s failed", ev[0])
+    orders(cur)
+    cur.execute("savepoint rec")
+    try:
+        recurring(cur)
+    except Exception:
+        cur.execute("rollback to savepoint rec")
+        log.exception("recurring invoices failed")
     return len(events)

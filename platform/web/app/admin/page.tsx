@@ -7,7 +7,7 @@ import { addTeamMember, removeTeamMember, updateTeamMember } from '@/app/actions
 import { one, rows, withUser } from '@/lib/db';
 import { STAGES, ago, fmtDate, title } from '@/lib/format';
 import { MFR_PLANS, SERVICES, countryName } from '@/lib/mfr';
-import { saveMarketCosts } from '@/app/actions/admin';
+import { createInvoice, markInvoicePaid, saveInvoiceSettings, saveMarketCosts } from '@/app/actions/admin';
 import { answerQuestion, reviewManufacturer, grantCredits, keepSeparate, saveRoutes, setMoleculeRoute, matchMolecule, mergeCompanies, postRegulatory, addPrice, editUseCase, queueRecompute,
   rejectSuggestion, resetPassword, resetTwoStep, reviewClaim, setPlan, updateSource } from '@/app/actions/admin';
 import { StagePill } from '@/components/ui';
@@ -54,7 +54,6 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
       out.coverage = await rows(db, `with reg as (select distinct country, molecule_id from registrations where active and molecule_id is not null)
         select r.country, count(*)::int as total, count(p.molecule_id)::int as priced, count(*) filter (where p.basis = 'listings')::int as direct
         from reg r left join molecule_prices p using (country, molecule_id) group by 1 order by 1`);
-      out.costs = await rows(db, 'select country, freight, duty, distributor, pharmacy, vat from market_costs order by country');
     }
     if (tab === 'review') {
       out.sugg = await rows(db, `select s.molecule_id, m.inn, m.category, t.id as to_id, t.inn as to_inn, s.confidence, s.reason
@@ -150,7 +149,17 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
                                 from audit_log a left join users u on u.id = a.actor where $1::uuid is null or a.actor = $1
                                 order by a.at desc limit 200`, [who]);
     }
+    if (tab === 'billing') {
+      out.inv = await one(db, 'select * from invoice_settings where id = 1');
+      out.invoices = await rows(db, `select i.number, i.amount_cents, i.currency, i.status, i.issued_at, i.due_at, i.document_id, i.plan,
+                                     u.email, coalesce(p.company_name, u.name, u.email) as company
+                                     from invoices i join users u on u.id = i.user_id left join manufacturer_profiles p on p.user_id = i.user_id
+                                     order by i.issued_at desc limit 100`);
+      out.pending = await rows(db, `select o.id, o.error, u.email from invoice_orders o join users u on u.id = o.user_id
+                                    where o.processed_at is null order by o.id`);
+    }
     if (tab === 'content') {
+      out.costs = await rows(db, 'select country, freight, duty, distributor, pharmacy, vat from market_costs order by country');
       out.routes = await rows(db, 'select key, label, description, months_low, months_high from registration_routes order by sort');
       out.prices = await rows(db, 'select key, price, note, amount_usd from plan_prices');
       out.feed = await rows(db, `select title, created_at from feed_items where kind = 'regulatory' order by created_at desc limit 8`);
@@ -164,43 +173,44 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
   const diff = d.lastAny?.diff ?? {};
   const c = d.counts;
   // Claims, sourcing requests and expert questions belong to the paused distributor side (distributor/README.md)
-  const tabs = [
-    { key: 'data', label: 'Data updates', href: '/admin?tab=data' },
-    { key: 'review', label: `Review queue (${c.suggestions + c.dups})`, href: '/admin?tab=review' },
-    { key: 'manufacturers', label: `Manufacturers (${c.mfr_open})`, href: '/admin?tab=manufacturers' },
-    { key: 'documents', label: `Documents${c.expiring ? ` (${c.expiring})` : ''}`, href: '/admin?tab=documents' },
-    { key: 'regulatory', label: 'Regulatory', href: '/admin?tab=regulatory' },
-    { key: 'calls', label: 'Calls', href: '/admin?tab=calls' },
-    { key: 'accounts', label: `Accounts${c.plan_requests ? ` (${c.plan_requests})` : ''}`, href: '/admin?tab=accounts' },
-    { key: 'content', label: 'Content', href: '/admin?tab=content' },
-    { key: 'activity', label: 'Activity', href: '/admin?tab=activity' },
-    { key: 'team', label: 'Team', href: '/admin?tab=team' },
-  ].filter((t) => allowedTabs.includes(t.key));
+  // six areas on top; an area with several pages shows them as a second row
+  const n = (x: number) => (x ? ` (${x})` : '');
+  const pages: Record<string, string> = {
+    data: 'Sources and uploads', review: `Review queue${n(c.suggestions + c.dups)}`, manufacturers: `Manufacturers${n(c.mfr_open)}`,
+    accounts: `Accounts${n(c.plan_requests)}`, calls: 'Calls', billing: 'Invoices', documents: 'Documents', regulatory: 'Regulatory',
+    content: 'Content and prices', team: 'Team', activity: 'Activity',
+  };
+  const areas = [
+    { key: 'data', label: `Data${n(c.suggestions + c.dups)}`, pages: ['data', 'review'] },
+    { key: 'customers', label: `Customers${n(c.mfr_open + c.plan_requests)}`, pages: ['manufacturers', 'accounts', 'calls'] },
+    { key: 'billing', label: 'Billing', pages: ['billing'] },
+    { key: 'documents', label: `Documents${n(c.expiring)}`, pages: ['documents'] },
+    { key: 'regulatory', label: 'Regulatory', pages: ['regulatory'] },
+    { key: 'settings', label: 'Settings', pages: ['content', 'team', 'activity'] },
+  ].map((a) => ({ ...a, pages: a.pages.filter((k) => allowedTabs.includes(k)) })).filter((a) => a.pages.length);
+  const area = areas.find((a) => a.pages.includes(tab));
+  const tabs = areas.map((a) => ({ key: a.key, label: a.label, href: `/admin?tab=${a.pages[0]}` }));
+  const subTabs = (area?.pages ?? []).map((k) => ({ key: k, label: pages[k], href: `/admin?tab=${k}` }));
   return (
     <Shell user={u} title="Admin" sub="Nazryx team only. Not visible to customers."
       actions={<Link className="btn btn-blue btn-sm" href="/m/partners?names=1">Distributors with names</Link>}>
-      <Tabs items={tabs} current={tab} />
+      <Tabs items={tabs} current={area?.key ?? tab} />
+      {subTabs.length > 1 && <div className="sub-tabs"><Tabs items={subTabs} current={tab} /></div>}
       <Flash sp={sp} />
       {sp.queued && <div className="ok" role="status">Queued. The ingest job runs in the background; refresh to see the result.</div>}
       {tab === 'data' && (<>
-        <section className="card stack" id="costs">
-          <div className="card-h"><div><h2>Margin check assumptions</h2><p className="note">What is added on the way from ex-works to the shelf in each market, in %.</p></div></div>
-          {(d.costs ?? []).map((c: any) => (
-            <form key={c.country} action={saveMarketCosts} className="row" style={{ gap: 8, flexWrap: 'wrap', alignItems: 'flex-end' }}>
-              <input type="hidden" name="country" value={c.country} /><b style={{ width: 100 }}>{countryName(c.country)}</b>
-              {(['freight', 'duty', 'distributor', 'pharmacy', 'vat'] as const).map((k) => (
-                <label key={k} className="small" style={{ width: 90 }}>{k === 'duty' ? 'Duty, fees' : k === 'vat' ? 'VAT' : title(k)}
-                  <input className="input" name={k} type="number" step="any" min="0" defaultValue={Math.round(Number(c[k]) * 1000) / 10} /></label>))}
-              <button className="btn btn-ghost btn-sm" type="submit">Save</button>
-            </form>))}
-        </section>
         <section className="card stack" id="sources">
           <div className="card-h"><div><h2>Sources</h2><p className="note">Collected by themselves: registers weekly, tenders daily, prices every three days.
             A register pull much smaller than what is loaded waits here instead of replacing good data.</p></div></div>
           {(d.coverage ?? []).length > 0 && <p className="small">Prices: {(d.coverage ?? []).map((c: any) =>
             `${c.country} ${Math.round((100 * c.priced) / Math.max(1, c.total))}% (${c.direct} direct)`).join(' · ')} of registered molecules.</p>}
-          <div className="tbl-wrap"><table className="tbl"><thead><tr><th>Source</th><th>Last run</th><th className="r">Rows</th><th>Status</th><th /></tr></thead>
-            <tbody>{(d.sources ?? []).map((x: any) => (
+          {(() => {
+            const all = d.sources ?? [];
+            const needs = (x: any) => x.kind === 'registry' || !x.enabled || x.held_rows || x.last_error;
+            const ok = all.filter((x: any) => x.last_ok && !x.last_error && x.enabled).length;
+            const table = (list: any[]) => (
+            <div className="tbl-wrap"><table className="tbl"><thead><tr><th>Source</th><th>Last run</th><th className="r">Rows</th><th>Status</th><th /></tr></thead>
+            <tbody>{list.map((x: any) => (
               <tr key={x.key}>
                 <td><b>{x.label}</b><div className="sub2">{x.kind} · every {x.every_hours >= 24 ? `${Math.round(x.every_hours / 24)} days` : `${x.every_hours} h`} · <a href={x.url} target="_blank" rel="noopener noreferrer">{x.url.replace('https://', '')}</a></div></td>
                 <td className="small">{x.last_run ? ago(x.last_run) : 'never'}{x.run_now && <div className="sub2">queued</div>}</td>
@@ -214,18 +224,19 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
                   {[['run', 'Run now'], ...(x.held_rows && !x.release_held ? [['use_held', 'Use it anyway']] : []), [x.enabled ? 'off' : 'on', x.enabled ? 'Turn off' : 'Turn on']].map(([act, l]) => (
                     <form key={act} action={updateSource}><input type="hidden" name="key" value={x.key} /><input type="hidden" name="act" value={act} />
                       <button className="btn btn-ghost btn-sm" type="submit">{l}</button></form>))}</div></td>
-              </tr>))}</tbody></table></div>
+              </tr>))}</tbody></table></div>);
+            return (<>
+              <p className="small"><b>{ok} of {all.length}</b> sources healthy{all.some((x: any) => x.last_error) ? ', problems listed first' : ''}.</p>
+              {table(all.filter(needs).sort((x: any, y: any) => Number(!!y.last_error) - Number(!!x.last_error)))}
+              <details><summary className="small">All {all.length} sources (tenders, prices, regulator news)</summary>{table(all.filter((x: any) => !needs(x)))}</details>
+            </>);
+          })()}
         </section>
-        <section className={`tile ${overdue ? 't-alert' : 't-blue'}`} role={overdue ? 'alert' : undefined}>
-          <span className="v" style={{ fontSize: 24 }}>{overdue
-            ? `Registration list update overdue${last ? ` by ${Math.round(-msLeft / 36e5)} hours` : ''}`
-            : `Registration list is due for an update in ${Math.max(1, Math.round(msLeft / 36e5))} hours`}</span>
-          <span className="k">Last uploaded {last ? ago(last) : 'never'}. Reminder every 48 hours: turns red when overdue, plus email and WhatsApp to the team.
-            {d.reminders?.[0] && ` Last reminder sent ${ago(d.reminders[0].sent_at)}.`}</span>
-        </section>
+        {overdue && <div className="err" role="alert">Tanzania list update overdue{last ? ` by ${Math.round(-msLeft / 36e5)} hours` : ''}: upload the latest export below.</div>}
         <div className="grid g2">
           <section className="card stack">
             <h2>Upload new list</h2>
+            <p className="note">Tanzania last uploaded {last ? ago(last) : 'never'}{!overdue ? `; next due in ${Math.max(1, Math.round(msLeft / 36e5))} hours` : ''}. The other markets are collected by themselves (Sources above).</p>
             {d.refs.length < 2 && <div className="err" role="alert">Upload the two reference lists below first. The registry upload needs them.</div>}
             <form action="/api/admin/upload" method="post" encType="multipart/form-data" className="stack">
               <div className="field"><label htmlFor="country">Country</label>
@@ -254,7 +265,8 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
             <Link className="btn btn-ghost btn-sm" href="/admin?tab=review" style={{ alignSelf: 'flex-start' }}>Open queue</Link>
           </section>
         </div>
-        <section className="card stack">
+        <details className="card"><summary><b>Reference lists and upload history</b></summary><div className="stack" style={{ marginTop: 12 }}>
+        <section className="stack">
           <div className="card-h"><h2>Reference lists</h2>
             <span className="note">Used by every update. Replace them when a new edition comes out.</span></div>
           <table className="tbl"><tbody>
@@ -270,7 +282,7 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
             <div className="full"><button className="btn btn-ghost btn-sm" type="submit">Save reference lists</button></div>
           </form>
         </section>
-        <section className="card">
+        <section>
           <div className="card-h"><h2>Upload history</h2></div>
           <div className="tbl-wrap"><table className="tbl">
             <thead><tr><th>Date</th><th>Country</th><th>By</th><th>File</th><th className="r">Rows</th><th>Status</th></tr></thead>
@@ -285,6 +297,7 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
                   {h.status === 'failed' && <div className="tiny muted">{h.error}</div>}</td></tr>))}
             </tbody></table></div>
         </section>
+        </div></details>
       </>)}
       {tab === 'review' && (<>
         <section className="card">
@@ -411,7 +424,7 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
       )}
       {tab === 'accounts' && (
         <section className="card">
-          <div className="card-h"><h2>Accounts</h2><span className="note">Billing is manual for now: invoice, then switch the plan here.</span></div>
+          <div className="card-h"><h2>Accounts</h2><span className="note">Card plans run by themselves; invoices are in Billing.</span></div>
           <div className="tbl-wrap"><table className="tbl"><thead><tr><th>Account</th><th>Role</th><th>Plan</th><th className="r">Credits</th><th className="r">Actions</th></tr></thead>
             <tbody>{d.users.map((x: any) => (
               <tr key={x.id}><td><Link href={`/admin/accounts/${x.id}`}><b>{x.name || x.email}</b></Link><div className="sub2">{x.email}{x.owner_id ? ' · teammate seat' : ''}</div>
@@ -495,6 +508,62 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
                   <td className="small">{x.from_team ? 'Nazryx' : 'Customer'}</td><td className="r small">{ago(x.created_at)}</td></tr>))}</tbody></table></div>)}
         </section>
       </>)}
+      {tab === 'billing' && (<>
+        {sp.queued && <div className="ok" role="status">Invoice queued. It is written and filed in the customer's documents within a minute.</div>}
+        <div className="grid g2">
+          <section className="card stack">
+            <h2>New invoice</h2>
+            <form action={createInvoice} className="stack">
+              <div className="field"><label htmlFor="account">Customer email</label><input className="input" id="account" name="account" type="email" required /></div>
+              {[0, 1, 2, 3, 4].map((i) => (
+                <div key={i} className="row" style={{ gap: 6 }}>
+                  <input className="input" name={`text_${i}`} placeholder={i ? 'Another line (optional)' : 'What it is for, e.g. Complete Market Access, May 2026'} required={i === 0} style={{ flex: 3 }} aria-label={`Line ${i + 1}`} />
+                  <input className="input" name={`qty_${i}`} type="number" step="any" min="0" placeholder="Qty" style={{ width: 64 }} aria-label="Quantity" />
+                  <input className="input" name={`unit_${i}`} type="number" step="0.01" min="0" placeholder="Price" style={{ width: 100 }} aria-label="Unit price" />
+                </div>))}
+              <div className="row" style={{ gap: 8, alignItems: 'flex-end' }}>
+                <label className="small">Currency<select className="input" name="currency" defaultValue="usd"><option value="usd">USD</option><option value="eur">EUR</option><option value="gbp">GBP</option></select></label>
+                <label className="row small" style={{ gap: 6 }}><input type="checkbox" name="paid" /> Already paid</label>
+              </div>
+              <div className="field"><label htmlFor="note">Note on the invoice (optional)</label><input className="input" id="note" name="note" /></div>
+              <button className="btn btn-blue" type="submit">Create and send invoice</button>
+              <p className="note">Numbered, filed in the customer's Settings, Documents, and emailed to them. Plan invoices are made by themselves: when a plan starts or a card payment comes in{d.inv?.recurring ? ', and every billing period for invoiced plans' : ''}.</p>
+            </form>
+            {(d.pending ?? []).length > 0 && <p className="small">{d.pending.map((o: any) => `${o.email}: ${o.error ? `failed (${o.error})` : 'being written'}`).join(' · ')}</p>}
+          </section>
+          <section className="card stack">
+            <h2>Our details on invoices</h2>
+            <form action={saveInvoiceSettings} className="stack">
+              {([['issuer', 'Company name', true], ['address', 'Address', false], ['tax_id', 'Tax or registration number', false], ['email', 'Email', true], ['phone', 'Phone', false]] as const).map(([k, l, req]) => (
+                <div key={k} className="field"><label htmlFor={k}>{l}</label><input className="input" id={k} name={k} defaultValue={d.inv?.[k] ?? ''} required={req} /></div>))}
+              <div className="field"><label htmlFor="payment_details">How to pay (bank, account, SWIFT…)</label><textarea className="input" id="payment_details" name="payment_details" rows={4} defaultValue={d.inv?.payment_details ?? ''} /></div>
+              <div className="field"><label htmlFor="footer">Footer note</label><textarea className="input" id="footer" name="footer" rows={2} defaultValue={d.inv?.footer ?? ''} /></div>
+              <div className="row" style={{ gap: 8, alignItems: 'flex-end', flexWrap: 'wrap' }}>
+                <label className="small" style={{ width: 120 }}>Days to pay<input className="input" name="terms_days" type="number" min="0" max="120" defaultValue={d.inv?.terms_days ?? 14} /></label>
+                <label className="small" style={{ width: 120 }}>Number prefix<input className="input" name="prefix" defaultValue={d.inv?.prefix ?? 'NZX'} /></label>
+                <label className="row small" style={{ gap: 6 }}><input type="checkbox" name="recurring" defaultChecked={d.inv?.recurring ?? true} /> Invoice invoiced plans every period</label>
+              </div>
+              <button className="btn btn-ghost" type="submit">Save details</button>
+            </form>
+          </section>
+        </div>
+        <section className="card">
+          <div className="card-h"><h2>Invoices</h2></div>
+          {(d.invoices ?? []).length === 0 ? <Empty>No invoices yet.</Empty> : (
+            <div className="tbl-wrap"><table className="tbl"><thead><tr><th>Number</th><th>Customer</th><th>Issued</th><th className="r">Amount</th><th>Status</th><th /></tr></thead>
+              <tbody>{d.invoices.map((i: any) => (
+                <tr key={i.number}>
+                  <td>{i.document_id ? <a href={`/files/account/${i.document_id}`}>{i.number}</a> : i.number}</td>
+                  <td><b>{i.company}</b><div className="sub2">{i.email}</div></td>
+                  <td className="small">{fmtDate(i.issued_at)}</td>
+                  <td className="r num">{i.amount_cents != null ? `${i.currency.toUpperCase()} ${(i.amount_cents / 100).toLocaleString('en', { minimumFractionDigits: 2 })}` : '—'}</td>
+                  <td>{i.status === 'paid' ? <span className="pill mint">Paid</span>
+                    : i.due_at && new Date(i.due_at) < new Date() ? <span className="pill peach">Overdue</span> : <span className="pill blue">Due {i.due_at ? fmtDate(i.due_at) : ''}</span>}</td>
+                  <td className="r"><form action={markInvoicePaid}><input type="hidden" name="number" value={i.number} /><input type="hidden" name="paid" value={i.status === 'paid' ? '0' : '1'} />
+                    <button className="btn btn-ghost btn-sm" type="submit">{i.status === 'paid' ? 'Mark unpaid' : 'Mark paid'}</button></form></td>
+                </tr>))}</tbody></table></div>)}
+        </section>
+      </>)}
       {tab === 'regulatory' && <RegulatoryTab userId={u.id} country={sp.rc} />}
       {tab === 'calls' && <CallsTab userId={u.id} />}
       {tab === 'none' && <section className="card"><p className="muted">Your account has no Admin areas yet. Ask an owner to give you access.</p></section>}
@@ -559,6 +628,17 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
       )}
       {tab === 'content' && (
         <div className="grid g2">
+        <section className="card stack" id="costs" style={{ gridColumn: '1 / -1' }}>
+          <div className="card-h"><div><h2>Margin check assumptions</h2><p className="note">What is added on the way from ex-works to the shelf in each market, in %.</p></div></div>
+          {(d.costs ?? []).map((c: any) => (
+            <form key={c.country} action={saveMarketCosts} className="row" style={{ gap: 8, flexWrap: 'wrap', alignItems: 'flex-end' }}>
+              <input type="hidden" name="country" value={c.country} /><b style={{ width: 100 }}>{countryName(c.country)}</b>
+              {(['freight', 'duty', 'distributor', 'pharmacy', 'vat'] as const).map((k) => (
+                <label key={k} className="small" style={{ width: 90 }}>{k === 'duty' ? 'Duty, fees' : k === 'vat' ? 'VAT' : title(k)}
+                  <input className="input" name={k} type="number" step="any" min="0" defaultValue={Math.round(Number(c[k]) * 1000) / 10} /></label>))}
+              <button className="btn btn-ghost btn-sm" type="submit">Save</button>
+            </form>))}
+        </section>
           <section className="card stack">
             <h2>Regulatory note for the feed</h2>
             <form action={postRegulatory} className="stack">
