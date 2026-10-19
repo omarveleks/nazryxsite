@@ -11,14 +11,16 @@ import re
 import statistics
 
 log = logging.getLogger("pricing")
-MARKETS = ("KZ", "KG", "UZ", "KE", "TZ")
-NEARBY = {"africa": ("NG", "GH", "ZA"),                          # nearby countries with price data (estimates only)
+MARKETS = ("KZ", "KG", "UZ", "KE", "TZ", "NG")
+NEARBY = {"africa": ("GH", "ZA"),                                # nearby countries with price data (estimates only)
           "cis": ("BY", "AM", "AZ")}
 # East Africa's medicines mostly come from South Asia, so its estimates draw on the South Asian makers' home prices
 # (Pakistan, India, Bangladesh) and Nigeria, beside each other
 SOUTH_ASIA = ("PK", "IN", "BD")
 NEIGHBOURS = {"KZ": ("KG", "UZ") + NEARBY["cis"], "KG": ("KZ", "UZ") + NEARBY["cis"], "UZ": ("KZ", "KG") + NEARBY["cis"],
-              "KE": ("TZ", "NG") + SOUTH_ASIA, "TZ": ("KE", "NG") + SOUTH_ASIA}
+              "KE": ("TZ", "NG") + SOUTH_ASIA, "TZ": ("KE", "NG") + SOUTH_ASIA,
+              # Nigeria's medicines come mostly from India and China and its own makers; Ghana shares its West African market
+              "NG": ("GH",) + SOUTH_ASIA}
 CURRENCY = {"KZ": "KZT", "KG": "KGS", "UZ": "UZS", "KE": "KES", "TZ": "TZS", "PK": "PKR", "GB": "GBP", "FR": "EUR",
             "NG": "NGN", "GH": "GHS", "ZA": "ZAR", "BY": "BYN", "AM": "AMD", "AZ": "AZN", "IN": "INR", "BD": "BDT"}
 ABROAD = ("PK", "GB", "FR")    # far reference countries: last, only for molecules nothing nearer prices, Pakistan first
@@ -1039,7 +1041,7 @@ def tracked_words(cur):
     for inn, mine in cur.execute("""select m.inn, bool_or(p.id is not null) from molecules m
                                     left join mfr_products p on p.molecule_id = m.id
                                     where p.id is not null or exists (select 1 from registrations r where r.molecule_id = m.id
-                                      and r.country in ('KE', 'TZ') and r.active)
+                                      and r.country in ('KE', 'TZ', 'NG') and r.active)
                                     group by m.inn""").fetchall():
         w = {x for x in re.findall(r"[a-z]{4,}", (inn or "").lower())}
         words |= w

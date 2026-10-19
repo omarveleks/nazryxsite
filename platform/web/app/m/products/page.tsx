@@ -28,7 +28,7 @@ const COMP: Record<string, [string, string]> = {
 
 const PER_ML = ['eye_drops', 'nasal', 'contact_lens', 'inhaled_saline'];
 // where a price can be inferred from when a market has none: its neighbours, with similar prices
-const NEIGHBOURS: Record<string, string[]> = { TZ: ['KE'], KE: ['TZ'], KZ: ['KG', 'UZ'], KG: ['KZ', 'UZ'], UZ: ['KZ', 'KG'] };
+const NEIGHBOURS: Record<string, string[]> = { TZ: ['KE'], KE: ['TZ'], NG: [], KZ: ['KG', 'UZ'], KG: ['KZ', 'UZ'], UZ: ['KZ', 'KG'] };
 
 // The manufacturer's catalogue against its markets: a portfolio dashboard on top, then every product.
 export default async function MfrProducts({ searchParams }: { searchParams: Promise<{ added?: string; matched?: string; error?: string; market?: string; tab?: string; saved?: string; uploaded?: string; removed?: string; reading?: string; cleared?: string }> }) {

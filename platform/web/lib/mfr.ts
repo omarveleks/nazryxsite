@@ -9,6 +9,7 @@ export const MFR_COUNTRIES: { code: string; name: string; core: boolean }[] = [
   { code: 'KG', name: 'Kyrgyzstan', core: true },
   { code: 'UZ', name: 'Uzbekistan', core: true },
   { code: 'KE', name: 'Kenya', core: true },
+  { code: 'NG', name: 'Nigeria', core: true },
   { code: 'SN', name: 'Senegal', core: false },
   { code: 'CM', name: 'Cameroon', core: false },
   { code: 'CI', name: 'Côte d’Ivoire', core: false },

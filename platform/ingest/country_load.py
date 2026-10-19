@@ -28,7 +28,7 @@ from norm import company_key, display_name, form_of, molecule_key, same_stem, sp
 import loader  # noqa: E402
 import xlsx_rows  # noqa: E402
 
-COUNTRIES = {"KZ": "KAZAKHSTAN", "KG": "KYRGYZSTAN", "UZ": "UZBEKISTAN", "KE": "KENYA"}
+COUNTRIES = {"KZ": "KAZAKHSTAN", "KG": "KYRGYZSTAN", "UZ": "UZBEKISTAN", "KE": "KENYA", "NG": "NIGERIA"}
 CATALOG = os.path.join(HERE, "catalog", "medicines.csv")
 ATC_NAMES = os.path.join(HERE, "catalog", "atc_names.csv")
 RU_NAMES = os.path.join(HERE, "catalog", "ru_names.csv")

@@ -7,7 +7,7 @@ import { saveUpload } from '@/lib/uploads';
 // validates, diffs, upserts and recomputes in one transaction, so a failed upload never changes live data.
 const ALLOWED = new Set(['.xls', '.xlsx', '.html', '.htm']);
 // Tanzania has its own pipeline; the others are read by ingest/country_load.py
-const COUNTRIES = ['TZ', 'KZ', 'KG', 'UZ', 'KE'];
+const COUNTRIES = ['TZ', 'KZ', 'KG', 'UZ', 'KE', 'NG'];
 
 export async function POST(req: Request) {
   const u = await getUser();

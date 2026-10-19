@@ -118,7 +118,7 @@ export default async function MfrProduct({ params, searchParams }: { params: Pro
                 <p>{d.inGroupN.devices + d.inGroupN.medicines > 0
                   ? <><b className="num">{d.inGroupN.devices}</b> registered as devices and <b className="num">{d.inGroupN.medicines}</b> as medicines in this group in {countryName(market)}. Brands and prices are below.</>
                   : <>Nothing in this group is registered in {countryName(market)} yet: an opening.</>}</p>) : null}
-              <p className="small muted">Registered with {market === 'KE' ? 'the Pharmacy and Poisons Board' : market === 'TZ' ? 'TMDA' : 'the regulator'} as a medical device, under device rules (risk class, conformity evidence, a local representative).
+              <p className="small muted">Registered with {market === 'KE' ? 'the Pharmacy and Poisons Board' : market === 'TZ' ? 'TMDA' : market === 'NG' ? 'NAFDAC' : 'the regulator'} as a medical device, under device rules (risk class, conformity evidence, a local representative).
 </p>
               <form action={setKind} className="small"><input type="hidden" name="product_id" value={id} /><input type="hidden" name="market" value={market} /><input type="hidden" name="kind" value="medicine" />
                 Not a device? <button className="btn-link" type="submit">Treat it as a medicine</button></form>

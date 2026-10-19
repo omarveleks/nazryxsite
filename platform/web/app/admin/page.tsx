@@ -243,7 +243,7 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
               <div className="field"><label htmlFor="country">Country</label>
                 <select className="input" id="country" name="country" defaultValue="TZ">
                   {[['TZ', 'Tanzania (registered products .xls)'], ['KZ', 'Kazakhstan (state register .xlsx)'], ['KG', 'Kyrgyzstan (register .xlsx)'],
-                    ['UZ', 'Uzbekistan (bulletin: registration certificates .xlsx)'], ['KE', 'Kenya (PPB register .xlsx)']].map(([k, l]) => <option key={k} value={k}>{l}</option>)}</select></div>
+                    ['UZ', 'Uzbekistan (bulletin: registration certificates .xlsx)'], ['KE', 'Kenya (PPB register .xlsx)'], ['NG', 'Nigeria (NAFDAC Greenbook export .xlsx or .csv)']].map(([k, l]) => <option key={k} value={k}>{l}</option>)}</select></div>
               <div className="drop"><label className="lbl" htmlFor="file">Registration list (.xls or .xlsx export)</label>
                 <input id="file" name="file" type="file" accept=".xls,.xlsx,.html,.htm" required disabled={d.refs.length < 2} /></div>
               <button className="btn btn-blue" type="submit" disabled={d.refs.length < 2}>Upload registration list</button>
