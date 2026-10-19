@@ -51,15 +51,20 @@ def makers(s, cur, rows):
     import html as htmllib
     known = {int(ref): tuple(json.loads(state)) for ref, state in cur.execute(
         "select ref, state from source_items where source = 'ng_maker' and state is not null").fetchall()}
+    # product pages that failed before (the site answers some with an error every time): another of the maker's is read
+    bad = {ref for (ref,) in cur.execute("select ref from source_items where source = 'ng_page_bad'").fetchall()}
     todo = {}
     for r in rows:
         mid = r.get("manufacturer_id")
-        if mid and mid not in known:
+        if mid and mid not in known and str(r["product_id"]) not in bad:
             todo[mid] = r["product_id"]                # a maker's latest product (an older page may be broken)
     for mid, pid in list(todo.items())[:MAKERS_PER_RUN]:
         try:
             page = s.get(f"{GREENBOOK}products/details/{pid}", timeout=60)
-        except Exception:                          # one broken product page: try another of the maker's products next run
+            page.raise_for_status()
+        except Exception:                          # a broken product page: another of the maker's products next run
+            cur.execute("insert into source_items (source, ref, checked_at) values ('ng_page_bad', %s, now()) on conflict do nothing",
+                        (str(pid),))
             time.sleep(1)
             continue
         text = htmllib.unescape(re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " | ", page.text if page.ok else "")))

@@ -557,7 +557,7 @@ def run(conn, only=None):
         return None
     key, country, kind, last_ok, release, held = rows[0]
     src = dict(key=key, country=country, kind=kind, last_ok=last_ok, release_held=release)
-    cur.execute("update data_sources set last_run = now(), run_now = false where key = %s", (key,))
+    cur.execute("update data_sources set last_run = now(), run_now = false, running_since = now() where key = %s", (key,))
     conn.commit()
     s, n, warning = session(), None, None
     try:
@@ -599,13 +599,14 @@ def run(conn, only=None):
                     cur.execute("rollback to savepoint tr2")
             if kind in ("prices", "tenders"):
                 pricing.rebuild(cur)                    # averages per molecule and market, and neighbour estimates
-        cur.execute("""update data_sources set last_rows = %s, last_error = %s, last_ok = case when %s then last_ok else now() end
-                       where key = %s""", (n, warning, warning is not None, key))
+        cur.execute("""update data_sources set last_rows = %s, last_error = %s, last_ok = case when %s then last_ok else now() end,
+                       running_since = null where key = %s""", (n, warning, warning is not None, key))
         conn.commit()
         log.info("collected %s: %s%s", key, n, f" ({warning})" if warning else "")
     except Exception as e:
         conn.rollback()
-        cur.execute("update data_sources set last_error = %s where key = %s", (f"{type(e).__name__}: {str(e)[:300]}", key))
+        cur.execute("update data_sources set last_error = %s, running_since = null where key = %s",
+                    (f"{type(e).__name__}: {str(e)[:300]}", key))
         conn.commit()
         log.exception("collector %s failed", key)
     return key

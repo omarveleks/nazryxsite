@@ -49,7 +49,7 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
       out.reminders = await rows(db, 'select sent_at from reminders_log order by sent_at desc limit 3');
       out.refs = await rows(db, 'select kind, name, uploaded_at from reference_files');
       out.sources = await rows(db, `select key, country, kind, label, url, every_hours, enabled, run_now, last_run, last_ok, last_rows, last_error,
-                                    held_rows, release_held from data_sources order by kind, country`);
+                                    held_rows, release_held, to_jsonb(data_sources) ->> 'running_since' as running_since from data_sources order by kind, country`);
       // how many molecules on each market's register have a price, and from which tier
       out.coverage = await rows(db, `with reg as (select distinct country, molecule_id from registrations where active and molecule_id is not null)
         select r.country, count(*)::int as total, count(p.molecule_id)::int as priced, count(*) filter (where p.basis = 'listings')::int as direct
@@ -218,10 +218,12 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
                 <td className="small">{x.last_run ? ago(x.last_run) : 'never'}{x.run_now && <div className="sub2">queued</div>}</td>
                 <td className="r num">{x.last_rows?.toLocaleString('en') ?? '—'}</td>
                 <td className="small">{!x.enabled ? <span className="pill">Off</span>
+                  : x.running_since ? <span className="pill blue">Running</span>
                   : x.held_rows ? <span className="pill peach">Held</span>
                   : x.last_error ? <span className="pill peach">Error</span>
                   : x.last_ok ? <span className="pill mint">OK</span> : <span className="pill">Waiting</span>}
-                  {x.last_error && <div className="sub2" style={{ maxWidth: 320 }}>{x.last_error}</div>}</td>
+                  {x.running_since && <div className="sub2">started {ago(x.running_since)}</div>}
+                  {x.last_error && <div className="sub2" style={{ maxWidth: 320 }}>{x.running_since ? 'Previous run: ' : ''}{x.last_error}</div>}</td>
                 <td className="r"><div className="row" style={{ justifyContent: 'flex-end', gap: 6 }}>
                   {[['run', 'Run now'], ...(x.held_rows && !x.release_held ? [['use_held', 'Use it anyway']] : []), [x.enabled ? 'off' : 'on', x.enabled ? 'Turn off' : 'Turn on']].map(([act, l]) => (
                     <form key={act} action={updateSource}><input type="hidden" name="key" value={x.key} /><input type="hidden" name="act" value={act} />

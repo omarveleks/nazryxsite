@@ -79,6 +79,13 @@ def main():
         conn.commit()
         if n:
             log.warning("marked %s interrupted job(s) as failed", n)
+        # a source run cut off by the restart (a deploy, a crash) saved nothing: it runs again
+        n = conn.execute("""update data_sources set running_since = null, run_now = true,
+                            last_error = 'Interrupted (worker restarted); runs again now'
+                            where running_since is not null""").rowcount
+        conn.commit()
+        if n:
+            log.warning("re-queued %s interrupted source run(s)", n)
     listen = connect(autocommit=True)
     listen.execute("listen ingest")
     log.info("worker started, polling every %ss", POLL)
