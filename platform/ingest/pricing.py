@@ -14,12 +14,15 @@ log = logging.getLogger("pricing")
 MARKETS = ("KZ", "KG", "UZ", "KE", "TZ")
 NEARBY = {"africa": ("NG", "GH", "ZA"),                          # nearby countries with price data (estimates only)
           "cis": ("BY", "AM", "AZ")}
+# East Africa's medicines mostly come from South Asia, so its estimates draw on the South Asian makers' home prices
+# (Pakistan, India, Bangladesh) and Nigeria, beside each other
+SOUTH_ASIA = ("PK", "IN", "BD")
 NEIGHBOURS = {"KZ": ("KG", "UZ") + NEARBY["cis"], "KG": ("KZ", "UZ") + NEARBY["cis"], "UZ": ("KZ", "KG") + NEARBY["cis"],
-              "KE": ("TZ",) + NEARBY["africa"], "TZ": ("KE",) + NEARBY["africa"]}
+              "KE": ("TZ", "NG") + SOUTH_ASIA, "TZ": ("KE", "NG") + SOUTH_ASIA}
 CURRENCY = {"KZ": "KZT", "KG": "KGS", "UZ": "UZS", "KE": "KES", "TZ": "TZS", "PK": "PKR", "GB": "GBP", "FR": "EUR",
-            "NG": "NGN", "GH": "GHS", "ZA": "ZAR", "BY": "BYN", "AM": "AMD", "AZ": "AZN"}
+            "NG": "NGN", "GH": "GHS", "ZA": "ZAR", "BY": "BYN", "AM": "AMD", "AZ": "AZN", "IN": "INR", "BD": "BDT"}
 ABROAD = ("PK", "GB", "FR")    # far reference countries: last, only for molecules nothing nearer prices, Pakistan first
-OTHERS = NEARBY["africa"] + NEARBY["cis"] + ABROAD
+OTHERS = NEARBY["africa"] + NEARBY["cis"] + ABROAD + ("IN", "BD")
 RANK = {"survey": 0, "retail": 0, "cap": 1, "reimbursement": 2, "tender": 3}
 MIN_OVERLAP = 15          # molecules priced in both markets before their price ratio is trusted; otherwise 1.0
 
@@ -155,16 +158,17 @@ def ingredients(name, singles):
 
 
 def observations(cur):
-    """(country, molecule, kind, text, units, pack price, currency) from every source."""
-    rows = cur.execute("""select country, molecule_id, kind, coalesce(pack, name), units, pack_price, currency from price_listings
-                          where molecule_id is not null and pack_price > 0""").fetchall()
+    """(country, molecule, kind, text, units, pack price, currency, brand) from every source. brand: True for an originator
+    or international brand, False for a generic, None when the source does not say (worked out in rebuild)."""
+    rows = cur.execute("""select country, molecule_id, kind, coalesce(pack, name), units, pack_price, currency, originator
+                          from price_listings where molecule_id is not null and pack_price > 0""").fetchall()
     for c, m, text, price, ccy in cur.execute("""select country, molecule_id, coalesce(pack, name), max_retail, currency
                                                   from reference_prices where molecule_id is not null and max_retail > 0"""):
-        rows.append((c, m, "cap", text, units_in(text), price, ccy))
+        rows.append((c, m, "cap", text, units_in(text), price, ccy, None))
     for c, m, title, price, ccy in cur.execute("""select country, molecule_ids[1], coalesce(title_en, title), unit_price, currency
                                                    from tenders where cardinality(molecule_ids) = 1 and unit_price > 0
                                                    and coalesce(awarded, closing, published) > current_date - 730"""):
-        rows.append((c, m, "tender", title, 1, price, ccy))
+        rows.append((c, m, "tender", title, 1, price, ccy, False))        # tenders buy generics
     return rows
 
 
@@ -238,7 +242,12 @@ def rebuild(cur):
             fam[mid] = k
             members.setdefault(k, []).append(mid)
     raw = []
-    for c, m, kind, text, units, price, ccy in observations(cur):
+    obs_all = observations(cur)
+    # brand names known from makers (a multinational's product anywhere): the same name in a shop without a maker is a brand
+    inn_words = {w for (inn,) in cur.execute("select inn from molecules where inn is not null") for w in re.findall(r"[a-z]{4,}", inn.lower())}
+    brand_words = {w.group(0) for (*_, text, _u, _p, _c, b) in obs_all if b and (w := re.match(r"[a-z][a-z\-]{3,}", (text or "").lower()))
+                   and w.group(0) not in inn_words}
+    for c, m, kind, text, units, price, ccy, brand in obs_all:
         if c not in sources or ccy not in fx:
             continue
         units = units if units is not None else units_in(text)
@@ -247,7 +256,13 @@ def rebuild(cur):
         unit, volume = unit_of(text), None
         if unit == "pack" and (vol := volume_of(text)):
             unit, volume, units = vol[1], vol[0], float(units) * vol[0]    # drops, syrups, creams: per ml or g
-        raw.append(dict(c=c, m=fam.get(m, m), kind=kind, unit=unit, strength=strength_of(text), units=float(units),
+        if brand is None:
+            w = re.match(r"[a-z][a-z\-]{3,}", (text or "").lower())
+            brand = bool(w and w.group(0) in brand_words)
+        st = strength_of(text)
+        if unit in ("ml", "g") and st and re.fullmatch(r"[\d.]+ (ml|g)", st):
+            st = None                                  # a bottle's size is not its strength ('5 ml' of 0.09% drops)
+        raw.append(dict(c=c, m=fam.get(m, m), kind=kind, unit=unit, strength=st, units=float(units), brand=brand,
                         price=float(price), usd_rate=float(fx[ccy]), volume=volume, countable=bool(COUNTED.search(text or "")
                                                                                              and not NOT_COUNTED.search(text or ""))))
     # 'ЦЕФТРИАКСОН 1г №1' names no form: a counted item takes the form the medicine usually comes in (a vial here)
@@ -259,8 +274,8 @@ def rebuild(cur):
     for o in raw:
         if o["unit"] == "pack" and o["countable"] and o["m"] in forms:
             o["unit"] = max(forms[o["m"]], key=forms[o["m"]].get)
-    groups = {}
-    for o in sanity(raw):
+    groups, kept = {}, sanity(raw)
+    for o in kept:
         local = float(fx[CURRENCY[o["c"]]])               # into the market's own currency
         groups.setdefault((o["c"], o["m"]), []).append((RANK[o["kind"]], o["kind"], o["unit"], o["strength"],
                                                          o["usd"] * o["usd_rate"], o["price"], o["usd_rate"] / local, o.get("volume")))
@@ -419,10 +434,46 @@ def rebuild(cur):
         if added and mid not in members.setdefault(k, []):
             members[k].append(mid)
 
+    # a generic and a brand price for each medicine and market, for the form and strength shown: this market's own
+    # listings, else its neighbours' (East Africa: each other, Nigeria and South Asia), scaled by the measured price gap;
+    # a brand with no price anywhere near is the generic marked up by how brands compare with generics on our data
+    split = {}
+    for o in kept:
+        split.setdefault((o["c"], o["m"], o["unit"], o["strength"]), {}).setdefault(o["brand"], []).append(o["usd"])
+    for (c, m), v in out.items():
+        if c not in markets:
+            continue
+        key = (m, v["unit"], v["strength"])
+        mine = split.get((c,) + key, {})
+
+        def near(brand):
+            vals = []
+            for n in NEIGHBOURS[c]:
+                # same form and strength; a bottle or tube that does not state its strength still compares per ml or g
+                got = split.get((n,) + key, {}).get(brand) or (split.get((n, m, v["unit"], None), {}).get(brand) if v["unit"] in ("ml", "g") else None)
+                if n in sources and got:
+                    # generics in East Africa sell close to South Asian and Nigerian prices: the measured gap is kept within
+                    # 0.75-1.5x so a brand-heavy shop list cannot inflate a generic's estimate
+                    vals.append(statistics.median(got) * min(max(gap(c, n)[0], 0.75), 1.5))
+            return statistics.median(vals) if vals else None
+        gen = statistics.median(mine[False]) if len(mine.get(False, [])) >= 2 else near(False)
+        if gen is None and mine.get(False):
+            gen = mine[False][0]
+        brand = statistics.median(mine[True]) if mine.get(True) else near(True)
+        if brand is None and gen is not None and generic_vs_originator < 1:
+            brand = gen / generic_vs_originator
+        rate = float(fx[CURRENCY[c]])
+        if brand is None and gen is not None and v["basis"] == "listings" and v.get("hi") and v["hi"] / rate > gen * 1.2:
+            brand = v["hi"] / rate                       # no maker on the shelf: the premium end of this market's own prices
+        if gen is None and brand is not None and generic_vs_originator < 1:
+            gen = brand * generic_vs_originator
+        v["generic"] = gen * rate if gen else None
+        v["brand"] = brand * rate if brand and (gen is None or brand >= gen) else None
+
     import json
     cur.execute("delete from molecule_prices")
     with cur.copy("""copy molecule_prices (country, molecule_id, basis, kinds, currency, unit, strength, unit_price, unit_usd, lo, hi, n,
-                     from_country, factor, overlap, by_strength, pack_size) from stdin""") as cp:
+                     from_country, factor, overlap, by_strength, pack_size, generic_price, brand_price) from stdin""") as cp:
         written = set()                                 # a molecule in two families keeps the first (best) price
         for (c, k), v in out.items():
             if c not in MARKETS:
@@ -433,7 +484,8 @@ def rebuild(cur):
                 written.add((c, m))
                 cp.write_row((c, m, v["basis"], v["kinds"], CURRENCY[c], v["unit"], v["strength"], round(v["unit_price"], 4), round(v["unit_usd"], 6),
                               round(v["lo"], 4), round(v["hi"], 4), v["n"], v.get("from_country"), v.get("factor"), v.get("overlap"),
-                              json.dumps(v["by"], ensure_ascii=False), v.get("pack_size")))
+                              json.dumps(v["by"], ensure_ascii=False), v.get("pack_size"),
+                              round(v["generic"], 4) if v.get("generic") else None, round(v["brand"], 4) if v.get("brand") else None))
     log.info("molecule prices: %s", len(written))
     return len(written)
 
@@ -505,7 +557,8 @@ def due_items(cur, source, per_run, list_items, every_days=7):
                                          order by checked_at nulls first limit %s""", (source, every_days, per_run)).fetchall()]
 
 
-ITEM_SOURCES = {"KZ": ("prices_KZ", "prices_KZ_ep"), "TZ": ("prices_TZ",), "KE": ("prices_KE_shop",), "INTL": ("prices_INTL_pk", "prices_INTL_by")}
+ITEM_SOURCES = {"KZ": ("prices_KZ", "prices_KZ_ep"), "TZ": ("prices_TZ",), "KE": ("prices_KE_shop",), "INTL": ("prices_INTL_pk", "prices_INTL_by"),
+                "SASIA": ("prices_BD", "prices_IN", "prices_PK_shop")}
 
 
 def catching_up(cur, country):
@@ -899,12 +952,15 @@ def prices_INTL(cur, s):
 
     # Pakistan: notified maximum retail prices of essential medicines, a page at a time
     def pages():
-        first = s.get(DRAP, params={"category": "Essential Drugs", "page": 1}, timeout=60).text
-        last = max([int(x) for x in re.findall(r"page=(\d+)", first)] or [1])
-        return range(1, last + 1)
+        out = []
+        for cat in ("Essential Drugs", "Low Price Drugs"):
+            first = s.get(DRAP, params={"category": cat, "page": 1}, timeout=60).text
+            out += [f"{cat}|{p}" for p in range(1, max([int(x) for x in re.findall(r"page=(\d+)", first)] or [1]) + 1)]
+        return out
 
     for p in due_items(cur, "prices_INTL_pk", DRAP_PER_RUN, pages, every_days=30):
-        r = s.get(DRAP, params={"category": "Essential Drugs", "page": p}, timeout=60)
+        cat, page_no = p.split("|") if "|" in p else ("Essential Drugs", p)
+        r = s.get(DRAP, params={"category": cat, "page": page_no}, timeout=60)
         for t in (pd.read_html(io.StringIO(r.text)) if r.ok and "<table" in r.text else []):
             if "Price" not in t.columns:
                 continue
@@ -913,12 +969,161 @@ def prices_INTL(cur, s):
                 mol = english_molecule(cur, names, generics, name) if price else None
                 if mol:
                     save_listing(cur, "PK", "drap", "cap", str(x.get("Reg. Number")), name, f"{name} · {x.get('Pack Size')}",
-                                 mol, None, price, "PKR")
+                                 mol, None, price, "PKR", originator=is_brand(str(x.get("Manufacturer") or "")),
+                                 description=str(x.get("Manufacturer") or "") or None)
                     n += 1
         checked(cur, "prices_INTL_pk", str(p))
         time.sleep(2)
     return n
 
+
+
+# South Asia: where most generics sold in East Africa are made, and the generic price level East African prices follow.
+# Bangladesh (MedEx: every brand of a generic, with company and price), India (1mg: a generic's brands, then each brand's
+# packs) and Pakistan (dawaai: product pages with the generic, strength, form and maker). All three allow these pages in
+# robots.txt. Listings carry the maker, so a multinational's brand counts as a brand and the rest as generics.
+MEDEX = "https://medex.com.bd"
+ONEMG = "https://www.1mg.com"
+DAWAAI = "https://dawaai.pk"
+SA_PER_RUN = 250          # pages a run per country, about one a second
+# companies whose products are originator or international brands (their local arms too); everyone else sells generics
+BRAND_MAKERS = re.compile(r"pfizer|novartis(?! *sandoz)|glaxo|\bgsk\b|sanofi|astra ?zeneca|\bmsd\b|merck sharp|bayer|roche|janssen|"
+                          r"johnson|allergan|abbvie|alcon|bausch|santen|boehringer|eli lilly|novo ?nordisk|takeda|servier|astellas|"
+                          r"bristol[- ]myers|organon|\bucb\b|ipsen|menarini|lundbeck|gr[uü]nenthal|wyeth|galderma|th[eé]a\b|ursapharm|"
+                          r"reckitt|haleon|mundipharma|otsuka|daiichi|eisai", re.I)
+
+
+def is_brand(maker):
+    return bool(maker and BRAND_MAKERS.search(maker))
+
+
+def tracked_words(cur):
+    """Words of the molecules worth pricing first: in a manufacturer's portfolio, or registered in our East African markets."""
+    words, first = set(), set()
+    for inn, mine in cur.execute("""select m.inn, bool_or(p.id is not null) from molecules m
+                                    left join mfr_products p on p.molecule_id = m.id
+                                    where p.id is not null or exists (select 1 from registrations r where r.molecule_id = m.id
+                                      and r.country in ('KE', 'TZ') and r.active)
+                                    group by m.inn""").fetchall():
+        w = {x for x in re.findall(r"[a-z]{4,}", (inn or "").lower())}
+        words |= w
+        if mine:
+            first |= w
+    return words, first
+
+
+def prices_SASIA(cur, s):
+    import html as htmllib
+    import json
+    import time
+    from catalogue import Generics
+    names, generics, n = Names(cur, "KE"), Generics(cur), 0
+    words, first = tracked_words(cur)
+    parts = lambda t: set(re.findall(r"[a-z]{4,}", t.lower())) - set(SALT_WORDS)
+    useful = lambda t: bool(parts(t)) and parts(t) <= words           # every ingredient is one we track
+    # portfolio first, single ingredients before combinations
+    order = lambda ref: (0 if parts(ref.split("|")[-1]) <= first else 1, "+" in ref or ref.count("-") > 2)
+    text = lambda h: htmllib.unescape(re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", h))).strip()
+
+    # Bangladesh: the generics index, then each generic's brand list (all brands on one page)
+    def medex_list():
+        out, page = [], 1
+        while True:
+            h = s.get(f"{MEDEX}/generics", params={"page": page}, timeout=60).text
+            got = re.findall(r'href="https://medex\.com\.bd/generics/(\d+/[a-z0-9-]+)"[^>]*>.*?dcind-title">\s*([^<]+?)\s*<', h, re.S)
+            out += [f"{g}|{t}" for g, t in got if useful(t)]
+            if not got or page > 150:
+                return out
+            page += 1
+            time.sleep(1)
+
+    for ref in sorted(due_items(cur, "prices_BD", 100000, medex_list, every_days=30), key=order)[:SA_PER_RUN]:
+        path, title = ref.split("|", 1)
+        mol = english_molecule(cur, names, generics, title.replace(" + ", "+").replace("+", " + "))
+        r = s.get(f"{MEDEX}/generics/{path}/brand-names", timeout=60)
+        for row in re.findall(r'<tr class="brand-row"(.*?)</tr>', r.text if r.ok and mol else "", re.S):
+            cells = [text(c) for c in re.findall(r"<td[^>]*>(.*?)</td>", row, re.S)]
+            if len(cells) < 5:
+                continue
+            brand, form, strength, maker, price = cells[:5]
+            for amount, label in [(m.group(2), m.group(1)) for m in re.finditer(r"([^:৳]+?):\s*৳\s*([\d,.]+)", price)]:
+                label = label.strip()
+                if label.lower().startswith("unit price"):        # a tablet, capsule or sachet: the price of one
+                    save_listing(cur, "BD", "medex", "retail", f"{path}|{brand}|{strength}|unit", brand, f"{brand} {strength} {form} · 1 unit",
+                                 mol, 1, num(amount.replace(",", "")), "BDT", originator=is_brand(maker), description=maker)
+                    n += 1
+                    break
+                save_listing(cur, "BD", "medex", "retail", f"{path}|{brand}|{strength}|{label}", brand, f"{brand} {strength} {form} · {label}",
+                             mol, 1, num(amount.replace(",", "")), "BDT", originator=is_brand(maker), description=maker)
+                n += 1
+        checked(cur, "prices_BD", ref)
+        time.sleep(1)
+
+    # India: a generic's page names its brands; each brand page lists its packs and prices
+    def onemg_list():
+        out = []
+        for i in (1, 2, 3):
+            xml = s.get(f"{ONEMG}/sitemap_generics_{i}.xml", timeout=120)
+            out += [u.rsplit("/", 1)[1] for u in re.findall(r"<loc>([^<]+/generics/[^<]+)</loc>", xml.text if xml.ok else "")
+                    if useful(re.sub(r"-\d+$", "", u.rsplit("/", 1)[1]))]
+        return out
+
+    for slug in sorted(due_items(cur, "prices_IN", 100000, onemg_list, every_days=30), key=order)[:SA_PER_RUN // 5]:
+        r = s.get(f"{ONEMG}/generics/{slug}", timeout=60)
+        title = (re.search(r"<h1[^>]*>(.*?)</h1>", r.text, re.S) if r.ok else None)
+        mol = english_molecule(cur, names, generics, text(title.group(1))) if title else None
+        brands = re.findall(r'"name":"([^"]+)","manufacturer_name":"([^"]*)","price_range":\{[^}]*\},"variants_available":"[^"]*","slug":"(/brands/[^"]+)"',
+                            r.text if mol else "")
+        for brand, maker, bslug in list(dict.fromkeys(brands))[:8]:
+            b = s.get(ONEMG + bslug, timeout=60)
+            # the page's data in either of the two shapes 1mg serves: {skuId, header, subText, ..., price: {mrp}} or {header, ..., price: '₹216', skuId, subText}
+            page = b.text if b.ok else ""
+            skus = {sku: (header, price, sub) for sku, header, sub, price in re.findall(
+                r'"skuId":(\d+),"header":"([^"]+)","subText":"([^"]*)",[^\]]*?"price":\{"mrp":([\d.]+)', page)}
+            for header, price, sku, sub in re.findall(r'"header":"([^"]+)",(?:"[a-zA-Z]+":"[^"]*",)*"price":"₹([\d,.]+)","quantity":\d+,'
+                                                      r'(?:"[a-zA-Z]+":\{[^{}]*\},)*"skuId":"(\d+)","subText":"([^"]*)"', page):
+                skus.setdefault(sku, (header, price, sub))
+            for sku, (header, price, sub) in skus.items():
+                units = re.search(r"(?:strip|bottle|box|packet|pack|tube|vial)?\s*of\s*(\d+)\s*(?:tablet|capsule|ampoule|vial|sachet|lozenge)", sub, re.I)
+                save_listing(cur, "IN", "1mg", "retail", sku, header, f"{header} · {sub}", mol, int(units.group(1)) if units else 1,
+                             num(price.replace(",", "")), "INR", originator=is_brand(maker), description=maker)
+                n += 1
+            time.sleep(1)
+        checked(cur, "prices_IN", slug)
+        time.sleep(1)
+
+    # Pakistan: pharmacy product pages (schema.org Product and Drug: generic, strength, form, maker, price per pack)
+    def dawaai_list():
+        out = []
+        for sm in ("sitemap.xml", "sitemap_second.xml", "sitemap_new.xml"):
+            xml = s.get(f"{DAWAAI}/{sm}", timeout=120)
+            out += re.findall(r"<loc>(https://dawaai\.pk/medicine/[a-z0-9-]+-\d+\.html)</loc>", xml.text if xml.ok else "")
+        return sorted(set(out))
+
+    for url in sorted(due_items(cur, "prices_PK_shop", 100000, dawaai_list, every_days=30), key=portfolio_first(cur))[:SA_PER_RUN]:
+        r = s.get(url, timeout=60)
+        blocks = []
+        for b in re.findall(r"<script[^>]*ld\+json[^>]*>(.*?)</script>", r.text if r.ok else "", re.S):
+            try:
+                blocks.append(json.loads(htmllib.unescape(b)))
+            except ValueError:
+                pass
+        prod = next((b for b in blocks if isinstance(b, dict) and b.get("@type") == "Product"), None)
+        drug = next((b for b in blocks if isinstance(b, dict) and b.get("@type") == "Drug"), None)
+        price = num((prod or {}).get("offers", {}).get("price")) if prod else None
+        if price and drug and drug.get("nonProprietaryName"):
+            # 'Latanoprost, Timolol' is a combination
+            mol = english_molecule(cur, names, generics, re.sub(r"\s*(?:,|\band\b|&|/)\s*", " + ", drug["nonProprietaryName"]))
+            if mol:
+                desc = prod.get("description") or ""
+                pack = re.search(r"Order (.+?) and avail", desc)
+                label = pack.group(1) if pack else f"{prod.get('name')} {drug.get('drugUnit') or ''} {drug.get('dosageForm') or ''}"
+                save_listing(cur, "PK", "dawaai", "retail", url, prod.get("name"), label, mol, None, price, "PKR",
+                             originator=is_brand(drug.get("manufacturer")), description=drug.get("manufacturer"))
+                n += 1
+        checked(cur, "prices_PK_shop", url)
+        time.sleep(1)
+    return n
 
 
 # Nearby countries (second tier, beside our own markets): official lists and one pharmacy catalogue, read in bulk.

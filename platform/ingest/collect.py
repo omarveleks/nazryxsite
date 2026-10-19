@@ -511,7 +511,8 @@ def prices_UZ(cur, s):
 
 
 PRICES = {"UZ": prices_UZ, "KZ": pricing.prices_KZ, "KE": pricing.prices_KE, "TZ": pricing.prices_TZ,
-          "KG": pricing.prices_KG, "INTL": pricing.prices_INTL, "NEAR": pricing.prices_NEAR}
+          "KG": pricing.prices_KG, "INTL": pricing.prices_INTL, "NEAR": pricing.prices_NEAR,
+          "SASIA": pricing.prices_SASIA}
 
 
 # ------------------------------------------------------------------ the schedule
