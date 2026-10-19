@@ -10,7 +10,7 @@ import { requireUser } from '@/lib/auth';
 import { one, rows, withUser } from '@/lib/db';
 import { HIGH_DEMAND, LAUNCH_STAGES, MFR_FILE_KINDS, canUse, countryName, covers, displayClass, productClass, tierIn, byMolecule } from '@/lib/mfr';
 import { fmtDate } from '@/lib/format';
-import { PRICE_SQL, perUnit, priceFits, type MoleculePrice } from '@/lib/prices';
+import { PRICE_SQL, formUnit, median, perUnit, priceFits, type MoleculePrice } from '@/lib/prices';
 import { isDevice, productGroup } from '@/lib/segments';
 import { segmentBrands } from '@/lib/competitors';
 
@@ -60,14 +60,19 @@ export default async function MfrProducts({ searchParams }: { searchParams: Prom
         union all
         select use_group, coalesce(ltr_id, registrant_id)::text from registrations where country = $1 and active and use_group = any($2)) x group by use_group`,
       [market, groups]) : [];
-    const groupPrices: Record<string, { per10: number; currency: string; n: number }> = {};
+    const groupPrices: Record<string, { price: number; per: string; currency: string; n: number }> = {};
     const cur = hasData(market) ? (await one(db, 'select currency from price_listings where country = $1 limit 1', [market]))?.currency : null;
-    // bottles compare per 10 ml; syringes and fillers do not, so they show no average
-    if (cur) for (const g of groups.filter((x) => PER_ML.includes(x))) {
-      const v = (await segmentBrands(db, market, g, [])).map((b) => b.per10).filter((x): x is number => x != null).sort((a, b) => a - b);
-      if (v.length) groupPrices[g] = { per10: v[Math.floor(v.length / 2)], currency: cur, n: v.length };
+    // bottles compare per 10 ml; syringes, fillers and irrigation packs per pack
+    if (cur) for (const g of groups) {
+      const brands = await segmentBrands(db, market, g, []);
+      const v = PER_ML.includes(g) ? median(brands.map((b) => b.per10).filter((x): x is number => x != null)) : median(brands.flatMap((b) => b.prices));
+      const n = PER_ML.includes(g) ? brands.filter((b) => b.per10 != null).length : brands.filter((b) => b.prices.length).length;
+      if (v != null) groupPrices[g] = { price: v, per: PER_ML.includes(g) ? '10 ml' : 'pack', currency: cur, n };
     }
-    return { targets, market, products, facts, launches, files, watched, watchCount, prices, groupFacts, groupPrices };
+    // pharmacy prices for each product's own ingredient, so a capsule is priced from capsules when the average is for another form
+    const listings = ids.length && hasData(market) ? await rows(db, `select molecule_id, name, pack_price::float as price, currency from price_listings
+        where country = $1 and kind = 'retail' and molecule_id = any($2) and pack_price > 0`, [market, ids]) : [];
+    return { targets, market, products, facts, launches, files, watched, watchCount, prices, groupFacts, groupPrices, listings };
   });
   const market = d.market;
   const analysis = canUse(tierIn(u, market), 'portfolio');
@@ -221,14 +226,23 @@ export default async function MfrProducts({ searchParams }: { searchParams: Prom
                   const f = p.f;
                   return <td key={c} className="r">{!hasData(c) ? <span className="pill blue">Managed by Nazryx</span>
                     : !visible(i) ? <span className="note row" style={{ justifyContent: 'flex-end', gap: 4 }}><LockIcon /> Locked</span>
-                    : <span className={`pill ${COMP[competition(f)][1]}`}>{competition(f) === 'some' || competition(f) === 'crowded' ? `${f!.registrants} competitors` : COMP[competition(f)][0]}</span>}</td>;
+                    : <><span className={`pill ${COMP[competition(f)][1]}`}>{competition(f) === 'some' || competition(f) === 'crowded' ? `${f!.registrants} competitors` : competition(f) === 'few' ? `${f!.registrants} ${f!.registrants === 1 ? 'competitor' : 'competitors'}` : COMP[competition(f)][0]}</span>
+                      {competition(f) === 'absent' && p.molecule_id && !p.group && (() => {   // where it is sold among the other markets followed
+                        const o = d.facts.filter((x) => x.molecule_id === p.molecule_id && x.country !== c && x.registrations > 0);
+                        return o.length ? <div className="sub2">{o.map((x) => `${countryName(x.country)}: ${x.registrants} ${x.registrants === 1 ? 'company' : 'companies'}`).join(' · ')}</div> : null;
+                      })()}</>}</td>;
                 })}
                 <td className="r small hide-m num">{(() => {
                   if (!visible(i)) return '—';
                   const gp = p.group ? d.groupPrices[p.group] : undefined;
-                  if (p.group) return gp ? <>{gp.currency} {Math.round(gp.per10).toLocaleString('en')} / 10 ml<div className="sub2">pharmacy median, {gp.n} brands</div></> : '—';
+                  if (p.group && gp) return <>{gp.currency} {Math.round(gp.price).toLocaleString('en')} / {gp.per}<div className="sub2">pharmacy median, {gp.n} {gp.n === 1 ? 'brand' : 'brands'}</div></>;
                   const pr = d.prices.find((x) => x.molecule_id === p.molecule_id);
-                  return pr && priceFits(pr, p.dosage_form) ? <>{perUnit(pr)}{pr.basis === 'estimate' && <div className="sub2">estimate</div>}</> : '—';
+                  if (pr && priceFits(pr, p.dosage_form)) return <>{perUnit(pr)}{pr.basis === 'estimate' && <div className="sub2">estimate</div>}</>;
+                  // else the same ingredient in the same form, as sold in pharmacies
+                  const u = formUnit(p.dosage_form);
+                  const same = d.listings.filter((l) => l.molecule_id === p.molecule_id && (!u || !formUnit(l.name) || formUnit(l.name) === u));
+                  const m = median(same.map((l) => l.price));
+                  return m != null ? <>{same[0].currency} {Math.round(m).toLocaleString('en')} / pack<div className="sub2">pharmacy median, {same.length} {same.length === 1 ? 'price' : 'prices'}</div></> : '—';
                 })()}</td>
               </tr>))}</tbody></table></div>)}
       </section>
