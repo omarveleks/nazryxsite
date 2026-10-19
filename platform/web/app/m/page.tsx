@@ -26,7 +26,7 @@ export default async function MfrHome({ searchParams }: { searchParams: Promise<
     const profile = await one(db, `select company_name, status, target_countries, suggested_plan, chosen_plan, active_plan, verified_at, sample_product_id, primary_market,
                                    cardinality(certifications) + cardinality(dosage_forms) as profile_bits
                                    from manufacturer_profiles where user_id = $1`, [u.id]);
-    const targets = targetMarkets(profile?.target_countries);
+    const targets = targetMarkets(profile?.target_countries, u.mfr_markets);
     const live = targets.filter(hasData);
     const chosen = pickMarket(undefined, targets, profile?.primary_market);
     // Home reads a market in the plan: the chosen one if it is, else the first that is

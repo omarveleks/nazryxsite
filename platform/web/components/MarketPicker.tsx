@@ -4,10 +4,12 @@ import { LockIcon, VerifiedIcon } from './Icons';
 import { MFR_COUNTRIES, countryName, covers } from '@/lib/mfr';
 
 /** The manufacturer's target markets, in the order of the market list. */
-export function targetMarkets(targets?: string[] | null): string[] {
+export function targetMarkets(targets?: string[] | null, paid?: string[] | null): string[] {
   // no profile at all (the team looking at the manufacturer side): every market with data
-  if (targets == null) return MFR_COUNTRIES.filter((x) => x.core).map((x) => x.code);
-  const t = MFR_COUNTRIES.map((x) => x.code).filter((c) => targets.includes(c));
+  if (targets == null && !paid?.length) return MFR_COUNTRIES.filter((x) => x.core).map((x) => x.code);
+  // the markets they chose, and every market in their plan even if not chosen at sign-up
+  const all = [...(targets ?? []), ...(paid ?? [])];
+  const t = MFR_COUNTRIES.map((x) => x.code).filter((c) => all.includes(c));
   return t.length ? t : ['TZ'];
 }
 /** The market a page shows: one named in the link, else the manufacturer's chosen market, else the first with data. */

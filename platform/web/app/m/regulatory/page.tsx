@@ -18,7 +18,7 @@ export default async function MfrRegulatory({ searchParams }: { searchParams: Pr
   const d = await withUser(u.id, async (db) => {
     await loadLive(db);
     const prof = await one(db, 'select target_countries, primary_market, sample_product_id from manufacturer_profiles where user_id = $1', [u.id]);
-    const targets = targetMarkets(prof?.target_countries);
+    const targets = targetMarkets(prof?.target_countries, u.mfr_markets);
     const market = pickMarket(sp.market, targets, prof?.primary_market);
     const reqs = await rows(db, REQ_SQL, [market]) as Requirement[];
     const products = await rows(db, `select p.id, p.name, p.dosage_form, p.use_group, p.kind, p.molecule_id, coalesce(p.atc, '') as atc, m.inn, m.category

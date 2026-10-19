@@ -26,7 +26,7 @@ export default async function IntroRequest({ searchParams }: { searchParams: Pro
   const d = await withUser(u.id, async (db) => {
     const p = await one(db, 'select target_countries, primary_market, status from manufacturer_profiles where user_id = $1', [u.id]);
     return {
-      p, targets: targetMarkets(p?.target_countries),
+      p, targets: targetMarkets(p?.target_countries, u.mfr_markets),
       products: await rows(db, `select p.id, coalesce(m.inn, p.name) as name, p.strength, p.dosage_form from mfr_products p
                                 left join molecules m on m.id = p.molecule_id where p.user_id = $1 order by 2 limit 500`, [u.id]),
       phone: (await one(db, 'select whatsapp from users where id = $1', [u.id]))?.whatsapp as string | null,

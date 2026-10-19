@@ -31,7 +31,7 @@ export default async function Services({ searchParams }: { searchParams: Promise
                                  from engagements e left join mfr_products p on p.id = e.product_id left join molecules m on m.id = p.molecule_id
                                  where e.user_id = $1 and e.status = 'open' order by e.updated_at desc limit 8`, [u.id]),
   }));
-  const targets = targetMarkets(d.p?.target_countries);
+  const targets = targetMarkets(d.p?.target_countries, u.mfr_markets);
   const goal = GOALS.some(([k]) => k === sp.goal) ? sp.goal! : null;
   const market = goal && MFR_COUNTRIES.some((c) => c.code === sp.market) ? sp.market! : null;
   const depth = goal && market && DEPTH.some(([k]) => k === sp.depth) ? sp.depth! : null;

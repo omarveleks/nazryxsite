@@ -26,7 +26,7 @@ export default async function MfrProduct({ params, searchParams }: { params: Pro
     const prof = await one(db, 'select target_countries, sample_product_id, primary_market from manufacturer_profiles where user_id = $1', [u.id]);
     // the free full read opens every section for one product
     const sampled = prof?.sample_product_id === id;
-    const targets = targetMarkets(prof?.target_countries);
+    const targets = targetMarkets(prof?.target_countries, u.mfr_markets);
     const market = pickMarket(sp.market, targets, prof?.primary_market);
     const t = sampled ? 3 : tierIn(u, market);
     const focus = hasData(market) ? market : targets.find(hasData) ?? 'TZ';

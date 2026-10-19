@@ -21,7 +21,7 @@ export default async function MarketRead({ searchParams }: { searchParams: Promi
   const d = await withUser(u.id, async (db) => {
     await loadLive(db);
     const p = await one(db, 'select company_name, target_countries, verified_at from manufacturer_profiles where user_id = $1', [u.id]);
-    const targets = targetMarkets(p?.target_countries);
+    const targets = targetMarkets(p?.target_countries, u.mfr_markets);
     const market = asked ?? targets.find((c) => hasData(c) && covers(u, c)) ?? targets.find(hasData) ?? 'TZ';
     const h = await one(db, `select (select count(*)::int from registrations where country = $1 and active) as products,
         (select count(distinct ltr_id)::int from registrations where country = $1 and active) as distributors,

@@ -706,21 +706,29 @@ def prices_KE(cur, s):
 MYDAWA = "https://mydawa.com"
 
 
+def portfolio_first(cur):
+    """Sort key for shop pages: manufacturers' own products, their ingredients and named competitors, and device groups first."""
+    from devices import GROUPS
+    words = {w for (w,) in cur.execute("""select distinct lower(brand) from mfr_competitors
+                                          union select distinct lower(split_part(m.inn, ' ', 1)) from mfr_products p join molecules m on m.id = p.molecule_id
+                                          union select distinct lower(split_part(regexp_replace(p.name, '[^A-Za-z ]', ' ', 'g'), ' ', 1))
+                                          from mfr_products p""").fetchall() if w and len(w) >= 4}
+    keys = [re.sub(r"[^a-z0-9]+", "-", w).strip("-") for w in words]
+    return lambda u: not (any(k and k in u.lower() for k in keys) or any(re.search(rx, u.replace("-", " ")) for _, rx in GROUPS))
+
+
 def mydawa(cur, s, names):
     import time
-    from devices import GROUPS
 
     def urls():
         xml = s.get(f"{MYDAWA}/sitemap-products.xml", timeout=120).text
         return [u for u in re.findall(r"<loc>([^<]+)</loc>", xml) if u.count("/") >= 4]
 
-    due = due_items(cur, "prices_KE_shop", TZ_PER_RUN, urls)
+    due = due_items(cur, "prices_KE_shop", 100000, urls)      # all due pages; the portfolio first, below
+    seen = set(due)
     due += [r for (r,) in cur.execute("""select ref from source_items where source = 'prices_KE_shop' and ref <> '*list'
-                                         and checked_at is null""").fetchall() if r not in due]
-    # brands manufacturers watch, and device groups, first
-    watched = [b.lower() for (b,) in cur.execute("select distinct brand from mfr_competitors").fetchall()]
-    keys = [re.sub(r"[^a-z0-9]+", "-", w).strip("-") for w in watched]
-    first = lambda u: not (any(k and k in u.lower() for k in keys) or any(re.search(rx, u.replace("-", " ")) for _, rx in GROUPS))
+                                         and checked_at is null""").fetchall() if r not in seen]
+    first = portfolio_first(cur)
     n = 0
     for url in sorted(due, key=first)[:TZ_PER_RUN]:
         r = s.get(url, timeout=60)
@@ -750,7 +758,8 @@ def prices_TZ(cur, s):
         return re.findall(r"<loc>([^<]+/product/[^<]+)</loc>", xml)
 
     names, n = Names(cur, "TZ"), 0
-    for url in due_items(cur, "prices_TZ", TZ_PER_RUN, urls):
+    # every page due, manufacturers' products and their competitors first
+    for url in sorted(due_items(cur, "prices_TZ", 100000, urls), key=portfolio_first(cur))[:TZ_PER_RUN]:
         r = s.get(url, timeout=60)
         for x in ld_products(r.text if r.ok else ""):
             offer = x.get("offers") or {}

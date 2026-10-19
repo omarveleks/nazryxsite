@@ -36,7 +36,7 @@ export default async function MfrMarket({ searchParams }: { searchParams: Promis
   const d = await withUser(u.id, async (db) => {
     const p = await one(db, 'select target_countries, primary_market from manufacturer_profiles where user_id = $1', [u.id]);
     await loadLive(db);
-    const targets = targetMarkets(p?.target_countries);
+    const targets = targetMarkets(p?.target_countries, u.mfr_markets);
     const market = pickMarket(sp.market, targets, p?.primary_market);
     const reqs = (await rows(db, REQ_SQL, [market]) as Requirement[]).filter((r) => r.applies === 'all');
     if (!hasData(market)) return { targets, market, reqs };

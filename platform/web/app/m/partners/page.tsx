@@ -21,7 +21,7 @@ export default async function Partners({ searchParams }: { searchParams: Promise
   const d = await withUser(u.id, async (db) => {
     await loadLive(db);
     const prof = await one(db, 'select target_countries, status, primary_market from manufacturer_profiles where user_id = $1', [u.id]);
-    const targets = targetMarkets(prof?.target_countries);
+    const targets = targetMarkets(prof?.target_countries, u.mfr_markets);
     const market = pickMarket(sp.market, targets, prof?.primary_market);
     const cats = await categories(db, market);
     const mine = await rows(db, `select distinct m.id, m.inn from mfr_products p join molecules m on m.id = p.molecule_id where p.user_id = $1 order by m.inn`, [u.id]);

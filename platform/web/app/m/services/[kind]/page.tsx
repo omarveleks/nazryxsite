@@ -18,7 +18,7 @@ export default async function Service({ params, searchParams }: { params: Promis
   const u = await requireUser({ manufacturer: true });
   const s = SERVICES[kind];
   const d = await withUser(u.id, async (db) => ({
-    targets: targetMarkets((await one(db, 'select target_countries from manufacturer_profiles where user_id = $1', [u.id]))?.target_countries),
+    targets: targetMarkets((await one(db, 'select target_countries from manufacturer_profiles where user_id = $1', [u.id]))?.target_countries, u.mfr_markets),
     products: await rows(db, `select p.id, coalesce(m.inn, p.name) as name from mfr_products p left join molecules m on m.id = p.molecule_id
                               where p.user_id = $1 order by 2 limit 300`, [u.id]),
   }));

@@ -18,7 +18,7 @@ export default async function Tenders({ searchParams }: { searchParams: Promise<
   const d = await withUser(u.id, async (db) => {
     await loadLive(db);
     const p = await one(db, 'select target_countries, primary_market from manufacturer_profiles where user_id = $1', [u.id]);
-    const targets = targetMarkets(p?.target_countries);
+    const targets = targetMarkets(p?.target_countries, u.mfr_markets);
     const market = pickMarket(sp.market, targets, p?.primary_market);
     const mine = `exists (select 1 from mfr_products p where p.user_id = $2 and p.molecule_id = any(t.molecule_ids))`;
     const counts = await one(db, `select count(*) filter (where ${mine})::int as mine, count(*) filter (where t.stage = 'open')::int as open,
