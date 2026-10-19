@@ -89,24 +89,11 @@ export default async function MfrProduct({ params, searchParams }: { params: Pro
     // the molecule's average price in this market: listings, or an estimate from a neighbouring market
     const price = canUse(t, 'market') ? await one(db, `${PRICE_SQL} where molecule_id = $1 and country = $2`, [p.molecule_id, market]) as MoleculePrice | null : null;
     const avg = price && priceFits(price, p.dosage_form) ? price : null;     // a vial price says nothing about a capsule
-    // nothing priced here or near: the price where it sells elsewhere, converted at today's rate, as a reference only
-    let ref: { price: number; per: string; currency: string } | null = null;
-    if (!avg && canUse(t, 'market')) {
-      const fx = Object.fromEntries((await rows(db, 'select currency, per_usd::float as r from fx_rates')).map((x) => [x.currency, x.r]));
-      const cur = (await one(db, 'select currency from countries where code = $1', [market]))?.currency;
-      // the nearest other market that prices it (CIS first), not an average with Europe's originator prices
-      const order = ['KZ', 'UZ', 'KG', 'NG', 'KE', 'TZ'];
-      const vals = (await rows(db, `${PRICE_SQL} where molecule_id = $1 and country <> $2`, [p.molecule_id, market]) as MoleculePrice[])
-        .filter((x) => priceFits(x, p.dosage_form) && fx[x.currency] && cur && fx[cur])
-        .sort((a, b) => (order.indexOf(a.country) + 99) % 99 - (order.indexOf(b.country) + 99) % 99)
-        .map((x) => ({ v: Number(x.generic_price ?? x.unit_price) * packOf(x) / fx[x.currency] * fx[cur], per: unitWord(x) }));
-      if (vals.length && cur) ref = { price: vals[0].v, per: vals[0].per, currency: cur };
-    }
     // a market with only one or two products prices the brand; a generic usually enters lower (measured on lists that say which is which)
     const costs = avg ? await one(db, 'select freight, duty, distributor, pharmacy, vat from market_costs where country = $1', [market]) : null;
     const brands = avg ? await one(db, `select (select registrants from country_molecules where molecule_id = $1 and country = $2) as registrants,
         (select value from price_factors where key = 'generic_vs_originator') as generic`, [p.molecule_id, market]) : null;
-    return { ...base, origin, lapsed, route, routes, checklist, ready, open, tenders, brands, costs, ...(canUse(t, 'market') ? { avg, ref } : {}) };
+    return { ...base, origin, lapsed, route, routes, checklist, ready, open, tenders, brands, costs, ...(canUse(t, 'market') ? { avg } : {}) };
   });
   if (!d) notFound();
   const { p, market } = d;
@@ -221,7 +208,7 @@ export default async function MfrProduct({ params, searchParams }: { params: Pro
                 <span className="pill peach">Est. avg</span></div>
               {/* low, average and high; one average when they are all the same price */}
               {(() => {
-                const p = d.avg!, k = packOf(p), avg = Number(p.generic_price ?? p.unit_price) * k;
+                const p = d.avg!, k = packOf(p), avg = Number(p.unit_price) * k;
                 const lo = p.lo != null ? Math.min(Number(p.lo) * k, avg) : null, hi = p.hi != null ? Math.max(Number(p.hi) * k, avg) : null;
                 const same = (x: number | null) => x == null || Math.round(x) === Math.round(avg);
                 const tiles: [string, number, string][] = same(lo) && same(hi) ? [['Average', avg, 't-blue']]
@@ -240,9 +227,7 @@ export default async function MfrProduct({ params, searchParams }: { params: Pro
             </section>) : (
             <section className="card between" style={{ flexWrap: 'wrap', gap: 12 }}>
               <span><b>Price in {countryName(market)}</b>
-                {'ref' in d && d.ref ? <div className="small">Not sold near {countryName(market)}. Reference price in other markets: <b>{d.ref.currency} {fmtMoney(d.ref.price)}</b> per {d.ref.per},
-                  converted at today&rsquo;s rate.<div className="muted">A reference only, not a local estimate. We check the local price for you within 24 hours.</div></div>
-                  : <div className="small muted">No public price for this medicine yet. We check it for you within 24 hours.</div>}</span>
+                <div className="small muted">No public price for this medicine yet. We check it for you within 24 hours.</div></span>
               <Link className="btn btn-ghost btn-sm" href="/m/call?topic=market_entry">Ask for a price</Link>
             </section>))}
           {'avg' in d && d.avg && 'costs' in d && d.costs && <MarginCheck p={d.avg} c={d.costs} id={id} market={market} exw={sp.exw} units={sp.units} />}

@@ -348,8 +348,8 @@ def rebuild(cur):
         for o in obs:
             sizes[(o[2], o[3])] = sizes.get((o[2], o[3]), 0) + 1
         want = usual_form.get(m)
-        if want and want not in sizes and c not in MARKETS and want[0] in ("ml", "g") and (want[0], None) in sizes:
-            unit, usual = want[0], None  # a country we borrow from sells the same bottle without stating its strength
+        if want and want not in sizes and want[0] in ("ml", "g") and (want[0], None) in sizes:
+            unit, usual = want[0], None  # the same bottle or tube, sold without stating its strength
         elif want and want not in sizes and (want[0] == "tablet or capsule" or not any(k[1] for k in sizes)):
             continue                     # this market only prices another form (an infusion, a gel): estimate the usual one
         else:
@@ -358,10 +358,14 @@ def rebuild(cur):
         # in our own markets, one or two listings without a strength (or one shop listing) are not enough to call it market
         # data; a country we only borrow from keeps every price as evidence for the estimate
         if c in MARKETS and usual is None and sizes[(unit, usual)] < 3:
+            if unit in ("ml", "g") and all(o[1] == "retail" for o in obs if (o[2], o[3]) == (unit, usual)):
+                # a bottle or tube on this market's own shelf ('Unibrom Eye Drops 5ml'): one voice in its estimate
+                mine = [o for o in obs if (o[2], o[3]) == (unit, usual)]
+                weak[(c, m)] = (unit, usual, statistics.median(o[4] / o[6] for o in mine) / float(fx[CURRENCY[c]]), mine[0][8])
             continue
         if c in MARKETS and sizes[(unit, usual)] == 1 and all(o[1] == "retail" for o in obs if (o[2], o[3]) == (unit, usual)):
             o = next(o for o in obs if (o[2], o[3]) == (unit, usual))
-            weak[(c, m)] = (unit, usual, o[4] / o[6] / float(fx[CURRENCY[c]]))
+            weak[(c, m)] = (unit, usual, o[4] / o[6] / float(fx[CURRENCY[c]]), o[8])
             continue                     # a single shop listing (often one brand) is weaker than the blended estimate:
                                          # it counts as one voice in this market's estimate below
         strengths = {}
@@ -459,16 +463,25 @@ def rebuild(cur):
                 cands.append((tier <= 3, v["strength"], v["unit"], v["unit_usd"] * factor, v["lo"] / float(fx[CURRENCY[n]]) * factor,
                               v["hi"] / float(fx[CURRENCY[n]]) * factor, v["n"], n, v["kinds"], factor, overlap, v.get("pack_size"),
                               v.get("ftype")))
-            if (c, m) in weak:                                   # this market's own single listing
-                u_, st_, usd_ = weak[(c, m)]
-                cands.append((True, st_, u_, usd_, usd_, usd_, 1, c, ["retail"], 1.0, 0, None, None))
-            if not cands:
+            for n in NEIGHBOURS[c]:                              # a neighbour's own single shelf price is a voice too
+                if (n, m) in weak and (n, m) not in direct:
+                    u_, st_, usd_, t_ = weak[(n, m)]
+                    f_ = gap(c, n, t_ or "all")[0]
+                    cands.append((True, st_, u_, usd_ * f_, usd_ * f_, usd_ * f_, 1, n, ["retail"], f_, 0, None, t_))
+            own = []
+            if (c, m) in weak:                                   # this market's own shelf price: it counts double
+                u_, st_, usd_, t_ = weak[(c, m)]
+                own = [(True, st_, u_, usd_, usd_, usd_, 1, c, ["retail"], 1.0, 0, None, t_),
+                       (True, st_, u_, usd_, usd_, usd_, 0, c, ["retail"], 1.0, 0, None, t_)]
+            if not cands and not own:
                 continue
             if any(x[0] for x in cands):
                 cands = [x for x in cands if x[0]]
-            usual = max({(x[2], x[1]) for x in cands}, key=lambda k: sum(1 for x in cands if (x[2], x[1]) == k))
+            # the form and strength compared: the one most sources price (this market's own voice does not choose it)
+            usual = max({(x[2], x[1]) for x in cands or own}, key=lambda k: sum(1 for x in cands or own if (x[2], x[1]) == k))
             # one form and strength, like for like; a bottle or tube that does not state its strength compares per ml or g
-            cands = [x for x in cands if (x[2], x[1]) == usual or (x[2] == usual[0] and x[1] is None and usual[0] in ("ml", "g"))]
+            like = lambda x: (x[2], x[1]) == usual or (x[2] == usual[0] and usual[0] in ("ml", "g") and None in (x[1], usual[1]))
+            cands = [x for x in cands if like(x)] + [x for x in own if like(x)]
             usd = statistics.median(x[3] for x in cands)
             main = min(cands, key=lambda x: abs(x[3] - usd))
             out[(c, m)] = dict(basis="estimate", kinds=main[8], unit=usual[0], strength=usual[1], unit_price=usd * rate, unit_usd=usd,

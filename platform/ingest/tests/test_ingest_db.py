@@ -1274,6 +1274,32 @@ def test_molecule_prices_from_listings_and_neighbour_estimates(env, monkeypatch)
 
 
 
+def test_eye_drops_east_africa_from_its_own_shelves_and_south_asia(env):
+    """Kenya's one bromfenac bottle on the shelf (no strength on its label) is the market's price, not thrown away; Tanzania,
+    with none, takes South Asia and Kenya carried over by the measured eye-drop gaps (about 2x South Asia, 0.29x Kenya)."""
+    import pricing
+    with psycopg.connect(URL) as c:
+        cur = c.cursor()
+        for t in ("price_listings", "reference_prices", "tenders"):
+            cur.execute(f"delete from {t}")
+        m = (cur.execute("select id from molecules where canonical_key = 'bromfenac'").fetchone() or cur.execute(
+            "insert into molecules (inn, canonical_key, category) values ('Bromfenac', 'bromfenac', 'medicine') returning id").fetchone())[0]
+        rows = [("KE", "Unibrom Eye Drops 5ml", 745, "KES"), ("PK", "Bromfenac (eye) 0.09% Drops 5ml", 380, "PKR")]
+        rows += [("IN", f"Brand{i} · packet of 5 ml Eye Drop", p, "INR") for i, p in enumerate((216, 131, 172, 180, 131, 141, 170, 75, 83, 93))]
+        rows += [("BD", f"Brand{i} 0.09% Ophthalmic Solution · 5 ml drop", p, "BDT") for i, p in enumerate((100, 100, 100, 110, 110, 100, 115))]
+        for i, (co, name, price, ccy) in enumerate(rows):
+            cur.execute("""insert into price_listings (country, source, kind, ref, molecule_id, name, pack, units, pack_price, currency)
+                           values (%s, 'shop', 'retail', %s, %s, %s, %s, 1, %s, %s)""", (co, f"eye{i}", m, name, name, price, ccy))
+        cur.execute("""update fx_rates set per_usd = case currency when 'KES' then 129 when 'TZS' then 2620 when 'PKR' then 281
+                       when 'INR' then 88 when 'BDT' then 122 else per_usd end""")
+        pricing.rebuild(cur)
+        got = {k: float(v) for k, v in cur.execute("select country, unit_price from molecule_prices where molecule_id = %s and unit = 'ml'", (m,))}
+        assert round(got["KE"]) == 149                                     # KES 745 for 5 ml, the shelf price
+        tz_bottle = got["TZ"] * 5
+        assert 4500 < tz_bottle < 7500                                     # not TZS 30,000; near Kenya's 0.29 and South Asia's 2x
+        c.rollback()
+
+
 def test_researched_regulatory_detail_replaces_starter_rules(env, tmp_path):
     """Researched rules replace the generic starter rules (team-written ones stay); low-confidence ones are drafts;
     routes, the document checklist and regulator news pages load; an unchanged file is not reloaded."""
