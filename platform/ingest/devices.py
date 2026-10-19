@@ -99,11 +99,17 @@ def read_TZ(s):
     return [r for r in out if r["brand"]]
 
 
-READERS = {"KE": read_KE, "TZ": read_TZ}
+def read_NG(s, cur):
+    import nigeria
+    return nigeria.device_rows(s, cur)
+
+
+READERS = {"KE": read_KE, "TZ": read_TZ, "NG": read_NG}
+WITH_CURSOR = {"NG"}
 
 
 def collect(cur, s, country):
-    rows = READERS[country](s)
+    rows = READERS[country](s, cur) if country in WITH_CURSOR else READERS[country](s)
     if not rows:
         raise ValueError("The register returned no devices; nothing was changed.")
     for r in rows:

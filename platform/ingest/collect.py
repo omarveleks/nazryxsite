@@ -171,7 +171,14 @@ def reg_TZ(s, tmp):
     return path, len(rows)
 
 
-REGISTRIES = {"KZ": reg_KZ, "KE": reg_KE, "UZ": reg_UZ, "KG": reg_KG, "TZ": reg_TZ}
+def reg_NG(s, tmp, cur):
+    """NAFDAC's Greenbook: medicines and vaccines, with each manufacturer looked up once (nigeria.py)."""
+    import nigeria
+    return _json_rows(nigeria.registry_rows(s, cur), tmp, "ng-register.json")
+
+
+REGISTRIES = {"KZ": reg_KZ, "KE": reg_KE, "UZ": reg_UZ, "KG": reg_KG, "TZ": reg_TZ, "NG": reg_NG}
+WITH_CURSOR = {"NG"}                             # readers that remember what they learned between runs
 
 
 def carry_forward(cur, country, path):
@@ -194,7 +201,7 @@ def carry_forward(cur, country, path):
 
 def run_registry(cur, src, s, tmp):
     country = src["country"]
-    path, active = REGISTRIES[country](s, tmp)
+    path, active = REGISTRIES[country](s, tmp, cur) if country in WITH_CURSOR else REGISTRIES[country](s, tmp)
     if path.endswith(".json"):
         carry_forward(cur, country, path)
     loaded = cur.execute("select count(*) from registrations where country = %s and active", (country,)).fetchone()[0]
@@ -476,7 +483,8 @@ def ten_KE(s, src):
     return out
 
 
-TENDERS = {"KZ": lambda s, src: ten_KZ(s, src) + ten_KZ_hosp(s, src), "UZ": lambda s, src: ten_UZ(s, src) + ten_UZ_deals(s, src), "TZ": ten_TZ, "KE": lambda s, src: ten_KE_live(s, src) + ten_KE(s, src), "KG": ten_KG}
+TENDERS = {"KZ": lambda s, src: ten_KZ(s, src) + ten_KZ_hosp(s, src), "UZ": lambda s, src: ten_UZ(s, src) + ten_UZ_deals(s, src), "TZ": ten_TZ, "KE": lambda s, src: ten_KE_live(s, src) + ten_KE(s, src), "KG": ten_KG,
+           "NG": lambda s, src: __import__("nigeria").tenders(s, src)}
 
 
 # ------------------------------------------------------------------ prices
@@ -512,7 +520,7 @@ def prices_UZ(cur, s):
 
 PRICES = {"UZ": prices_UZ, "KZ": pricing.prices_KZ, "KE": pricing.prices_KE, "TZ": pricing.prices_TZ,
           "KG": pricing.prices_KG, "INTL": pricing.prices_INTL, "NEAR": pricing.prices_NEAR,
-          "SASIA": pricing.prices_SASIA}
+          "SASIA": pricing.prices_SASIA, "NG": pricing.prices_NG}
 
 
 # ------------------------------------------------------------------ the schedule

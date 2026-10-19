@@ -268,7 +268,21 @@ def read_ke(path):
     return out
 
 
-ADAPTERS = {"KZ": read_kz, "KG": read_kg, "UZ": read_uz, "KE": read_ke}
+def read_ng(path):
+    """A Greenbook export saved by the team (the collector reads the Greenbook directly)."""
+    out = []
+    for r in _table(path, ["NAFDAC"]):
+        g = lambda *ks: next((v for k, v in r.items() if any(x in k.lower() for x in ks) and v), None)
+        exp = date_of(g("expiry"))
+        out.append(dict(certificate_no=g("nafdac", "nrn"), brand=g("product name", "product_name"), generic=g("ingredient"), atc=g("atc"),
+                        dosage_form=g("form"), strength=g("strength"), manufacturer=g("manufacturer name"),
+                        manufacturing_country=country_en(g("manufacturer country", "country")), holder=g("applicant"),
+                        ltr=g("applicant"), reg_year=year_of(g("approval")),
+                        status="Expired" if exp and exp < TODAY else "Registered", active=not (exp and exp < TODAY)))
+    return out
+
+
+ADAPTERS = {"KZ": read_kz, "KG": read_kg, "UZ": read_uz, "KE": read_ke, "NG": read_ng}
 
 
 # ------------------------------------------------------------------ names in English, and the molecule each row is
@@ -552,7 +566,7 @@ def uzbek_latin(name):
 
 LIST_NAMES = {"KG": latin_inn, "UZ": uzbek_latin}
 # lists whose unmatched entries become new molecules (openings): clean, typed lists only, not the scanned one
-NEW_FROM_LIST = {"KG", "KE", "KZ"}
+NEW_FROM_LIST = {"KG", "KE", "KZ", "NG"}
 
 
 # ------------------------------------------------------------------ the load

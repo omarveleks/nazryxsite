@@ -596,7 +596,7 @@ def due_items(cur, source, per_run, list_items, every_days=7):
 
 
 ITEM_SOURCES = {"KZ": ("prices_KZ", "prices_KZ_ep"), "TZ": ("prices_TZ",), "KE": ("prices_KE_shop",), "INTL": ("prices_INTL_pk", "prices_INTL_by"),
-                "SASIA": ("prices_BD", "prices_IN", "prices_PK_shop")}
+                "SASIA": ("prices_BD", "prices_IN", "prices_PK_shop"), "NG": ("prices_NG",)}
 
 
 def catching_up(cur, country):
@@ -1179,6 +1179,74 @@ def prices_SASIA(cur, s):
     return n
 
 
+# Nigeria: pharmacy catalogues (NGN), read a page at a time; every product kept, matched to a medicine where we can.
+# All allow these reads in robots.txt (Asset Pharmacy asks for 3 seconds between requests).
+NG_WOO = {"bonamour": "https://www.bonamour.com.ng", "asset": "https://assetpharmacy.com", "mariamgrey": "https://mariamgrey.com"}
+NG_SHOPIFY = {"healthplus": "https://healthplusnigeria.com", "precious": "https://precious-pharmacy.com"}
+NG_DELAY = {"asset": 3}
+NG_PER_RUN = 300                 # pages a run
+
+
+def prices_NG(cur, s):
+    import html as htmllib
+    import time
+
+    def pages():
+        out = []
+        for k, base in NG_WOO.items():
+            r = s.get(f"{base}/wp-json/wc/store/v1/products", params={"per_page": 100, "page": 1}, timeout=120)
+            out += [f"{k}|{p}" for p in range(1, int(r.headers.get("X-WP-TotalPages") or 0) + 1)] if r.ok else []
+            time.sleep(NG_DELAY.get(k, 1))
+        d = s.get("https://api.drugstore.ng/get/drugs", params={"page": 1}, timeout=120)
+        out += [f"drugstore|{p}" for p in range(1, (d.json()["data"]["drugs"].get("last_page") or 0) + 1)] if d.ok else []
+        for k in NG_SHOPIFY:
+            out += [f"{k}|{p}" for p in range(1, 41)]             # Shopify: pages until one comes back empty
+        h = s.get("https://medplusnig.com/products", params={"data_from": "latest", "page": 1}, timeout=120)
+        last = max([int(x) for x in re.findall(r"[?&]page=(\d+)", h.text if h.ok else "")] or [1])
+        out += [f"medplus|{p}" for p in range(1, last + 1)]
+        return out
+
+    def items(ref):
+        """(ref, name, price) for every product on one catalogue page."""
+        src, p = ref.split("|")
+        if src in NG_WOO:
+            r = s.get(f"{NG_WOO[src]}/wp-json/wc/store/v1/products", params={"per_page": 100, "page": p}, timeout=120)
+            for x in r.json() if r.ok else []:
+                pr = x.get("prices") or {}
+                if pr.get("price"):
+                    yield x.get("id"), x.get("name"), int(pr["price"]) / 10 ** int(pr.get("currency_minor_unit") or 0)
+        elif src == "drugstore":
+            r = s.get("https://api.drugstore.ng/get/drugs", params={"page": p}, timeout=120)
+            for x in (r.json()["data"]["drugs"]["data"] if r.ok else []):
+                yield x.get("id"), x.get("name"), num((x.get("price") or {}).get("digit"))
+        elif src in NG_SHOPIFY:
+            r = s.get(f"{NG_SHOPIFY[src]}/products.json", params={"limit": 250, "page": p}, timeout=120)
+            for x in (r.json().get("products", []) if r.ok else []):
+                for v in x.get("variants") or []:
+                    vt = v.get("title") or ""
+                    title = x.get("title") + ("" if vt in ("", "Default Title") or vt.lower() in x.get("title", "").lower() else f" {vt}")
+                    yield v.get("id"), title, num(v.get("price"))
+        elif src == "medplus":
+            r = s.get("https://medplusnig.com/products", params={"data_from": "latest", "page": p}, timeout=120)
+            for slug, name, price in re.findall(r'<a href="https://medplusnig\.com/product/([^"]+)">\s*([^<]+?)\s*</a>.*?'
+                                                 r'<span class="text-accent[^"]*">\s*₦([\d,.]+)', r.text if r.ok else "", re.S):
+                # the card shortens long names; the slug has the whole one
+                full = re.sub(r"-[a-z0-9]{6,}$", "", slug).replace("-", " ")
+                yield slug, full if len(full) > len(name) else name, num(price.replace(",", ""))
+
+    names, n = Names(cur, "NG"), 0
+    for ref in due_items(cur, "prices_NG", NG_PER_RUN, pages):
+        src = ref.split("|")[0]
+        for key, name, price in items(ref):
+            name = htmllib.unescape(name or "").strip()
+            if name and price:
+                save_listing(cur, "NG", src, "retail", f"{src}|{key}", name, name, names.find(name), None, price, "NGN")
+                n += 1
+        checked(cur, "prices_NG", ref)
+        time.sleep(NG_DELAY.get(src, 1))
+    return n
+
+
 # Nearby countries (second tier, beside our own markets): official lists and one pharmacy catalogue, read in bulk.
 SA_MEDIA = "https://www.health.gov.za/wp-json/wp/v2/media"
 GHANA = "https://www.nhis.gov.gh/medlist.aspx"
@@ -1247,17 +1315,6 @@ def prices_NEAR(cur, s):
                              english_molecule(cur, names, generics, m.group(2)), 1, num(p_.group(1)), "GHS")
                 n += 1
         read_version(cur, "gh", pdf)
-    # Nigeria: a pharmacy chain's catalogue (NGN)
-    for page_no in range(1, 20):
-        items = s.get(HEALTHPLUS, params={"limit": 250, "page": page_no}, timeout=120).json().get("products", [])
-        for x in items:
-            v = (x.get("variants") or [{}])[0]
-            mol = names.find(x.get("title") or "")
-            if mol and num(v.get("price")):
-                save_listing(cur, "NG", "healthplus", "retail", x["id"], x.get("title"), x.get("title"), mol, None, num(v["price"]), "NGN")
-                n += 1
-        if len(items) < 250:
-            break
     # Azerbaijan: Tariff Council maximum prices (PDF; AZN incl. VAT, retail)
     page = s.get(AZ_TARIFF, timeout=60).text
     pdfs = re.findall(r'href="([^"]+/storage/media/(\d+)/[^"]+\.pdf)"', page)
