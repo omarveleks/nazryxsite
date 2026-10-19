@@ -1100,17 +1100,18 @@ def prices_SASIA(cur, s):
 
     for slug in sorted(due_items(cur, "prices_IN", 100000, onemg_list, every_days=30), key=order)[:SA_PER_RUN // 5]:
         r = s.get(f"{ONEMG}/generics/{slug}", timeout=60)
-        title = (re.search(r"<h1[^>]*>(.*?)</h1>", r.text, re.S) if r.ok else None)
+        page_ = r.content.decode("utf-8", "ignore") if r.ok else ""         # 1mg does not declare its character set
+        title = re.search(r"<h1[^>]*>(.*?)</h1>", page_, re.S)
         mol = english_molecule(cur, names, generics, text(title.group(1))) if title else None
         brands = re.findall(r'"name":"([^"]+)","manufacturer_name":"([^"]*)","price_range":\{[^}]*\},"variants_available":"[^"]*","slug":"(/brands/[^"]+)"',
-                            r.text if mol else "")
+                            page_ if mol else "")
         for brand, maker, bslug in list(dict.fromkeys(brands))[:8]:
             b = s.get(ONEMG + bslug, timeout=60)
             # the page's data in either of the two shapes 1mg serves: {skuId, header, subText, ..., price: {mrp}} or {header, ..., price: '₹216', skuId, subText}
-            page = b.text if b.ok else ""
+            page = b.content.decode("utf-8", "ignore") if b.ok else ""
             skus = {sku: (header, price, sub) for sku, header, sub, price in re.findall(
                 r'"skuId":(\d+),"header":"([^"]+)","subText":"([^"]*)",[^\]]*?"price":\{"mrp":([\d.]+)', page)}
-            for header, price, sku, sub in re.findall(r'"header":"([^"]+)",(?:"[a-zA-Z]+":"[^"]*",)*"price":"₹([\d,.]+)","quantity":\d+,'
+            for header, price, sku, sub in re.findall(r'"header":"([^"]+)",(?:"[a-zA-Z]+":"[^"]*",)*"price":"[^\d"]*([\d,.]+)","quantity":\d+,'
                                                       r'(?:"[a-zA-Z]+":\{[^{}]*\},)*"skuId":"(\d+)","subText":"([^"]*)"', page):
                 skus.setdefault(sku, (header, price, sub))
             for sku, (header, price, sub) in skus.items():
@@ -1160,7 +1161,9 @@ def prices_SASIA(cur, s):
                 desc = prod.get("description") or ""
                 pack = re.search(r"Order (.+?) and avail", desc)
                 label = pack.group(1) if pack else f"{prod.get('name')} {drug.get('drugUnit') or ''} {drug.get('dosageForm') or ''}"
-                save_listing(cur, "PK", "dawaai", "retail", url, prod.get("name"), label, mol, None, price, "PKR",
+                # dawaai sells '20x10's' by the strip: the price is for the 10, not the box of 200
+                strip = re.search(r"(\d+)\s*x\s*(\d+)\s*'?s?\b", label, re.I)
+                save_listing(cur, "PK", "dawaai", "retail", url, prod.get("name"), label, mol, int(strip.group(2)) if strip else None, price, "PKR",
                              originator=is_brand(drug.get("manufacturer")), description=drug.get("manufacturer"))
                 n += 1
         checked(cur, "prices_PK_shop", url)
