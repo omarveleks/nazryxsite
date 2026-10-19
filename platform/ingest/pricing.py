@@ -82,9 +82,11 @@ def units_in(text):
         for x in po:
             n *= int(x)
         return n
+    if re.search(r"\b(?:1\s+)?single\s+(?:tablet|capsule|caplet|pessary|vial|ampoule|sachet)", t):
+        return 1                                                                         # '1 Single Tablet'
     m = (re.search(r"(\d+)\s*x\s*(\d+)\s*(?:tab|cap|amp|vial|sachet|supp|блист|'?s\b)", t)     # 2 x 10 tabs, 10x10's
          or re.search(r"(?:pack|box|strip|bottle) of\s*(\d+)()", t)
-         or re.search(r"(?<![\w-])(\d+)()\s*(?:tablets?|tabs?|capsules?|caps?|sachets?|ampoules?|amps?|vials?|suppositories|"
+         or re.search(r"(?<![\w/-])(\d+)()\s*(?:tablets?|tabs?|capsules?|caps?|sachets?|ampoules?|amps?|vials?|suppositories|"
                       r"pessaries|lozenges)\b", t)                                     # not 'Benza-200 Tablets'
          or re.search(r"\b(\d+)()\s*[',]?s\b", t)
          or re.search(r"(?:^|\s)x\s*(\d+)()\b(?!\s*(?:ml|g)\b)", t))                    # '5mg x28', 'x100'
@@ -314,10 +316,13 @@ def rebuild(cur):
         for o in obs:
             sizes[(o[2], o[3])] = sizes.get((o[2], o[3]), 0) + 1
         want = usual_form.get(m)
-        if want and want not in sizes and (want[0] == "tablet or capsule" or not any(k[1] for k in sizes)):
+        if want and want not in sizes and c not in MARKETS and want[0] in ("ml", "g") and (want[0], None) in sizes:
+            unit, usual = want[0], None  # a country we borrow from sells the same bottle without stating its strength
+        elif want and want not in sizes and (want[0] == "tablet or capsule" or not any(k[1] for k in sizes)):
             continue                     # this market only prices another form (an infusion, a gel): estimate the usual one
-        unit, usual = want if want in sizes else max(sizes, key=lambda k: (sizes[k] * (2 if k[0] == "tablet or capsule" else 1),
-                                                                           k[1] is not None))
+        else:
+            unit, usual = want if want in sizes else max(sizes, key=lambda k: (sizes[k] * (2 if k[0] == "tablet or capsule" else 1),
+                                                                               k[1] is not None))
         # in our own markets, one or two listings without a strength (or one shop listing) are not enough to call it market
         # data; a country we only borrow from keeps every price as evidence for the estimate
         if c in MARKETS and usual is None and sizes[(unit, usual)] < 3:
@@ -430,7 +435,8 @@ def rebuild(cur):
             if any(x[0] for x in cands):
                 cands = [x for x in cands if x[0]]
             usual = max({(x[2], x[1]) for x in cands}, key=lambda k: sum(1 for x in cands if (x[2], x[1]) == k))
-            cands = [x for x in cands if (x[2], x[1]) == usual]               # one form and strength, like for like
+            # one form and strength, like for like; a bottle or tube that does not state its strength compares per ml or g
+            cands = [x for x in cands if (x[2], x[1]) == usual or (x[2] == usual[0] and x[1] is None and usual[0] in ("ml", "g"))]
             usd = statistics.median(x[3] for x in cands)
             main = min(cands, key=lambda x: abs(x[3] - usd))
             out[(c, m)] = dict(basis="estimate", kinds=main[8], unit=usual[0], strength=usual[1], unit_price=usd * rate, unit_usd=usd,

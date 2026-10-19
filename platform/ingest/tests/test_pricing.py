@@ -70,3 +70,19 @@ def test_bottle_and_tube_sizes():
     assert pricing.volume_of("Amoxicillin 250mg/5ml suspension 100ml") == (100.0, "ml")     # not the 5 ml of the strength
     assert pricing.volume_of("БРОКСИНАК Капли глазные 0,09% 1.7мл") == (1.7, "ml")
     assert pricing.volume_of("Diclofenac 1% gel 50г") == (50.0, "g")
+
+
+def test_pack_counts_from_east_african_shops():
+    assert pricing.units_in("Artefan 80/480 Tabs 6's") == 6                     # not the 480 of a strength
+    assert pricing.units_in("Zocon 150mg Fluconazole Antifungal Tablets - 1 Single Tablet") == 1
+    assert pricing.units_in("Amtas 5mg Amlodipine Antihypertensive Tablets - 1 Strip of 10 Tablets") == 10
+    assert pricing.units_in("Vitabiotics Neurozan - 1 Pack of 30 Tablets") == 30
+
+
+def test_form_types_for_price_gaps():
+    assert pricing.form_type("tablet or capsule", "Amlodipine 5mg") == "tablet"
+    assert pricing.form_type("ml", "Ivytimol 0.5% Timolol Glaucoma Eye Drops - 10ml Bottle") == "eye"
+    assert pricing.form_type("ml", "Otrivin nasal spray 10 ml") == "nasal"
+    assert pricing.form_type("g", "Canestal 1% Clotrimazole Antifungal Cream - 15g Tube") == "topical"
+    assert pricing.form_type("ml", "Azilin 200mg/5ml Azithromycin Pediatric Suspension - 100ml") == "oral liquid"
+    assert pricing.form_type("ampoule or vial", "Ceftriaxone 1g") == "injection"
