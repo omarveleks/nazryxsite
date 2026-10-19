@@ -1035,6 +1035,17 @@ def is_brand(maker):
     return bool(maker and BRAND_MAKERS.search(maker))
 
 
+# the same ingredient under another name in another market's lists
+WORD_SYNONYMS = {"adrenalin": "epinefrin", "noradrenalin": "norepinefrin", "lignokain": "lidokain", "frusemid": "furosemid",
+                 "albuterol": "salbutamol", "acetaminofen": "parasetamol", "kgolekalsiferol": "kolekalsiferol", "glukoz": "dekstroz"}
+
+
+def word_key(w):
+    """One spelling of one ingredient word: 'Ksilometazolin' and 'xylometazoline', 'adrenaline' and 'epinephrine'."""
+    k = family(w) or w
+    return WORD_SYNONYMS.get(k, k)
+
+
 def tracked_words(cur):
     """Words of the molecules worth pricing first: in a manufacturer's portfolio, or registered in our East African markets."""
     words, first = set(), set()
@@ -1043,7 +1054,7 @@ def tracked_words(cur):
                                     where p.id is not null or exists (select 1 from registrations r where r.molecule_id = m.id
                                       and r.country in ('KE', 'TZ', 'NG') and r.active)
                                     group by m.inn""").fetchall():
-        w = {x for x in re.findall(r"[a-z]{4,}", (inn or "").lower())}
+        w = {word_key(x) for x in re.findall(r"[a-z]{4,}", (inn or "").lower())}
         words |= w
         if mine:
             first |= w
@@ -1057,7 +1068,8 @@ def prices_SASIA(cur, s):
     from catalogue import Generics
     names, generics, n = Names(cur, "KE"), Generics(cur), 0
     words, first = tracked_words(cur)
-    parts = lambda t: set(re.findall(r"[a-z]{4,}", t.lower())) - set(SALT_WORDS)
+    salts = {word_key(x) for x in SALT_WORDS}
+    parts = lambda t: {word_key(x) for x in re.findall(r"[a-z]{4,}", t.lower())} - salts
     useful = lambda t: bool(parts(t)) and parts(t) <= words           # every ingredient is one we track
     # portfolio first, single ingredients before combinations
     order = lambda ref: (0 if parts(ref.split("|")[-1]) <= first else 1, "+" in ref or ref.count("-") > 2)

@@ -28,7 +28,15 @@ const COMP: Record<string, [string, string]> = {
 
 const PER_ML = ['eye_drops', 'nasal', 'contact_lens', 'inhaled_saline'];
 // where a price can be inferred from when a market has none: its neighbours, with similar prices
-const NEIGHBOURS: Record<string, string[]> = { TZ: ['KE'], KE: ['TZ'], NG: [], KZ: ['KG', 'UZ'], KG: ['KZ', 'UZ'], UZ: ['KZ', 'KG'] };
+// where a price can be inferred from when a market has none, nearest first; the price gap between the two countries
+// (per product type, from price_gaps) carries it over. East Africa and Nigeria draw on each other and on South Asia.
+const NEIGHBOURS: Record<string, string[]> = {
+  TZ: ['KE', 'NG', 'IN', 'PK', 'BD'], KE: ['TZ', 'NG', 'IN', 'PK', 'BD'], NG: ['KE', 'TZ', 'GH', 'IN', 'PK', 'BD'],
+  KZ: ['KG', 'UZ'], KG: ['KZ', 'UZ'], UZ: ['KZ', 'KG'],
+};
+// a use group's product type, for its price gap
+const GROUP_TYPE: Record<string, string> = { eye_drops: 'eye', contact_lens: 'eye', nasal: 'nasal', inhaled_saline: 'nasal',
+  eye_surgery: 'injection', joint: 'injection', dermal_filler: 'injection' };
 
 // The manufacturer's catalogue against its markets: a portfolio dashboard on top, then every product.
 export default async function MfrProducts({ searchParams }: { searchParams: Promise<{ added?: string; matched?: string; error?: string; market?: string; tab?: string; saved?: string; uploaded?: string; removed?: string; reading?: string; cleared?: string }> }) {
@@ -68,7 +76,8 @@ export default async function MfrProducts({ searchParams }: { searchParams: Prom
     // prices: local first, then other markets converted at today's rate (shown as an estimate)
     const fx = Object.fromEntries((await rows(db, 'select currency, per_usd::float as r from fx_rates')).map((x) => [x.currency, x.r]));
     const curOf = Object.fromEntries((await rows(db, 'select country, min(currency) as c from price_listings group by country')).map((x) => [x.country, x.c]));
-    const order = [market, ...(NEIGHBOURS[market] ?? []).filter(hasData)].filter((c) => curOf[c]);
+    const order = [market, ...(NEIGHBOURS[market] ?? [])].filter((c) => curOf[c]);
+    const gaps = await rows(db, `select source, form_type, ratio::float as ratio, n, basis from price_gaps where country = $1`, [market]);
     const groupPrices: Record<string, { price: number; per: string; currency: string; n: number; from: string }> = {};
     for (const g of groups) for (const c of order) {
       const brands = await segmentBrands(db, c, g, []);
@@ -80,7 +89,7 @@ export default async function MfrProducts({ searchParams }: { searchParams: Prom
     const listings = ids.length ? await rows(db, `select country, molecule_id, name, pack_price::float as price, currency from price_listings
         where kind = 'retail' and molecule_id = any($1) and pack_price > 0`, [ids]) : [];
     const local = curOf[market] ?? null;
-    return { targets, market, products, facts, launches, files, watched, watchCount, prices, groupFacts, groupPrices, listings, otherPrices, fx, local, order };
+    return { targets, market, products, facts, launches, files, watched, watchCount, prices, groupFacts, groupPrices, listings, otherPrices, fx, local, order, gaps };
   });
   const market = d.market;
   const analysis = canUse(tierIn(u, market), 'portfolio');
@@ -115,15 +124,23 @@ export default async function MfrProducts({ searchParams }: { searchParams: Prom
   // a price for every product we can: same group, the ingredient's average in the same form, pharmacy packs in the same form;
   // here first, then from another market converted to this one's currency (an estimate)
   const conv = (v: number, from: string) => d.local && d.fx[from] && d.fx[d.local] ? v / d.fx[from] * d.fx[d.local] : null;
+  // this market's price over the source country's for this type: measured (10+ medicines), else the set figure, else 1
+  const gap = (src: string, type: string) => {
+    const pick = (t: string, basis: string) => d.gaps.find((g) => g.source === src && g.form_type === t && g.basis === basis && (basis === 'set' || g.n >= 10));
+    return (pick(type, 'measured') ?? pick(type, 'set') ?? pick('all', 'set'))?.ratio ?? 1;
+  };
+  const typeOf = (form?: string | null) => { const u = formUnit(form);
+    return u === 'tablet or capsule' ? 'tablet' : u === 'ampoule or vial' ? 'injection' : /eye|ophth/i.test(form ?? '') ? 'eye' : /nasal|nose/i.test(form ?? '') ? 'nasal' : 'all'; };
   const priceFor = (p: (typeof mols)[number]): { price: number; per: string; currency: string } | null => {
-    const out = (v: number | null, cur: string, per: string) => {
+    // a price from another country: converted at today's rate and carried over by the price gap for this product type
+    const out = (v: number | null, cur: string, per: string, from = market, type = 'all') => {
       if (v == null) return null;
       const x = cur === d.local ? v : conv(v, cur);
-      return x == null ? null : { price: x, per, currency: d.local! };
+      return x == null ? null : { price: from === market ? x : x * gap(from, type), per, currency: d.local! };
     };
     if (p.group) {
       const gp = d.groupPrices[p.group];
-      return gp ? out(gp.price, gp.currency, gp.per) : null;
+      return gp ? out(gp.price, gp.currency, gp.per, gp.from, GROUP_TYPE[p.group] ?? 'all') : null;
     }
     if (!p.molecule_id) return null;
     const u = formUnit(p.dosage_form);
@@ -132,11 +149,11 @@ export default async function MfrProducts({ searchParams }: { searchParams: Prom
       if (pr && priceFits(pr, p.dosage_form)) {
         const per = packOf(pr) > 1 ? `${packOf(pr)} ${pr.unit}` : unitShort(pr);
         // the generic's price: what a generic sells for
-        const r = out(Number(pr.generic_price ?? pr.unit_price) * packOf(pr), pr.currency, per);
+        const r = out(Number(pr.generic_price ?? pr.unit_price) * packOf(pr), pr.currency, per, c, typeOf(p.dosage_form));
         if (r) return r;
       }
       const same = d.listings.filter((l) => l.country === c && l.molecule_id === p.molecule_id && (!u || !formUnit(l.name) || formUnit(l.name) === u));
-      const r = out(median(same.map((l) => l.price)), same[0]?.currency, 'pack');
+      const r = out(median(same.map((l) => l.price)), same[0]?.currency, 'pack', c, typeOf(p.dosage_form));
       if (r) return r;
     }
     return null;
