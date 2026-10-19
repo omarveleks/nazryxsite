@@ -300,9 +300,11 @@ def rebuild(cur):
             continue                     # this market only prices another form (an infusion, a gel): estimate the usual one
         unit, usual = want if want in sizes else max(sizes, key=lambda k: (sizes[k] * (2 if k[0] == "tablet or capsule" else 1),
                                                                            k[1] is not None))
-        if usual is None and sizes[(unit, usual)] < 3:
-            continue                     # one or two listings without a strength are not enough to call it market data
-        if sizes[(unit, usual)] == 1 and all(o[1] == "retail" for o in obs if (o[2], o[3]) == (unit, usual)):
+        # in our own markets, one or two listings without a strength (or one shop listing) are not enough to call it market
+        # data; a country we only borrow from keeps every price as evidence for the estimate
+        if c in MARKETS and usual is None and sizes[(unit, usual)] < 3:
+            continue
+        if c in MARKETS and sizes[(unit, usual)] == 1 and all(o[1] == "retail" for o in obs if (o[2], o[3]) == (unit, usual)):
             o = next(o for o in obs if (o[2], o[3]) == (unit, usual))
             weak[(c, m)] = (unit, usual, o[4] / o[6] / float(fx[CURRENCY[c]]))
             continue                     # a single shop listing (often one brand) is weaker than the blended estimate:
@@ -318,7 +320,7 @@ def rebuild(cur):
         vols = [o[7] for o in obs if (o[2], o[3]) == (unit, usual) and o[7]]
         out[(c, m)] = dict(basis="listings", kinds=sorted({o[1] for o in obs}), unit=unit, strength=usual, unit_price=avg,
                            unit_usd=avg / float(fx[CURRENCY[c]]), lo=pct(local, 0.1), hi=pct(local, 0.9), n=len(local), by=by,
-                           pack_size=statistics.median(vols) if vols else None)
+                           pack_size=statistics.median_low(vols) if vols else None)
     # where a market only publishes official maximums, the shelf price is the maximum times how shelf prices compare with
     # maximums where both are known (measured on our data)
     both = []
@@ -405,7 +407,7 @@ def rebuild(cur):
             out[(c, m)] = dict(basis="estimate", kinds=main[8], unit=usual[0], strength=usual[1], unit_price=usd * rate, unit_usd=usd,
                                lo=statistics.median(x[4] for x in cands) * rate, hi=statistics.median(x[5] for x in cands) * rate,
                                n=sum(x[6] for x in cands), by=[], from_country=main[7], factor=main[9], overlap=len(cands),
-                               pack_size=statistics.median([x[11] for x in cands if x[11]] or [0]) or None)
+                               pack_size=statistics.median_low([x[11] for x in cands if x[11]] or [0]) or None)
     # combinations nobody prices: their ingredients' prices added up, scaled by how combination packs compare with their
     # ingredients where both are priced (measured on our data)
     samples = []
