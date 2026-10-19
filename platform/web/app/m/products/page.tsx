@@ -27,6 +27,8 @@ const COMP: Record<string, [string, string]> = {
 };
 
 const PER_ML = ['eye_drops', 'nasal', 'contact_lens', 'inhaled_saline'];
+// where a price can be inferred from when a market has none: its neighbours, with similar prices
+const NEIGHBOURS: Record<string, string[]> = { TZ: ['KE'], KE: ['TZ'], KZ: ['KG', 'UZ'], KG: ['KZ', 'UZ'], UZ: ['KZ', 'KG'] };
 
 // The manufacturer's catalogue against its markets: a portfolio dashboard on top, then every product.
 export default async function MfrProducts({ searchParams }: { searchParams: Promise<{ added?: string; matched?: string; error?: string; market?: string; tab?: string; saved?: string; uploaded?: string; removed?: string; reading?: string; cleared?: string }> }) {
@@ -66,7 +68,7 @@ export default async function MfrProducts({ searchParams }: { searchParams: Prom
     // prices: local first, then other markets converted at today's rate (shown as an estimate)
     const fx = Object.fromEntries((await rows(db, 'select currency, per_usd::float as r from fx_rates')).map((x) => [x.currency, x.r]));
     const curOf = Object.fromEntries((await rows(db, 'select country, min(currency) as c from price_listings group by country')).map((x) => [x.country, x.c]));
-    const order = [market, ...live.filter((c) => c !== market)].filter((c) => curOf[c]);
+    const order = [market, ...(NEIGHBOURS[market] ?? []).filter(hasData)].filter((c) => curOf[c]);
     const groupPrices: Record<string, { price: number; per: string; currency: string; n: number; from: string }> = {};
     for (const g of groups) for (const c of order) {
       const brands = await segmentBrands(db, c, g, []);
@@ -114,15 +116,14 @@ export default async function MfrProducts({ searchParams }: { searchParams: Prom
   // here first, then from another market converted to this one's currency (an estimate)
   const conv = (v: number, from: string) => d.local && d.fx[from] && d.fx[d.local] ? v / d.fx[from] * d.fx[d.local] : null;
   const priceFor = (p: (typeof mols)[number]): { price: number; per: string; currency: string; note: string } | null => {
-    const out = (v: number | null, cur: string, per: string, note: string) => {
+    const out = (v: number | null, cur: string, per: string) => {
       if (v == null) return null;
       const x = cur === d.local ? v : conv(v, cur);
-      return x == null ? null : { price: x, per, currency: d.local!, note: cur === d.local ? note : `${note}, estimate` };
+      return x == null ? null : { price: x, per, currency: d.local!, note: 'Est. avg' };
     };
-    const where = (c: string) => (c === market ? '' : ` in ${countryName(c)}`);
     if (p.group) {
       const gp = d.groupPrices[p.group];
-      return gp ? out(gp.price, gp.currency, gp.per, `pharmacy median${where(gp.from)}, ${gp.n} ${gp.n === 1 ? 'brand' : 'brands'}`) : null;
+      return gp ? out(gp.price, gp.currency, gp.per) : null;
     }
     if (!p.molecule_id) return null;
     const u = formUnit(p.dosage_form);
@@ -130,11 +131,11 @@ export default async function MfrProducts({ searchParams }: { searchParams: Prom
       const pr = (c === market ? d.prices : d.otherPrices).find((x) => x.molecule_id === p.molecule_id && x.country === c);
       if (pr && priceFits(pr, p.dosage_form)) {
         const per = packOf(pr) > 1 ? `${packOf(pr)} ${pr.unit}` : unitShort(pr);
-        const r = out(Number(pr.unit_price) * packOf(pr), pr.currency, per, `average${where(c)}`);
-        if (r) return pr.basis === 'estimate' && c === market ? { ...r, note: 'estimate' } : r;
+        const r = out(Number(pr.unit_price) * packOf(pr), pr.currency, per);
+        if (r) return r;
       }
       const same = d.listings.filter((l) => l.country === c && l.molecule_id === p.molecule_id && (!u || !formUnit(l.name) || formUnit(l.name) === u));
-      const r = out(median(same.map((l) => l.price)), same[0]?.currency, 'pack', `pharmacy median${where(c)}, ${same.length} ${same.length === 1 ? 'price' : 'prices'}`);
+      const r = out(median(same.map((l) => l.price)), same[0]?.currency, 'pack');
       if (r) return r;
     }
     return null;
@@ -264,7 +265,8 @@ export default async function MfrProducts({ searchParams }: { searchParams: Prom
                     : <><span className={`pill ${COMP[competition(f)][1]}`}>{competition(f) === 'some' || competition(f) === 'crowded' ? `${f!.registrants} competitors` : competition(f) === 'few' ? `${f!.registrants} ${f!.registrants === 1 ? 'competitor' : 'competitors'}` : COMP[competition(f)][0]}</span>
                       {(competition(f) === 'absent' || competition(f) === 'open') && (() => {   // where it sells among the other markets with data
                         const o = (p.group ? d.groupFacts.filter((x) => x.use_group === p.group && x.country !== c)
-                          : d.facts.filter((x) => x.molecule_id === p.molecule_id && x.country !== c)).filter((x) => x.registrations > 0);
+                          : d.facts.filter((x) => x.molecule_id === p.molecule_id && x.country !== c))
+                          .filter((x) => x.registrations > 0 && d.targets.includes(x.country));
                         return o.length ? <div className="sub2">{o.map((x) => `${countryName(x.country)}: ${x.registrants} ${x.registrants === 1 ? 'competitor' : 'competitors'}`).join(' · ')}</div> : null;
                       })()}</>}</td>;
                 })}
