@@ -7,6 +7,7 @@ import { requireUser } from '@/lib/auth';
 import { one, rows, withUser } from '@/lib/db';
 import { categories } from '@/lib/queries';
 import { canUse, countryName, tierIn } from '@/lib/mfr';
+import { GROUP_LABEL } from '@/lib/segments';
 
 export const metadata = { title: 'Partners' };
 
@@ -29,20 +30,22 @@ export default async function Partners({ searchParams }: { searchParams: Promise
     const sort = SORTS.some(([k]) => k === sp.sort) ? sp.sort! : cls ? 'class' : 'open';
     // where the registry names no local distributor (Kazakhstan, Kyrgyzstan) the list is the companies holding registrations
     const byHolder = hasData(market) && !(await one(db, 'select 1 as x from registrations where country = $1 and active and ltr_id is not null limit 1', [market]));
-    const list = hasData(market) ? await rows(db, 'select * from partner_search($1, $2, $3, $4, $5, $6)',
-      [market, cls, molecule?.id ?? null, false, Number(sp.min) || 0, sort]) : [];
+    // a product group (eye lubricants, viscoelastics, joint injections, nasal saline): importers of devices and medicines together
+    const group = sp.group && GROUP_LABEL[sp.group] ? sp.group : null;
+    const list = !hasData(market) ? [] : group ? await rows(db, 'select * from group_partners($1, $2)', [market, group])
+      : await rows(db, 'select * from partner_search($1, $2, $3, $4, $5, $6)', [market, cls, molecule?.id ?? null, false, Number(sp.min) || 0, sort]);
     const products = await rows(db, `select p.id, coalesce(m.inn, p.name) as name from mfr_products p left join molecules m on m.id = p.molecule_id
                                      where p.user_id = $1 order by 2 limit 300`, [u.id]);
     // the team sees the names behind the codes, one click away (customers never do)
     const names: Record<string, string> = u.role === 'team' && sp.names === '1'
       ? Object.fromEntries((await rows(db, 'select code, name from team_partner_names($1)', [market])).map((r) => [r.code, r.name])) : {};
-    return { targets, market, cats, mine, cls, molecule, sort, list, products, byHolder, names, status: prof?.status };
+    return { targets, market, cats, mine, cls, molecule, sort, list, products, byHolder, names, status: prof?.status, group };
   });
   const t = tierIn(u, d.market);
   const lists = canUse(t, 'distributors'), matching = canUse(t, 'matching'), intro = canUse(t, 'partner_intro');
   const shown = d.molecule && sp.gap === '1' ? d.list.filter((p) => !p.carries) : d.list;
   const total = d.list[0]?.total ?? 0, mineN = d.list[0]?.mine ?? d.mine.length;
-  const filtered = Boolean(d.cls || d.molecule || Number(sp.min));
+  const filtered = Boolean(d.cls || d.molecule || Number(sp.min) || d.group);
   const noun = d.byHolder ? 'companies' : 'distributors';
   return (
     <Shell user={u} title="Partners" sub={`Who could carry your products in ${countryName(d.market)}`}
@@ -60,6 +63,8 @@ export default async function Partners({ searchParams }: { searchParams: Promise
               <option value="">All therapeutic classes</option>{d.cats.map((c) => <option key={c} value={c}>{c}</option>)}</select>
             <select className="input" name="molecule" defaultValue={d.molecule?.id ?? ''} aria-label="One of your molecules" style={{ flex: '2 1 200px' }}>
               <option value="">Any of your molecules</option>{d.mine.map((m) => <option key={m.id} value={m.id}>{m.inn}</option>)}</select>
+            <select className="input" name="group" defaultValue={d.group ?? ''} aria-label="Product group" style={{ flex: '2 1 220px' }}>
+              <option value="">Any product group</option>{Object.entries(GROUP_LABEL).map(([k, l]) => <option key={k} value={k}>{l} (devices and medicines)</option>)}</select>
             <select className="input" name="min" defaultValue={sp.min ?? '0'} aria-label="Portfolio size" style={{ flex: '1 1 140px' }}>
               {SIZES.map(([k, l]) => <option key={k} value={k}>{l}</option>)}</select>
             <select className="input" name="sort" defaultValue={d.sort} aria-label="Sort" style={{ flex: '1 1 200px' }}>
@@ -74,7 +79,7 @@ export default async function Partners({ searchParams }: { searchParams: Promise
           </div>
         </form>
         <section className="card" data-tour="distributors">
-          <div className="card-h"><div><h2>{total} {d.byHolder ? 'companies holding registrations' : 'distributors'}{d.cls ? ` in ${d.cls}` : ''}</h2>
+          <div className="card-h"><div><h2>{total} {d.group ? 'importers' : d.byHolder ? 'companies holding registrations' : 'distributors'}{d.group ? ` of ${GROUP_LABEL[d.group].toLowerCase()}` : d.cls ? ` in ${d.cls}` : ''}</h2>
             {d.byHolder && <p className="note">{countryName(d.market)}&rsquo;s register names the company holding each product. Local companies come first.</p>}</div></div>
           {shown.length === 0 ? <Empty>No {d.byHolder ? 'company' : 'distributor'} matches these filters.</Empty> : (
             <div>{shown.map((p, i) => (
@@ -83,10 +88,14 @@ export default async function Partners({ searchParams }: { searchParams: Promise
                   <span className="nm">{d.names[p.code] ?? `${d.byHolder ? 'Company' : 'Distributor'} ${p.code}`}</span>
                   {d.names[p.code] && <span className="sub2"> · {p.code}</span>}
                   {d.byHolder && p.local_maker && <span className="pill mint" style={{ marginLeft: 8, fontSize: 12 }}>Local</span>}
+                  {d.group ? (<>
+                    {p.local_maker && <span className="pill mint" style={{ marginLeft: 8, fontSize: 12 }}>Local</span>}
+                    <div className="sub2">{p.in_group} products in this group ({p.group_devices} devices, {p.in_group - p.group_devices} medicines) · {p.products} registered products in all{p.devices ? `, ${p.devices} of them devices` : ''}</div>
+                    {p.origins && <div className="sub2">Brings in products made in {p.origins}</div>}</>) : (<>
                   <div className="sub2">{p.products} registered products · {p.molecules} molecules · {p.classes} classes{d.cls ? ` · ${p.in_class} in ${d.cls}` : ''}</div>
-                  {p.top_classes && <div className="sub2">Strongest in {p.top_classes}</div>}
+                  {p.top_classes && <div className="sub2">Strongest in {p.top_classes}</div>}</>)}
                   <div className="row" style={{ gap: 6, marginTop: 6 }}>
-                    {mineN > 0 && (matching ? <span className={`pill ${p.open_to > 0 ? 'mint' : ''}`}>Open to {p.open_to} of your {mineN} molecules</span>
+                    {!d.group && mineN > 0 && (matching ? <span className={`pill ${p.open_to > 0 ? 'mint' : ''}`}>Open to {p.open_to} of your {mineN} molecules</span>
                       : <PlanLock compact need="access" title="Open to how many of your molecules" u={u} market={d.market} />)}
                     {d.molecule && <span className={`pill ${p.carries ? '' : 'blue'}`}>{p.carries ? `Already carries ${d.molecule.inn}` : `Does not carry ${d.molecule.inn}`}</span>}
                   </div>

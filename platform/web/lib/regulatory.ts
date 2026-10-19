@@ -67,4 +67,6 @@ export function byTopic(reqs: Requirement[]) {
 }
 
 export const REQ_SQL = `select id, topic, applies, match, title, body from reg_requirements
-  where country = $1 and status = 'published' order by sort, id`;
+  where country = $1 and status = 'published' and scope = 'medicine' order by sort, id`;
+/** Medical devices register under their own rules (classes, conformity evidence, a local representative). */
+export const DEVICE_REQ_SQL = REQ_SQL.replace("scope = 'medicine'", "scope = 'device'");

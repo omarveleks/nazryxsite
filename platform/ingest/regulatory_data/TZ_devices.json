@@ -1,0 +1,391 @@
+{
+ "country": "TZ",
+ "scope": "device",
+ "regulator": "Tanzania Medicines and Medical Devices Authority (TMDA) – https://www.tmda.go.tz",
+ "checked": "2026-10",
+ "facts": [
+  {
+   "topic": "Route",
+   "applies": "all",
+   "match": null,
+   "title": "Compendium of device guidelines (June 2024)",
+   "body": "TMDA's rules for devices, IVDs and lab equipment are in one Compendium (June 2024). It replaces the separate 2020 guidelines and covers procedure, technical documents, classification, clinical evidence, labelling, grouping, software and borderline products. Applications go through the TMDA Traders' Portal, in English or Kiswahili.",
+   "source": "https://www.tmda.go.tz/uploads/publications/en1755088789-Compendium%20of%20Guidelines%20for%20Marketing%20Authorization%20of%20Medical%20Devices,%20Diagnostics%20and%20Laboratory%20Equipment,%20June%202024.pdf",
+   "confidence": "high"
+  },
+  {
+   "topic": "Route",
+   "applies": "all",
+   "match": null,
+   "title": "Registration or notification",
+   "body": "Classes B, C and D, plus Class A devices that are sterile, active or measuring, need full registration. Other Class A devices only need notification, which is processed in 5 working days. TMDA can overrule the manufacturer's proposed class.",
+   "source": "https://www.tmda.go.tz/uploads/publications/en1755088789-Compendium%20of%20Guidelines%20for%20Marketing%20Authorization%20of%20Medical%20Devices,%20Diagnostics%20and%20Laboratory%20Equipment,%20June%202024.pdf",
+   "confidence": "high"
+  },
+  {
+   "topic": "Route",
+   "applies": "all",
+   "match": null,
+   "title": "Likely classes for our product types",
+   "body": "The Compendium itself says nasal sprays that hydrate the nasal passages and sinuses are Class B, while saline nasal solutions only for clearing or rinsing are Class A. Lubricant eye drops are usually Class B. OVDs are usually Class C, and intra-articular HA is usually Class C or D (absorbed, biological effect). Any device made from or with animal tissue or derivatives (e.g. animal-sourced HA) is Class D under Rule 14.",
+   "source": "https://www.tmda.go.tz/uploads/publications/en1755088789-Compendium%20of%20Guidelines%20for%20Marketing%20Authorization%20of%20Medical%20Devices,%20Diagnostics%20and%20Laboratory%20Equipment,%20June%202024.pdf",
+   "confidence": "medium"
+  },
+  {
+   "topic": "Route",
+   "applies": "all",
+   "match": null,
+   "title": "No formal reliance route for devices",
+   "body": "The Compendium has no abridged or reliance pathway for devices; every registrable device gets a first and second assessment. Foreign approvals and marketing history are submitted as supporting evidence. We found no EAC joint-assessment route for devices.",
+   "source": "https://www.tmda.go.tz/uploads/publications/en1755088789-Compendium%20of%20Guidelines%20for%20Marketing%20Authorization%20of%20Medical%20Devices,%20Diagnostics%20and%20Laboratory%20Equipment,%20June%202024.pdf",
+   "confidence": "medium"
+  },
+  {
+   "topic": "Timeline",
+   "applies": "all",
+   "match": null,
+   "title": "Target timelines",
+   "body": "Screening and invoicing take 1-2 working days. Scheduling takes up to 10 working days (A/B) or 20 (C/D), assessment 23 working days (A/B) or about 40 (C/D), quality review 5 or 8, and DG approval 5 or 25. That totals about 2 months for A/B and 4-5 months for C/D, not counting queries or site audits. Query responses are due within 60 working days or the file is treated as withdrawn.",
+   "source": "https://www.tmda.go.tz/uploads/publications/en1755088789-Compendium%20of%20Guidelines%20for%20Marketing%20Authorization%20of%20Medical%20Devices,%20Diagnostics%20and%20Laboratory%20Equipment,%20June%202024.pdf",
+   "confidence": "high"
+  },
+  {
+   "topic": "Fees",
+   "applies": "all",
+   "match": null,
+   "title": "Registration fees (imported)",
+   "body": "Under the Fees and Charges Regulations 2022 (GN 686), imported devices cost USD 100 for Class A notification, USD 500 for registrable Class A, and USD 2,500 for Class B, C or D. TMDA's fee page still cited GN 686 in October 2026. Fees are non-refundable and paid via a control number after screening.",
+   "source": "https://www.tmda.go.tz/pages/medical-devices-assessment-fees-and-charges",
+   "confidence": "high"
+  },
+  {
+   "topic": "Fees",
+   "applies": "all",
+   "match": null,
+   "title": "Retention and variation fees",
+   "body": "Annual retention is USD 200 per registered device and USD 50 per notified device. A major variation costs USD 300 and a minor one USD 150. Changing the Local Technical Representative costs USD 2,000.",
+   "source": "https://www.tmda.go.tz/uploads/publications/en1651219222-GN%20NO.%20686%20FEES%20REG%20(1).pdf",
+   "confidence": "high"
+  },
+  {
+   "topic": "Fees",
+   "applies": "all",
+   "match": null,
+   "title": "GMP / quality audit fees",
+   "body": "A foreign GMP inspection or quality audit costs USD 4,000 (East Africa) to USD 7,500 (Americas, Australia) per block; Europe is USD 6,500 and Asia USD 6,000. Each extra production line or block costs up to 25% more.",
+   "source": "https://www.tmda.go.tz/uploads/publications/en1651219222-GN%20NO.%20686%20FEES%20REG%20(1).pdf",
+   "confidence": "high"
+  },
+  {
+   "topic": "Local representative",
+   "applies": "all",
+   "match": null,
+   "title": "Local Responsible Person required",
+   "body": "A non-resident applicant must appoint a Local Responsible Person (also called authorised representative or local agent). It must be a company incorporated in Tanzania and licensed by TMDA to deal in medical devices. Proof of appointment goes with the application. The LRP handles market monitoring, recalls, user support and communication with TMDA.",
+   "source": "https://www.tmda.go.tz/uploads/publications/en1755088789-Compendium%20of%20Guidelines%20for%20Marketing%20Authorization%20of%20Medical%20Devices,%20Diagnostics%20and%20Laboratory%20Equipment,%20June%202024.pdf",
+   "confidence": "high"
+  },
+  {
+   "topic": "Site and GMP",
+   "applies": "all",
+   "match": null,
+   "title": "QMS audit as part of assessment",
+   "body": "A quality audit of the manufacturing site is part of the assessment, but its time is outside the target timelines. TMDA also accepts a desk assessment of GMP/QA for devices under a separate 2021 guideline. QMS certificates are needed for every design and manufacturing site, including contract manufacturers.",
+   "source": "https://www.tmda.go.tz/uploads/publications/en1667293873-Guidelines%20on%20Submission%20of%20Documentation%20for%20Establishment%20of%20Compliance%20to%20GMPand%20QA%20of%20Medical%20Devices%20through%20Desk%20Assessment,%20March%202021.pdf",
+   "confidence": "medium"
+  },
+  {
+   "topic": "Samples",
+   "applies": "all",
+   "match": null,
+   "title": "Two commercial packs",
+   "body": "New applications and renewals for single-use and small devices need two commercial packs from the same batch, submitted after payment. Assessment does not start without samples. Large equipment can send photos and artwork instead.",
+   "source": "https://www.tmda.go.tz/uploads/publications/en1755088789-Compendium%20of%20Guidelines%20for%20Marketing%20Authorization%20of%20Medical%20Devices,%20Diagnostics%20and%20Laboratory%20Equipment,%20June%202024.pdf",
+   "confidence": "high"
+  },
+  {
+   "topic": "Stability",
+   "applies": "all",
+   "match": null,
+   "title": "Shelf-life evidence",
+   "body": "Data must support the claimed shelf life on the label. Accelerated ageing can support the first claim if justified, but real-time results must follow when available. With no expiry date, TMDA treats the claim as an unlimited shelf life that must be justified.",
+   "source": "https://www.tmda.go.tz/uploads/publications/en1755088789-Compendium%20of%20Guidelines%20for%20Marketing%20Authorization%20of%20Medical%20Devices,%20Diagnostics%20and%20Laboratory%20Equipment,%20June%202024.pdf",
+   "confidence": "high"
+  },
+  {
+   "topic": "Dossier",
+   "applies": "all",
+   "match": null,
+   "title": "Technical documentation",
+   "body": "The dossier covers device details, a STED-style technical summary, Essential Principles and standards conformity, biocompatibility (ISO 10993), animal-origin materials, preclinical and clinical evidence, manufacturing and sterilisation (SAL 10^-6), labelling, and a post-market surveillance plan and reports. Grouping as a family, system or group is allowed per application.",
+   "source": "https://www.tmda.go.tz/uploads/publications/en1755088789-Compendium%20of%20Guidelines%20for%20Marketing%20Authorization%20of%20Medical%20Devices,%20Diagnostics%20and%20Laboratory%20Equipment,%20June%202024.pdf",
+   "confidence": "high"
+  },
+  {
+   "topic": "After approval",
+   "applies": "all",
+   "match": null,
+   "title": "Validity, renewal and PMS",
+   "body": "Registration is valid for 5 years and notification for 3 years. Renewal must be filed at least 90 days before expiry, with samples. Validity depends on paying annual retention, sending post-market surveillance reports twice a year and reporting adverse events.",
+   "source": "https://www.tmda.go.tz/uploads/publications/en1755088789-Compendium%20of%20Guidelines%20for%20Marketing%20Authorization%20of%20Medical%20Devices,%20Diagnostics%20and%20Laboratory%20Equipment,%20June%202024.pdf",
+   "confidence": "high"
+  },
+  {
+   "topic": "Import",
+   "applies": "all",
+   "match": null,
+   "title": "Import fee 2% of FOB",
+   "body": "Imports of medical devices and diagnostics pay a fee of 2% of FOB value under GN 686. Late payment carries a 15% penalty.",
+   "source": "https://www.tmda.go.tz/uploads/publications/en1651219222-GN%20NO.%20686%20FEES%20REG%20(1).pdf",
+   "confidence": "high"
+  }
+ ],
+ "routes": [
+  {
+   "key": "notification_a",
+   "label": "Class A notification",
+   "description": "Notification for non-sterile, non-measuring, non-active Class A devices, such as rinse-only saline nasal spray.",
+   "months_low": 0,
+   "months_high": 1,
+   "fee_usd_low": 100,
+   "fee_usd_high": 100,
+   "source": "https://www.tmda.go.tz/uploads/publications/en1651219222-GN%20NO.%20686%20FEES%20REG%20(1).pdf",
+   "confidence": "high"
+  },
+  {
+   "key": "class_a_reg",
+   "label": "Class A registration",
+   "description": "Full registration for sterile, measuring or active Class A devices.",
+   "months_low": 2,
+   "months_high": 4,
+   "fee_usd_low": 500,
+   "fee_usd_high": 500,
+   "source": "https://www.tmda.go.tz/pages/medical-devices-assessment-fees-and-charges",
+   "confidence": "medium"
+  },
+  {
+   "key": "class_b",
+   "label": "Class B registration",
+   "description": "Full assessment, e.g. HA lubricant eye drops and hydrating nasal sprays.",
+   "months_low": 2,
+   "months_high": 6,
+   "fee_usd_low": 2500,
+   "fee_usd_high": 2500,
+   "source": "https://www.tmda.go.tz/uploads/publications/en1755088789-Compendium%20of%20Guidelines%20for%20Marketing%20Authorization%20of%20Medical%20Devices,%20Diagnostics%20and%20Laboratory%20Equipment,%20June%202024.pdf",
+   "confidence": "medium"
+  },
+  {
+   "key": "class_c",
+   "label": "Class C registration",
+   "description": "Full assessment, e.g. OVDs and many intra-articular HA products.",
+   "months_low": 4,
+   "months_high": 9,
+   "fee_usd_low": 2500,
+   "fee_usd_high": 2500,
+   "source": "https://www.tmda.go.tz/uploads/publications/en1755088789-Compendium%20of%20Guidelines%20for%20Marketing%20Authorization%20of%20Medical%20Devices,%20Diagnostics%20and%20Laboratory%20Equipment,%20June%202024.pdf",
+   "confidence": "medium"
+  },
+  {
+   "key": "class_d",
+   "label": "Class D registration",
+   "description": "Full assessment for high-risk devices, incl. any made with animal-derived materials.",
+   "months_low": 5,
+   "months_high": 12,
+   "fee_usd_low": 2500,
+   "fee_usd_high": 2500,
+   "source": "https://www.tmda.go.tz/uploads/publications/en1755088789-Compendium%20of%20Guidelines%20for%20Marketing%20Authorization%20of%20Medical%20Devices,%20Diagnostics%20and%20Laboratory%20Equipment,%20June%202024.pdf",
+   "confidence": "medium"
+  }
+ ],
+ "documents": [
+  {
+   "name": "Cover letter and online application form (TMDA Traders' Portal)",
+   "applies": "all",
+   "match": null,
+   "note": null,
+   "source": "https://www.tmda.go.tz/uploads/publications/en1755088789-Compendium%20of%20Guidelines%20for%20Marketing%20Authorization%20of%20Medical%20Devices,%20Diagnostics%20and%20Laboratory%20Equipment,%20June%202024.pdf"
+  },
+  {
+   "name": "Proof of appointment of the Local Responsible Person",
+   "applies": "all",
+   "match": null,
+   "note": null,
+   "source": "https://www.tmda.go.tz/uploads/publications/en1755088789-Compendium%20of%20Guidelines%20for%20Marketing%20Authorization%20of%20Medical%20Devices,%20Diagnostics%20and%20Laboratory%20Equipment,%20June%202024.pdf"
+  },
+  {
+   "name": "TMDA medical device dealer licence of the applicant or LRP",
+   "applies": "all",
+   "match": null,
+   "note": null,
+   "source": "https://www.tmda.go.tz/uploads/publications/en1755088789-Compendium%20of%20Guidelines%20for%20Marketing%20Authorization%20of%20Medical%20Devices,%20Diagnostics%20and%20Laboratory%20Equipment,%20June%202024.pdf"
+  },
+  {
+   "name": "Device name, description, GMDN code, intended use and indications",
+   "applies": "all",
+   "match": null,
+   "note": null,
+   "source": "https://www.tmda.go.tz/uploads/publications/en1755088789-Compendium%20of%20Guidelines%20for%20Marketing%20Authorization%20of%20Medical%20Devices,%20Diagnostics%20and%20Laboratory%20Equipment,%20June%202024.pdf"
+  },
+  {
+   "name": "Contraindications, warnings, precautions and adverse effects",
+   "applies": "all",
+   "match": null,
+   "note": null,
+   "source": "https://www.tmda.go.tz/uploads/publications/en1755088789-Compendium%20of%20Guidelines%20for%20Marketing%20Authorization%20of%20Medical%20Devices,%20Diagnostics%20and%20Laboratory%20Equipment,%20June%202024.pdf"
+  },
+  {
+   "name": "Risk class and classification rule applied",
+   "applies": "all",
+   "match": null,
+   "note": null,
+   "source": "https://www.tmda.go.tz/uploads/publications/en1755088789-Compendium%20of%20Guidelines%20for%20Marketing%20Authorization%20of%20Medical%20Devices,%20Diagnostics%20and%20Laboratory%20Equipment,%20June%202024.pdf"
+  },
+  {
+   "name": "Summary technical documentation (STED): variants and accessories",
+   "applies": "all",
+   "match": null,
+   "note": null,
+   "source": "https://www.tmda.go.tz/uploads/publications/en1755088789-Compendium%20of%20Guidelines%20for%20Marketing%20Authorization%20of%20Medical%20Devices,%20Diagnostics%20and%20Laboratory%20Equipment,%20June%202024.pdf"
+  },
+  {
+   "name": "Essential Principles checklist with standards conformity",
+   "applies": "all",
+   "match": null,
+   "note": null,
+   "source": "https://www.tmda.go.tz/uploads/publications/en1755088789-Compendium%20of%20Guidelines%20for%20Marketing%20Authorization%20of%20Medical%20Devices,%20Diagnostics%20and%20Laboratory%20Equipment,%20June%202024.pdf"
+  },
+  {
+   "name": "Declaration of conformity",
+   "applies": "all",
+   "match": null,
+   "note": null,
+   "source": "https://www.tmda.go.tz/uploads/publications/en1755088789-Compendium%20of%20Guidelines%20for%20Marketing%20Authorization%20of%20Medical%20Devices,%20Diagnostics%20and%20Laboratory%20Equipment,%20June%202024.pdf"
+  },
+  {
+   "name": "Conformity assessment certificate, e.g. CE certificate",
+   "applies": "all",
+   "match": null,
+   "note": null,
+   "source": "https://www.tmda.go.tz/uploads/publications/en1755088789-Compendium%20of%20Guidelines%20for%20Marketing%20Authorization%20of%20Medical%20Devices,%20Diagnostics%20and%20Laboratory%20Equipment,%20June%202024.pdf"
+  },
+  {
+   "name": "Risk management file to ISO 14971",
+   "applies": "all",
+   "match": null,
+   "note": null,
+   "source": "https://www.tmda.go.tz/uploads/publications/en1755088789-Compendium%20of%20Guidelines%20for%20Marketing%20Authorization%20of%20Medical%20Devices,%20Diagnostics%20and%20Laboratory%20Equipment,%20June%202024.pdf"
+  },
+  {
+   "name": "Biocompatibility to ISO 10993",
+   "applies": "all",
+   "match": null,
+   "note": null,
+   "source": "https://www.tmda.go.tz/uploads/publications/en1755088789-Compendium%20of%20Guidelines%20for%20Marketing%20Authorization%20of%20Medical%20Devices,%20Diagnostics%20and%20Laboratory%20Equipment,%20June%202024.pdf"
+  },
+  {
+   "name": "Materials of animal, human or microbial origin, with TSE controls",
+   "applies": "all",
+   "match": null,
+   "note": "if applicable",
+   "source": "https://www.tmda.go.tz/uploads/publications/en1755088789-Compendium%20of%20Guidelines%20for%20Marketing%20Authorization%20of%20Medical%20Devices,%20Diagnostics%20and%20Laboratory%20Equipment,%20June%202024.pdf"
+  },
+  {
+   "name": "Preclinical and performance test reports",
+   "applies": "all",
+   "match": null,
+   "note": null,
+   "source": "https://www.tmda.go.tz/uploads/publications/en1755088789-Compendium%20of%20Guidelines%20for%20Marketing%20Authorization%20of%20Medical%20Devices,%20Diagnostics%20and%20Laboratory%20Equipment,%20June%202024.pdf"
+  },
+  {
+   "name": "Clinical evidence / clinical evaluation report",
+   "applies": "all",
+   "match": null,
+   "note": "Part VII",
+   "source": "https://www.tmda.go.tz/uploads/publications/en1755088789-Compendium%20of%20Guidelines%20for%20Marketing%20Authorization%20of%20Medical%20Devices,%20Diagnostics%20and%20Laboratory%20Equipment,%20June%202024.pdf"
+  },
+  {
+   "name": "Shelf-life and stability data",
+   "applies": "all",
+   "match": null,
+   "note": null,
+   "source": "https://www.tmda.go.tz/uploads/publications/en1755088789-Compendium%20of%20Guidelines%20for%20Marketing%20Authorization%20of%20Medical%20Devices,%20Diagnostics%20and%20Laboratory%20Equipment,%20June%202024.pdf"
+  },
+  {
+   "name": "Manufacturing process flow chart and site list",
+   "applies": "all",
+   "match": null,
+   "note": null,
+   "source": "https://www.tmda.go.tz/uploads/publications/en1755088789-Compendium%20of%20Guidelines%20for%20Marketing%20Authorization%20of%20Medical%20Devices,%20Diagnostics%20and%20Laboratory%20Equipment,%20June%202024.pdf"
+  },
+  {
+   "name": "ISO 13485 certificates for design and manufacturing sites",
+   "applies": "all",
+   "match": null,
+   "note": null,
+   "source": "https://www.tmda.go.tz/uploads/publications/en1755088789-Compendium%20of%20Guidelines%20for%20Marketing%20Authorization%20of%20Medical%20Devices,%20Diagnostics%20and%20Laboratory%20Equipment,%20June%202024.pdf"
+  },
+  {
+   "name": "Sterilisation validation (SAL 10^-6, bioburden)",
+   "applies": "all",
+   "match": null,
+   "note": "if sterile",
+   "source": "https://www.tmda.go.tz/uploads/publications/en1755088789-Compendium%20of%20Guidelines%20for%20Marketing%20Authorization%20of%20Medical%20Devices,%20Diagnostics%20and%20Laboratory%20Equipment,%20June%202024.pdf"
+  },
+  {
+   "name": "Mock-up labels for primary and secondary packs",
+   "applies": "all",
+   "match": null,
+   "note": "Part VIII",
+   "source": "https://www.tmda.go.tz/uploads/publications/en1755088789-Compendium%20of%20Guidelines%20for%20Marketing%20Authorization%20of%20Medical%20Devices,%20Diagnostics%20and%20Laboratory%20Equipment,%20June%202024.pdf"
+  },
+  {
+   "name": "Instructions for use",
+   "applies": "all",
+   "match": null,
+   "note": null,
+   "source": "https://www.tmda.go.tz/uploads/publications/en1755088789-Compendium%20of%20Guidelines%20for%20Marketing%20Authorization%20of%20Medical%20Devices,%20Diagnostics%20and%20Laboratory%20Equipment,%20June%202024.pdf"
+  },
+  {
+   "name": "Post-market surveillance plan",
+   "applies": "all",
+   "match": null,
+   "note": null,
+   "source": "https://www.tmda.go.tz/uploads/publications/en1755088789-Compendium%20of%20Guidelines%20for%20Marketing%20Authorization%20of%20Medical%20Devices,%20Diagnostics%20and%20Laboratory%20Equipment,%20June%202024.pdf"
+  },
+  {
+   "name": "Post-market surveillance reports and PSUR",
+   "applies": "all",
+   "match": null,
+   "note": null,
+   "source": "https://www.tmda.go.tz/uploads/publications/en1755088789-Compendium%20of%20Guidelines%20for%20Marketing%20Authorization%20of%20Medical%20Devices,%20Diagnostics%20and%20Laboratory%20Equipment,%20June%202024.pdf"
+  },
+  {
+   "name": "Foreign approvals and marketing history",
+   "applies": "all",
+   "match": null,
+   "note": null,
+   "source": "https://www.tmda.go.tz/uploads/publications/en1755088789-Compendium%20of%20Guidelines%20for%20Marketing%20Authorization%20of%20Medical%20Devices,%20Diagnostics%20and%20Laboratory%20Equipment,%20June%202024.pdf"
+  },
+  {
+   "name": "Two commercial pack samples",
+   "applies": "all",
+   "match": null,
+   "note": null,
+   "source": "https://www.tmda.go.tz/uploads/publications/en1755088789-Compendium%20of%20Guidelines%20for%20Marketing%20Authorization%20of%20Medical%20Devices,%20Diagnostics%20and%20Laboratory%20Equipment,%20June%202024.pdf"
+  },
+  {
+   "name": "Certificate of analysis",
+   "applies": "all",
+   "match": null,
+   "note": null,
+   "source": "https://www.tmda.go.tz/uploads/publications/en1755088789-Compendium%20of%20Guidelines%20for%20Marketing%20Authorization%20of%20Medical%20Devices,%20Diagnostics%20and%20Laboratory%20Equipment,%20June%202024.pdf"
+  },
+  {
+   "name": "GMP/QA desk assessment documents",
+   "applies": "all",
+   "match": null,
+   "note": null,
+   "source": "https://www.tmda.go.tz/uploads/publications/en1667293873-Guidelines%20on%20Submission%20of%20Documentation%20for%20Establishment%20of%20Compliance%20to%20GMPand%20QA%20of%20Medical%20Devices%20through%20Desk%20Assessment,%20March%202021.pdf"
+  }
+ ]
+}

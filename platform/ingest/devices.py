@@ -3,6 +3,7 @@ lubricants, eye-surgery viscoelastics, joint injections and nasal saline apart e
 import datetime as dt
 import html
 import logging
+import os
 import re
 
 log = logging.getLogger("devices")
@@ -23,6 +24,11 @@ NOT_GROUPED = (r"cannula|oxygen|mask|prosthe|arthroplast|brace|immobili|implant|
                r"ventilat|aspirat|suction|prong|knife|catheter|swab|kit for|analy[sz]er|scanner|system$|hinge|nail|screw|plate")
 GROUP_LABEL = {"eye_drops": "Eye lubricants (dry eye)", "eye_surgery": "Eye-surgery viscoelastics",
                "joint": "Joint injections (hyaluronic acid)", "nasal": "Nasal saline"}
+
+
+# what lubricants and nasal washes are made of: an eye drop or nasal spray with another active ingredient is a medicine
+LUBRICANTS = (r"hyaluron|carmellose|carboxymethyl|hypromellose|hydroxypropyl|carbomer|polyvinyl|povidone|trehalose|dexpanthenol|"
+              r"glycerin|glycerol|polyethylene glycol|propylene glycol|dextran|sodium chloride|sea ?water|saline|hylan")
 
 
 def use_group(*texts):
@@ -81,7 +87,8 @@ def read_TZ(s):
                         manufacturer=x.get("manufacturer"), manufacturing_country=(x.get("manufacturer_country") or "").title() or None,
                         holder=x.get("registrant"), ltr=re.sub(r"\s*\(\d+\)\s*$", "", x.get("localtechnical_representative") or "") or None,
                         reg_year=_year(x.get("certificate_issue_date")), expires=exp,
-                        active=(exp is None or exp >= dt.date.today()) and "valid" in str(x.get("registration_status") or "valid").lower()))
+                        active=(exp is None or exp >= dt.date.today())
+                        and not re.search(r"cancel|revok|suspend|withdraw|expired", str(x.get("registration_status") or ""), re.I)))
     return [r for r in out if r["brand"]]
 
 
@@ -106,8 +113,51 @@ def collect(cur, s, country):
                          active = excluded.active, use_group = excluded.use_group, seen = current_date""", {**r, "c": country})
     # a device that left the register is no longer registered
     cur.execute("update devices set active = false where country = %s and seen < current_date", (country,))
+    # the importer: the local representative, else the registration holder
+    cache = {}
+    for did, ltr, holder in cur.execute("select id, ltr, holder from devices where country = %s", (country,)).fetchall():
+        cur.execute("update devices set company_id = %s where id = %s", (company_id(cur, country, ltr or holder, cache), did))
     tag_products(cur)
     return len(rows)
+
+
+def registration_group(brand, generic, form):
+    """A registered medicine's use group: only lubricants count as eye lubricants and only saline as nasal saline."""
+    g = use_group(brand, generic, form)
+    if g in ("eye_drops", "nasal") and generic and not re.search(LUBRICANTS, generic, re.I):
+        return None
+    return g
+
+
+def tag_registrations(cur):
+    changed = 0
+    for rid, brand, generic, form, old in cur.execute("""select id, brand, generic_name, dosage_form, use_group from registrations
+                                                         where (brand || ' ' || coalesce(generic_name, '') || ' ' || coalesce(dosage_form, ''))
+                                                         ~* '(eye|ophth|tear|nasal|nose|visc|hyalur|articul|knee|joint|saline|sinus|sea ?water)'
+                                                            or use_group is not null""").fetchall():
+        g = registration_group(brand, generic, form)
+        if g != old:
+            cur.execute("update registrations set use_group = %s where id = %s", (g, rid))
+            changed += 1
+    return changed
+
+
+def company_id(cur, country, name, cache):
+    """The importer as one company record, shared with the medicines registers (same cluster key)."""
+    import sys
+    sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "pipeline"))
+    from norm import company_key
+    k = company_key(name or "")
+    if not k:
+        return None
+    ck = k if country == "TZ" else f"{country}|{k}"       # Tanzania's companies have plain keys (loader.py)
+    if ck not in cache:
+        row = cur.execute("select coalesce(merged_into, id) from companies where cluster_key = %s", (ck,)).fetchone()
+        home = cur.execute("select upper(name) from countries where code = %s", (country,)).fetchone()
+        cache[ck] = row[0] if row else cur.execute("""insert into companies (display_name, cluster_key, country, is_ltr, is_registrant,
+                                                       is_manufacturer) values (%s, %s, %s, true, false, false) returning id""",
+                                                   (name.strip()[:200], ck, home[0] if home else None)).fetchone()[0]
+    return cache[ck]
 
 
 def tag_products(cur):

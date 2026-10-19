@@ -28,7 +28,11 @@ export function inGroup(group: string, text: string, ingredient?: string | null,
     if (MEDICATED.test(description ?? '') && !/lubricat|dry eye|artificial tear/i.test(description ?? '')) return false;
     return Boolean(ingredient && LUBRICANTS.test(ingredient)) || LUBRICANTS.test(all) || /lubricat|dry eye|dryness|artificial tear|\btears\b|moistur|hydrat/i.test(all);
   }
-  if (group === 'nasal') return !NOT_LUBRICANT.test(`${text} ${ingredient ?? ''}`) && (!ingredient || /sodium chloride|sea ?water|saline/i.test(ingredient));
+  if (group === 'nasal') {   // only saline and sea-water washes: decongestant and steroid sprays are medicines
+    if (NOT_LUBRICANT.test(`${text} ${ingredient ?? ''}`) || /decongest|steroid|xylometaz|oxymetaz|ephedrin|otrivin|xylolin|flutica|zycet|decomit|novorin/i.test(`${text} ${ingredient ?? ''}`)) return false;
+    return ingredient ? /sodium chloride|sea ?water|saline/i.test(ingredient)
+      : /saline|sea ?water|seawater|isotonic|hypertonic|sodium chloride|salt water|rinse|wash|sterimar|neilmed|nasamist|pediamist|synolin|physiomer|marimer|aquaease|linaqua/i.test(all);
+  }
   return true;
 }
 // what a medicated eye drop's description says (an antibiotic or steroid is not a competitor to a lubricant)
@@ -42,4 +46,12 @@ export function brandOf(name: string) {
   const first = w[0] ?? '';
   if (/^tears?$/i.test(w[1] ?? '') || /^(tears?|fresh)$/i.test(first)) return w.slice(0, 2).join(' ');   // 'Loc Tears', 'Tears Naturale'
   return /^(hylo|neilmed|sterimar|optive|refresh|systane)$/i.test(first.replace(/-.*/, '')) ? first.replace(/-.*/, '') : first;
+}
+
+/** Registered as a medical device: the manufacturer's choice, else viscoelastics, joint injections and nasal saline,
+ *  and lubricants we could not match to a medicine. */
+export function isDevice(p: { kind?: string | null; use_group?: string | null; name?: string | null; dosage_form?: string | null; inn?: string | null; molecule_id?: number | null }) {
+  if (p.kind) return p.kind === 'device';
+  const g = p.use_group ?? useGroup(p.name, p.dosage_form, p.inn);
+  return ['eye_surgery', 'joint', 'nasal'].includes(g ?? '') || Boolean(g && !p.molecule_id);
 }

@@ -8,7 +8,7 @@ import { DemandIcon } from '@/components/Icons';
 import { addMfrProducts, deleteAllMfrProducts, deleteMfrFile, saveLaunch, unwatchMolecule, uploadMfrFile, watchMolecule } from '@/app/actions/mfr';
 import { requireUser } from '@/lib/auth';
 import { one, rows, withUser } from '@/lib/db';
-import { HIGH_DEMAND, LAUNCH_STAGES, MFR_FILE_KINDS, canUse, countryName, covers, productClass, tierIn, byMolecule } from '@/lib/mfr';
+import { HIGH_DEMAND, LAUNCH_STAGES, MFR_FILE_KINDS, canUse, countryName, covers, displayClass, productClass, tierIn, byMolecule } from '@/lib/mfr';
 import { fmtDate } from '@/lib/format';
 import { PRICE_SQL, perUnit, type MoleculePrice } from '@/lib/prices';
 
@@ -31,7 +31,7 @@ export default async function MfrProducts({ searchParams }: { searchParams: Prom
     await loadLive(db);
     const prof = await one(db, 'select target_countries, primary_market from manufacturer_profiles where user_id = $1', [u.id]);
     const targets = targetMarkets(prof?.target_countries);
-    const products = await rows(db, `select p.id, p.name, p.strength, p.dosage_form, p.molecule_id, p.atc, m.inn, m.category
+    const products = await rows(db, `select p.id, p.name, p.strength, p.dosage_form, p.molecule_id, p.atc, p.use_group, m.inn, m.category
         from mfr_products p left join molecules m on m.id = p.molecule_id where p.user_id = $1 order by coalesce(m.inn, p.name)`, [u.id]);
     const ids = products.map((p) => p.molecule_id).filter(Boolean);
     const facts = ids.length ? await rows(db, `select cm.molecule_id, cm.country, cm.registrants, cm.registrations, cm.on_national_list, cm.facility_level,
@@ -57,7 +57,7 @@ export default async function MfrProducts({ searchParams }: { searchParams: Prom
   const fact = (mol: number | null, c: string) => d.facts.find((f) => f.molecule_id === mol && f.country === c);
   const focus = hasData(market) ? market : null;      // the market the dashboard reads
 
-  const list = d.products.map((p) => ({ ...p, cls: productClass(p), f: focus ? fact(p.molecule_id, focus) : undefined }))
+  const list = d.products.map((p) => ({ ...p, cls: displayClass(p), f: focus ? fact(p.molecule_id, focus) : undefined }))
     .sort((a, b) => (b.f?.score ?? -1) - (a.f?.score ?? -1) || String(a.inn ?? a.name).localeCompare(String(b.inn ?? b.name)));
   // doses, forms and packs of one medicine count once: the analysis and the list are by molecule
   const mols = byMolecule(list);

@@ -50,6 +50,9 @@ def classes(cur):
     cur.execute("savepoint classes")
     try:
         classify.run(cur)
+        import devices
+        devices.tag_registrations(cur)              # the same use groups as the device registers
+        devices.tag_products(cur)
     except Exception:
         cur.execute("rollback to savepoint classes")
         log.exception("classes not refreshed")

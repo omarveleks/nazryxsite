@@ -4,8 +4,9 @@ import MarketPicker, { AgencyMarket, hasData, loadLive, pickMarket, targetMarket
 import { Empty, PlanLock } from '@/components/ui';
 import { requireUser } from '@/lib/auth';
 import { one, rows, withUser } from '@/lib/db';
-import { canUse, tierIn, countryName, productClass } from '@/lib/mfr';
-import { REQ_SQL, byTopic, forProduct, type Requirement } from '@/lib/regulatory';
+import { canUse, tierIn, countryName, productClass, displayClass } from '@/lib/mfr';
+import { DEVICE_REQ_SQL, REQ_SQL, byTopic, forProduct, type Requirement } from '@/lib/regulatory';
+import { isDevice } from '@/lib/segments';
 
 export const metadata = { title: 'Regulatory' };
 
@@ -20,21 +21,28 @@ export default async function MfrRegulatory({ searchParams }: { searchParams: Pr
     const targets = targetMarkets(prof?.target_countries);
     const market = pickMarket(sp.market, targets, prof?.primary_market);
     const reqs = await rows(db, REQ_SQL, [market]) as Requirement[];
-    const products = await rows(db, `select p.id, p.name, p.dosage_form, coalesce(p.atc, '') as atc, m.inn, m.category
+    const products = await rows(db, `select p.id, p.name, p.dosage_form, p.use_group, p.kind, p.molecule_id, coalesce(p.atc, '') as atc, m.inn, m.category
         from mfr_products p left join molecules m on m.id = p.molecule_id where p.user_id = $1 order by coalesce(m.inn, p.name)`, [u.id]);
     const routes = await rows(db, `select key, label, description, months_low, months_high, fee_usd_low, fee_usd_high, eligibility
-        from country_routes where country = $1 order by sort`, [market]);
-    const checked = (await one(db, `select max(checked) as d from reg_requirements where country = $1 and status = 'published'`, [market]))?.d;
+        from country_routes where country = $1 and scope = 'medicine' order by sort`, [market]);
+    // medical devices follow their own rules: shown for the user's device products, and as their own section
+    const devReqs = await rows(db, DEVICE_REQ_SQL, [market]) as Requirement[];
+    const devRoutes = await rows(db, `select key, label, description, months_low, months_high, fee_usd_low, fee_usd_high, eligibility
+        from country_routes where country = $1 and scope = 'device' order by sort`, [market]);
+    const checked = (await one(db, `select max(checked) as d from reg_requirements where country = $1 and status = 'published' and scope = 'medicine'`, [market]))?.d;
     // the regulator's latest notices (in English), those naming one of the user's molecules first
     const news = await rows(db, `select n.id, coalesce(n.title_en, n.title) as title, n.url, n.found_at,
         exists (select 1 from mfr_products p where p.user_id = $2 and p.molecule_id = any(n.molecule_ids)) as mine
         from reg_news n where n.country = $1 and not n.baseline order by mine desc, n.found_at desc limit 8`, [market, u.id]);
-    return { targets, market, reqs, products, routes, checked, news, sample: prof?.sample_product_id as number | null };
+    return { targets, market, reqs, products, routes, checked, news, devReqs, devRoutes, sample: prof?.sample_product_id as number | null };
   });
   const m = d.market;
   const general = d.reqs.filter((r) => r.applies === 'all');
   const reqs: Requirement[] = d.reqs;
-  const perProduct = d.products.map((p) => ({ ...p, cls: productClass(p), extra: forProduct(reqs, { ...p, category: productClass(p) }) as Requirement[] }));
+  const perProduct = d.products.map((p) => isDevice(p)
+    ? { ...p, cls: displayClass(p), device: true, extra: forProduct(d.devReqs, { ...p, category: productClass(p) }) as Requirement[] }
+    : { ...p, cls: displayClass(p), device: false, extra: forProduct(reqs, { ...p, category: productClass(p) }) as Requirement[] });
+  const hasDevices = perProduct.some((p) => p.device);
   const withExtra = perProduct.filter((p) => p.extra.length > 0);
   const open = canUse(tierIn(u, m), 'requirements');
   const focus = sp.product ? perProduct.find((p) => String(p.id) === sp.product) : undefined;
@@ -73,7 +81,8 @@ export default async function MfrRegulatory({ searchParams }: { searchParams: Pr
                 return (
                   <tr key={p.id} id={`p${p.id}`} style={focus?.id === p.id ? { background: 'var(--pastel-blue)' } : undefined}>
                     <td style={{ width: '34%' }}><Link href={`/m/products/${p.id}?market=${m}`}><b>{p.inn ?? p.name}</b></Link>
-                      <div className="sub2">{[p.inn ? p.name : null, p.cls].filter(Boolean).join(' · ')}</div></td>
+                      <div className="sub2">{[p.inn ? p.name : null, p.cls].filter(Boolean).join(' · ')}</div>
+                      {p.device && <span className="pill blue" style={{ fontSize: 12 }}>Medical device</span>}</td>
                     <td>{!shown ? <PlanLock compact need="access" title="Locked" u={u} market={m} />
                       : p.extra.length === 0 ? <span className="muted small">Only the general requirements</span> : (
                         <details open={focus?.id === p.id}>
@@ -95,6 +104,24 @@ export default async function MfrRegulatory({ searchParams }: { searchParams: Pr
                   <td className="small hide-m">{WHO[r.eligibility] ?? r.eligibility}</td>
                   <td className="r num">{r.months_low != null ? `${r.months_low}–${r.months_high} months` : '—'}</td>
                   <td className="r num">{usd(r.fee_usd_low, r.fee_usd_high)}</td></tr>))}</tbody></table></div>
+          </section>)}
+
+        {(d.devRoutes.length > 0 || d.devReqs.length > 0) && (
+          <section className="card stack" id="devices">
+            <div className="card-h"><div><h2>Medical devices in {countryName(m)}</h2>
+              <p className="note">Eye-surgery viscoelastics, joint injections, nasal saline and lubricants registered as devices follow device rules{hasDevices ? ', which apply to your products marked Medical device above' : ''}.</p></div></div>
+            {d.devRoutes.length > 0 && (
+              <div className="tbl-wrap"><table className="tbl">
+                <thead><tr><th>Route</th><th className="hide-m">Who can use it</th><th className="r">Time</th><th className="r">Official fees</th></tr></thead>
+                <tbody>{d.devRoutes.map((r) => (
+                  <tr key={r.key}><td><b>{r.label}</b><div className="sub2">{r.description}</div></td>
+                    <td className="small hide-m">{r.eligibility === 'sra_or_pq' ? 'Approved elsewhere first (CE, FDA or similar)' : 'Any device'}</td>
+                    <td className="r num">{r.months_low != null ? `${r.months_low}–${r.months_high} months` : '—'}</td>
+                    <td className="r num">{usd(r.fee_usd_low, r.fee_usd_high)}</td></tr>))}</tbody></table></div>)}
+            {open || hasDevices ? <div className="grid g2">{byTopic(d.devReqs.filter((r) => r.applies === 'all')).map(([topic, list]) => (
+              <div key={topic} className="stack" style={{ gap: 6 }}><span className="lbl">{topic}</span>
+                {list.map((r) => <div key={r.id}><b>{r.title}</b><div className="small muted">{r.body}</div></div>)}</div>))}</div>
+              : <PlanLock need="access" title="Every device requirement in this market" u={u} market={m} />}
           </section>)}
 
         {d.news.length > 0 && (

@@ -1,3 +1,4 @@
+import { GROUP_LABEL, useGroup } from './segments';
 // Manufacturer side: countries, agency services and their milestones, report types.
 
 /** Markets manufacturers can target. Core markets get full market screens (live once their data is loaded); the others
@@ -199,6 +200,12 @@ export const ATC_GROUPS: Record<string, string> = {
   R: 'Respiratory system', S: 'Sensory organs', V: 'Various',
 };
 export const productClass = (p: { category?: string | null; atc?: string | null }) => p.category ?? (p.atc ? ATC_GROUPS[p.atc[0]] : null) ?? null;
+/** The class people see: what the product is used for where that matters (an eye lubricant, not 'pain'), else its class. */
+export const displayClass = (p: { category?: string | null; atc?: string | null; use_group?: string | null; name?: string | null;
+  dosage_form?: string | null; inn?: string | null }) => {
+  const g = p.use_group ?? useGroup(p.name, p.dosage_form, p.inn);
+  return (g && GROUP_LABEL[g]) || productClass(p);
+};
 
 /** What each service needs from the manufacturer, shown before they ask for it. */
 export const SERVICE_NEEDS: Record<string, string[]> = {

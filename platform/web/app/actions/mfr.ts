@@ -639,7 +639,17 @@ export async function removeCompetitor(f: FormData) {
 export async function setUseGroup(f: FormData) {
   const u = await requireUser({ manufacturer: true });
   const product = int(f, 'product_id'), market = str(f, 'market', 2), g = str(f, 'use_group', 20);
-  await withUser(u.id, (db) => db.query('update mfr_products set use_group = $3 where id = $1 and user_id = $2',
-    [product, u.id, ['eye_drops', 'eye_surgery', 'joint', 'nasal'].includes(g) ? g : null]));
+  const k = str(f, 'kind', 10);
+  await withUser(u.id, (db) => db.query('update mfr_products set use_group = $3, kind = coalesce($4, kind) where id = $1 and user_id = $2',
+    [product, u.id, ['eye_drops', 'eye_surgery', 'joint', 'nasal'].includes(g) ? g : null, k === 'device' || k === 'medicine' ? k : null]));
   redirect(`/m/products/${product}?market=${market}#competitors`);
+}
+
+/** Medicine or medical device: decides which registration rules, routes and documents apply. */
+export async function setKind(f: FormData) {
+  const u = await requireUser({ manufacturer: true });
+  const product = int(f, 'product_id'), market = str(f, 'market', 2), k = str(f, 'kind', 10);
+  await withUser(u.id, (db) => db.query('update mfr_products set kind = $3 where id = $1 and user_id = $2',
+    [product, u.id, k === 'device' || k === 'medicine' ? k : null]));
+  redirect(`/m/products/${product}?market=${market}`);
 }

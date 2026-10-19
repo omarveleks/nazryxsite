@@ -1,0 +1,419 @@
+{
+ "country": "KE",
+ "scope": "device",
+ "regulator": "Pharmacy and Poisons Board (PPB) – https://web.pharmacyboardkenya.org",
+ "checked": "2026-10",
+ "facts": [
+  {
+   "topic": "Route",
+   "applies": "all",
+   "match": null,
+   "title": "Legal basis and portal",
+   "body": "PPB registers medical devices and IVDs under the Pharmacy and Poisons Act (Cap. 244) and the Registration of Health Products and Technologies Rules, 2022. Every device must be registered before it is placed on the Kenyan market. Applications go through the PRIMS portal (prims.pharmacyboardkenya.org); an invoice is generated when the form is complete.",
+   "source": "https://web.pharmacyboardkenya.org/medical-devices-evaluation-and-registration-procedure/",
+   "confidence": "high"
+  },
+  {
+   "topic": "Route",
+   "applies": "all",
+   "match": null,
+   "title": "Four risk classes A-D",
+   "body": "PPB uses IMDRF/GHTF-style classes: A (low), B (low-moderate), C (moderate-high), D (high). The manufacturer proposes the class from the guideline's rules; where more than one rule applies, the highest class wins. PPB can be asked to confirm the class of borderline products.",
+   "source": "https://web.pharmacyboardkenya.org/download/guidelines-for-registration-of-medical-devices-including-in-vitro-diagnostics/",
+   "confidence": "high"
+  },
+  {
+   "topic": "Route",
+   "applies": "all",
+   "match": null,
+   "title": "Likely classes for our product types",
+   "body": "Lubricant eye drops (sodium hyaluronate) are usually Class B (EU IIa/IIb). Saline or sea-water nasal sprays are usually Class A or B (EU I/IIa). OVDs (viscoelastics) are usually Class C, and intra-articular HA is usually Class D, because PPB puts absorbed products and those with a biological effect in Class D (EU III). Any HA of animal origin (e.g. rooster comb) is Class D under the animal-tissue rule; fermentation-derived HA is not caught by that rule. Confirm the class with PPB; the guideline has no product-specific entry for these items.",
+   "source": "https://web.pharmacyboardkenya.org/download/guidelines-for-registration-of-medical-devices-including-in-vitro-diagnostics/",
+   "confidence": "medium"
+  },
+  {
+   "topic": "Route",
+   "applies": "all",
+   "match": null,
+   "title": "Reliance on reference regulators",
+   "body": "PPB's device reference regulators are US FDA (510(k)/PMA), Health Canada, TGA, Japan MHLW, EU notified bodies, Swissmedic and Ireland's HPRA. Class B: abridged route needs 2 reference approvals; expedited (EBR) needs 2 approvals plus 3 years of marketing; immediate (IBR) needs 3 approvals plus 4 years. Class C/D: abridged needs 3 approvals; expedited (ECR/EDR) needs 3 approvals plus 5 years, or 5 approvals. EU/TGA approvals count only if not granted through an MRA, and FDA 510(k)-exempt products do not qualify.",
+   "source": "https://web.pharmacyboardkenya.org/download/guidelines-for-registration-of-medical-devices-including-in-vitro-diagnostics/",
+   "confidence": "high"
+  },
+  {
+   "topic": "Route",
+   "applies": "all",
+   "match": null,
+   "title": "Exclusions from expedited Class C/D",
+   "body": "Hip, knee and shoulder replacements are excluded from the expedited routes. Class D devices that incorporate a registrable drug in an ancillary role cannot use the EDR route and are jointly reviewed with the medicines unit. A device with no reference approval goes through full evaluation.",
+   "source": "https://web.pharmacyboardkenya.org/download/guidelines-for-registration-of-medical-devices-including-in-vitro-diagnostics/",
+   "confidence": "high"
+  },
+  {
+   "topic": "Timeline",
+   "applies": "all",
+   "match": null,
+   "title": "Turn-around times not stated in text",
+   "body": "The 2022 device guideline sets target turn-around times in a chart that is not readable in the published text. The clock stops whenever PPB raises a query and while any field safety corrective action is open. Class B, C and D files can also use PPB's separate fast-track guideline. The IBR route registers a Class B device within an hour of submission, with email confirmation within 48 hours. Month ranges in the routes list are estimates.",
+   "source": "https://web.pharmacyboardkenya.org/download/guidelines-for-registration-of-medical-devices-including-in-vitro-diagnostics/",
+   "confidence": "low"
+  },
+  {
+   "topic": "Fees",
+   "applies": "all",
+   "match": null,
+   "title": "Registration fees by class",
+   "body": "Under the 2022 Rules (Second Schedule) the application fee is USD 100 for Class A, USD 200 for Class B and USD 1,000 for Class C or D. Renewal costs the same per class. The 2022 guideline lists lower local-manufacturer fees (USD 50-100). Fees are per product, non-refundable, and paid through the portal.",
+   "source": "https://web.pharmacyboardkenya.org/download/schedule-of-fees-for-regulatory-activities-2/",
+   "confidence": "high"
+  },
+  {
+   "topic": "Fees",
+   "applies": "all",
+   "match": null,
+   "title": "Retention and variation fees",
+   "body": "Annual retention is USD 50 for Class A and B and USD 300 for Class C and D (imported). A variation costs USD 200. Retention is paid through the portal, which opens 60 days before the due date; missing it can lead to suspension.",
+   "source": "https://web.pharmacyboardkenya.org/download/guidelines-for-registration-of-medical-devices-including-in-vitro-diagnostics/",
+   "confidence": "high"
+  },
+  {
+   "topic": "Fees",
+   "applies": "all",
+   "match": null,
+   "title": "Fast-track and emergency fees",
+   "body": "The 2022 Rules list USD 2,000 for fast-track evaluation of a product made outside Kenya and USD 2,500 for an emergency use authorisation of a device or IVD. The schedule does not say whether the fast-track fee applies to devices at the same rate as medicines.",
+   "source": "https://web.pharmacyboardkenya.org/download/schedule-of-fees-for-regulatory-activities-2/",
+   "confidence": "medium"
+  },
+  {
+   "topic": "Local representative",
+   "applies": "all",
+   "match": null,
+   "title": "Exclusive Local Authorized Representative",
+   "body": "A manufacturer outside Kenya must appoint one Local Authorized Representative (LAR) per product line, with a letter of authorisation (Annex 1 template) giving exclusive rights to import, register and distribute. The LAR handles vigilance, field safety actions and communication with PPB. It must itself be licensed by PPB to deal in medical devices.",
+   "source": "https://web.pharmacyboardkenya.org/download/guidelines-for-registration-of-medical-devices-including-in-vitro-diagnostics/",
+   "confidence": "high"
+  },
+  {
+   "topic": "Site and GMP",
+   "applies": "all",
+   "match": null,
+   "title": "GMP before registration",
+   "body": "PPB's procedure says to apply for GMP inspection or recognition before the device application. Reliance on reference-authority certificates allows a desk review instead of an on-site visit. For medicines a foreign on-site inspection costs USD 4,000 per site; PPB does not publish a separate device rate. The dossier also needs ISO 13485 or equivalent QMS proof.",
+   "source": "https://web.pharmacyboardkenya.org/medical-devices-evaluation-and-registration-procedure/",
+   "confidence": "medium"
+  },
+  {
+   "topic": "Dossier",
+   "applies": "all",
+   "match": null,
+   "title": "CSDT format",
+   "body": "Class B, C and D dossiers follow the ASEAN-style Common Submission Dossier Template (CSDT), based on IMDRF STED. Class A needs a short list: authorisation letter, labels, PVoC or certificate of conformity, IFU, QMS proof, sterilisation information and approval in the country of origin. Labels and IFU must be in English.",
+   "source": "https://web.pharmacyboardkenya.org/download/guidelines-for-registration-of-medical-devices-including-in-vitro-diagnostics/",
+   "confidence": "high"
+  },
+  {
+   "topic": "Stability",
+   "applies": "all",
+   "match": null,
+   "title": "Shelf-life validation",
+   "body": "Shelf life must be backed by tests on the device itself, not only the packaging. Accelerated ageing is accepted if justified. For sterile products include samples sterilised once and twice (1X, 2X) and a clear statistical rationale. Any change to packaging counts as a significant change.",
+   "source": "https://web.pharmacyboardkenya.org/download/guidelines-for-registration-of-medical-devices-including-in-vitro-diagnostics/",
+   "confidence": "high"
+  },
+  {
+   "topic": "Samples",
+   "applies": "all",
+   "match": null,
+   "title": "Lab testing mainly for IVDs and condoms",
+   "body": "The guideline requires samples for in-country performance testing for IVDs and condoms. For other devices it does not set routine sample testing, but PPB may ask for samples or a certificate of analysis.",
+   "source": "https://web.pharmacyboardkenya.org/download/guidelines-for-registration-of-medical-devices-including-in-vitro-diagnostics/",
+   "confidence": "medium"
+  },
+  {
+   "topic": "After approval",
+   "applies": "all",
+   "match": null,
+   "title": "Validity, renewal and changes",
+   "body": "Registration is valid for 5 years (2 years for emergency or public-interest approvals), subject to annual retention. Changes must be notified under PPB's change-notification guideline for medical devices. The LAR reports incidents and field safety actions.",
+   "source": "https://web.pharmacyboardkenya.org/download/guidelines-for-registration-of-medical-devices-including-in-vitro-diagnostics/",
+   "confidence": "high"
+  },
+  {
+   "topic": "Import",
+   "applies": "all",
+   "match": null,
+   "title": "Import permit per shipment",
+   "body": "Each shipment needs a PPB import permit through the KenTrade single window. The current medicines guideline sets the permit fee at 0.75% of FOB value; an older 2010 rule set 2% of FOB for devices. Which rate applies to devices today is not confirmed.",
+   "source": "https://web.pharmacyboardkenya.org/download/guideline-on-import-and-export-of-health-products-and-technologies/",
+   "confidence": "low"
+  }
+ ],
+ "routes": [
+  {
+   "key": "class_a",
+   "label": "Class A listing",
+   "description": "Short-form listing for low-risk devices such as rinse-type nasal saline.",
+   "months_low": 1,
+   "months_high": 3,
+   "fee_usd_low": 100,
+   "fee_usd_high": 100,
+   "source": "https://web.pharmacyboardkenya.org/download/guidelines-for-registration-of-medical-devices-including-in-vitro-diagnostics/",
+   "confidence": "low"
+  },
+  {
+   "key": "class_b_ibr",
+   "label": "Class B immediate (IBR)",
+   "description": "Instant registration for Class B devices with 3 reference approvals and 4 years of marketing.",
+   "months_low": 0,
+   "months_high": 1,
+   "fee_usd_low": 200,
+   "fee_usd_high": 200,
+   "source": "https://web.pharmacyboardkenya.org/download/guidelines-for-registration-of-medical-devices-including-in-vitro-diagnostics/",
+   "confidence": "high"
+  },
+  {
+   "key": "class_b_ebr_abridged",
+   "label": "Class B expedited or abridged",
+   "description": "Reliance review for Class B devices with 2 reference approvals, e.g. lubricant eye drops or HA nasal sprays.",
+   "months_low": 2,
+   "months_high": 6,
+   "fee_usd_low": 200,
+   "fee_usd_high": 200,
+   "source": "https://web.pharmacyboardkenya.org/download/guidelines-for-registration-of-medical-devices-including-in-vitro-diagnostics/",
+   "confidence": "low"
+  },
+  {
+   "key": "class_b_full",
+   "label": "Class B full evaluation",
+   "description": "Full CSDT review for Class B devices with no reference approval.",
+   "months_low": 6,
+   "months_high": 12,
+   "fee_usd_low": 200,
+   "fee_usd_high": 200,
+   "source": "https://web.pharmacyboardkenya.org/download/guidelines-for-registration-of-medical-devices-including-in-vitro-diagnostics/",
+   "confidence": "low"
+  },
+  {
+   "key": "class_cd_expedited",
+   "label": "Class C/D expedited (ECR/EDR)",
+   "description": "Reliance route for Class C/D devices with 3 reference approvals plus 5 years of marketing, or 5 approvals; suits OVDs and intra-articular HA with CE plus FDA history.",
+   "months_low": 3,
+   "months_high": 6,
+   "fee_usd_low": 1000,
+   "fee_usd_high": 1000,
+   "source": "https://web.pharmacyboardkenya.org/download/guidelines-for-registration-of-medical-devices-including-in-vitro-diagnostics/",
+   "confidence": "low"
+  },
+  {
+   "key": "class_cd_abridged",
+   "label": "Class C/D abridged",
+   "description": "Shorter review for Class C/D devices with at least 3 reference approvals.",
+   "months_low": 4,
+   "months_high": 9,
+   "fee_usd_low": 1000,
+   "fee_usd_high": 1000,
+   "source": "https://web.pharmacyboardkenya.org/download/guidelines-for-registration-of-medical-devices-including-in-vitro-diagnostics/",
+   "confidence": "low"
+  },
+  {
+   "key": "class_cd_full",
+   "label": "Class C/D full evaluation",
+   "description": "Full CSDT review for Class C/D devices without reference approvals.",
+   "months_low": 9,
+   "months_high": 18,
+   "fee_usd_low": 1000,
+   "fee_usd_high": 1000,
+   "source": "https://web.pharmacyboardkenya.org/download/guidelines-for-registration-of-medical-devices-including-in-vitro-diagnostics/",
+   "confidence": "low"
+  },
+  {
+   "key": "fast_track",
+   "label": "Fast track",
+   "description": "Faster review on request for Class B-D under PPB's fast-track guideline.",
+   "months_low": 2,
+   "months_high": 6,
+   "fee_usd_low": 2000,
+   "fee_usd_high": 2000,
+   "source": "https://web.pharmacyboardkenya.org/download/schedule-of-fees-for-regulatory-activities-2/",
+   "confidence": "low"
+  }
+ ],
+ "documents": [
+  {
+   "name": "Letter of authorisation appointing the exclusive Local Authorized Representative",
+   "applies": "all",
+   "match": null,
+   "note": "Annex 1 template",
+   "source": "https://web.pharmacyboardkenya.org/download/guidelines-for-registration-of-medical-devices-including-in-vitro-diagnostics/"
+  },
+  {
+   "name": "Application form on PRIMS, with the list of device configurations and GMDN codes",
+   "applies": "all",
+   "match": null,
+   "note": null,
+   "source": "https://web.pharmacyboardkenya.org/download/guidelines-for-registration-of-medical-devices-including-in-vitro-diagnostics/"
+  },
+  {
+   "name": "Executive summary",
+   "applies": "all",
+   "match": null,
+   "note": null,
+   "source": "https://web.pharmacyboardkenya.org/download/guidelines-for-registration-of-medical-devices-including-in-vitro-diagnostics/"
+  },
+  {
+   "name": "Essential Principles checklist",
+   "applies": "all",
+   "match": null,
+   "note": "Annex 6 example",
+   "source": "https://web.pharmacyboardkenya.org/download/guidelines-for-registration-of-medical-devices-including-in-vitro-diagnostics/"
+  },
+  {
+   "name": "Declaration of conformity",
+   "applies": "all",
+   "match": null,
+   "note": null,
+   "source": "https://web.pharmacyboardkenya.org/download/guidelines-for-registration-of-medical-devices-including-in-vitro-diagnostics/"
+  },
+  {
+   "name": "Device description, intended use, variants and accessories",
+   "applies": "all",
+   "match": null,
+   "note": null,
+   "source": "https://web.pharmacyboardkenya.org/download/guidelines-for-registration-of-medical-devices-including-in-vitro-diagnostics/"
+  },
+  {
+   "name": "Design verification and validation summary",
+   "applies": "all",
+   "match": null,
+   "note": null,
+   "source": "https://web.pharmacyboardkenya.org/download/guidelines-for-registration-of-medical-devices-including-in-vitro-diagnostics/"
+  },
+  {
+   "name": "Preclinical study reports",
+   "applies": "all",
+   "match": null,
+   "note": null,
+   "source": "https://web.pharmacyboardkenya.org/download/guidelines-for-registration-of-medical-devices-including-in-vitro-diagnostics/"
+  },
+  {
+   "name": "Biocompatibility to ISO 10993-1",
+   "applies": "all",
+   "match": null,
+   "note": null,
+   "source": "https://web.pharmacyboardkenya.org/download/guidelines-for-registration-of-medical-devices-including-in-vitro-diagnostics/"
+  },
+  {
+   "name": "Sterilisation validation (method, bioburden, sterility testing)",
+   "applies": "all",
+   "match": null,
+   "note": "if sterile",
+   "source": "https://web.pharmacyboardkenya.org/download/guidelines-for-registration-of-medical-devices-including-in-vitro-diagnostics/"
+  },
+  {
+   "name": "Shelf-life and stability validation",
+   "applies": "all",
+   "match": null,
+   "note": null,
+   "source": "https://web.pharmacyboardkenya.org/download/guidelines-for-registration-of-medical-devices-including-in-vitro-diagnostics/"
+  },
+  {
+   "name": "Risk analysis to ISO 14971",
+   "applies": "all",
+   "match": null,
+   "note": null,
+   "source": "https://web.pharmacyboardkenya.org/download/guidelines-for-registration-of-medical-devices-including-in-vitro-diagnostics/"
+  },
+  {
+   "name": "Manufacturer and site information, incl. contract manufacturers",
+   "applies": "all",
+   "match": null,
+   "note": null,
+   "source": "https://web.pharmacyboardkenya.org/download/guidelines-for-registration-of-medical-devices-including-in-vitro-diagnostics/"
+  },
+  {
+   "name": "Manufacturing process flow chart",
+   "applies": "all",
+   "match": null,
+   "note": null,
+   "source": "https://web.pharmacyboardkenya.org/download/guidelines-for-registration-of-medical-devices-including-in-vitro-diagnostics/"
+  },
+  {
+   "name": "Clinical evidence and clinical evaluation report with full study reports",
+   "applies": "all",
+   "match": null,
+   "note": null,
+   "source": "https://web.pharmacyboardkenya.org/download/guidelines-for-registration-of-medical-devices-including-in-vitro-diagnostics/"
+  },
+  {
+   "name": "Labels, artwork and IFU in English",
+   "applies": "all",
+   "match": null,
+   "note": null,
+   "source": "https://web.pharmacyboardkenya.org/download/guidelines-for-registration-of-medical-devices-including-in-vitro-diagnostics/"
+  },
+  {
+   "name": "QMS proof: ISO 13485 certificate, CE certificate, FDA QSR/free sale certificate or MHLW Ordinance 169",
+   "applies": "all",
+   "match": null,
+   "note": null,
+   "source": "https://web.pharmacyboardkenya.org/download/guidelines-for-registration-of-medical-devices-including-in-vitro-diagnostics/"
+  },
+  {
+   "name": "Reference regulator approvals (CE, FDA, TGA, HC, MHLW, Swissmedic, HPRA)",
+   "applies": "all",
+   "match": null,
+   "note": "for reliance routes",
+   "source": "https://web.pharmacyboardkenya.org/download/guidelines-for-registration-of-medical-devices-including-in-vitro-diagnostics/"
+  },
+  {
+   "name": "Marketing history declaration",
+   "applies": "all",
+   "match": null,
+   "note": "Annex 2; expedited routes",
+   "source": "https://web.pharmacyboardkenya.org/download/guidelines-for-registration-of-medical-devices-including-in-vitro-diagnostics/"
+  },
+  {
+   "name": "Declaration of no safety issues globally",
+   "applies": "all",
+   "match": null,
+   "note": "Annex 3; expedited routes",
+   "source": "https://web.pharmacyboardkenya.org/download/guidelines-for-registration-of-medical-devices-including-in-vitro-diagnostics/"
+  },
+  {
+   "name": "Sales, complaint and vigilance data for the last 5 years",
+   "applies": "all",
+   "match": null,
+   "note": null,
+   "source": "https://web.pharmacyboardkenya.org/download/guidelines-for-registration-of-medical-devices-including-in-vitro-diagnostics/"
+  },
+  {
+   "name": "Certificates of analysis for materials of animal, human, microbial or recombinant origin",
+   "applies": "all",
+   "match": null,
+   "note": "if applicable",
+   "source": "https://web.pharmacyboardkenya.org/download/guidelines-for-registration-of-medical-devices-including-in-vitro-diagnostics/"
+  },
+  {
+   "name": "Data on the ancillary medicinal substance",
+   "applies": "all",
+   "match": null,
+   "note": "if applicable",
+   "source": "https://web.pharmacyboardkenya.org/download/guidelines-for-registration-of-medical-devices-including-in-vitro-diagnostics/"
+  },
+  {
+   "name": "PVoC or certificate of conformity",
+   "applies": "all",
+   "match": null,
+   "note": "Class A",
+   "source": "https://web.pharmacyboardkenya.org/download/guidelines-for-registration-of-medical-devices-including-in-vitro-diagnostics/"
+  },
+  {
+   "name": "PPB GMP approval or reliance decision for the site",
+   "applies": "all",
+   "match": null,
+   "note": null,
+   "source": "https://web.pharmacyboardkenya.org/download/guidelines-on-the-reliance-and-recognition-of-good-manufacturing-practices-gmp-decisions/"
+  }
+ ]
+}
