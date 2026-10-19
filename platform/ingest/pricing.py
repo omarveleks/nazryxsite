@@ -371,12 +371,16 @@ def rebuild(cur):
                 continue
             cands = []
             for n, v in priced:
+                if n not in NEIGHBOURS[c]:                       # only neighbouring markets price alike: no Central Asia for East Africa
+                    continue
                 factor, overlap, tier = gap(c, n)
                 cands.append((tier <= 3, v["strength"], v["unit"], v["unit_usd"] * factor, v["lo"] / float(fx[CURRENCY[n]]) * factor,
                               v["hi"] / float(fx[CURRENCY[n]]) * factor, v["n"], n, v["kinds"], factor, overlap, v.get("pack_size")))
             if (c, m) in weak:                                   # this market's own single listing
                 u_, st_, usd_ = weak[(c, m)]
                 cands.append((True, st_, u_, usd_, usd_, usd_, 1, c, ["retail"], 1.0, 0, None))
+            if not cands:
+                continue
             if any(x[0] for x in cands):
                 cands = [x for x in cands if x[0]]
             usual = max({(x[2], x[1]) for x in cands}, key=lambda k: sum(1 for x in cands if (x[2], x[1]) == k))
