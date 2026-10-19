@@ -21,8 +21,9 @@ type Fact = { molecule_id: number; country: string; registrants: number; registr
 const competition = (f?: Fact) => !f || (!f.registrations && !f.on_national_list) ? 'absent'
   : f.registrants === 0 ? 'open' : f.registrants <= 3 ? 'few' : f.registrants < 8 ? 'some' : 'crowded';
 const COMP: Record<string, [string, string]> = {
-  open: ['Nobody registered', 'peach'], few: ['1 to 3 competitors', 'mint'], some: ['4 to 7 competitors', 'blue'], crowded: ['8 or more competitors', ''],
-  absent: ['Not on this market yet', ''],
+  // both mean nobody sells it here; 'open' is also on the country's official medicines list, so there is known demand
+  open: ['No competitors, on the official list', 'peach'], few: ['1 to 3 competitors', 'mint'], some: ['4 to 7 competitors', 'blue'], crowded: ['8 or more competitors', ''],
+  absent: ['No competitors', ''],
 };
 
 const PER_ML = ['eye_drops', 'nasal', 'contact_lens', 'inhaled_saline'];
@@ -88,7 +89,7 @@ export default async function MfrProducts({ searchParams }: { searchParams: Prom
 
   const groupFact = (g: string, c = market): Fact => {
     const x = d.groupFacts.find((r) => r.use_group === g && r.country === c);
-    return { molecule_id: 0, country: c, registrants: x?.registrants ?? 0, registrations: x?.registrations ?? 0, on_national_list: true,
+    return { molecule_id: 0, country: c, registrants: x?.registrants ?? 0, registrations: x?.registrations ?? 0, on_national_list: false,
       facility_level: null, rankable: false, score: null, demand: null };
   };
   const list = d.products.map((p) => {
@@ -217,7 +218,7 @@ export default async function MfrProducts({ searchParams }: { searchParams: Prom
           <div className="tile t-white"><span className="k">Medicines</span><span className="v num">{n}</span><span className="small">{packs} products{packs > matched ? `, ${packs - matched} not matched yet` : ''}</span></div>
           <div className="tile t-peach"><span className="k"><DemandIcon /> In high demand</span>
             <span className="v num">{mols.filter((p) => Number(p.f?.demand ?? 0) >= HIGH_DEMAND).length}</span>
-            <span className="small">{by('open')} of your medicines have nobody registered</span></div>
+            <span className="small">{by('open') + by('absent')} of your medicines have no competitors here</span></div>
           {analysis ? (<>
             <div className="tile t-blue"><span className="k">Average competitors</span><span className="v num">{avg}</span><span className="small">per medicine already on the market</span></div>
             <div className="tile t-mint"><span className="k">Top class</span><span className="v" style={{ fontSize: 20, lineHeight: 1.2 }}>{top?.cls ?? '—'}</span>
