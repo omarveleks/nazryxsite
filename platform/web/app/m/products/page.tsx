@@ -34,6 +34,11 @@ const NEIGHBOURS: Record<string, string[]> = {
   TZ: ['KE', 'NG', 'IN', 'PK', 'BD'], KE: ['TZ', 'NG', 'IN', 'PK', 'BD'], NG: ['KE', 'TZ', 'GH', 'IN', 'PK', 'BD'],
   KZ: ['KG', 'UZ'], KG: ['KZ', 'UZ'], UZ: ['KZ', 'KG'],
 };
+// reference prices, when nothing in or near a market prices a product: the first of these that does
+const REF_ORDER = ['KZ', 'UZ', 'KG', 'BY', 'AM', 'AZ', 'GH', 'ZA', 'NG', 'KE', 'TZ', 'PK', 'IN', 'BD', 'GB', 'FR'];
+// salt and hydrate words that do not change the medicine, for matching pharmacy listings to a product
+const SALTS = 'sodium|potassium|calcium|magnesium|hydrochloride|hcl|dihydrochloride|hydrobromide|maleate|besilate|besylate|mesylate|mesilate|'
+  + 'sulfate|sulphate|citrate|acetate|phosphate|tartrate|fumarate|succinate|bromide|dipropionate|propionate|monohydrate|dihydrate|trihydrate|anhydrous';
 // a use group's product type, for its price gap
 const GROUP_TYPE: Record<string, string> = { eye_drops: 'eye', contact_lens: 'eye', nasal: 'nasal', inhaled_saline: 'nasal',
   eye_surgery: 'injection', joint: 'injection', dermal_filler: 'injection' };
@@ -79,7 +84,8 @@ export default async function MfrProducts({ searchParams }: { searchParams: Prom
     const order = [market, ...(NEIGHBOURS[market] ?? [])].filter((c) => curOf[c]);
     const gaps = await rows(db, `select source, form_type, ratio::float as ratio, n, basis from price_gaps where country = $1`, [market]);
     // countries outside the region, for a reference price when nothing near prices a product
-    const elsewhere = Object.keys(curOf).filter((c) => !order.includes(c));
+    // nearest price levels first: the CIS, then other emerging markets, Europe's originator prices last
+    const elsewhere = [...REF_ORDER, ...Object.keys(curOf).filter((c) => !REF_ORDER.includes(c))].filter((c) => curOf[c] && !order.includes(c));
     const groupPrices: Record<string, { price: number; per: string; currency: string; n: number; from: string; ref?: boolean }> = {};
     for (const g of groups) for (const c of [...order, ...elsewhere]) {
       const brands = await segmentBrands(db, c, g, []);
@@ -88,8 +94,11 @@ export default async function MfrProducts({ searchParams }: { searchParams: Prom
       if (v != null) { groupPrices[g] = { price: v, per: PER_ML.includes(g) ? '10 ml' : 'pack', currency: curOf[c], n, from: c, ref: !order.includes(c) }; break; }
     }
     const otherPrices = ids.length ? await rows(db, `${PRICE_SQL} where molecule_id = any($1) and country <> $2`, [ids, market]) as MoleculePrice[] : [];
-    const listings = ids.length ? await rows(db, `select country, molecule_id, name, pack_price::float as price, currency from price_listings
-        where kind = 'retail' and molecule_id = any($1) and pack_price > 0`, [ids]) : [];
+    // pharmacy packs of the same ingredient whatever its salt is called ('Bromfenac Sodium' is Bromfenac), under the product's molecule
+    const listings = ids.length ? await rows(db, `with k as (select id, trim(regexp_replace(regexp_replace(lower(inn), '\\m(${SALTS})\\M', '', 'g'), '\\s+', ' ', 'g')) as k
+          from molecules), sib as (select a.id as mine, b.id as other from k a join k b on a.k = b.k and a.k <> '' where a.id = any($1))
+        select l.country, sib.mine as molecule_id, l.name, l.pack_price::float as price, l.currency from price_listings l join sib on sib.other = l.molecule_id
+        where l.kind = 'retail' and l.pack_price > 0`, [ids]) : [];
     const local = curOf[market] ?? null;
     return { targets, market, products, facts, launches, files, watched, watchCount, prices, groupFacts, groupPrices, listings, otherPrices, fx, local, order, gaps, elsewhere };
   });
@@ -159,21 +168,17 @@ export default async function MfrProducts({ searchParams }: { searchParams: Prom
       const r = out(median(same.map((l) => l.price)), same[0]?.currency, 'pack', c, typeOf(p.dosage_form));
       if (r) return r;
     }
-    // nothing in the region: a reference price from wherever else it sells, converted at today's rate (no price gap applied)
-    const refs: { v: number; per: string }[] = [];
-    for (const pr of d.otherPrices.filter((x) => x.molecule_id === p.molecule_id && !d.order.includes(x.country) && priceFits(x, p.dosage_form))) {
-      const v = conv(Number(pr.generic_price ?? pr.unit_price) * packOf(pr), pr.currency);
-      if (v != null) refs.push({ v, per: packOf(pr) > 1 ? `${packOf(pr)} ${pr.unit}` : unitShort(pr) });
-    }
-    if (!refs.length) for (const c of d.elsewhere) {
+    // nothing in the region: the price in the nearest other market that sells it, converted at today's rate (no gap applied)
+    for (const c of d.elsewhere) {
+      const pr = d.otherPrices.find((x) => x.molecule_id === p.molecule_id && x.country === c && priceFits(x, p.dosage_form));
+      if (pr) {
+        const v = conv(Number(pr.generic_price ?? pr.unit_price) * packOf(pr), pr.currency);
+        if (v != null) return { price: v, per: packOf(pr) > 1 ? `${packOf(pr)} ${pr.unit}` : unitShort(pr), currency: d.local!, ref: true };
+      }
       const same = d.listings.filter((l) => l.country === c && l.molecule_id === p.molecule_id && (!u || !formUnit(l.name) || formUnit(l.name) === u));
       const m = median(same.map((l) => l.price));
       const v = m != null ? conv(m, same[0].currency) : null;
-      if (v != null) refs.push({ v, per: 'pack' });
-    }
-    if (refs.length) {
-      const per = refs[0].per, v = median(refs.filter((x) => x.per === per).map((x) => x.v));
-      if (v != null) return { price: v, per, currency: d.local!, ref: true };
+      if (v != null) return { price: v, per: 'pack', currency: d.local!, ref: true };
     }
     return null;
   };

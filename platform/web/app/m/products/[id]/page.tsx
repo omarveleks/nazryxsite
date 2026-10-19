@@ -94,11 +94,13 @@ export default async function MfrProduct({ params, searchParams }: { params: Pro
     if (!avg && canUse(t, 'market')) {
       const fx = Object.fromEntries((await rows(db, 'select currency, per_usd::float as r from fx_rates')).map((x) => [x.currency, x.r]));
       const cur = (await one(db, 'select currency from countries where code = $1', [market]))?.currency;
+      // the nearest other market that prices it (CIS first), not an average with Europe's originator prices
+      const order = ['KZ', 'UZ', 'KG', 'NG', 'KE', 'TZ'];
       const vals = (await rows(db, `${PRICE_SQL} where molecule_id = $1 and country <> $2`, [p.molecule_id, market]) as MoleculePrice[])
         .filter((x) => priceFits(x, p.dosage_form) && fx[x.currency] && cur && fx[cur])
+        .sort((a, b) => (order.indexOf(a.country) + 99) % 99 - (order.indexOf(b.country) + 99) % 99)
         .map((x) => ({ v: Number(x.generic_price ?? x.unit_price) * packOf(x) / fx[x.currency] * fx[cur], per: unitWord(x) }));
-      const same = vals.filter((x) => x.per === vals[0]?.per).map((x) => x.v).sort((a, b) => a - b);
-      if (same.length && cur) ref = { price: same[Math.floor(same.length / 2)], per: vals[0].per, currency: cur };
+      if (vals.length && cur) ref = { price: vals[0].v, per: vals[0].per, currency: cur };
     }
     // a market with only one or two products prices the brand; a generic usually enters lower (measured on lists that say which is which)
     const costs = avg ? await one(db, 'select freight, duty, distributor, pharmacy, vat from market_costs where country = $1', [market]) : null;
