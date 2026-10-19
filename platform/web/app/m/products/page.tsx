@@ -78,18 +78,20 @@ export default async function MfrProducts({ searchParams }: { searchParams: Prom
     const curOf = Object.fromEntries((await rows(db, 'select country, min(currency) as c from price_listings group by country')).map((x) => [x.country, x.c]));
     const order = [market, ...(NEIGHBOURS[market] ?? [])].filter((c) => curOf[c]);
     const gaps = await rows(db, `select source, form_type, ratio::float as ratio, n, basis from price_gaps where country = $1`, [market]);
-    const groupPrices: Record<string, { price: number; per: string; currency: string; n: number; from: string }> = {};
-    for (const g of groups) for (const c of order) {
+    // countries outside the region, for a reference price when nothing near prices a product
+    const elsewhere = Object.keys(curOf).filter((c) => !order.includes(c));
+    const groupPrices: Record<string, { price: number; per: string; currency: string; n: number; from: string; ref?: boolean }> = {};
+    for (const g of groups) for (const c of [...order, ...elsewhere]) {
       const brands = await segmentBrands(db, c, g, []);
       const v = PER_ML.includes(g) ? median(brands.map((b) => b.per10).filter((x): x is number => x != null)) : median(brands.flatMap((b) => b.prices));
       const n = PER_ML.includes(g) ? brands.filter((b) => b.per10 != null).length : brands.filter((b) => b.prices.length).length;
-      if (v != null) { groupPrices[g] = { price: v, per: PER_ML.includes(g) ? '10 ml' : 'pack', currency: curOf[c], n, from: c }; break; }
+      if (v != null) { groupPrices[g] = { price: v, per: PER_ML.includes(g) ? '10 ml' : 'pack', currency: curOf[c], n, from: c, ref: !order.includes(c) }; break; }
     }
-    const otherPrices = ids.length ? await rows(db, `${PRICE_SQL} where molecule_id = any($1) and country = any($2) and country <> $3`, [ids, live, market]) as MoleculePrice[] : [];
+    const otherPrices = ids.length ? await rows(db, `${PRICE_SQL} where molecule_id = any($1) and country <> $2`, [ids, market]) as MoleculePrice[] : [];
     const listings = ids.length ? await rows(db, `select country, molecule_id, name, pack_price::float as price, currency from price_listings
         where kind = 'retail' and molecule_id = any($1) and pack_price > 0`, [ids]) : [];
     const local = curOf[market] ?? null;
-    return { targets, market, products, facts, launches, files, watched, watchCount, prices, groupFacts, groupPrices, listings, otherPrices, fx, local, order, gaps };
+    return { targets, market, products, facts, launches, files, watched, watchCount, prices, groupFacts, groupPrices, listings, otherPrices, fx, local, order, gaps, elsewhere };
   });
   const market = d.market;
   const analysis = canUse(tierIn(u, market), 'portfolio');
@@ -131,7 +133,7 @@ export default async function MfrProducts({ searchParams }: { searchParams: Prom
   };
   const typeOf = (form?: string | null) => { const u = formUnit(form);
     return u === 'tablet or capsule' ? 'tablet' : u === 'ampoule or vial' ? 'injection' : /eye|ophth/i.test(form ?? '') ? 'eye' : /nasal|nose/i.test(form ?? '') ? 'nasal' : 'all'; };
-  const priceFor = (p: (typeof mols)[number]): { price: number; per: string; currency: string } | null => {
+  const priceFor = (p: (typeof mols)[number]): { price: number; per: string; currency: string; ref?: boolean } | null => {
     // a price from another country: converted at today's rate and carried over by the price gap for this product type
     const out = (v: number | null, cur: string, per: string, from = market, type = 'all') => {
       if (v == null) return null;
@@ -140,6 +142,7 @@ export default async function MfrProducts({ searchParams }: { searchParams: Prom
     };
     if (p.group) {
       const gp = d.groupPrices[p.group];
+      if (gp?.ref) { const x = conv(gp.price, gp.currency); return x == null ? null : { price: x, per: gp.per, currency: d.local!, ref: true }; }
       return gp ? out(gp.price, gp.currency, gp.per, gp.from, GROUP_TYPE[p.group] ?? 'all') : null;
     }
     if (!p.molecule_id) return null;
@@ -155,6 +158,22 @@ export default async function MfrProducts({ searchParams }: { searchParams: Prom
       const same = d.listings.filter((l) => l.country === c && l.molecule_id === p.molecule_id && (!u || !formUnit(l.name) || formUnit(l.name) === u));
       const r = out(median(same.map((l) => l.price)), same[0]?.currency, 'pack', c, typeOf(p.dosage_form));
       if (r) return r;
+    }
+    // nothing in the region: a reference price from wherever else it sells, converted at today's rate (no price gap applied)
+    const refs: { v: number; per: string }[] = [];
+    for (const pr of d.otherPrices.filter((x) => x.molecule_id === p.molecule_id && !d.order.includes(x.country) && priceFits(x, p.dosage_form))) {
+      const v = conv(Number(pr.generic_price ?? pr.unit_price) * packOf(pr), pr.currency);
+      if (v != null) refs.push({ v, per: packOf(pr) > 1 ? `${packOf(pr)} ${pr.unit}` : unitShort(pr) });
+    }
+    if (!refs.length) for (const c of d.elsewhere) {
+      const same = d.listings.filter((l) => l.country === c && l.molecule_id === p.molecule_id && (!u || !formUnit(l.name) || formUnit(l.name) === u));
+      const m = median(same.map((l) => l.price));
+      const v = m != null ? conv(m, same[0].currency) : null;
+      if (v != null) refs.push({ v, per: 'pack' });
+    }
+    if (refs.length) {
+      const per = refs[0].per, v = median(refs.filter((x) => x.per === per).map((x) => x.v));
+      if (v != null) return { price: v, per, currency: d.local!, ref: true };
     }
     return null;
   };
@@ -292,7 +311,9 @@ export default async function MfrProducts({ searchParams }: { searchParams: Prom
                   if (!visible(i)) return '—';
                   const q = priceFor(p);
                   const fmt = (v: number) => `${q!.currency} ${Math.round(v).toLocaleString('en')}`;
-                  return q ? <>{fmt(q.price)} / {q.per}<div className="sub2">Est. avg</div></> : '—';
+                  return q ? <>{fmt(q.price)} / {q.per}{q.ref
+                    ? <div className="sub2" title="Not sold near this market: the price where it sells elsewhere, converted at today's rate">Ref. price, other markets</div>
+                    : <div className="sub2">Est. avg</div>}</> : '—';
                 })()}</td>
               </tr>))}</tbody></table></div>)}
       </section>

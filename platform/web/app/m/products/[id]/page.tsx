@@ -89,11 +89,22 @@ export default async function MfrProduct({ params, searchParams }: { params: Pro
     // the molecule's average price in this market: listings, or an estimate from a neighbouring market
     const price = canUse(t, 'market') ? await one(db, `${PRICE_SQL} where molecule_id = $1 and country = $2`, [p.molecule_id, market]) as MoleculePrice | null : null;
     const avg = price && priceFits(price, p.dosage_form) ? price : null;     // a vial price says nothing about a capsule
+    // nothing priced here or near: the price where it sells elsewhere, converted at today's rate, as a reference only
+    let ref: { price: number; per: string; currency: string } | null = null;
+    if (!avg && canUse(t, 'market')) {
+      const fx = Object.fromEntries((await rows(db, 'select currency, per_usd::float as r from fx_rates')).map((x) => [x.currency, x.r]));
+      const cur = (await one(db, 'select currency from countries where code = $1', [market]))?.currency;
+      const vals = (await rows(db, `${PRICE_SQL} where molecule_id = $1 and country <> $2`, [p.molecule_id, market]) as MoleculePrice[])
+        .filter((x) => priceFits(x, p.dosage_form) && fx[x.currency] && cur && fx[cur])
+        .map((x) => ({ v: Number(x.generic_price ?? x.unit_price) * packOf(x) / fx[x.currency] * fx[cur], per: unitWord(x) }));
+      const same = vals.filter((x) => x.per === vals[0]?.per).map((x) => x.v).sort((a, b) => a - b);
+      if (same.length && cur) ref = { price: same[Math.floor(same.length / 2)], per: vals[0].per, currency: cur };
+    }
     // a market with only one or two products prices the brand; a generic usually enters lower (measured on lists that say which is which)
     const costs = avg ? await one(db, 'select freight, duty, distributor, pharmacy, vat from market_costs where country = $1', [market]) : null;
     const brands = avg ? await one(db, `select (select registrants from country_molecules where molecule_id = $1 and country = $2) as registrants,
         (select value from price_factors where key = 'generic_vs_originator') as generic`, [p.molecule_id, market]) : null;
-    return { ...base, origin, lapsed, route, routes, checklist, ready, open, tenders, brands, costs, ...(canUse(t, 'market') ? { avg } : {}) };
+    return { ...base, origin, lapsed, route, routes, checklist, ready, open, tenders, brands, costs, ...(canUse(t, 'market') ? { avg, ref } : {}) };
   });
   if (!d) notFound();
   const { p, market } = d;
@@ -226,7 +237,10 @@ export default async function MfrProduct({ params, searchParams }: { params: Pro
                   <tbody>{d.avg.by_strength.map((x) => <tr key={x.strength}><td>{x.strength}</td><td className="r num">{fmtMoney(x.unit)}</td><td className="r num">{fmtMoney(x.pack)}</td><td className="r num">{x.n}</td></tr>)}</tbody></table></div>)}
             </section>) : (
             <section className="card between" style={{ flexWrap: 'wrap', gap: 12 }}>
-              <span><b>Price in {countryName(market)}</b><div className="small muted">No public price for this medicine yet. We check it for you within 24 hours.</div></span>
+              <span><b>Price in {countryName(market)}</b>
+                {'ref' in d && d.ref ? <div className="small">Not sold near {countryName(market)}. Reference price in other markets: <b>{d.ref.currency} {fmtMoney(d.ref.price)}</b> per {d.ref.per},
+                  converted at today&rsquo;s rate.<div className="muted">A reference only, not a local estimate. We check the local price for you within 24 hours.</div></div>
+                  : <div className="small muted">No public price for this medicine yet. We check it for you within 24 hours.</div>}</span>
               <Link className="btn btn-ghost btn-sm" href="/m/call?topic=market_entry">Ask for a price</Link>
             </section>))}
           {'avg' in d && d.avg && 'costs' in d && d.costs && <MarginCheck p={d.avg} c={d.costs} id={id} market={market} exw={sp.exw} units={sp.units} />}
