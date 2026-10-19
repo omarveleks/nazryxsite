@@ -1,0 +1,401 @@
+{
+ "country": "NG",
+ "scope": "device",
+ "regulator": "National Agency for Food and Drug Administration and Control (NAFDAC) – https://nafdac.gov.ng",
+ "checked": "2026-10",
+ "facts": [
+  {
+   "topic": "Route",
+   "applies": "all",
+   "match": null,
+   "title": "Legal basis and portal",
+   "body": "NAFDAC's Vaccines, Biologics and Medical Devices Registration directorate registers devices and IVDs under the NAFDAC Act (Cap. N1, LFN 2004). No device may be imported, sold or used in Nigeria unless registered. Ask for a dossier upload link by email (md.vbmrr@nafdac.gov.ng), then apply on NAPAMS (registration.nafdac.gov.ng): one application per device, group, family or system.",
+   "source": "https://nafdac.gov.ng/wp-content/uploads/Files/Resources/Guidelines/VBM_R&R/2025-2030/Guidelines-for-Registration-of-Medical-Devices-Including-In-Vitro-Diagnostics-IVDs-and-Related-Products.pdf",
+   "confidence": "high"
+  },
+  {
+   "topic": "Route",
+   "applies": "all",
+   "match": null,
+   "title": "Four risk classes A-D",
+   "body": "Class A low, B low-moderate, C moderate-high, D high risk; IVDs use the same letters by individual and public-health risk. Where more than one class could apply, the higher class wins. NAFDAC follows the GHTF/IMDRF classification principles (GHTF SG1 N77).",
+   "source": "https://nafdac.gov.ng/wp-content/uploads/Files/Resources/Guidelines/VBM_R&R/2025-2030/Guidelines-for-Registration-of-Medical-Devices-Including-In-Vitro-Diagnostics-IVDs-and-Related-Products.pdf",
+   "confidence": "high"
+  },
+  {
+   "topic": "Route",
+   "applies": "all",
+   "match": null,
+   "title": "Likely classes for our product types",
+   "body": "Under the GHTF rules NAFDAC follows: lubricant eye drops are usually Class B, saline or sea-water nasal sprays Class A or B, viscoelastics (OVDs) Class C, and intra-articular HA Class C or D. Products absorbed by the body or made with animal tissue (e.g. animal-origin HA) go to Class D. NAFDAC publishes no product-specific list, so confirm the class with the directorate.",
+   "source": "https://nafdac.gov.ng/wp-content/uploads/Files/Resources/Guidelines/VBM_R&R/NAFDAC-Guidelines-for-Conformity-Assessment-of-Non-IVD-Medical-Devices.pdf",
+   "confidence": "low"
+  },
+  {
+   "topic": "Route",
+   "applies": "all",
+   "match": null,
+   "title": "Reliance on reference regulators",
+   "body": "The reliance guideline (rev. Sep 2025) now covers devices. NAFDAC can rely on approvals by SRAs/WHO-listed authorities and IMDRF management committee members, on WHO PQ and on ECOWAS/AMRH outputs, for an identical device. A decision is targeted within 60 working days (about 90 calendar days).",
+   "source": "https://nafdac.gov.ng/wp-content/uploads/Files/Resources/Guidelines/VBM_R&R/2025-2030/Guidelines-for-Registration-and-Related-Activities-of-Drugs-Vaccines-and-Medical-Devices-Including-In-Vitro-Diagnostics-Using-the-Reliance-Procedure.pdf",
+   "confidence": "high"
+  },
+  {
+   "topic": "Route",
+   "applies": "all",
+   "match": null,
+   "title": "WHO PQ collaborative route",
+   "body": "WHO-prequalified devices and IVDs can use the WHO Collaborative Registration Procedure. The submitted device must be the same as the prequalified one. NAFDAC targets a decision in 60 working days. In practice this mainly covers IVDs and a few public-health devices.",
+   "source": "https://nafdac.gov.ng/wp-content/uploads/Files/Resources/Guidelines/VBM_R&R/2025-2030/Guidelines-for-Registration-of-Medical-Devices-Including-in-Vitro-Diagnostics-Under-WHO-Collaborative-Registration-Procedure-CRP.pdf",
+   "confidence": "high"
+  },
+  {
+   "topic": "Timeline",
+   "applies": "all",
+   "match": null,
+   "title": "120 or 240 working days",
+   "body": "Class A: at most 120 working days. Classes B, C and D: at most 240 working days. The clock stops when NAFDAC issues a compliance directive. If you do not answer queries within 90 days, the application is closed.",
+   "source": "https://nafdac.gov.ng/wp-content/uploads/Files/Resources/Guidelines/VBM_R&R/2025-2030/Guidelines-for-Registration-of-Medical-Devices-Including-In-Vitro-Diagnostics-IVDs-and-Related-Products.pdf",
+   "confidence": "high"
+  },
+  {
+   "topic": "Fees",
+   "applies": "all",
+   "match": null,
+   "title": "Registration fee: USD 750 per product",
+   "body": "The NAFDAC tariff (effective 31 Jan 2020) charges USD 750 per imported device (about NGN 997,500 at NGN 1,330/USD), the same for all classes. Locally made devices cost NGN 20,000. Renewal is 80% (USD 600, about NGN 798,000). Dollar fees are paid in naira, and 7.5% VAT is added.",
+   "source": "https://nafdac.gov.ng/wp-content/uploads/Publications/Others/Press_Release_PDF/NAFDAC-2019-Tariff_Final_Combined.pdf",
+   "confidence": "medium"
+  },
+  {
+   "topic": "Fees",
+   "applies": "all",
+   "match": null,
+   "title": "Fast track, PV fee and GMP",
+   "body": "Fast-track processing costs double (USD 1,500). A yearly post-marketing fee of 10% of the registration fee applies. The tariff lists USD 10,989 per site for foreign pharmaceutical GMP inspections; it does not show a separate device rate, so check with NAFDAC whether the same figure applies.",
+   "source": "https://nafdac.gov.ng/wp-content/uploads/Publications/Others/Press_Release_PDF/NAFDAC-2019-Tariff_Final_Combined.pdf",
+   "confidence": "low"
+  },
+  {
+   "topic": "Local representative",
+   "applies": "all",
+   "match": null,
+   "title": "Nigerian applicant and power of attorney",
+   "body": "The applicant must be a company registered with the Corporate Affairs Commission. A foreign maker gives it a power of attorney naming the products, saying 'Authority to register product with NAFDAC', notarised in the country of manufacture and valid at least 5 years, or a contract manufacturing agreement if the applicant owns the brand. The brand must be registered with the Nigerian Trademarks Registry (Class 10).",
+   "source": "https://nafdac.gov.ng/wp-content/uploads/Files/Resources/Guidelines/VBM_R&R/2025-2030/Guidelines-for-Registration-of-Medical-Devices-Including-In-Vitro-Diagnostics-IVDs-and-Related-Products.pdf",
+   "confidence": "high"
+  },
+  {
+   "topic": "Site and GMP",
+   "applies": "all",
+   "match": null,
+   "title": "GMP to ISO 13485",
+   "body": "Foreign makers must let NAFDAC inspect their sites. Inspections follow NAFDAC's 2024 device GMP guideline and ISO 13485:2016, with a risk-based approach. The application includes a letter inviting NAFDAC to the factory.",
+   "source": "https://nafdac.gov.ng/wp-content/uploads/Files/Resources/Guidelines/DER_Guidelines/Medical_Devices_2025/NAFDAC-Good-Manufacturing-Practice-GMP-for-Medical-Devices-IVDs-and-Related-Products-Guidelines-2024.pdf",
+   "confidence": "medium"
+  },
+  {
+   "topic": "Dossier",
+   "applies": "all",
+   "match": null,
+   "title": "IMDRF ToC dossier for Class C and D",
+   "body": "All classes need a declaration of conformity with the Essential Principles, QMS certification, a free sale certificate authenticated by the Nigerian embassy, a full CoA and labels/IFU. Class C and D also need a technical dossier in the IMDRF ToC format (nIVD ToC or IVD ToC). All technical documents are electronic.",
+   "source": "https://nafdac.gov.ng/wp-content/uploads/Files/Resources/Guidelines/VBM_R&R/2025-2030/Guidelines-for-Registration-of-Medical-Devices-Including-In-Vitro-Diagnostics-IVDs-and-Related-Products.pdf",
+   "confidence": "high"
+  },
+  {
+   "topic": "Dossier",
+   "applies": "all",
+   "match": null,
+   "title": "Recognised standards",
+   "body": "NAFDAC publishes a list of recognised standards (Nov 2024), including the ISO 10993 series and sterilisation standards. Using them is voluntary, but certificates of compliance should be attached to the declaration of conformity where available.",
+   "source": "https://nafdac.gov.ng/wp-content/uploads/Files/Resources/Note_To_Industry_2024/NAFDAC-List-of-Recognized-Standards-for-Medical-Devices.pdf",
+   "confidence": "medium"
+  },
+  {
+   "topic": "Samples",
+   "applies": "all",
+   "match": null,
+   "title": "Registration samples tested",
+   "body": "Once documents pass screening, NAFDAC issues an electronic permit to import registration samples. Samples go to the NAFDAC lab with a cover letter, proof of payment and a CoA.",
+   "source": "https://nafdac.gov.ng/wp-content/uploads/Files/Resources/Guidelines/VBM_R&R/2025-2030/Guidelines-for-Registration-of-Medical-Devices-Including-In-Vitro-Diagnostics-IVDs-and-Related-Products.pdf",
+   "confidence": "high"
+  },
+  {
+   "topic": "Labelling",
+   "applies": "all",
+   "match": null,
+   "title": "Label and IFU contents",
+   "body": "The label shows the device name, maker's name and address, device identifier, batch or lot, contents, 'sterile' and 'for single use only' where relevant, manufacturing and expiry month/year, directions for use and storage conditions. If the pack is too small, the IFU carries the details. Advertising needs a separate approval.",
+   "source": "https://nafdac.gov.ng/wp-content/uploads/Files/Resources/Guidelines/VBM_R&R/2025-2030/Guidelines-for-Registration-of-Medical-Devices-Including-In-Vitro-Diagnostics-IVDs-and-Related-Products.pdf",
+   "confidence": "high"
+  },
+  {
+   "topic": "After approval",
+   "applies": "all",
+   "match": null,
+   "title": "Validity, renewal and changes",
+   "body": "Registration is valid 5 years. Renewal can start 6 months before expiry and targets 60 working days. Critical changes need a new registration; major and minor changes both need NAFDAC approval before you implement them.",
+   "source": "https://nafdac.gov.ng/wp-content/uploads/Files/Resources/Guidelines/VBM_R&R/2025-2030/Guidelines-for-Renewal-of-Certificate-of-Product-Registration-for-Medical-Devices-Including-In-Vitro-Diagnostics-and-Related-Products.pdf",
+   "confidence": "high"
+  },
+  {
+   "topic": "After approval",
+   "applies": "all",
+   "match": null,
+   "title": "Vigilance reporting",
+   "body": "Manufacturers or their MAHs report a serious public-health threat within 48 hours, death or serious deterioration within 10 calendar days and potential death or serious deterioration within 30 days. A final report is due within 30 days of the first one. A post-market surveillance plan is part of registration.",
+   "source": "https://nafdac.gov.ng/wp-content/uploads/Files/Resources/Guidelines/PMS_Guidelines_2024/Guidelines-for-Post-Market-Surveillance-and-Reporting-of-Medical-Devices-and-In-Vitro-Diagnostics-IVDs-.pdf",
+   "confidence": "high"
+  },
+  {
+   "topic": "Import",
+   "applies": "all",
+   "match": null,
+   "title": "Port clearance and CRIA",
+   "body": "Shipments clear through the Single Window (Form M with the NAFDAC e-licence) and a NAFDAC port inspection, which costs NGN 27,000 per 20-ft container for devices (about USD 20). All regulated products shipped from China need a Clean Report of Inspection and Analysis from a NAFDAC-approved agent.",
+   "source": "https://nafdac.gov.ng/wp-content/uploads/Publications/Others/Press_Release_PDF/NAFDAC-2019-Tariff_Final_Combined.pdf",
+   "confidence": "medium"
+  },
+  {
+   "topic": "Pricing",
+   "applies": "all",
+   "match": null,
+   "title": "VAT: zero-rated",
+   "body": "The Nigeria Tax Act 2025 (from 1 Jan 2026) lists medical equipment and medical and pharmaceutical products as zero-rated for VAT. Whether a given device counts as 'medical equipment' is not defined in what we found; check before pricing.",
+   "source": "https://www.mondaq.com/nigeria/tax-authorities/1793598/examination-of-the-value-added-tax-provisions-under-the-nigeria-tax-act-2025",
+   "confidence": "medium"
+  }
+ ],
+ "routes": [
+  {
+   "key": "class_a",
+   "label": "Class A registration",
+   "description": "Short-form registration for low-risk devices (e.g. rinse-type nasal saline). At most 120 working days. No IMDRF technical dossier; declaration of conformity, QMS proof, free sale certificate, CoA and labels.",
+   "months_low": 4,
+   "months_high": 9,
+   "fee_usd_low": 750,
+   "fee_usd_high": 750,
+   "source": "https://nafdac.gov.ng/wp-content/uploads/Files/Resources/Guidelines/VBM_R&R/2025-2030/Guidelines-for-Registration-of-Medical-Devices-Including-In-Vitro-Diagnostics-IVDs-and-Related-Products.pdf",
+   "confidence": "low"
+  },
+  {
+   "key": "class_b",
+   "label": "Class B registration",
+   "description": "Review for low-moderate risk devices such as lubricant eye drops. At most 240 working days. Dossier screening clearance and GMP status are required; no full IMDRF dossier.",
+   "months_low": 9,
+   "months_high": 18,
+   "fee_usd_low": 750,
+   "fee_usd_high": 750,
+   "source": "https://nafdac.gov.ng/wp-content/uploads/Files/Resources/Guidelines/VBM_R&R/2025-2030/Guidelines-for-Registration-of-Medical-Devices-Including-In-Vitro-Diagnostics-IVDs-and-Related-Products.pdf",
+   "confidence": "low"
+  },
+  {
+   "key": "class_cd",
+   "label": "Class C/D full evaluation",
+   "description": "Full review of an IMDRF ToC technical dossier for viscoelastics, joint injections and other high-risk devices. At most 240 working days, plus GMP inspection scheduling.",
+   "months_low": 12,
+   "months_high": 24,
+   "fee_usd_low": 750,
+   "fee_usd_high": 750,
+   "source": "https://nafdac.gov.ng/wp-content/uploads/Files/Resources/Guidelines/VBM_R&R/2025-2030/Guidelines-for-Registration-of-Medical-Devices-Including-In-Vitro-Diagnostics-IVDs-and-Related-Products.pdf",
+   "confidence": "low"
+  },
+  {
+   "key": "class_bcd_reliance",
+   "label": "Class B-D reliance (SRA / IMDRF)",
+   "description": "Abridged review for devices approved by an SRA/WHO-listed authority or an IMDRF management committee member (e.g. CE, FDA, TGA, Health Canada, Japan) with an identical device. Target 60 working days.",
+   "months_low": 4,
+   "months_high": 9,
+   "fee_usd_low": 750,
+   "fee_usd_high": 750,
+   "source": "https://nafdac.gov.ng/wp-content/uploads/Files/Resources/Guidelines/VBM_R&R/2025-2030/Guidelines-for-Registration-and-Related-Activities-of-Drugs-Vaccines-and-Medical-Devices-Including-In-Vitro-Diagnostics-Using-the-Reliance-Procedure.pdf",
+   "confidence": "low"
+  },
+  {
+   "key": "who_pq_reliance",
+   "label": "WHO PQ collaborative registration",
+   "description": "For WHO-prequalified devices and IVDs. Same device as prequalified. Target 60 working days.",
+   "months_low": 3,
+   "months_high": 8,
+   "fee_usd_low": 750,
+   "fee_usd_high": 750,
+   "source": "https://nafdac.gov.ng/wp-content/uploads/Files/Resources/Guidelines/VBM_R&R/2025-2030/Guidelines-for-Registration-of-Medical-Devices-Including-in-Vitro-Diagnostics-Under-WHO-Collaborative-Registration-Procedure-CRP.pdf",
+   "confidence": "low"
+  },
+  {
+   "key": "fast_track",
+   "label": "Fast track",
+   "description": "Expedited processing at double the normal fee.",
+   "months_low": 4,
+   "months_high": 12,
+   "fee_usd_low": 1500,
+   "fee_usd_high": 1500,
+   "source": "https://nafdac.gov.ng/wp-content/uploads/Publications/Others/Press_Release_PDF/NAFDAC-2019-Tariff_Final_Combined.pdf",
+   "confidence": "low"
+  }
+ ],
+ "documents": [
+  {
+   "name": "Email request for a dossier upload link (md.vbmrr@nafdac.gov.ng)",
+   "applies": "all",
+   "match": null,
+   "note": null,
+   "source": "https://nafdac.gov.ng/wp-content/uploads/Files/Resources/Guidelines/VBM_R&R/2025-2030/Guidelines-for-Registration-of-Medical-Devices-Including-In-Vitro-Diagnostics-IVDs-and-Related-Products.pdf"
+  },
+  {
+   "name": "Dossier screening clearance",
+   "applies": "all",
+   "match": null,
+   "note": "Moderate- and high-risk devices",
+   "source": "https://nafdac.gov.ng/wp-content/uploads/Files/Resources/Guidelines/VBM_R&R/2025-2030/Guidelines-for-Registration-of-Medical-Devices-Including-In-Vitro-Diagnostics-IVDs-and-Related-Products.pdf"
+  },
+  {
+   "name": "Application letter to the Director-General, NAFDAC (Attn: VBM-R&RA)",
+   "applies": "all",
+   "match": null,
+   "note": null,
+   "source": "https://nafdac.gov.ng/wp-content/uploads/Files/Resources/Guidelines/VBM_R&R/2025-2030/Guidelines-for-Registration-of-Medical-Devices-Including-In-Vitro-Diagnostics-IVDs-and-Related-Products.pdf"
+  },
+  {
+   "name": "NAPAMS application per device, group, family or system",
+   "applies": "all",
+   "match": null,
+   "note": null,
+   "source": "https://nafdac.gov.ng/wp-content/uploads/Files/Resources/Guidelines/VBM_R&R/2025-2030/Guidelines-for-General-Grouping-of-Medical-Devices-Including-In-Vitro-Diagnostics.pdf"
+  },
+  {
+   "name": "Notarised declaration (Appendix 1)",
+   "applies": "all",
+   "match": null,
+   "note": "Notarised by a notary in Nigeria",
+   "source": "https://nafdac.gov.ng/wp-content/uploads/Files/Resources/Guidelines/VBM_R&R/2025-2030/Guidelines-for-Registration-of-Medical-Devices-Including-In-Vitro-Diagnostics-IVDs-and-Related-Products.pdf"
+  },
+  {
+   "name": "Power of attorney from the manufacturer, or contract manufacturing agreement",
+   "applies": "all",
+   "match": null,
+   "note": "Notarised in the country of manufacture, valid at least 5 years",
+   "source": "https://nafdac.gov.ng/wp-content/uploads/Files/Resources/Guidelines/VBM_R&R/2025-2030/Guidelines-for-Registration-of-Medical-Devices-Including-In-Vitro-Diagnostics-IVDs-and-Related-Products.pdf"
+  },
+  {
+   "name": "CAC certificate of incorporation of the Nigerian applicant",
+   "applies": "all",
+   "match": null,
+   "note": null,
+   "source": "https://nafdac.gov.ng/wp-content/uploads/Files/Resources/Guidelines/VBM_R&R/2025-2030/Guidelines-for-Registration-of-Medical-Devices-Including-In-Vitro-Diagnostics-IVDs-and-Related-Products.pdf"
+  },
+  {
+   "name": "Certificate of manufacture and free sale / free sale certificate",
+   "applies": "all",
+   "match": null,
+   "note": "Authenticated by the Nigerian embassy or high commission",
+   "source": "https://nafdac.gov.ng/wp-content/uploads/Files/Resources/Guidelines/VBM_R&R/2025-2030/Guidelines-for-Registration-of-Medical-Devices-Including-In-Vitro-Diagnostics-IVDs-and-Related-Products.pdf"
+  },
+  {
+   "name": "Comprehensive certificate of analysis",
+   "applies": "all",
+   "match": null,
+   "note": null,
+   "source": "https://nafdac.gov.ng/wp-content/uploads/Files/Resources/Guidelines/VBM_R&R/2025-2030/Guidelines-for-Registration-of-Medical-Devices-Including-In-Vitro-Diagnostics-IVDs-and-Related-Products.pdf"
+  },
+  {
+   "name": "Nigerian trademark registration of the brand (Class 10)",
+   "applies": "all",
+   "match": null,
+   "note": null,
+   "source": "https://nafdac.gov.ng/wp-content/uploads/Files/Resources/Guidelines/VBM_R&R/2025-2030/Guidelines-for-Registration-and-Related-Activities-of-Drugs-Vaccines-and-Medical-Devices-Including-In-Vitro-Diagnostics-Using-the-Reliance-Procedure.pdf"
+  },
+  {
+   "name": "Label artwork",
+   "applies": "all",
+   "match": null,
+   "note": null,
+   "source": "https://nafdac.gov.ng/wp-content/uploads/Files/Resources/Guidelines/VBM_R&R/2025-2030/Guidelines-for-Registration-of-Medical-Devices-Including-In-Vitro-Diagnostics-IVDs-and-Related-Products.pdf"
+  },
+  {
+   "name": "Instructions for use",
+   "applies": "all",
+   "match": null,
+   "note": null,
+   "source": "https://nafdac.gov.ng/wp-content/uploads/Files/Resources/Guidelines/VBM_R&R/2025-2030/Guidelines-for-Registration-of-Medical-Devices-Including-In-Vitro-Diagnostics-IVDs-and-Related-Products.pdf"
+  },
+  {
+   "name": "Letter inviting NAFDAC to inspect the factory",
+   "applies": "all",
+   "match": null,
+   "note": null,
+   "source": "https://nafdac.gov.ng/wp-content/uploads/Files/Resources/Guidelines/VBM_R&R/2025-2030/Guidelines-for-Registration-of-Medical-Devices-Including-In-Vitro-Diagnostics-IVDs-and-Related-Products.pdf"
+  },
+  {
+   "name": "QMS certificate (ISO 13485:2016)",
+   "applies": "all",
+   "match": null,
+   "note": null,
+   "source": "https://nafdac.gov.ng/wp-content/uploads/Files/Resources/Guidelines/DER_Guidelines/Medical_Devices_2025/NAFDAC-Good-Manufacturing-Practice-GMP-for-Medical-Devices-IVDs-and-Related-Products-Guidelines-2024.pdf"
+  },
+  {
+   "name": "Declaration of conformity (Essential Principles, class, GMDN code)",
+   "applies": "all",
+   "match": null,
+   "note": null,
+   "source": "https://nafdac.gov.ng/wp-content/uploads/Files/Resources/Guidelines/VBM_R&R/2025-2030/Guidelines-for-Registration-of-Medical-Devices-Including-In-Vitro-Diagnostics-IVDs-and-Related-Products.pdf"
+  },
+  {
+   "name": "Certificates of compliance with recognised standards",
+   "applies": "all",
+   "match": null,
+   "note": "Where available",
+   "source": "https://nafdac.gov.ng/wp-content/uploads/Files/Resources/Note_To_Industry_2024/NAFDAC-List-of-Recognized-Standards-for-Medical-Devices.pdf"
+  },
+  {
+   "name": "nIVD technical dossier in IMDRF ToC format",
+   "applies": "all",
+   "match": null,
+   "note": "Class C and D",
+   "source": "https://nafdac.gov.ng/wp-content/uploads/Files/Resources/Guidelines/VBM_R&R/Guidelines-for-Compilation-of-a-Product-Dossier-for-Registration-of-Non-In-Vitro-Diagnostic-nIVD-ToC.pdf"
+  },
+  {
+   "name": "IVD technical dossier in IMDRF ToC format",
+   "applies": "all",
+   "match": null,
+   "note": "Class C and D IVDs",
+   "source": "https://nafdac.gov.ng/wp-content/uploads/Files/Resources/Guidelines/VBM_R&R/2025-2030/Guidelines-for-Compilation-of-Product-Dossier-for-Registration-of-IVDs-IMDRF-ToC.pdf"
+  },
+  {
+   "name": "Post-market surveillance plan",
+   "applies": "all",
+   "match": null,
+   "note": null,
+   "source": "https://nafdac.gov.ng/wp-content/uploads/Files/Resources/Guidelines/VBM_R&R/2025-2030/Guidelines-for-Registration-of-Medical-Devices-Including-In-Vitro-Diagnostics-IVDs-and-Related-Products.pdf"
+  },
+  {
+   "name": "Registration samples with cover letter, CoA and proof of payment",
+   "applies": "all",
+   "match": null,
+   "note": null,
+   "source": "https://nafdac.gov.ng/wp-content/uploads/Files/Resources/Guidelines/VBM_R&R/2025-2030/Guidelines-for-Registration-of-Medical-Devices-Including-In-Vitro-Diagnostics-IVDs-and-Related-Products.pdf"
+  },
+  {
+   "name": "Reference regulator approvals and unredacted assessment reports",
+   "applies": "all",
+   "match": null,
+   "note": "Reliance route only",
+   "source": "https://nafdac.gov.ng/wp-content/uploads/Files/Resources/Guidelines/VBM_R&R/2025-2030/Guidelines-for-Registration-and-Related-Activities-of-Drugs-Vaccines-and-Medical-Devices-Including-In-Vitro-Diagnostics-Using-the-Reliance-Procedure.pdf"
+  },
+  {
+   "name": "WHO PQ listing and PQ holder consent",
+   "applies": "all",
+   "match": null,
+   "note": "WHO CRP route only",
+   "source": "https://nafdac.gov.ng/wp-content/uploads/Files/Resources/Guidelines/VBM_R&R/2025-2030/Guidelines-for-Registration-of-Medical-Devices-Including-in-Vitro-Diagnostics-Under-WHO-Collaborative-Registration-Procedure-CRP.pdf"
+  },
+  {
+   "name": "Clean Report of Inspection and Analysis (CRIA)",
+   "applies": "all",
+   "match": null,
+   "note": "Shipments from China or India",
+   "source": "https://nafdac.gov.ng/regulatory-resources/pre-shipment-inspection-and-testing-agents/"
+  }
+ ]
+}

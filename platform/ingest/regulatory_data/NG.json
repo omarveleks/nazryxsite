@@ -1,0 +1,727 @@
+{
+ "country": "NG",
+ "regulator": "National Agency for Food and Drug Administration and Control (NAFDAC) – https://nafdac.gov.ng",
+ "checked": "2026-10",
+ "facts": [
+  {
+   "topic": "Route",
+   "applies": "all",
+   "match": null,
+   "title": "Regulator and legal basis",
+   "body": "NAFDAC registers medicines under the NAFDAC Act (Cap. N1, LFN 2004), the Food, Drugs and Related Products (Registration, etc.) Act (Cap. F33) and the Drugs and Related Products Registration Regulations, 2021 (S.I. 64 of 2021). No medicine may be imported, sold or advertised in Nigeria unless it is registered. Applications run on the NAPAMS portal (registration.nafdac.gov.ng). WHO reconfirmed NAFDAC at Maturity Level 3 in June 2025.",
+   "source": "https://faolex.fao.org/docs/pdf/nig188313.pdf",
+   "confidence": "high"
+  },
+  {
+   "topic": "Route",
+   "applies": "all",
+   "match": null,
+   "title": "Steps for an imported medicine",
+   "body": "1) Dossier screening clearance on the Dossier Management System (DMS). 2) Upload documents on NAPAMS. 3) Label vetting and a permit to import registration samples. 4) Lab samples. 5) GMP status of the foreign site. 6) Approval by the Food and Drug Registration Committee (FDRC). 7) Electronic certificate with a NAFDAC Reg. No.",
+   "source": "https://nafdac.gov.ng/wp-content/uploads/Files/Resources/Guidelines/DR&R_2025/Guidelines-for-Registration-of-Imported-Drug-Products-in-Nigeria-Human-and-Veterinary-Drugs.pdf",
+   "confidence": "high"
+  },
+  {
+   "topic": "Route",
+   "applies": "all",
+   "match": null,
+   "title": "Dossier windows and caps",
+   "body": "New CTD dossiers are accepted only in submission windows: NAFDAC aims for three a year, and each window closes once 300 dossiers are received. New manufacturers may file up to 3 dossiers per window. Rejected dossiers can be resubmitted in the next window. Products on the import prohibition or ceiling lists are rejected automatically.",
+   "source": "https://nafdac.gov.ng/regulatory-resources/frequently-asked-questions-faqs-on-dossier-submission/",
+   "confidence": "medium"
+  },
+  {
+   "topic": "Route",
+   "applies": "all",
+   "match": null,
+   "title": "Risk-based review pathways",
+   "body": "Dossiers are sorted into low, medium or high risk. Low risk covers SRA/WHO-ML3 products with shareable unredacted reports, WHO PQ/CRP, WAHO and Swissmedic MAGHP products, and topical or GI-only products. A new manufacturer from a non-SRA, non-ML3 country, a new dosage form or a new molecule is high risk and gets a full review. Liquids with glycerin, propylene glycol or sorbitol (DEG/EG risk) are always high risk.",
+   "source": "https://nafdac.gov.ng/wp-content/uploads/Files/Resources/Guidelines/DR&R_2025/Revised-Guidelines-for-Risk-Categorization-of-Product-Dossiers-for-the-Registration-of-Drug-Products-for-Human-Use.pdf",
+   "confidence": "high"
+  },
+  {
+   "topic": "Route",
+   "applies": "all",
+   "match": null,
+   "title": "Reliance: who NAFDAC relies on",
+   "body": "Reliance directive (11 Oct 2025): WHO-listed authorities, ML3/ML4 regulators, ICH members, WHO PQ and the WHO CRP, WAHO/ECOWAS-MRH and AMRH outputs. The product must be identical to the reference approval (same sites, specs, product information). NAFDAC keeps the right to decide and may still test samples.",
+   "source": "https://nafdac.gov.ng/wp-content/uploads/Files/Resources/Regulatory_Directive/2025-2030/REGULATORY-DIRECTIVE-ON-REGULATORY-RELIANCE-.pdf",
+   "confidence": "high"
+  },
+  {
+   "topic": "Route",
+   "applies": "all",
+   "match": null,
+   "title": "Reliance and CRP: 60 working days",
+   "body": "Under SRA reliance or the WHO Collaborative Registration Procedure, NAFDAC targets a decision within 60 working days (about 90 calendar days) of regulatory time. The product must have been approved by the reference authority for more than 6 months. Fees are the same as for a normal imported product. Reliance still needs a full CTD, unredacted assessment reports, lab samples and a NAFDAC GMP categorisation.",
+   "source": "https://nafdac.gov.ng/wp-content/uploads/Files/Resources/Guidelines/DR&R_2025/Guidelines-For-Registration-And-Related-Activities-Of-Drugs-Vaccines-And-In-Vitro-Diagnostics-Using-The-Reliance-Procedure.pdf",
+   "confidence": "high"
+  },
+  {
+   "topic": "Route",
+   "applies": "all",
+   "match": null,
+   "title": "Ceiling list: local production only",
+   "body": "36 medicines can only be registered as made in Nigeria (list of Nov 2021, updated Oct 2024). No new registration, renewal or variation is processed for imported versions. The list covers common generics including albendazole, amlodipine, amoxicillin (and oral co-amoxiclav), ampicillin, ampicillin/cloxacillin, bisacodyl, chlorphenamine, cimetidine, ciprofloxacin, cyproheptadine, diazepam, erythromycin, griseofulvin, oral hyoscine butylbromide, ibuprofen and its FDCs, indometacin, mebendazole, metformin, oral omeprazole, paracetamol FDCs, piperaquine, oral piroxicam, prednisolone tablets, salbutamol (not inhalers), sulfadoxine/pyrimethamine, tetracycline, oral vitamin C, hand sanitisers and some topical products.",
+   "source": "https://nafdac.gov.ng/wp-content/uploads/Files/Resources/Note_To_Industry_2024/Updated-NAFDAC-Ceiling-List.pdf",
+   "confidence": "high"
+  },
+  {
+   "topic": "Route",
+   "applies": "all",
+   "match": null,
+   "title": "5+5 policy: migrate to local production",
+   "body": "Since 2019 every imported registration carries the 5+5 condition: by year 4 of the first 5-year licence the foreign maker must submit a blueprint for local manufacture or a Nigerian contract partner. NAFDAC tracks progress during the second 5 years and can deregister. 29 products (e.g. common antacids, cimetidine, ciprofloxacin, diclofenac, omeprazole, ORS) are on the 5+5 list and are not renewed as imports.",
+   "source": "https://nafdac.gov.ng/five-plus-five-year-validity-migration-to-local-production/",
+   "confidence": "high"
+  },
+  {
+   "topic": "Route",
+   "applies": "all",
+   "match": null,
+   "title": "One site, one brand per product",
+   "body": "An importer may not bring in the same product from more than one manufacturing site unless it is a recognised multinational or the extra site comes through a collaborative (reliance) procedure. The same product from the same maker may not be imported under different brand names. Fixed-dose combinations need a pharmacopoeial monograph or proof that each component adds benefit; NAFDAC has discontinued several FDCs.",
+   "source": "https://faolex.fao.org/docs/pdf/nig188313.pdf",
+   "confidence": "high"
+  },
+  {
+   "topic": "Timeline",
+   "applies": "all",
+   "match": null,
+   "title": "Official target: 240 working days",
+   "body": "Since 1 May 2025 the target for new, renewal and variation applications for drugs, vaccines, biologics and devices is 240 working days (about 11-12 months), up from 120. The clock stops whenever NAFDAC issues a compliance query; unanswered queries close the file after 90 working days. The older service charter's 90-day pledge is out of date.",
+   "source": "https://nafdac.gov.ng/wp-content/uploads/Files/Resources/Regulatory_Directive/2025-2030/Regulatory-Directive-on-Revised-Registration-Timelines.pdf",
+   "confidence": "high"
+  },
+  {
+   "topic": "Timeline",
+   "applies": "all",
+   "match": null,
+   "title": "Foreign GMP inspections are scheduled",
+   "body": "NAFDAC publishes a risk-based plan of foreign sites to inspect, with high-risk sites scheduled months ahead. Registration waits for a satisfactory GMP outcome, so inspection scheduling often drives the real timeline more than dossier review.",
+   "source": "https://nafdac.gov.ng/regulatory-resources/foreign-gmp-plan/",
+   "confidence": "medium"
+  },
+  {
+   "topic": "Fees",
+   "applies": "all",
+   "match": null,
+   "title": "Registration fee: USD 1,200-1,280",
+   "body": "Imported prescription medicine: USD 1,280 if the product can be made in Nigeria (POM 1) or USD 1,200 if there is no local facility (POM 2); OTC USD 967. At NGN 1,330/USD that is about NGN 1.60-1.70m (OTC NGN 1.29m). Made-in-Nigeria: NGN 80,000. Dollar fees are paid in the naira equivalent. The fee includes lab analysis, the certificate and the sample import permit. The tariff in force dates from 31 Jan 2020.",
+   "source": "https://nafdac.gov.ng/wp-content/uploads/Publications/Others/Press_Release_PDF/NAFDAC-2019-Tariff_Final_Combined.pdf",
+   "confidence": "medium"
+  },
+  {
+   "topic": "Fees",
+   "applies": "all",
+   "match": null,
+   "title": "Renewal, site and agent changes",
+   "body": "Renewal costs 80% of the new-registration fee (about USD 960-1,024, NGN 1.28-1.36m). Adding or changing a source/site costs the same as a new registration. Changing the local agent (agencyship) costs 50% of the registration fee. Late renewal of a foreign product is charged NGN 537,500 (about USD 404).",
+   "source": "https://nafdac.gov.ng/wp-content/uploads/Publications/Others/Press_Release_PDF/NAFDAC-2019-Tariff_Final_Combined.pdf",
+   "confidence": "medium"
+  },
+  {
+   "topic": "Fees",
+   "applies": "all",
+   "match": null,
+   "title": "Foreign GMP inspection: USD 10,989 per site",
+   "body": "A NAFDAC inspection of a foreign pharmaceutical site costs USD 10,989 per site (about NGN 14.6m) and is valid 3 years. A risk-based desk review for a maker using an already-inspected foreign site costs USD 5,000 (about NGN 6.65m). The tariff does not say whether inspector travel is charged on top.",
+   "source": "https://nafdac.gov.ng/wp-content/uploads/Publications/Others/Press_Release_PDF/NAFDAC-2019-Tariff_Final_Combined.pdf",
+   "confidence": "medium"
+  },
+  {
+   "topic": "Fees",
+   "applies": "all",
+   "match": null,
+   "title": "Other fees and VAT",
+   "body": "Fast-track processing costs double the normal fee. A yearly pharmacovigilance/post-marketing fee of 10% of the registration fee applies. Variant change for medicines USD 614.30 (NGN 817,000); label, design or pack-size change USD 206.25 (NGN 274,000). NAFDAC fees attract 7.5% VAT on top.",
+   "source": "https://nafdac.gov.ng/wp-content/uploads/Publications/Others/Press_Release_PDF/NAFDAC-2019-Tariff_Final_Combined.pdf",
+   "confidence": "medium"
+  },
+  {
+   "topic": "Local representative",
+   "applies": "all",
+   "match": null,
+   "title": "Applicant must be a Nigerian company",
+   "body": "The applicant must be incorporated with the Corporate Affairs Commission (CAC); a foreign maker cannot apply directly. It needs a superintendent pharmacist with a current PCN annual licence and PCN-registered premises. Brand names must be registered with the Nigerian Trademarks Registry (Class 5).",
+   "source": "https://nafdac.gov.ng/wp-content/uploads/Files/Resources/Guidelines/DR&R_2025/Guidelines-for-Registration-of-Imported-Drug-Products-in-Nigeria-Human-and-Veterinary-Drugs.pdf",
+   "confidence": "high"
+  },
+  {
+   "topic": "Local representative",
+   "applies": "all",
+   "match": null,
+   "title": "Power of attorney rules",
+   "body": "If the applicant does not own the brand, the manufacturer issues a power of attorney signed by its MD, GM, chairman or president. It must name the products, state 'Authority to register product with NAFDAC', state who owns the trademark, be notarised in the country of manufacture and be valid at least 5 years. If the applicant owns the brand, a notarised contract manufacturing agreement is used instead.",
+   "source": "https://nafdac.gov.ng/wp-content/uploads/Files/Resources/Guidelines/DR&R_2025/Guidelines-for-Registration-of-Imported-Drug-Products-in-Nigeria-Human-and-Veterinary-Drugs.pdf",
+   "confidence": "high"
+  },
+  {
+   "topic": "Local representative",
+   "applies": "all",
+   "match": null,
+   "title": "Resident QPPV",
+   "body": "Every marketing authorisation holder must appoint a Qualified Person for Pharmacovigilance who lives and works in Nigeria, and notify NAFDAC with CV and training records. Failure can lead to suspension or non-renewal.",
+   "source": "https://nafdac.gov.ng/wp-content/uploads/Files/Resources/Regulatory_Directive/2025-2030/Regulatory-Directive-on-QPPV-Appointment.pdf",
+   "confidence": "high"
+  },
+  {
+   "topic": "Site and GMP",
+   "applies": "all",
+   "match": null,
+   "title": "NAFDAC inspects foreign sites",
+   "body": "The manufacturer sends a letter inviting NAFDAC to inspect the factory and fills in the facility status verification form. All sites are inspected once fees are paid; an SRA or home-authority GMP certificate is used to rank the site as lower priority so registration can proceed. NAFDAC has no mutual recognition agreement with any regulator for inspections.",
+   "source": "https://nafdac.gov.ng/wp-content/uploads/Files/Resources/Guidelines/DR&R_2025/Guidelines-For-Registration-And-Related-Activities-Of-Drugs-Vaccines-And-In-Vitro-Diagnostics-Using-The-Reliance-Procedure.pdf",
+   "confidence": "high"
+  },
+  {
+   "topic": "Site and GMP",
+   "applies": "all",
+   "match": null,
+   "title": "Approved API and excipient sources",
+   "body": "From 2025 only dossiers whose APIs come from WHO-prequalified, CEP-certified, PIC/S- or SRA/WLA-inspected sources (or are tested by an ISO 17025 lab) are accepted. Excipients must be pharmacopoeial grade from ISO 9001 or EXCiPACT-certified sites. Registered products must switch to such sources by the end of January 2027.",
+   "source": "https://nafdac.gov.ng/revised-sources-of-api-and-excipients/",
+   "confidence": "high"
+  },
+  {
+   "topic": "Dossier",
+   "applies": "all",
+   "match": null,
+   "title": "CTD with Nigerian Module 1",
+   "body": "Submit ICH CTD Modules 1-5. Module 1 holds the application letter, CAC certificate, power of attorney, notarised declaration, CoPP, GMP certificate, manufacturing licence, trademark evidence, PCN licences, GMP invitation letter, CEP or APIMF letter of access, biowaiver requests, SmPC, labels, PIL, BTIF and QIS. Dossiers not in CTD format, incomplete or zipped uploads are rejected.",
+   "source": "https://nafdac.gov.ng/wp-content/uploads/Files/Resources/Guidelines/DR_And_R_Guidelines/Guidelines-For-The-Preparation-of-Product-Dossiers-in-the-Common-Technical-Document-CTD-Form.pdf",
+   "confidence": "high"
+  },
+  {
+   "topic": "Dossier",
+   "applies": "all",
+   "match": null,
+   "title": "Embassy-authenticated certificates",
+   "body": "The WHO-format CoPP, the GMP certificate and the manufacturing licence/free sale certificate must be issued by the home regulator and authenticated by the Nigerian embassy or high commission. Where there is none, a Commonwealth or ECOWAS mission can authenticate. The declaration is notarised by a notary in Nigeria.",
+   "source": "https://nafdac.gov.ng/wp-content/uploads/Files/Resources/Guidelines/DR&R_2025/Guidelines-for-Registration-of-Imported-Drug-Products-in-Nigeria-Human-and-Veterinary-Drugs.pdf",
+   "confidence": "high"
+  },
+  {
+   "topic": "Dossier",
+   "applies": "all",
+   "match": null,
+   "title": "Drug master file mandatory",
+   "body": "From 7 Aug 2026 every new human-medicine dossier must include the API maker's DMF in CTD format, in English, in the S part. With a CEP or WHO CPQ the closed part is not needed. With an APIMF/DMF route the holder sends the closed part directly to NAFDAC with a letter of access. Dossiers without it are rejected at screening.",
+   "source": "https://nafdac.gov.ng/wp-content/uploads/Files/Resources/Regulatory_Directive/2026-2031/Regulatory-Directive-On-Mandatory-Submission-Of-Drug-Master-File-DMF-In-Product-Dossiers.pdf",
+   "confidence": "high"
+  },
+  {
+   "topic": "Dossier",
+   "applies": "all",
+   "match": null,
+   "title": "New molecules need local-population data",
+   "body": "For a new chemical entity there must be clinical trial evidence in the relevant population, reviewed by the Drug Evaluation and Research directorate. Under reliance a bridging study may be enough. A clinical trial application takes up to 60 working days excluding clock stops.",
+   "source": "https://nafdac.gov.ng/wp-content/uploads/Files/Resources/Guidelines/DR&R_2025/Guidelines-for-Registration-of-Imported-Drug-Products-in-Nigeria-Human-and-Veterinary-Drugs.pdf",
+   "confidence": "high"
+  },
+  {
+   "topic": "Bioequivalence",
+   "applies": "all",
+   "match": null,
+   "title": "BE now required for generics",
+   "body": "NAFDAC is phasing in mandatory bioequivalence for new registrations and renewals, starting with antimalarials, antibiotics and NTD medicines. Imported products need the full BE report (deadline January 2026). For renewals, the BE protocol is due no later than 18 months before the licence expires.",
+   "source": "https://nafdac.gov.ng/note-to-industry-on-requirement-for-bioequivalence-study/",
+   "confidence": "medium"
+  },
+  {
+   "topic": "Bioequivalence",
+   "applies": "all",
+   "match": null,
+   "title": "Comparator and biowaivers",
+   "body": "Use the innovator product or a product on the WHO comparator list. BCS biowaivers apply only to Class I and III with similar dissolution and the same excipients. Oral solutions usually need no BE; suspensions do. For several strengths, run BE on the highest strength and request a biowaiver for the others.",
+   "source": "https://nafdac.gov.ng/regulatory-resources/frequently-asked-questions-faqs-on-dossier-submission/",
+   "confidence": "high"
+  },
+  {
+   "topic": "Stability",
+   "applies": "all",
+   "match": null,
+   "title": "Zone IVb: 30°C/75% RH",
+   "body": "Stability must be tested under Zone IVb conditions: long-term 30°C ± 2°C / 75% ± 5% RH and accelerated 40°C / 75% RH, for every product marketed in Nigeria. Products not needing temperature control must be labelled 'Store below 30°C'; terms like 'room temperature' are not allowed.",
+   "source": "https://faolex.fao.org/docs/pdf/nig188313.pdf",
+   "confidence": "high"
+  },
+  {
+   "topic": "Samples",
+   "applies": "all",
+   "match": null,
+   "title": "Lab testing by NAFDAC",
+   "body": "After screening, NAFDAC issues a permit to import registration samples. Submit them with a cover letter, proof of payment, the permit and a CoA on the lab's letterhead (brand, batch, dates, analyst's signature). Lab fees are already in the registration fee. NAFDAC may test samples even on reliance routes.",
+   "source": "https://nafdac.gov.ng/wp-content/uploads/Files/Resources/Guidelines/DR&R_2025/Guidelines-for-Registration-of-Imported-Drug-Products-in-Nigeria-Human-and-Veterinary-Drugs.pdf",
+   "confidence": "high"
+  },
+  {
+   "topic": "Labelling",
+   "applies": "all",
+   "match": null,
+   "title": "English labels with NAFDAC number",
+   "body": "The pack must leave space for the NAFDAC Reg. No. and show brand and generic name (generic name directly under the brand), maker's name and full address, batch, manufacturing and expiry dates, strength, net content, storage conditions and warnings. Labels in a foreign language need English on the label and PIL. Names or packs that resemble a registered product are refused. Advertising needs a separate NAFDAC approval.",
+   "source": "https://nafdac.gov.ng/wp-content/uploads/Files/Resources/Guidelines/DR&R_2025/Guidelines-for-Registration-of-Imported-Drug-Products-in-Nigeria-Human-and-Veterinary-Drugs.pdf",
+   "confidence": "high"
+  },
+  {
+   "topic": "Labelling",
+   "applies": "all",
+   "match": null,
+   "title": "Label format details",
+   "body": "Expiry dates must be numeric (e.g. 12/2027), not '2027 DEC'. Blisters show name, strength, form, maker, batch and un-coded manufacturing and expiry dates. List excipients of known safety concern; parenteral and topical labels list all excipients. OTC packs also carry indications and directions for use.",
+   "source": "https://nafdac.gov.ng/wp-content/uploads/Files/Resources/Guidelines/DR_And_R_Guidelines/Label-Guidance-For-Pharmaceutical-Products.pdf",
+   "confidence": "high"
+  },
+  {
+   "topic": "Marking",
+   "applies": "all",
+   "match": null,
+   "title": "Mobile Authentication Service (MAS)",
+   "body": "MAS scratch-panel PINs, checked by free SMS, have been required on antimalarials and antibiotics since 2012. Five approved providers supply the codes. NAFDAC has said compliance was incomplete despite several deadlines, so check the current enforcement position for your class.",
+   "source": "https://nafdac.gov.ng/our-services/pharmacovigilance-post-market-surveillance/mobile-authentication-service-mas/",
+   "confidence": "medium"
+  },
+  {
+   "topic": "Marking",
+   "applies": "all",
+   "match": null,
+   "title": "GS1 traceability being phased in",
+   "body": "NAFDAC published a Pharmaceutical Products Traceability Regulation in October 2024, based on GS1 2D DataMatrix codes checked against the NAFDAC Green Book. Rollout is by programme: COVID-19, HIV/TB/malaria and narcotics pilots, then mother-and-child health products from 2025. We found no single date when all imported medicines must be serialised.",
+   "source": "https://nafdac.gov.ng/nafdac-traceability-find-out-all-you-need-to-know-here/",
+   "confidence": "medium"
+  },
+  {
+   "topic": "Pricing",
+   "applies": "all",
+   "match": null,
+   "title": "No price approval",
+   "body": "We found no price-registration or price-cap step in NAFDAC's registration rules. Prices are set by the market. A WHO/HAI survey (2004 data) found typical margins of about 20% for the importer, 10% for the distributor and 30% for the retailer, with large variation.",
+   "source": "https://www.afro.who.int/sites/default/files/2017-06/nigeria_medicine_prices.pdf",
+   "confidence": "medium"
+  },
+  {
+   "topic": "Pricing",
+   "applies": "all",
+   "match": null,
+   "title": "VAT on medicines: zero-rated",
+   "body": "The Nigeria Tax Act 2025 (in force from 1 Jan 2026, s.187) lists all medical and pharmaceutical products, and medical equipment, as zero-rated (0% VAT with input VAT recoverable). They were previously VAT-exempt. Standard VAT is 7.5%.",
+   "source": "https://www.mondaq.com/nigeria/tax-authorities/1793598/examination-of-the-value-added-tax-provisions-under-the-nigeria-tax-act-2025",
+   "confidence": "medium"
+  },
+  {
+   "topic": "Import",
+   "applies": "all",
+   "match": null,
+   "title": "Import prohibition list",
+   "body": "The federal import prohibition list bans imports of some finished medicines regardless of registration, including paracetamol tablets and syrups, co-trimoxazole, metronidazole and chloroquine tablets and syrups, common haematinics and multivitamins, plain aspirin, magnesium trisilicate, piperazine, levamisole, pyrantel, clotrimazole cream and IV fluids.",
+   "source": "https://www.trade.gov/country-commercial-guides/nigeria-prohibited-and-restricted-imports",
+   "confidence": "medium"
+  },
+  {
+   "topic": "Import",
+   "applies": "all",
+   "match": null,
+   "title": "Shipment clearance",
+   "body": "Each commercial shipment is cleared through the Single Window (Form M using the NAFDAC e-licence) and NAFDAC's PIDCARMS port portal. Documents include the registration evidence, manufacturer's CoA, PAAR, bill of lading, PCN licences and an indemnity letter. NAFDAC inspects and samples the goods at the port or warehouse before release. Port inspection costs NGN 40,000 (POM) or NGN 148,500 (OTC) per 20-ft container.",
+   "source": "https://nafdac.gov.ng/wp-content/uploads/Files/Resources/Guidelines/PORTINSPECTION_GUIDELINES/2022_To_2027/Guidelines-For-Clearing-Imported-Finished-Pharmaceutical-Human-And-Veterinary-Products-at-Ports-of-Entry-in-Nigeria.pdf",
+   "confidence": "high"
+  },
+  {
+   "topic": "Import",
+   "applies": "all",
+   "match": null,
+   "title": "Pre-shipment CRIA for India and China",
+   "body": "Medicines shipped from India or China need a Clean Report of Inspection and Analysis (CRIA) from a NAFDAC-approved pre-shipment agent. Importing without one is charged NGN 1,000,000.",
+   "source": "https://nafdac.gov.ng/regulatory-resources/pre-shipment-inspection-and-testing-agents/",
+   "confidence": "high"
+  },
+  {
+   "topic": "Import",
+   "applies": "all",
+   "match": null,
+   "title": "Duty on finished medicines",
+   "body": "Nigeria applies the ECOWAS CET. World Bank WITS data show a 0% applied MFN duty on retail-packed medicaments (HS 3004, latest year 2023). Customs levies and port charges come on top; we did not find an official 2026 schedule for them.",
+   "source": "https://wits.worldbank.org/tariff/trains/en/country/NGA/partner/WLD/product/300490",
+   "confidence": "medium"
+  },
+  {
+   "topic": "Import",
+   "applies": "class",
+   "match": "controlled",
+   "title": "Controlled substances",
+   "body": "Narcotics and controlled substances need a NAFDAC permit to import and a permit to clear on top of registration. Only the Federal Ministry of Health imports Schedule 1 narcotics, directly or through a contractor it appoints.",
+   "source": "https://nafdac.gov.ng/wp-content/uploads/Files/Resources/Guidelines/NARCOTICS_GUIDELINES/Guidelines-for-Obtaining-Permit-for-Importation-of-Schedule-1-Narcotic-Drugs.pdf",
+   "confidence": "high"
+  },
+  {
+   "topic": "After approval",
+   "applies": "all",
+   "match": null,
+   "title": "Validity and renewal",
+   "body": "A registration is valid 5 years. Apply for renewal on NAPAMS at least 6 months before expiry and send a PSUR to the PV directorate. You also need a fresh power of attorney (unless the old one is still valid), a list of approved variations, a PQR, the current QIS and new samples for imported products. Imports on the ceiling, 5+5 or prohibition lists are not renewed.",
+   "source": "https://nafdac.gov.ng/wp-content/uploads/Files/Resources/Guidelines/DR&R_2025/Guidelines-for-Renewal-of-Certificate-of-Registration-for-Drug-Products-Human-and-Vet.pdf",
+   "confidence": "high"
+  },
+  {
+   "topic": "After approval",
+   "applies": "all",
+   "match": null,
+   "title": "Variation categories",
+   "body": "Annual notification: file within 12 months of the change. Immediate notification: accepted if NAFDAC raises no objection within 30 working days. Minor and major variations need prior approval. A new API, strength, dosage form (e.g. IR to modified release) or route needs a new application.",
+   "source": "https://nafdac.gov.ng/wp-content/uploads/Files/Resources/Guidelines/DR_And_R_Guidelines/Guidelines-on-Variation-to-Registered-Pharmaceutical-Product.pdf",
+   "confidence": "high"
+  },
+  {
+   "topic": "After approval",
+   "applies": "all",
+   "match": null,
+   "title": "Pharmacovigilance reporting",
+   "body": "Fatal or life-threatening unexpected serious ADRs: initial report in 7 days, complete report 8 days later. Other serious ADRs: 15 days. Non-serious: 90 days. Products already authorised abroad send their latest PSUR/PBRER with the application or within 30 days. Every new application needs a risk management plan.",
+   "source": "https://nafdac.gov.ng/wp-content/uploads/Files/Resources/Regulatory_Directive/2026-2031/Regulatory-Directive-on-Reporting-timelines-Pharmacovigilance.pdf",
+   "confidence": "high"
+  }
+ ],
+ "routes": [
+  {
+   "key": "full",
+   "label": "Full review (national)",
+   "description": "Default route for imported generics. Dossier screening in a submission window, documents on NAPAMS, lab samples and a NAFDAC GMP inspection of the foreign site (USD 10,989 per site, on top of the fee). Official target 240 working days excluding clock stops; window waits and inspection scheduling make it longer in practice. Fee USD 1,200 (POM 2) to USD 1,280 (POM 1), about NGN 1.60-1.70m.",
+   "months_low": 14,
+   "months_high": 30,
+   "fee_usd_low": 1200,
+   "fee_usd_high": 1280,
+   "source": "https://nafdac.gov.ng/wp-content/uploads/Files/Resources/Guidelines/DR&R_2025/Guidelines-for-Registration-of-Imported-Drug-Products-in-Nigeria-Human-and-Veterinary-Drugs.pdf",
+   "confidence": "medium"
+  },
+  {
+   "key": "reliance",
+   "label": "SRA / WLA / ML3 reliance (abridged)",
+   "description": "For products approved by a WHO-listed authority, an ICH member or an ML3/ML4 regulator, registered there more than 6 months, with the same dossier and unredacted assessment reports. Abridged review; NAFDAC targets a decision in 60 working days (about 90 calendar days) of regulatory time. Lab samples and a GMP categorisation are still needed. Same fee as full review.",
+   "months_low": 5,
+   "months_high": 12,
+   "fee_usd_low": 1200,
+   "fee_usd_high": 1280,
+   "source": "https://nafdac.gov.ng/wp-content/uploads/Files/Resources/Guidelines/DR&R_2025/Guidelines-For-Registration-And-Related-Activities-Of-Drugs-Vaccines-And-In-Vitro-Diagnostics-Using-The-Reliance-Procedure.pdf",
+   "confidence": "medium"
+  },
+  {
+   "key": "who_crp",
+   "label": "WHO Collaborative Registration (CRP)",
+   "description": "For WHO-prequalified products (and SRA products via WHO's SRA CRP). The dossier must match the PQ file exactly. NAFDAC targets 60 working days (about 90 calendar days) after receiving WHO's documents. Samples are still tested. Same tariff as an imported product.",
+   "months_low": 4,
+   "months_high": 9,
+   "fee_usd_low": 1200,
+   "fee_usd_high": 1280,
+   "source": "https://www.nafdac.gov.ng/wp-content/uploads/Files/Resources/Guidelines/DR_And_R_Guidelines/Guidelines-For-Registration-of-Imported-Drugs-Vaccines-IVDs-Under-Collaborative-Registration-Procedure.pdf",
+   "confidence": "medium"
+  },
+  {
+   "key": "priority",
+   "label": "Fast-track / priority screening",
+   "description": "Fast-track processing is available at double the normal fee (about USD 2,400-2,560). Products for public-health emergencies, oncology and life-saving uses can be invited for priority dossier screening. NAFDAC publishes no separate timeline.",
+   "months_low": 6,
+   "months_high": 18,
+   "fee_usd_low": 2400,
+   "fee_usd_high": 2560,
+   "source": "https://nafdac.gov.ng/wp-content/uploads/Publications/Others/Press_Release_PDF/NAFDAC-2019-Tariff_Final_Combined.pdf",
+   "confidence": "low"
+  },
+  {
+   "key": "local",
+   "label": "Local or contract manufacture in Nigeria",
+   "description": "Register the product as made in Nigeria through your own plant or a Nigerian contract manufacturer. This is the only route for ceiling-list and 5+5 products. Transfers under the 5+5 policy are treated as low risk. The registration fee is NGN 80,000 (about USD 60); local GMP inspection fees are extra. A 2024 executive order removed duty and VAT on pharmaceutical raw materials and machinery for local makers.",
+   "months_low": 9,
+   "months_high": 24,
+   "fee_usd_low": 60,
+   "fee_usd_high": 60,
+   "source": "https://nafdac.gov.ng/wp-content/uploads/Files/Resources/Guidelines/DR&R_2025/Revised-Guidelines-for-Risk-Categorization-of-Product-Dossiers-for-the-Registration-of-Drug-Products-for-Human-Use.pdf",
+   "confidence": "low"
+  }
+ ],
+ "documents": [
+  {
+   "name": "Dossier screening clearance (DMS)",
+   "applies": "all",
+   "match": null,
+   "note": "Required before the NAPAMS application",
+   "source": "https://nafdac.gov.ng/wp-content/uploads/Files/Resources/Guidelines/DR&R_2025/Guidelines-for-Registration-of-Imported-Drug-Products-in-Nigeria-Human-and-Veterinary-Drugs.pdf"
+  },
+  {
+   "name": "Application letter to the Director-General, NAFDAC (Attn: DR&R)",
+   "applies": "all",
+   "match": null,
+   "note": null,
+   "source": "https://nafdac.gov.ng/wp-content/uploads/Files/Resources/Guidelines/DR&R_2025/Guidelines-for-Registration-of-Imported-Drug-Products-in-Nigeria-Human-and-Veterinary-Drugs.pdf"
+  },
+  {
+   "name": "NAPAMS online application form",
+   "applies": "all",
+   "match": null,
+   "note": "One form per product",
+   "source": "https://nafdac.gov.ng/wp-content/uploads/Files/Resources/Guidelines/DR&R_2025/Guidelines-for-Registration-of-Imported-Drug-Products-in-Nigeria-Human-and-Veterinary-Drugs.pdf"
+  },
+  {
+   "name": "Notarised declaration (Appendix I)",
+   "applies": "all",
+   "match": null,
+   "note": "Typed, signed and notarised by a notary in Nigeria",
+   "source": "https://nafdac.gov.ng/wp-content/uploads/Files/Resources/Guidelines/DR&R_2025/Guidelines-for-Registration-of-Imported-Drug-Products-in-Nigeria-Human-and-Veterinary-Drugs.pdf"
+  },
+  {
+   "name": "Power of attorney from the manufacturer",
+   "applies": "all",
+   "match": null,
+   "note": "Notarised in the country of manufacture, valid at least 5 years, states 'Authority to register product with NAFDAC'",
+   "source": "https://nafdac.gov.ng/wp-content/uploads/Files/Resources/Guidelines/DR&R_2025/Guidelines-for-Registration-of-Imported-Drug-Products-in-Nigeria-Human-and-Veterinary-Drugs.pdf"
+  },
+  {
+   "name": "Contract manufacturing agreement",
+   "applies": "all",
+   "match": null,
+   "note": "Instead of a power of attorney, where the applicant owns the brand",
+   "source": "https://nafdac.gov.ng/wp-content/uploads/Files/Resources/Guidelines/DR&R_2025/Guidelines-for-Registration-of-Imported-Drug-Products-in-Nigeria-Human-and-Veterinary-Drugs.pdf"
+  },
+  {
+   "name": "CAC certificate of incorporation of the Nigerian applicant",
+   "applies": "all",
+   "match": null,
+   "note": null,
+   "source": "https://nafdac.gov.ng/wp-content/uploads/Files/Resources/Guidelines/DR&R_2025/Guidelines-for-Registration-of-Imported-Drug-Products-in-Nigeria-Human-and-Veterinary-Drugs.pdf"
+  },
+  {
+   "name": "Manufacturing licence or certificate of free sale",
+   "applies": "all",
+   "match": null,
+   "note": "Authenticated by the Nigerian embassy or high commission",
+   "source": "https://nafdac.gov.ng/wp-content/uploads/Files/Resources/Guidelines/DR&R_2025/Guidelines-for-Registration-of-Imported-Drug-Products-in-Nigeria-Human-and-Veterinary-Drugs.pdf"
+  },
+  {
+   "name": "WHO-format Certificate of Pharmaceutical Product (CoPP)",
+   "applies": "all",
+   "match": null,
+   "note": "Authenticated by the Nigerian embassy or high commission",
+   "source": "https://nafdac.gov.ng/wp-content/uploads/Files/Resources/Guidelines/DR&R_2025/Guidelines-for-Registration-of-Imported-Drug-Products-in-Nigeria-Human-and-Veterinary-Drugs.pdf"
+  },
+  {
+   "name": "Valid GMP certificate of the manufacturing site",
+   "applies": "all",
+   "match": null,
+   "note": "Authenticated by the Nigerian embassy or high commission",
+   "source": "https://nafdac.gov.ng/wp-content/uploads/Files/Resources/Guidelines/DR&R_2025/Guidelines-for-Registration-of-Imported-Drug-Products-in-Nigeria-Human-and-Veterinary-Drugs.pdf"
+  },
+  {
+   "name": "Nigerian trademark registration of the brand (Class 5)",
+   "applies": "all",
+   "match": null,
+   "note": null,
+   "source": "https://nafdac.gov.ng/wp-content/uploads/Files/Resources/Guidelines/DR&R_2025/Guidelines-for-Registration-of-Imported-Drug-Products-in-Nigeria-Human-and-Veterinary-Drugs.pdf"
+  },
+  {
+   "name": "Superintendent pharmacist's PCN annual licence to practise",
+   "applies": "all",
+   "match": null,
+   "note": null,
+   "source": "https://nafdac.gov.ng/wp-content/uploads/Files/Resources/Guidelines/DR&R_2025/Guidelines-for-Registration-of-Imported-Drug-Products-in-Nigeria-Human-and-Veterinary-Drugs.pdf"
+  },
+  {
+   "name": "PCN certificate of registration/retention of premises",
+   "applies": "all",
+   "match": null,
+   "note": null,
+   "source": "https://nafdac.gov.ng/wp-content/uploads/Files/Resources/Guidelines/DR&R_2025/Guidelines-for-Registration-of-Imported-Drug-Products-in-Nigeria-Human-and-Veterinary-Drugs.pdf"
+  },
+  {
+   "name": "Letter inviting NAFDAC to inspect the factory",
+   "applies": "all",
+   "match": null,
+   "note": "Full factory address and contacts of the maker and the local agent",
+   "source": "https://nafdac.gov.ng/wp-content/uploads/Files/Resources/Guidelines/DR&R_2025/Guidelines-for-Registration-of-Imported-Drug-Products-in-Nigeria-Human-and-Veterinary-Drugs.pdf"
+  },
+  {
+   "name": "Facility status verification form (DER)",
+   "applies": "all",
+   "match": null,
+   "note": "For the risk-based GMP categorisation",
+   "source": "https://nafdac.gov.ng/wp-content/uploads/Files/Resources/Guidelines/DR&R_2025/Guidelines-For-Registration-And-Related-Activities-Of-Drugs-Vaccines-And-In-Vitro-Diagnostics-Using-The-Reliance-Procedure.pdf"
+  },
+  {
+   "name": "CTD dossier, Modules 1-5",
+   "applies": "all",
+   "match": null,
+   "note": null,
+   "source": "https://nafdac.gov.ng/wp-content/uploads/Files/Resources/Guidelines/DR_And_R_Guidelines/Guidelines-For-The-Preparation-of-Product-Dossiers-in-the-Common-Technical-Document-CTD-Form.pdf"
+  },
+  {
+   "name": "Quality Information Summary and QOS-PD (Word)",
+   "applies": "all",
+   "match": null,
+   "note": null,
+   "source": "https://nafdac.gov.ng/notice-on-new-window-for-dossier-submissions/"
+  },
+  {
+   "name": "Executed and blank batch manufacturing records (PDF)",
+   "applies": "all",
+   "match": null,
+   "note": null,
+   "source": "https://nafdac.gov.ng/notice-on-new-window-for-dossier-submissions/"
+  },
+  {
+   "name": "Drug master file, CEP or WHO CPQ for each API",
+   "applies": "all",
+   "match": null,
+   "note": "With APIMF/DMF: closed part sent by the holder plus a letter of access",
+   "source": "https://nafdac.gov.ng/wp-content/uploads/Files/Resources/Regulatory_Directive/2026-2031/Regulatory-Directive-On-Mandatory-Submission-Of-Drug-Master-File-DMF-In-Product-Dossiers.pdf"
+  },
+  {
+   "name": "Evidence of approved API and excipient sources",
+   "applies": "all",
+   "match": null,
+   "note": "WHO PQ, CEP, PIC/S or SRA site; excipients ISO 9001 or EXCiPACT",
+   "source": "https://nafdac.gov.ng/revised-sources-of-api-and-excipients/"
+  },
+  {
+   "name": "Zone IVb stability data (30°C/75% RH)",
+   "applies": "all",
+   "match": null,
+   "note": "At least 6 months long-term and 6 months accelerated data at submission",
+   "source": "https://nafdac.gov.ng/wp-content/uploads/Files/Resources/Guidelines/DR_And_R_Guidelines/Guidelines-For-The-Preparation-of-Product-Dossiers-in-the-Common-Technical-Document-CTD-Form.pdf"
+  },
+  {
+   "name": "Summary of Product Characteristics (SmPC)",
+   "applies": "all",
+   "match": null,
+   "note": null,
+   "source": "https://nafdac.gov.ng/wp-content/uploads/Files/Resources/Guidelines/DR_And_R_Guidelines/Guidelines-for-the-Preparation-of-Summary-of-Product-Characteristics-SmPC-for-Drug-Products-in-Nigeria-Human-Drugs.pdf"
+  },
+  {
+   "name": "Patient information leaflet",
+   "applies": "all",
+   "match": null,
+   "note": null,
+   "source": "https://nafdac.gov.ng/wp-content/uploads/Files/Resources/Guidelines/DR_And_R_Guidelines/Guidelines-For-The-Preparation-of-Product-Dossiers-in-the-Common-Technical-Document-CTD-Form.pdf"
+  },
+  {
+   "name": "Label artwork, inner and outer, with space for the NAFDAC Reg. No.",
+   "applies": "all",
+   "match": null,
+   "note": null,
+   "source": "https://nafdac.gov.ng/wp-content/uploads/Files/Resources/Guidelines/DR&R_2025/Guidelines-for-Registration-of-Imported-Drug-Products-in-Nigeria-Human-and-Veterinary-Drugs.pdf"
+  },
+  {
+   "name": "Bioequivalence study report and BTIF",
+   "applies": "class",
+   "match": "bioequivalence",
+   "note": null,
+   "source": "https://nafdac.gov.ng/note-to-industry-on-requirement-for-bioequivalence-study/"
+  },
+  {
+   "name": "Biowaiver request (BCS or additional strength)",
+   "applies": "class",
+   "match": "bioequivalence",
+   "note": "BCS Class I and III only",
+   "source": "https://nafdac.gov.ng/wp-content/uploads/Files/Resources/Guidelines/DR_And_R_Guidelines/Guidelines-For-The-Preparation-of-Product-Dossiers-in-the-Common-Technical-Document-CTD-Form.pdf"
+  },
+  {
+   "name": "EG/DEG test in specifications for high-risk solvents",
+   "applies": "all",
+   "match": null,
+   "note": "Liquids with glycerin, propylene glycol, sorbitol, PEG and similar",
+   "source": "https://nafdac.gov.ng/regulatory-resources/frequently-asked-questions-faqs-on-dossier-submission/"
+  },
+  {
+   "name": "Clinical trial reports in the relevant population",
+   "applies": "all",
+   "match": null,
+   "note": "New chemical entities only",
+   "source": "https://nafdac.gov.ng/wp-content/uploads/Files/Resources/Guidelines/DR&R_2025/Guidelines-for-Registration-of-Imported-Drug-Products-in-Nigeria-Human-and-Veterinary-Drugs.pdf"
+  },
+  {
+   "name": "Risk management plan",
+   "applies": "all",
+   "match": null,
+   "note": "All new applications",
+   "source": "https://nafdac.gov.ng/wp-content/uploads/Files/Resources/Regulatory_Directive/2025-2030/Regulatory-Directive-on-Risk-Management-Plan.pdf"
+  },
+  {
+   "name": "Latest PSUR/PBRER",
+   "applies": "all",
+   "match": null,
+   "note": "Products already authorised abroad",
+   "source": "https://nafdac.gov.ng/wp-content/uploads/Files/Resources/Regulatory_Directive/2026-2031/Regulatory-Directive-on-PSUR-PBRER.pdf"
+  },
+  {
+   "name": "QPPV appointment notice with CV and training records",
+   "applies": "all",
+   "match": null,
+   "note": null,
+   "source": "https://nafdac.gov.ng/wp-content/uploads/Files/Resources/Regulatory_Directive/2025-2030/Regulatory-Directive-on-QPPV-Appointment.pdf"
+  },
+  {
+   "name": "Lab samples with cover letter, CoA, sample import permit and proof of payment",
+   "applies": "all",
+   "match": null,
+   "note": null,
+   "source": "https://nafdac.gov.ng/wp-content/uploads/Files/Resources/Guidelines/DR&R_2025/Guidelines-for-Registration-of-Imported-Drug-Products-in-Nigeria-Human-and-Veterinary-Drugs.pdf"
+  },
+  {
+   "name": "Reliance expression of interest and unredacted assessment reports",
+   "applies": "all",
+   "match": null,
+   "note": "Reliance route only",
+   "source": "https://nafdac.gov.ng/wp-content/uploads/Files/Resources/Guidelines/DR&R_2025/Guidelines-For-Registration-And-Related-Activities-Of-Drugs-Vaccines-And-In-Vitro-Diagnostics-Using-The-Reliance-Procedure.pdf"
+  },
+  {
+   "name": "WHO CRP expression of interest and PQ holder consent",
+   "applies": "all",
+   "match": null,
+   "note": "CRP route only",
+   "source": "https://www.nafdac.gov.ng/wp-content/uploads/Files/Resources/Guidelines/DR_And_R_Guidelines/Guidelines-For-Registration-of-Imported-Drugs-Vaccines-IVDs-Under-Collaborative-Registration-Procedure.pdf"
+  },
+  {
+   "name": "Narcotics import permit and permit to clear",
+   "applies": "class",
+   "match": "controlled",
+   "note": null,
+   "source": "https://nafdac.gov.ng/wp-content/uploads/Files/Resources/Guidelines/NARCOTICS_GUIDELINES/Guidelines-for-Obtaining-Permit-for-Importation-of-Schedule-1-Narcotic-Drugs.pdf"
+  }
+ ],
+ "news": [
+  {
+   "name": "NAFDAC website RSS feed (all posts)",
+   "url": "https://nafdac.gov.ng/feed/",
+   "format": "rss",
+   "notes": "WordPress RSS, last 10 posts of all kinds (press, alerts, notes to industry). Updated several times a month."
+  },
+  {
+   "name": "NAFDAC Notes to Industry feed",
+   "url": "https://nafdac.gov.ng/category/notes-to-industry/feed/",
+   "format": "rss",
+   "notes": "Best feed for regulatory changes: dossier windows, BE deadlines, API sources, ceiling list. A few posts a quarter."
+  },
+  {
+   "name": "NAFDAC recalls and alerts feed",
+   "url": "https://nafdac.gov.ng/category/recalls-and-alerts/feed/",
+   "format": "rss",
+   "notes": "Public alerts on recalls, falsified products and safety signals. Several a month."
+  },
+  {
+   "name": "NAFDAC posts sitemap",
+   "url": "https://nafdac.gov.ng/wp-sitemap-posts-post-1.xml",
+   "format": "xml",
+   "notes": "XML sitemap of about 680 posts with lastmod dates. Useful to catch notices missing from the 10-item feeds."
+  },
+  {
+   "name": "NAFDAC regulatory directives page",
+   "url": "https://nafdac.gov.ng/regulatory-resources/regulatory-directive/",
+   "format": "html",
+   "notes": "HTML list of signed directives (PDF links): timelines, reliance, DMF, PV, discontinued products. No feed; the server sometimes resets connections, so retry."
+  },
+  {
+   "name": "NAFDAC drug guidelines page",
+   "url": "https://nafdac.gov.ng/drugs/drug-guidelines/",
+   "format": "html",
+   "notes": "HTML index of current drug guideline PDFs with document codes and effective dates. Compare PDF links to spot new versions."
+  }
+ ]
+}

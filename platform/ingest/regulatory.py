@@ -12,7 +12,7 @@ log = logging.getLogger("regulatory")
 HERE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "regulatory_data")
 TOPICS = ["Route", "Timeline", "Fees", "Local representative", "Site and GMP", "Dossier", "Bioequivalence", "Stability",
           "Samples", "Labelling", "Marking", "Pricing", "Import", "After approval"]
-ELIGIBLE = {"full": "all", "eaeu": "eaeu", "eac": "eac"}       # everything else needs an SRA approval or WHO PQ
+ELIGIBLE = {"full": "all", "eaeu": "eaeu", "eac": "eac", "local": "all", "priority": "all"}   # the rest need an SRA approval or WHO PQ
 
 
 def checked_on(text):
