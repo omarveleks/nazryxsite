@@ -48,6 +48,23 @@ NOT_COUNTED = re.compile(r"\d\s*(?:ml|мл|л)\b|крем|мазь|гел|сир
                          r"drops|spray|suspension|lotion|shampoo|шампун|лосьон|паст", re.I)
 
 
+# product types whose prices move together, for price gaps between countries: eye drops are compared with eye drops
+FORM_TYPES = (("injection", None), ("eye", r"\beye|ophth|occul|ocul|глаз"), ("nasal", r"nasal|\bnose|назал|нос"),
+              ("inhaled", r"inhal|nebul|aerosol|ингал|аэроз"), ("topical", r"cream|ointment|\bgel\b|lotion|крем|мазь|гель|линимент"),
+              ("oral liquid", r"syrup|suspension|elixir|oral (?:solution|drops)|сироп|сусп"))
+MIN_TYPE = 10             # medicines of one type priced in both countries before their price gap is measured from data
+
+
+def form_type(unit, text):
+    """tablet, injection, eye, nasal, inhaled, topical, oral liquid or other."""
+    if unit == "tablet or capsule":
+        return "tablet"
+    if unit == "ampoule or vial":
+        return "injection"
+    t = text or ""
+    return next((k for k, rx in FORM_TYPES if rx and re.search(rx, t, re.I)), "other")
+
+
 def unit_of(text):
     t = text or ""
     return "ampoule or vial" if INJ.search(t) else "tablet or capsule" if SOLID.search(t) else "pack"
@@ -262,7 +279,7 @@ def rebuild(cur):
         st = strength_of(text)
         if unit in ("ml", "g") and st and re.fullmatch(r"[\d.]+ (ml|g)", st):
             st = None                                  # a bottle's size is not its strength ('5 ml' of 0.09% drops)
-        raw.append(dict(c=c, m=fam.get(m, m), kind=kind, unit=unit, strength=st, units=float(units), brand=brand,
+        raw.append(dict(c=c, m=fam.get(m, m), kind=kind, unit=unit, strength=st, units=float(units), brand=brand, text=text,
                         price=float(price), usd_rate=float(fx[ccy]), volume=volume, countable=bool(COUNTED.search(text or "")
                                                                                              and not NOT_COUNTED.search(text or ""))))
     # 'ЦЕФТРИАКСОН 1г №1' names no form: a counted item takes the form the medicine usually comes in (a vial here)
@@ -278,7 +295,8 @@ def rebuild(cur):
     for o in kept:
         local = float(fx[CURRENCY[o["c"]]])               # into the market's own currency
         groups.setdefault((o["c"], o["m"]), []).append((RANK[o["kind"]], o["kind"], o["unit"], o["strength"],
-                                                         o["usd"] * o["usd_rate"], o["price"], o["usd_rate"] / local, o.get("volume")))
+                                                         o["usd"] * o["usd_rate"], o["price"], o["usd_rate"] / local, o.get("volume"),
+                                                         form_type(o["unit"], o["text"])))
     # every market's headline is the molecule's usual form and strength across all countries (paracetamol 500 mg tablet),
     # so markets compare like for like; tablets count double when choosing it
     usual_form = {}
@@ -318,9 +336,10 @@ def rebuild(cur):
         local = sorted(o[4] / o[6] for o in obs if (o[2], o[3]) == (unit, usual))      # in the market's own currency
         avg = statistics.median(local)               # one premium brand or promotion cannot pull it
         vols = [o[7] for o in obs if (o[2], o[3]) == (unit, usual) and o[7]]
+        types = [o[8] for o in obs if (o[2], o[3]) == (unit, usual)]
         out[(c, m)] = dict(basis="listings", kinds=sorted({o[1] for o in obs}), unit=unit, strength=usual, unit_price=avg,
                            unit_usd=avg / float(fx[CURRENCY[c]]), lo=pct(local, 0.1), hi=pct(local, 0.9), n=len(local), by=by,
-                           pack_size=statistics.median_low(vols) if vols else None)
+                           pack_size=statistics.median_low(vols) if vols else None, ftype=max(set(types), key=types.count))
     # where a market only publishes official maximums, the shelf price is the maximum times how shelf prices compare with
     # maximums where both are known (measured on our data)
     both = []
@@ -353,27 +372,36 @@ def rebuild(cur):
     # estimates for what a market lacks: from the market whose prices compare best with it (neighbours first, then the
     # market sharing the most priced molecules), adjusted by the median price ratio between the two markets
     direct = dict(out)
-    factors = {}
+    # price gaps between a market and each country it borrows from, one per product type: the median ratio over at least
+    # MIN_TYPE medicines of that type priced in both; else the ratio set for that pair and type, else for the pair; else 1.0
     markets = tuple(c for c in MARKETS if c in sources)
+    measured = {}
     for c in markets:
-        for n in sources:
-            if n == c:
-                continue
-            ratios = [direct[(c, m)]["unit_usd"] / direct[(n, m)]["unit_usd"] for (cc, m) in direct
-                      if cc == c and (n, m) in direct and direct[(n, m)]["unit_usd"] > 0
-                      and (direct[(n, m)]["unit"], direct[(n, m)]["strength"]) == (direct[(c, m)]["unit"], direct[(c, m)]["strength"])]
-            factors[(c, n)] = (statistics.median(ratios) if len(ratios) >= MIN_OVERLAP else 1.0, len(ratios))
+        for n in NEIGHBOURS[c]:
+            by_type = {}
+            for (cc, m) in direct:
+                a_, b_ = direct[(cc, m)], direct.get((n, m))
+                if cc == c and b_ and b_["unit_usd"] > 0 and (a_["unit"], a_["strength"]) == (b_["unit"], b_["strength"]) \
+                        and a_.get("ftype") == b_.get("ftype"):
+                    by_type.setdefault(a_["ftype"], []).append(a_["unit_usd"] / b_["unit_usd"])
+            for t, r in by_type.items():
+                measured[(c, n, t)] = (statistics.median(r), len(r))
+    set_gaps = {(c, n, t): float(r) for c, n, t, r in cur.execute("select country, source, form_type, ratio from price_gaps where basis = 'set'")}
+    cur.execute("delete from price_gaps where basis = 'measured'")
+    for (c, n, t), (r, k) in measured.items():
+        cur.execute("insert into price_gaps (country, source, form_type, ratio, n, basis) values (%s, %s, %s, %s, %s, 'measured')",
+                    (c, n, t, round(r, 4), k))
 
-    def gap(c, n):
-        """(factor, molecules behind it, how good): measured between the two markets, else borrowed from a neighbour of
-        c that has it measured (neighbours price alike), else none (1.0)."""
-        f, k = factors[(c, n)]
-        if k >= MIN_OVERLAP:
-            return f, k, 0 if n in NEIGHBOURS[c] else 1
-        if n in NEIGHBOURS[c]:
-            return 1.0, k, 2
-        via = [factors[(nb, n)] for nb in NEIGHBOURS[c] if nb != n and factors.get((nb, n), (1, 0))[1] >= MIN_OVERLAP]
-        return (max(via, key=lambda x: x[1]) + (3,)) if via else (1.0, k, 4)
+    def gap(c, n, t="all"):
+        """(ratio, medicines behind it, how good): price in c over price in n for this product type."""
+        r, k = measured.get((c, n, t), (None, 0))
+        if r is not None and k >= MIN_TYPE:
+            return r, k, 0
+        if (c, n, t) in set_gaps:
+            return set_gaps[(c, n, t)], k, 1
+        if (c, n, "all") in set_gaps:
+            return set_gaps[(c, n, "all")], k, 2
+        return 1.0, k, 3
 
     # an estimate is the median of every country that prices the molecule, each scaled by its measured price gap with this
     # market, so no single source (or a source with one or two prices) decides it. Sources whose gap is measured, directly
@@ -390,12 +418,13 @@ def rebuild(cur):
             for n, v in priced:
                 if n not in NEIGHBOURS[c]:                       # only neighbouring markets price alike: no Central Asia for East Africa
                     continue
-                factor, overlap, tier = gap(c, n)
+                factor, overlap, tier = gap(c, n, v.get("ftype", "all"))
                 cands.append((tier <= 3, v["strength"], v["unit"], v["unit_usd"] * factor, v["lo"] / float(fx[CURRENCY[n]]) * factor,
-                              v["hi"] / float(fx[CURRENCY[n]]) * factor, v["n"], n, v["kinds"], factor, overlap, v.get("pack_size")))
+                              v["hi"] / float(fx[CURRENCY[n]]) * factor, v["n"], n, v["kinds"], factor, overlap, v.get("pack_size"),
+                              v.get("ftype")))
             if (c, m) in weak:                                   # this market's own single listing
                 u_, st_, usd_ = weak[(c, m)]
-                cands.append((True, st_, u_, usd_, usd_, usd_, 1, c, ["retail"], 1.0, 0, None))
+                cands.append((True, st_, u_, usd_, usd_, usd_, 1, c, ["retail"], 1.0, 0, None, None))
             if not cands:
                 continue
             if any(x[0] for x in cands):
@@ -407,7 +436,8 @@ def rebuild(cur):
             out[(c, m)] = dict(basis="estimate", kinds=main[8], unit=usual[0], strength=usual[1], unit_price=usd * rate, unit_usd=usd,
                                lo=statistics.median(x[4] for x in cands) * rate, hi=statistics.median(x[5] for x in cands) * rate,
                                n=sum(x[6] for x in cands), by=[], from_country=main[7], factor=main[9], overlap=len(cands),
-                               pack_size=statistics.median_low([x[11] for x in cands if x[11]] or [0]) or None)
+                               pack_size=statistics.median_low([x[11] for x in cands if x[11]] or [0]) or None,
+                               ftype=main[12] or next((x[12] for x in cands if x[12]), None))
     # combinations nobody prices: their ingredients' prices added up, scaled by how combination packs compare with their
     # ingredients where both are priced (measured on our data)
     samples = []
@@ -431,7 +461,7 @@ def rebuild(cur):
             out[(c, k)] = dict(basis="estimate", kinds=["ingredients"], unit=out[(c, parts[0])]["unit"], strength=None,
                                unit_price=usd * rate, unit_usd=usd, lo=sum(out[(c, p)]["lo"] for p in parts) * combo_factor,
                                hi=sum(out[(c, p)]["hi"] for p in parts) * combo_factor, n=len(parts), by=[],
-                               from_country=None, factor=combo_factor, overlap=len(samples))
+                               from_country=None, factor=combo_factor, overlap=len(samples), ftype=out[(c, parts[0])].get("ftype"))
             added = True
         if added and mid not in members.setdefault(k, []):
             members[k].append(mid)
@@ -454,9 +484,7 @@ def rebuild(cur):
                 # same form and strength; a bottle or tube that does not state its strength still compares per ml or g
                 got = split.get((n,) + key, {}).get(brand) or (split.get((n, m, v["unit"], None), {}).get(brand) if v["unit"] in ("ml", "g") else None)
                 if n in sources and got:
-                    # generics in East Africa sell close to South Asian and Nigerian prices: the measured gap is kept within
-                    # 0.75-1.5x so a brand-heavy shop list cannot inflate a generic's estimate
-                    vals.append(statistics.median(got) * min(max(gap(c, n)[0], 0.75), 1.5))
+                    vals.append(statistics.median(got) * gap(c, n, v.get("ftype", "all"))[0])
             return statistics.median(vals) if vals else None
         gen = statistics.median(mine[False]) if len(mine.get(False, [])) >= 2 else near(False)
         if gen is None and mine.get(False):
@@ -1095,14 +1123,26 @@ def prices_SASIA(cur, s):
         time.sleep(1)
 
     # Pakistan: pharmacy product pages (schema.org Product and Drug: generic, strength, form, maker, price per pack)
+    # the generic pages (one per generic, listing its brands) point to the products worth reading first
+    gen_urls = set()
+
     def dawaai_list():
-        out = []
+        out, sitemap = [], []
         for sm in ("sitemap.xml", "sitemap_second.xml", "sitemap_new.xml"):
             xml = s.get(f"{DAWAAI}/{sm}", timeout=120)
-            out += re.findall(r"<loc>(https://dawaai\.pk/medicine/[a-z0-9-]+-\d+\.html)</loc>", xml.text if xml.ok else "")
-        return sorted(set(out))
+            sitemap += re.findall(r"<loc>(https://dawaai\.pk/(?:medicine|generic)/[a-z0-9-]+(?:-\d+\.html)?)</loc>", xml.text if xml.ok else "")
+        for g in sorted({u for u in sitemap if "/generic/" in u and useful(u.rsplit("/", 1)[1])}):
+            r = s.get(g, timeout=60)
+            gen_urls.update(re.findall(r'href="(https://dawaai\.pk/medicine/[a-z0-9-]+-\d+\.html)"', r.text if r.ok else ""))
+            time.sleep(1)
+        return sorted(gen_urls | {u for u in sitemap if "/medicine/" in u})
 
-    for url in sorted(due_items(cur, "prices_PK_shop", 100000, dawaai_list, every_days=30), key=portfolio_first(cur))[:SA_PER_RUN]:
+    due = due_items(cur, "prices_PK_shop", 100000, dawaai_list, every_days=30)
+    for u in gen_urls:                                   # remembered between runs
+        cur.execute("update source_items set state = 'generic' where source = 'prices_PK_shop' and ref = %s", (u,))
+    tracked = {r for (r,) in cur.execute("select ref from source_items where source = 'prices_PK_shop' and state = 'generic'")}
+    pf = portfolio_first(cur)
+    for url in sorted(due, key=lambda u: (u not in tracked, pf(u)))[:SA_PER_RUN]:
         r = s.get(url, timeout=60)
         blocks = []
         for b in re.findall(r"<script[^>]*ld\+json[^>]*>(.*?)</script>", r.text if r.ok else "", re.S):
