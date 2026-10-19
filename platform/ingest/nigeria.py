@@ -55,9 +55,13 @@ def makers(s, cur, rows):
     for r in rows:
         mid = r.get("manufacturer_id")
         if mid and mid not in known:
-            todo.setdefault(mid, r["product_id"])
+            todo[mid] = r["product_id"]                # a maker's latest product (an older page may be broken)
     for mid, pid in list(todo.items())[:MAKERS_PER_RUN]:
-        page = s.get(f"{GREENBOOK}products/details/{pid}", timeout=60)
+        try:
+            page = s.get(f"{GREENBOOK}products/details/{pid}", timeout=60)
+        except Exception:                          # one broken product page: try another of the maker's products next run
+            time.sleep(1)
+            continue
         text = htmllib.unescape(re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " | ", page.text if page.ok else "")))
         name = re.search(r"Manufacturer Name \|[ |]*([^|]+?)\s*\|", text)
         ctry = re.search(r"Manufacturer Country \|[ |]*([^|]+?)\s*\|", text)

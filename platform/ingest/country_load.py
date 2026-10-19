@@ -287,7 +287,7 @@ ADAPTERS = {"KZ": read_kz, "KG": read_kg, "UZ": read_uz, "KE": read_ke, "NG": re
 
 # ------------------------------------------------------------------ names in English, and the molecule each row is
 EN_FIXES = {"vitamin c": "ascorbic acid", "vitamin b12": "cyanocobalamin", "vitamin b1": "thiamine", "vitamin b6": "pyridoxine",
-            "vitamin d3": "colecalciferol", "vitamin a": "retinol", "vitamin e": "tocopherol",
+            "vitamin d3": "cholecalciferol", "colecalciferol": "cholecalciferol", "vitamin a": "retinol", "vitamin e": "tocopherol",
             # US names to the international ones the rest of the data uses
             "glyburide": "glibenclamide", "acetaminophen": "paracetamol", "albuterol": "salbutamol", "meperidine": "pethidine",
             "cyclosporine": "ciclosporin", "rifampin": "rifampicin", "isoproterenol": "isoprenaline", "furosemide": "furosemide"}
