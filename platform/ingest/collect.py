@@ -528,7 +528,21 @@ def due(cur):
     return cur.execute("""select key, country, kind, last_ok, release_held, held_path from data_sources
                           where enabled and (run_now or release_held or last_run is null
                                 or last_run < now() - make_interval(hours => every_hours))
-                          order by last_run nulls first limit 1""").fetchall()
+                          order by last_run nulls first""").fetchall()
+
+
+def readable(kind, country):
+    """True when this release has a reader for the source."""
+    if kind == "registry":
+        return country in REGISTRIES
+    if kind == "tenders":
+        return country in TENDERS
+    if kind == "prices":
+        return country in PRICES
+    if kind == "devices":
+        import devices
+        return country in devices.READERS
+    return True
 
 
 def run(conn, only=None):
@@ -536,6 +550,9 @@ def run(conn, only=None):
     cur = conn.cursor()
     rows = cur.execute("select key, country, kind, last_ok, release_held, held_path from data_sources where key = %s", (only,)).fetchall() \
         if only else due(cur)
+    # a source added by a newer release than this worker (during a deploy the old worker runs a few minutes more) is
+    # left untouched for the new worker
+    rows = [r for r in rows if readable(r[2], r[1])]
     if not rows:
         return None
     key, country, kind, last_ok, release, held = rows[0]
@@ -567,9 +584,12 @@ def run(conn, only=None):
                 url = cur.execute("select url from data_sources where key = %s", (key,)).fetchone()[0]
                 n = reg_news.collect(cur, s, key, country, url)
             elif kind == "prices":
+                pricing.fresh_run()
                 n = PRICES[country](cur, s)
                 pricing.refresh_fx(cur, s)
-                if pricing.catching_up(cur, country):         # first pass not finished: go again on the next free tick
+                if pricing.DOWN:                               # what was read is kept; the rest on the next scheduled run
+                    warning = f"No answer from {', '.join(sorted(pricing.DOWN))}: {n:,} prices read are kept, the rest next run"
+                elif pricing.catching_up(cur, country):       # first pass not finished: go again on the next free tick
                     cur.execute("update data_sources set run_now = true where key = %s", (key,))
             if kind in ("tenders", "news"):
                 cur.execute("savepoint tr2")

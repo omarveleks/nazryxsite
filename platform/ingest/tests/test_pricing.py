@@ -86,3 +86,27 @@ def test_form_types_for_price_gaps():
     assert pricing.form_type("g", "Canestal 1% Clotrimazole Antifungal Cream - 15g Tube") == "topical"
     assert pricing.form_type("ml", "Azilin 200mg/5ml Azithromycin Pediatric Suspension - 100ml") == "oral liquid"
     assert pricing.form_type("ampoule or vial", "Ceftriaxone 1g") == "injection"
+
+
+def test_a_page_that_does_not_load_is_skipped_and_a_site_that_stops_answering_is_left_for_next_run():
+    import requests
+    calls = []
+
+    class S:
+        def get(self, url, **kw):
+            calls.append(url)
+            if "slow" in url:
+                raise requests.exceptions.ConnectTimeout(url)
+            return "ok"
+
+    pricing.fresh_run()
+    assert pricing.page(S(), "https://shop.test/slow-1") is None
+    assert pricing.page(S(), "https://shop.test/fine") == "ok"          # one slow page: the rest still read
+    for i in range(pricing.DOWN_AFTER):
+        pricing.page(S(), f"https://shop.test/slow-{i}")
+    assert pricing.DOWN == {"shop.test"}
+    asked = len(calls)
+    assert pricing.page(S(), "https://shop.test/fine") is None and len(calls) == asked     # down: not asked again this run
+    assert pricing.page(S(), "https://other.test/fine") == "ok"
+    pricing.fresh_run()
+    assert not pricing.DOWN

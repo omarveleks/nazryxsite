@@ -108,6 +108,36 @@ def strength_of(text):
     return f"{v:g} {u}"
 
 
+DOWN = set()         # sites that stopped answering during this run (collect.run reports them)
+_FAILS = {}
+DOWN_AFTER = 3       # pages in a row that do not load before a site counts as down for the rest of the run
+
+
+def fresh_run():
+    DOWN.clear()
+    _FAILS.clear()
+
+
+def page(s, url, **kw):
+    """One page of a site read page by page. A page that does not load is None and is read again next run, so one slow
+    page never throws away the rest of the run; after a few in a row the site is down and no longer asked this run."""
+    import requests
+    from urllib.parse import urlsplit
+    host = urlsplit(url).netloc
+    if host in DOWN:
+        return None
+    try:
+        r = s.get(url, **kw)
+    except requests.RequestException:
+        _FAILS[host] = _FAILS.get(host, 0) + 1
+        if _FAILS[host] >= DOWN_AFTER:
+            DOWN.add(host)
+        log.warning("no answer from %s", url)
+        return None
+    _FAILS[host] = 0
+    return r
+
+
 def refresh_fx(cur, s):
     d = s.get("https://open.er-api.com/v6/latest/USD", timeout=30).json()
     if d.get("result") != "success":
@@ -695,7 +725,9 @@ def europharma(cur, s):
     mols, n = Molecules(cur, "KZ"), 0
     pages = due_items(cur, "prices_KZ_ep", EP_PER_RUN, lambda: sitemap_urls(s, EUROPHARMA, lambda u: "europharma.kz/" in u))
     for url in pages:
-        r = s.get(url, timeout=60)
+        r = page(s, url, timeout=60)
+        if r is None:
+            continue
         for x in ld_products(r.text if r.ok else ""):
             offer = x.get("offers") or {}
             price = num(offer.get("price")) if isinstance(offer, dict) else None
@@ -826,7 +858,9 @@ def mydawa(cur, s, names):
     first = portfolio_first(cur)
     n = 0
     for url in sorted(due, key=first)[:TZ_PER_RUN]:
-        r = s.get(url, timeout=60)
+        r = page(s, url, timeout=60)
+        if r is None:
+            continue
         for x in ld_products(r.text if r.ok else ""):
             offer = x.get("offers") or {}
             price = num(offer.get("price")) if isinstance(offer, dict) else None
@@ -855,7 +889,9 @@ def prices_TZ(cur, s):
     names, n = Names(cur, "TZ"), 0
     # every page due, manufacturers' products and their competitors first
     for url in sorted(due_items(cur, "prices_TZ", 100000, urls), key=portfolio_first(cur))[:TZ_PER_RUN]:
-        r = s.get(url, timeout=60)
+        r = page(s, url, timeout=60)
+        if r is None:
+            continue
         for x in ld_products(r.text if r.ok else ""):
             offer = x.get("offers") or {}
             price = num(offer.get("price")) if isinstance(offer, dict) else None
@@ -1090,7 +1126,9 @@ def prices_SASIA(cur, s):
     for ref in sorted(due_items(cur, "prices_BD", 100000, medex_list, every_days=30), key=order)[:SA_PER_RUN]:
         path, title = ref.split("|", 1)
         mol = english_molecule(cur, names, generics, title.replace(" + ", "+").replace("+", " + "))
-        r = s.get(f"{MEDEX}/generics/{path}/brand-names", timeout=60)
+        r = page(s, f"{MEDEX}/generics/{path}/brand-names", timeout=60) if mol else None
+        if mol and r is None:
+            continue
         for row in re.findall(r'<tr class="brand-row"(.*?)</tr>', r.text if r.ok and mol else "", re.S):
             cells = [text(c) for c in re.findall(r"<td[^>]*>(.*?)</td>", row, re.S)]
             if len(cells) < 5:
@@ -1119,20 +1157,26 @@ def prices_SASIA(cur, s):
         return out
 
     for slug in sorted(due_items(cur, "prices_IN", 100000, onemg_list, every_days=30), key=order)[:SA_PER_RUN // 5]:
-        r = s.get(f"{ONEMG}/generics/{slug}", timeout=60)
+        r = page(s, f"{ONEMG}/generics/{slug}", timeout=60)
+        if r is None:
+            continue
         page_ = r.content.decode("utf-8", "ignore") if r.ok else ""         # 1mg does not declare its character set
         title = re.search(r"<h1[^>]*>(.*?)</h1>", page_, re.S)
         mol = english_molecule(cur, names, generics, text(title.group(1))) if title else None
         brands = re.findall(r'"name":"([^"]+)","manufacturer_name":"([^"]*)","price_range":\{[^}]*\},"variants_available":"[^"]*","slug":"(/brands/[^"]+)"',
                             page_ if mol else "")
+        missed = False
         for brand, maker, bslug in list(dict.fromkeys(brands))[:8]:
-            b = s.get(ONEMG + bslug, timeout=60)
+            b = page(s, ONEMG + bslug, timeout=60)
+            if b is None:
+                missed = True
+                continue
             # the page's data in either of the two shapes 1mg serves: {skuId, header, subText, ..., price: {mrp}} or {header, ..., price: '₹216', skuId, subText}
-            page = b.content.decode("utf-8", "ignore") if b.ok else ""
+            bpage = b.content.decode("utf-8", "ignore") if b.ok else ""
             skus = {sku: (header, price, sub) for sku, header, sub, price in re.findall(
-                r'"skuId":(\d+),"header":"([^"]+)","subText":"([^"]*)",[^\]]*?"price":\{"mrp":([\d.]+)', page)}
+                r'"skuId":(\d+),"header":"([^"]+)","subText":"([^"]*)",[^\]]*?"price":\{"mrp":([\d.]+)', bpage)}
             for header, price, sku, sub in re.findall(r'"header":"([^"]+)",(?:"[a-zA-Z]+":"[^"]*",)*"price":"[^\d"]*([\d,.]+)","quantity":\d+,'
-                                                      r'(?:"[a-zA-Z]+":\{[^{}]*\},)*"skuId":"(\d+)","subText":"([^"]*)"', page):
+                                                      r'(?:"[a-zA-Z]+":\{[^{}]*\},)*"skuId":"(\d+)","subText":"([^"]*)"', bpage):
                 skus.setdefault(sku, (header, price, sub))
             for sku, (header, price, sub) in skus.items():
                 units = re.search(r"(?:strip|bottle|box|packet|pack|tube|vial)?\s*of\s*(\d+)\s*(?:tablet|capsule|ampoule|vial|sachet|lozenge)", sub, re.I)
@@ -1140,6 +1184,8 @@ def prices_SASIA(cur, s):
                              num(price.replace(",", "")), "INR", originator=is_brand(maker), description=maker)
                 n += 1
             time.sleep(1)
+        if missed:                 # a brand page did not load: the generic is read again next run
+            continue
         checked(cur, "prices_IN", slug)
         time.sleep(1)
 
@@ -1153,8 +1199,8 @@ def prices_SASIA(cur, s):
             xml = s.get(f"{DAWAAI}/{sm}", timeout=120)
             sitemap += re.findall(r"<loc>(https://dawaai\.pk/(?:medicine|generic)/[a-z0-9-]+(?:-\d+\.html)?)</loc>", xml.text if xml.ok else "")
         for g in sorted({u for u in sitemap if "/generic/" in u and useful(u.rsplit("/", 1)[1])}):
-            r = s.get(g, timeout=60)
-            gen_urls.update(re.findall(r'href="(https://dawaai\.pk/medicine/[a-z0-9-]+-\d+\.html)"', r.text if r.ok else ""))
+            r = page(s, g, timeout=60)
+            gen_urls.update(re.findall(r'href="(https://dawaai\.pk/medicine/[a-z0-9-]+-\d+\.html)"', r.text if r is not None and r.ok else ""))
             time.sleep(1)
         return sorted(gen_urls | {u for u in sitemap if "/medicine/" in u})
 
@@ -1164,7 +1210,9 @@ def prices_SASIA(cur, s):
     tracked = {r for (r,) in cur.execute("select ref from source_items where source = 'prices_PK_shop' and state = 'generic'")}
     pf = portfolio_first(cur)
     for url in sorted(due, key=lambda u: (u not in tracked, pf(u)))[:SA_PER_RUN]:
-        r = s.get(url, timeout=60)
+        r = page(s, url, timeout=60)
+        if r is None:
+            continue
         blocks = []
         for b in re.findall(r"<script[^>]*ld\+json[^>]*>(.*?)</script>", r.text if r.ok else "", re.S):
             try:
@@ -1203,18 +1251,27 @@ def prices_NG(cur, s):
     import html as htmllib
     import time
 
+    class Unread(Exception):
+        """A catalogue page that did not load: read again next run."""
+
+    def get(url, **kw):
+        r = page(s, url, **kw)
+        if r is None:
+            raise Unread(url)
+        return r
+
     def pages():
         out = []
         for k, base in NG_WOO.items():
-            r = s.get(f"{base}/wp-json/wc/store/v1/products", params={"per_page": 100, "page": 1}, timeout=120)
-            out += [f"{k}|{p}" for p in range(1, int(r.headers.get("X-WP-TotalPages") or 0) + 1)] if r.ok else []
+            r = page(s, f"{base}/wp-json/wc/store/v1/products", params={"per_page": 100, "page": 1}, timeout=120)
+            out += [f"{k}|{p}" for p in range(1, int(r.headers.get("X-WP-TotalPages") or 0) + 1)] if r is not None and r.ok else []
             time.sleep(NG_DELAY.get(k, 1))
-        d = s.get("https://api.drugstore.ng/get/drugs", params={"page": 1}, timeout=120)
-        out += [f"drugstore|{p}" for p in range(1, (d.json()["data"]["drugs"].get("last_page") or 0) + 1)] if d.ok else []
+        d = page(s, "https://api.drugstore.ng/get/drugs", params={"page": 1}, timeout=120)
+        out += [f"drugstore|{p}" for p in range(1, (d.json()["data"]["drugs"].get("last_page") or 0) + 1)] if d is not None and d.ok else []
         for k in NG_SHOPIFY:
             out += [f"{k}|{p}" for p in range(1, 41)]             # Shopify: pages until one comes back empty
-        h = s.get("https://medplusnig.com/products", params={"data_from": "latest", "page": 1}, timeout=120)
-        last = max([int(x) for x in re.findall(r"[?&](?:amp;)?page=(\d+)", h.text if h.ok else "")] or [0])
+        h = page(s, "https://medplusnig.com/products", params={"data_from": "latest", "page": 1}, timeout=120)
+        last = max([int(x) for x in re.findall(r"[?&](?:amp;)?page=(\d+)", h.text if h is not None and h.ok else "")] or [0])
         out += [f"medplus|{p}" for p in range(1, (last or 200) + 1)]      # no page links found: read until pages come back empty
         return out
 
@@ -1222,24 +1279,24 @@ def prices_NG(cur, s):
         """(ref, name, price) for every product on one catalogue page."""
         src, p = ref.split("|")
         if src in NG_WOO:
-            r = s.get(f"{NG_WOO[src]}/wp-json/wc/store/v1/products", params={"per_page": 100, "page": p}, timeout=120)
+            r = get(f"{NG_WOO[src]}/wp-json/wc/store/v1/products", params={"per_page": 100, "page": p}, timeout=120)
             for x in r.json() if r.ok else []:
                 pr = x.get("prices") or {}
                 if pr.get("price"):
                     yield x.get("id"), x.get("name"), int(pr["price"]) / 10 ** int(pr.get("currency_minor_unit") or 0)
         elif src == "drugstore":
-            r = s.get("https://api.drugstore.ng/get/drugs", params={"page": p}, timeout=120)
+            r = get("https://api.drugstore.ng/get/drugs", params={"page": p}, timeout=120)
             for x in (r.json()["data"]["drugs"]["data"] if r.ok else []):
                 yield x.get("id"), x.get("name"), num((x.get("price") or {}).get("digit"))
         elif src in NG_SHOPIFY:
-            r = s.get(f"{NG_SHOPIFY[src]}/products.json", params={"limit": 250, "page": p}, timeout=120)
+            r = get(f"{NG_SHOPIFY[src]}/products.json", params={"limit": 250, "page": p}, timeout=120)
             for x in (r.json().get("products", []) if r.ok else []):
                 for v in x.get("variants") or []:
                     vt = v.get("title") or ""
                     title = x.get("title") + ("" if vt in ("", "Default Title") or vt.lower() in x.get("title", "").lower() else f" {vt}")
                     yield v.get("id"), title, num(v.get("price"))
         elif src == "medplus":
-            r = s.get("https://medplusnig.com/products", params={"data_from": "latest", "page": p}, timeout=120)
+            r = get("https://medplusnig.com/products", params={"data_from": "latest", "page": p}, timeout=120)
             for slug, name, price in re.findall(r'<a href="https://medplusnig\.com/product/([^"]+)">\s*([^<]+?)\s*</a>.*?'
                                                  r'<span class="text-accent[^"]*">\s*₦([\d,.]+)', r.text if r.ok else "", re.S):
                 # the card shortens long names; the slug has the whole one
@@ -1249,7 +1306,11 @@ def prices_NG(cur, s):
     names, n = Names(cur, "NG"), 0
     for ref in due_items(cur, "prices_NG", NG_PER_RUN, pages):
         src = ref.split("|")[0]
-        for key, name, price in items(ref):
+        try:
+            got = list(items(ref))
+        except Unread:
+            continue
+        for key, name, price in got:
             name = htmllib.unescape(name or "").strip()
             if name and price:
                 save_listing(cur, "NG", src, "retail", f"{src}|{key}", name, name, names.find(name), None, price, "NGN")

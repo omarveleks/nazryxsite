@@ -1239,6 +1239,7 @@ def test_molecule_prices_from_listings_and_neighbour_estimates(env, monkeypatch)
     the neighbour's, adjusted by how the two markets' prices compare on the molecules priced in both."""
     import pricing
     monkeypatch.setattr(pricing, "MIN_OVERLAP", 2)
+    monkeypatch.setattr(pricing, "MIN_TYPE", 2)            # price gaps measured from two medicines here (10 in production)
     with psycopg.connect(URL) as c:
         cur = c.cursor()
         for t in ("price_listings", "reference_prices", "tenders"):
