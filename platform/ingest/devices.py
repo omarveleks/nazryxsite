@@ -72,7 +72,7 @@ def read_KE(s):
 def read_TZ(s):
     url, rows, skip = "https://imis2.tmda.go.tz/publicaccess/onSearchPublicRegisteredproducts", [], 0
     while True:
-        d = s.get(url, params={"skip": skip, "take": 1000, "section_id": 4, "sub_modulesin": "7,8,9,20", "extra_paramsdata": "{}"},
+        d = s.get(url, params={"skip": skip, "take": 1000, "section_id": 4, "sub_modulesin": "", "extra_paramsdata": "{}"},
                   timeout=180).json()
         rows += d.get("data") or []
         skip += 1000

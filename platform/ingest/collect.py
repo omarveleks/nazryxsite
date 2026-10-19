@@ -155,7 +155,7 @@ def reg_TZ(s, tmp):
     url = "https://imis2.tmda.go.tz/publicaccess/onSearchPublicRegisteredproducts"
     rows, skip = [], 0
     while True:
-        d = s.get(url, params={"skip": skip, "take": 500, "section_id": 2, "sub_modulesin": "7,8,9,20", "extra_paramsdata": "{}"}, timeout=TIMEOUT).json()
+        d = s.get(url, params={"skip": skip, "take": 500, "section_id": 2, "sub_modulesin": "", "extra_paramsdata": "{}"}, timeout=TIMEOUT).json()
         rows += d.get("data") or []
         skip += 500
         if skip >= (d.get("totalCount") or 0) or not d.get("data"):
