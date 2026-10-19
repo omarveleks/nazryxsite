@@ -513,3 +513,21 @@ export async function uploadPortfolioFor(f: FormData) {
   }
   redirect(`${to}?saved=1#mfiles`);
 }
+
+/** Suspend a customer account (and its seats): no sign-in, everything kept. Restoring lets them back in. */
+export async function setAccountSuspended(f: FormData) {
+  await requireTeam('accounts');
+  const id = str(f, 'user_id', 40), suspend = f.get('suspend') === '1';
+  await team((db) => db.query('select admin_set_disabled($1, $2)', [id, suspend]), `/admin/accounts/${id}`);
+  redirect(`/admin/accounts/${id}?saved=1`);
+}
+
+/** Delete a customer account for good (owners only, after typing its email): the account, its seats, its data and
+ *  files. Invoices are kept as records. */
+export async function deleteAccount(f: FormData) {
+  const u = await requireTeam('accounts');
+  const id = str(f, 'user_id', 40);
+  if (!u.team_owner) back(`/admin/accounts/${id}`, { error: 'Only an owner can delete accounts.' });
+  await team((db) => db.query('select admin_delete_account($1, $2)', [id, str(f, 'confirm_email', 200)]), `/admin/accounts/${id}`);
+  redirect('/admin?tab=accounts&deleted=1');
+}

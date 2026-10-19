@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation';
 import Shell from '@/components/Shell';
 import { Empty, Flash, StagePill } from '@/components/ui';
 import { deleteAccountDoc, setMfrPlan, setVerified, uploadAccountDoc } from '@/app/actions/docs';
-import { uploadPortfolioFor } from '@/app/actions/admin';
+import { deleteAccount, setAccountSuspended, uploadPortfolioFor } from '@/app/actions/admin';
 import { requireTeam } from '@/lib/auth';
 import { one, rows, withUser } from '@/lib/db';
 import { ACCOUNT_DOC_KINDS } from '@/lib/docs';
@@ -20,7 +20,7 @@ export default async function AdminAccount({ params, searchParams }: { params: P
   if (!/^[0-9a-f-]{36}$/.test(id)) notFound();
   const u = await requireTeam('accounts');
   const d = await withUser(u.id, async (db) => {
-    const a = await one(db, 'select id, email, name, role, plan, whatsapp, account_type, onboarded, created_at from users where id = $1', [id]);
+    const a = await one(db, 'select id, email, name, role, plan, whatsapp, account_type, onboarded, created_at, disabled, owner_id from users where id = $1', [id]);
     if (!a) return null;
     return {
       a,
@@ -46,8 +46,9 @@ export default async function AdminAccount({ params, searchParams }: { params: P
   const s = p ? suggestPlan(p) : null;
   return (
     <Shell user={u} title={p?.company_name || a.name || a.email} crumb={<><Link href="/admin?tab=accounts">Admin / Accounts</Link> / {a.email}</>}
-      sub={`${a.account_type} · ${a.plan} plan · joined ${fmtDate(a.created_at)}${a.whatsapp ? ` · WhatsApp ${a.whatsapp}` : ''}`}>
+      sub={`${a.account_type} · ${a.plan} plan · joined ${fmtDate(a.created_at)}${a.whatsapp ? ` · WhatsApp ${a.whatsapp}` : ''}${a.disabled ? ' · suspended' : ''}`}>
       <Flash sp={sp} />
+      {a.disabled && <div className="ok" role="status">This account is suspended: it cannot sign in. Everything it holds is kept.</div>}
       <div className="split">
         <div className="stack">
           {p && (
@@ -164,6 +165,26 @@ export default async function AdminAccount({ params, searchParams }: { params: P
             </form>
             <p className="note">For a request or engagement, upload on its own page so the document sits next to its step.</p>
           </section>
+          {a.role !== 'team' && !a.owner_id && (
+            <section className="card stack" id="access">
+              <h2>Access</h2>
+              <p className="note">Suspend blocks sign-in for this account and its teammate seats and signs them out. Nothing is deleted;
+                restore lets them back in.</p>
+              <form action={setAccountSuspended}><input type="hidden" name="user_id" value={id} /><input type="hidden" name="suspend" value={a.disabled ? '0' : '1'} />
+                <button className="btn btn-ghost btn-sm" type="submit">{a.disabled ? 'Restore access' : 'Suspend account'}</button></form>
+              {u.team_owner && (
+                <details>
+                  <summary className="btn-link small" style={{ cursor: 'pointer' }}>Delete account</summary>
+                  <form action={deleteAccount} className="stack small" style={{ gap: 8, marginTop: 8 }}>
+                    <input type="hidden" name="user_id" value={id} />
+                    <span>This deletes the account, its teammate seats, its products, requests, services, documents and every file
+                      uploaded for it. It cannot be undone. Invoices are kept as records.</span>
+                    <label className="lbl" htmlFor="confirm_email">Type <b>{a.email}</b> to confirm</label>
+                    <input className="input" id="confirm_email" name="confirm_email" autoComplete="off" required style={{ maxWidth: 320 }} />
+                    <button className="btn btn-sm" type="submit" style={{ alignSelf: 'flex-start' }}>Delete for good</button>
+                  </form>
+                </details>)}
+            </section>)}
         </div>
       </div>
     </Shell>

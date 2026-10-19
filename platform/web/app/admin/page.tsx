@@ -20,7 +20,7 @@ export const metadata = { title: 'Admin' };
 export const dynamic = 'force-dynamic';
 const H48 = 48 * 3600e3;
 
-export default async function Admin({ searchParams }: { searchParams: Promise<{ tab?: string; error?: string; saved?: string; queued?: string; dq?: string; rc?: string; who?: string }> }) {
+export default async function Admin({ searchParams }: { searchParams: Promise<{ tab?: string; error?: string; saved?: string; queued?: string; dq?: string; rc?: string; who?: string; deleted?: string }> }) {
   const sp = await searchParams;
   const u = await requireTeam();
   // each team member sees only the tabs their permissions open; owners see all of them and the Team tab
@@ -130,7 +130,7 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
                                      order by (r.stage = 'Closed'), r.updated_at desc limit 100`);
     }
     if (tab === 'accounts') {
-      out.users = await rows(db, `select u.id, u.email, u.name, u.role, u.plan, u.credits, u.created_at, u.owner_id, u.last_login_at, u.last_seen_at,
+      out.users = await rows(db, `select u.id, u.email, u.name, u.role, u.plan, u.credits, u.created_at, u.owner_id, u.last_login_at, u.last_seen_at, u.disabled,
                                   (select string_agg(p.wanted, ', ') from plan_requests p where p.user_id = u.id and p.status = 'open') as wants,
                                   auth_totp_enabled(u.id) as two_step
                                   from users u order by (select count(*) from plan_requests p where p.user_id = u.id and p.status = 'open') desc, u.created_at desc limit 200`);
@@ -198,6 +198,7 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
       <Tabs items={tabs} current={area?.key ?? tab} />
       {subTabs.length > 1 && <div className="sub-tabs"><Tabs items={subTabs} current={tab} /></div>}
       <Flash sp={sp} />
+      {sp.deleted && <div className="ok" role="status">Account deleted. Its invoices are kept as records.</div>}
       {sp.queued && <div className="ok" role="status">Queued. The ingest job runs in the background; refresh to see the result.</div>}
       {tab === 'data' && (<>
         <section className="card stack" id="sources">
@@ -429,6 +430,7 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
           <div className="tbl-wrap"><table className="tbl"><thead><tr><th>Account</th><th>Role</th><th>Plan</th><th className="r">Credits</th><th className="r">Actions</th></tr></thead>
             <tbody>{d.users.map((x: any) => (
               <tr key={x.id}><td><Link href={`/admin/accounts/${x.id}`}><b>{x.name || x.email}</b></Link><div className="sub2">{x.email}{x.owner_id ? ' · teammate seat' : ''}</div>
+                {x.disabled && x.role !== 'team' && <span className="pill">Suspended</span>}
                 <div className="sub2">{x.last_login_at ? `Signed in ${ago(x.last_login_at)} · active ${ago(x.last_seen_at ?? x.last_login_at)}` : 'Not signed in yet'}</div>
                 {x.wants && <span className="pill solid">Asked for: {x.wants}</span>}</td>
                 <td>{x.role}</td><td>{x.plan}</td><td className="r num">{x.credits}</td>
