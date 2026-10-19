@@ -116,6 +116,8 @@ def from_rows(rows):
         col = max(range(width), key=lambda i: sum(bool(re.search(r"[A-Za-z]{3}", r[i] if i < len(r) else "")) for r in rows))
         return [(r[col][:200], r[col], None) for r in rows if col < len(r) and re.search(r"[A-Za-z]{3}", r[col])]
     form_col = next((i for i in extra if "form" in header[i]), None)
+    type_col = next((i for i, x in enumerate(header) if x in ("type", "kind", "product type") and i not in (name_col, gen_col)), None)
+    group_col = next((i for i, x in enumerate(header) if x in ("use_group", "use group")), None)
     out = []
     for r in rows[at + 1:]:
         if sum(bool(c) for c in r) < 2 or [c.lower() for c in r] == header:
@@ -130,6 +132,9 @@ def from_rows(rows):
         if re.search(r"[A-Za-z]{3}", line):
             out.append((line[:200], generic or line, get(form_col) or None))
             LEGACY[line[:200]] = " ".join(parts)[:200]
+            kind, group = KINDS.get(get(type_col).lower()), get(group_col).lower()
+            if kind or group in GROUPS:
+                EXTRA[line[:200]] = (kind, group if group in GROUPS else None)
     return out
 
 
@@ -174,6 +179,10 @@ def ask_claude(client, blocks):
 
 
 LEGACY = {}   # product line -> the same product as the earlier reader named it (form repeated), to find it again
+EXTRA = {}    # product line -> what a curated list says beyond the name: medicine, device or supplement, and its use group
+KINDS = {"md": "device", "device": "device", "medical device": "device", "drug": "medicine", "medicine": "medicine",
+         "ds": "supplement", "supplement": "supplement", "dietary supplement": "supplement"}
+GROUPS = ("eye_drops", "eye_surgery", "joint", "nasal")
 
 
 class Products(list):
@@ -287,6 +296,19 @@ class Generics:
         return None
 
 
+def new_molecule(cur, generic):
+    """A medicine on a manufacturer's list that no market registers yet: kept as a molecule, so it shows as an opening."""
+    key = molecule_key(generic)
+    if not key:
+        return None
+    hit = cur.execute("select molecule_id from molecule_aliases where alias = %s union all select id from molecules where canonical_key = %s",
+                      (key, key)).fetchone()
+    if hit:
+        return hit[0]
+    name = " + ".join(p.strip()[:1].upper() + p.strip()[1:] for p in re.split(r"\s*\+\s*", generic.strip()))
+    return cur.execute("insert into molecules (canonical_key, inn) values (%s, %s) returning id", (key, name[:200])).fetchone()[0]
+
+
 def add_products(cur, user_id, products, generics=None, refresh_only=False):
     """Adds the products not yet in the list; a product already there but not matched (an earlier read) gets its
     molecule now, and one already matched gets any missing form and strength. With refresh_only nothing is added.
@@ -307,18 +329,27 @@ def add_products(cur, user_id, products, generics=None, refresh_only=False):
             continue
         if not old and refresh_only:
             continue
-        if generics:
+        kind, group = EXTRA.get(line, (None, None))
+        exact = cur.execute("""select coalesce(a.molecule_id, m.id) from molecules m left join molecule_aliases a on a.alias = m.canonical_key
+                               where lower(m.inn) = lower(%s) limit 1""", (generic,)).fetchone() if generic != line else None
+        if exact:
+            mol = exact[0]
+        elif generics:
             mol = generics.molecule(cur, generic) or (generics.molecule(cur, line) if generic == line else None)
         else:
             mol = find_molecule(cur, generic) or find_molecule(cur, line)
+        if not mol and kind in ("medicine", "supplement") and generic != line:
+            mol = new_molecule(cur, generic)
         atc = cur.execute("select atc from medicine_catalog where lower(name) = lower(%s) limit 1", (generic,)).fetchone()
         if old:
             cur.execute("""update mfr_products set name = %s, molecule_id = %s, atc = coalesce(atc, %s), strength = coalesce(strength, %s),
-                           dosage_form = coalesce(dosage_form, %s) where id = %s""",
-                        (line, mol, atc[0] if atc else None, (strength or None) and strength[:40], (form or None) and form[:40], old[0]))
+                           dosage_form = coalesce(dosage_form, %s), kind = coalesce(%s, kind), use_group = coalesce(%s, use_group) where id = %s""",
+                        (line, mol, atc[0] if atc else None, (strength or None) and strength[:40], (form or None) and form[:40], kind, group, old[0]))
         else:
-            cur.execute("insert into mfr_products (user_id, name, molecule_id, strength, dosage_form, atc) values (%s, %s, %s, %s, %s, %s)",
-                        (user_id, line, mol, (strength or None) and strength[:40], (form or None) and form[:40], atc[0] if atc else None))
+            cur.execute("""insert into mfr_products (user_id, name, molecule_id, strength, dosage_form, atc, kind, use_group)
+                           values (%s, %s, %s, %s, %s, %s, %s, %s)""",
+                        (user_id, line, mol, (strength or None) and strength[:40], (form or None) and form[:40], atc[0] if atc else None,
+                         kind, group))
         added += 1
         matched += bool(mol)
     return added, matched

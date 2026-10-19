@@ -5,6 +5,7 @@ import { dbMessage, one, withUser } from '@/lib/db';
 import { back, int, str } from '@/lib/forms';
 import { BE_STATUS, DOSSIER_ITEMS, DOSSIER_STATUS, GMP_BY, ORDER_STATUSES, SHIPMENT_DOCS, STAGES } from '@/lib/format';
 import { hashPassword } from '@/lib/password';
+import { saveUpload } from '@/lib/uploads';
 import { SERVICES } from '@/lib/mfr';
 import { renderInvoice, totals, money, type InvoiceData } from '@/lib/invoice';
 
@@ -490,4 +491,25 @@ export async function deleteInvoice(f: FormData) {
   await requireTeam('accounts');
   await team((db) => db.query("delete from invoices where number = $1 and plan is null and created_by is not null", [str(f, 'number', 40)]), '/admin?tab=billing');
   redirect('/admin?tab=billing&saved=1');
+}
+
+/** The team loads a product list into a customer's portfolio (Excel or CSV with a generic-name column). The worker reads
+ *  it within a minute, the same way as a customer's own upload; a 'type' column (drug, MD, DS) and a 'use_group' column
+ *  are honoured. */
+export async function uploadPortfolioFor(f: FormData) {
+  const u = await requireTeam('accounts');
+  const uid = str(f, 'user_id', 40);
+  const to = `/admin/accounts/${uid}`;
+  try {
+    const saved = await saveUpload(f.get('file'), u.id, new Set(['.xlsx', '.xls', '.csv']));
+    if (!saved) back(to, { error: 'Choose an Excel or CSV file.' });
+    await withUser(u.id, async (db) => {
+      await db.query(`insert into mfr_files (user_id, kind, file_path, file_name, status) values ($1, 'catalogue', $2, $3, 'queued')`, [uid, saved!.path, saved!.name]);
+      await db.query("select pg_notify('ingest', 'catalogue')");
+    });
+  } catch (e) {
+    if ((e as { digest?: string })?.digest?.startsWith('NEXT_REDIRECT')) throw e;
+    back(to, { error: dbMessage(e) });
+  }
+  redirect(`${to}?saved=1#mfiles`);
 }

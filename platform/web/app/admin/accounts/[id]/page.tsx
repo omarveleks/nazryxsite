@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import Shell from '@/components/Shell';
 import { Empty, Flash, StagePill } from '@/components/ui';
 import { deleteAccountDoc, setMfrPlan, setVerified, uploadAccountDoc } from '@/app/actions/docs';
+import { uploadPortfolioFor } from '@/app/actions/admin';
 import { requireTeam } from '@/lib/auth';
 import { one, rows, withUser } from '@/lib/db';
 import { ACCOUNT_DOC_KINDS } from '@/lib/docs';
@@ -33,7 +34,9 @@ export default async function AdminAccount({ params, searchParams }: { params: P
       engagements: await rows(db, 'select id, kind, country, stage, status, updated_at from engagements where user_id = $1 order by updated_at desc limit 30', [id]),
       wants: await rows(db, 'select wanted, note, status, created_at from plan_requests where user_id = $1 order by created_at desc limit 10', [id]),
       docs: await rows(db, 'select * from account_documents where user_id = $1 order by created_at desc', [id]),
-      mfiles: await rows(db, 'select id, kind, file_name, created_at from mfr_files where user_id = $1 order by created_at desc', [id]),
+      mfiles: await rows(db, 'select id, kind, file_name, created_at, status, added, matched, error from mfr_files where user_id = $1 order by created_at desc', [id]),
+      portfolio: await one(db, `select count(*)::int as n, count(molecule_id)::int as matched, count(*) filter (where kind = 'device')::int as devices
+                               from mfr_products where user_id = $1`, [id]),
     };
   });
   if (!d) notFound();
@@ -125,13 +128,19 @@ export default async function AdminAccount({ params, searchParams }: { params: P
                 <button className="btn btn-ghost btn-sm" type="submit">{p.verified_at ? 'Remove badge' : 'Mark verified (GMP checked)'}</button>
               </form>
             </section>)}
-          {d.mfiles.length > 0 && (
+          {p && (
             <section className="card stack" id="mfiles">
-              <h2>Uploaded by the manufacturer</h2>
-              <p className="note">Catalogues to load, and the starter pack. A valid GMP certificate is what the Verified badge checks.</p>
+              <h2>Products and files</h2>
+              <p className="note">Load a product list into this portfolio (Excel or CSV with a generic-name column; a <b>type</b> column with Drug, MD or DS and a <b>use_group</b> column are honoured). Products appear within a minute. Below: what the manufacturer uploaded.</p>
+              <form action={uploadPortfolioFor} className="row" style={{ gap: 8, flexWrap: 'wrap' }}>
+                <input type="hidden" name="user_id" value={id} />
+                <input type="file" name="file" accept=".xlsx,.xls,.csv" required aria-label="Product list" />
+                <button className="btn btn-blue btn-sm" type="submit">Load products</button>
+              </form>
+              {d.portfolio && <p className="small">{d.portfolio.n} products in the portfolio, {d.portfolio.matched} matched to a molecule, {d.portfolio.devices} devices.</p>}
               {d.mfiles.map((x) => (
                 <div key={x.id} className="between"><a href={`/files/mfile/${x.id}`}>{x.file_name}</a>
-                  <span className="sub2">{MFR_FILE_KINDS[x.kind]} · {fmtDate(x.created_at)}</span></div>))}
+                  <span className="sub2">{MFR_FILE_KINDS[x.kind]} · {fmtDate(x.created_at)}{x.status === 'queued' ? ' · being read' : x.status === 'done' && x.added != null ? ` · ${x.added} added, ${x.matched} matched` : x.error ? ` · ${x.error}` : ''}</span></div>))}
             </section>)}
           <section className="card stack" id="documents">
             <h2>Account documents</h2>
