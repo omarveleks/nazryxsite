@@ -40,7 +40,7 @@ export async function brandPresence(db: any, market: string, brands: { id: numbe
 
 /** Other brands in the same use group in this market, from the registers and pharmacy listings. */
 export async function segmentBrands(db: any, market: string, group: string, skip: string[]) {
-  const pre = 'eye|tear|nasal|nose|saline|sinus|visc|hyalur|ovd|articul|knee|joint|sea ?water|neti|lubric|systane|optive|refresh|sterimar|neilmed';
+  const pre = 'eye|tear|nasal|nose|saline|sinus|visc|hyalur|ovd|articul|knee|joint|sea ?water|neti|lubric|systane|optive|refresh|sterimar|neilmed|contact lens|lens care|renu|opti-?free|biotrue|nebuli|hypertonic|filler';
   const listings = await rows(db, `select l.name, l.pack_price::float as price, l.currency, l.description, m.inn from price_listings l
                                    left join molecules m on m.id = l.molecule_id where l.country = $1 and l.kind = 'retail' and l.name ~* $2`, [market, pre]);
   const devs = await rows(db, `select brand, risk_class, manufacturer, manufacturing_country as made from devices where country = $1 and active and use_group = $2`, [market, group]);

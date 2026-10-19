@@ -10,7 +10,9 @@ import { requireUser } from '@/lib/auth';
 import { one, rows, withUser } from '@/lib/db';
 import { HIGH_DEMAND, LAUNCH_STAGES, MFR_FILE_KINDS, canUse, countryName, covers, displayClass, productClass, tierIn, byMolecule } from '@/lib/mfr';
 import { fmtDate } from '@/lib/format';
-import { PRICE_SQL, perUnit, type MoleculePrice } from '@/lib/prices';
+import { PRICE_SQL, perUnit, priceFits, type MoleculePrice } from '@/lib/prices';
+import { isDevice, productGroup } from '@/lib/segments';
+import { segmentBrands } from '@/lib/competitors';
 
 export const metadata = { title: 'My products' };
 
@@ -23,6 +25,8 @@ const COMP: Record<string, [string, string]> = {
   absent: ['Not on this market yet', ''],
 };
 
+const PER_ML = ['eye_drops', 'nasal', 'contact_lens', 'inhaled_saline'];
+
 // The manufacturer's catalogue against its markets: a portfolio dashboard on top, then every product.
 export default async function MfrProducts({ searchParams }: { searchParams: Promise<{ added?: string; matched?: string; error?: string; market?: string; tab?: string; saved?: string; uploaded?: string; removed?: string; reading?: string; cleared?: string }> }) {
   const sp = await searchParams;
@@ -31,7 +35,7 @@ export default async function MfrProducts({ searchParams }: { searchParams: Prom
     await loadLive(db);
     const prof = await one(db, 'select target_countries, primary_market from manufacturer_profiles where user_id = $1', [u.id]);
     const targets = targetMarkets(prof?.target_countries);
-    const products = await rows(db, `select p.id, p.name, p.strength, p.dosage_form, p.molecule_id, p.atc, p.use_group, m.inn, m.category
+    const products = await rows(db, `select p.id, p.name, p.strength, p.dosage_form, p.molecule_id, p.atc, p.use_group, p.kind, m.inn, m.category
         from mfr_products p left join molecules m on m.id = p.molecule_id where p.user_id = $1 order by coalesce(m.inn, p.name)`, [u.id]);
     const ids = products.map((p) => p.molecule_id).filter(Boolean);
     const facts = ids.length ? await rows(db, `select cm.molecule_id, cm.country, cm.registrants, cm.registrations, cm.on_national_list, cm.facility_level,
@@ -48,7 +52,22 @@ export default async function MfrProducts({ searchParams }: { searchParams: Prom
     const watched = watching && hasData(market) && covers(u, market) ? await rows(db, 'select * from my_competitor_summary($1)', [market]) : [];
     const watchCount = Number((await one(db, 'select count(*)::int as n from watches where user_id = $1', [u.id]))?.n ?? 0);
     const prices = ids.length && hasData(market) ? await rows(db, `${PRICE_SQL} where molecule_id = any($1) and country = $2`, [ids, market]) as MoleculePrice[] : [];
-    return { targets, market, products, facts, launches, files, watched, watchCount, prices };
+    // products used in one place (eye-surgery viscoelastics, nasal saline...) compete with everything registered in that group,
+    // medicines and devices alike, whatever the ingredient; their price is the pharmacy median per 10 ml in the group
+    const groups = [...new Set(products.map((p) => productGroup(p)).filter(Boolean))] as string[];
+    const groupFacts = groups.length && hasData(market) ? await rows(db, `select use_group, count(distinct company)::int as registrants, count(*)::int as registrations from (
+        select use_group, coalesce(company_id::text, lower(coalesce(ltr, holder, manufacturer))) as company from devices where country = $1 and active and use_group = any($2)
+        union all
+        select use_group, coalesce(ltr_id, registrant_id)::text from registrations where country = $1 and active and use_group = any($2)) x group by use_group`,
+      [market, groups]) : [];
+    const groupPrices: Record<string, { per10: number; currency: string; n: number }> = {};
+    const cur = hasData(market) ? (await one(db, 'select currency from price_listings where country = $1 limit 1', [market]))?.currency : null;
+    // bottles compare per 10 ml; syringes and fillers do not, so they show no average
+    if (cur) for (const g of groups.filter((x) => PER_ML.includes(x))) {
+      const v = (await segmentBrands(db, market, g, [])).map((b) => b.per10).filter((x): x is number => x != null).sort((a, b) => a - b);
+      if (v.length) groupPrices[g] = { per10: v[Math.floor(v.length / 2)], currency: cur, n: v.length };
+    }
+    return { targets, market, products, facts, launches, files, watched, watchCount, prices, groupFacts, groupPrices };
   });
   const market = d.market;
   const analysis = canUse(tierIn(u, market), 'portfolio');
@@ -57,11 +76,19 @@ export default async function MfrProducts({ searchParams }: { searchParams: Prom
   const fact = (mol: number | null, c: string) => d.facts.find((f) => f.molecule_id === mol && f.country === c);
   const focus = hasData(market) ? market : null;      // the market the dashboard reads
 
-  const list = d.products.map((p) => ({ ...p, cls: displayClass(p), f: focus ? fact(p.molecule_id, focus) : undefined }))
+  const groupFact = (g: string): Fact => {
+    const x = d.groupFacts.find((r) => r.use_group === g);
+    return { molecule_id: 0, country: market, registrants: x?.registrants ?? 0, registrations: x?.registrations ?? 0, on_national_list: true,
+      facility_level: null, rankable: false, score: null, demand: null };
+  };
+  const list = d.products.map((p) => {
+    const group = productGroup(p);
+    return { ...p, group, device: isDevice(p), cls: displayClass(p), f: focus ? (group ? groupFact(group) : fact(p.molecule_id, focus)) : undefined };
+  })
     .sort((a, b) => (b.f?.score ?? -1) - (a.f?.score ?? -1) || String(a.inn ?? a.name).localeCompare(String(b.inn ?? b.name)));
   // doses, forms and packs of one medicine count once: the analysis and the list are by molecule
   const mols = byMolecule(list);
-  const packs = list.length, n = mols.length, matched = list.filter((p) => p.molecule_id).length;
+  const packs = list.length, n = mols.length, matched = list.filter((p) => p.molecule_id || p.group).length;
   const by = (k: string) => mols.filter((p) => competition(p.f) === k).length;
   const onMarket = mols.filter((p) => p.f && p.f.registrants > 0);
   const avg = onMarket.length ? (onMarket.reduce((s, p) => s + p.f!.registrants, 0) / onMarket.length).toFixed(1) : '—';
@@ -188,17 +215,20 @@ export default async function MfrProducts({ searchParams }: { searchParams: Prom
               <tr key={p.id}>
                 <td><Link href={`/m/products/${p.id}`}><b>{p.inn ?? p.name}</b></Link>
                   {Number(p.f?.demand ?? 0) >= HIGH_DEMAND && visible(i) && <span style={{ marginLeft: 6, color: 'var(--pastel-peach-ink)' }}><DemandIcon size={11} title="High demand" /></span>}
-                  <div className="sub2">{[p.packs > 1 ? `${p.packs} products` : p.inn ? p.name : null, p.variants || null, p.molecule_id ? null : 'Not matched yet'].filter(Boolean).join(' · ')}</div></td>
+                  <div className="sub2">{[p.packs > 1 ? `${p.packs} products` : p.inn ? p.name : null, p.variants || null, p.device ? 'Medical device' : p.molecule_id ? null : 'Not matched yet'].filter(Boolean).join(' · ')}</div></td>
                 <td className="small hide-m">{p.cls ?? '—'}</td>
                 {[market].map((c) => {
-                  const f = fact(p.molecule_id, c);
+                  const f = p.f;
                   return <td key={c} className="r">{!hasData(c) ? <span className="pill blue">Managed by Nazryx</span>
                     : !visible(i) ? <span className="note row" style={{ justifyContent: 'flex-end', gap: 4 }}><LockIcon /> Locked</span>
                     : <span className={`pill ${COMP[competition(f)][1]}`}>{competition(f) === 'some' || competition(f) === 'crowded' ? `${f!.registrants} competitors` : COMP[competition(f)][0]}</span>}</td>;
                 })}
                 <td className="r small hide-m num">{(() => {
-                  const pr = visible(i) ? d.prices.find((x) => x.molecule_id === p.molecule_id) : undefined;
-                  return pr ? <>{perUnit(pr)}{pr.basis === 'estimate' && <div className="sub2">estimate</div>}</> : '—';
+                  if (!visible(i)) return '—';
+                  const gp = p.group ? d.groupPrices[p.group] : undefined;
+                  if (p.group) return gp ? <>{gp.currency} {Math.round(gp.per10).toLocaleString('en')} / 10 ml<div className="sub2">pharmacy median, {gp.n} brands</div></> : '—';
+                  const pr = d.prices.find((x) => x.molecule_id === p.molecule_id);
+                  return pr && priceFits(pr, p.dosage_form) ? <>{perUnit(pr)}{pr.basis === 'estimate' && <div className="sub2">estimate</div>}</> : '—';
                 })()}</td>
               </tr>))}</tbody></table></div>)}
       </section>

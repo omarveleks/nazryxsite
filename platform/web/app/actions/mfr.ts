@@ -14,6 +14,7 @@ import { DOSSIER_ITEMS } from '@/lib/format';
 import { saveUpload } from '@/lib/uploads';
 import { TOUR } from '@/lib/tour';
 import { catalogueLines, hasGenericColumn } from '@/lib/catalogue';
+import { GROUP_LABEL } from '@/lib/segments';
 
 const codes = MFR_COUNTRIES.map((c) => c.code);
 const pick = (f: FormData, k: string, allowed: readonly string[]) => [...new Set(f.getAll(k).map(String))].filter((v) => allowed.includes(v));
@@ -641,7 +642,7 @@ export async function setUseGroup(f: FormData) {
   const product = int(f, 'product_id'), market = str(f, 'market', 2), g = str(f, 'use_group', 20);
   const k = str(f, 'kind', 10);
   await withUser(u.id, (db) => db.query('update mfr_products set use_group = $3, kind = coalesce($4, kind) where id = $1 and user_id = $2',
-    [product, u.id, ['eye_drops', 'eye_surgery', 'joint', 'nasal'].includes(g) ? g : null, k === 'device' || k === 'medicine' ? k : null]));
+    [product, u.id, Object.keys(GROUP_LABEL).includes(g) ? g : null, k === 'device' || k === 'medicine' ? k : null]));
   redirect(`/m/products/${product}?market=${market}#competitors`);
 }
 

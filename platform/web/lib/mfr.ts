@@ -1,4 +1,4 @@
-import { GROUP_LABEL, useGroup } from './segments';
+import { GROUP_LABEL, productGroup } from './segments';
 // Manufacturer side: countries, agency services and their milestones, report types.
 
 /** Markets manufacturers can target. Core markets get full market screens (live once their data is loaded); the others
@@ -202,9 +202,9 @@ export const ATC_GROUPS: Record<string, string> = {
 export const productClass = (p: { category?: string | null; atc?: string | null }) => p.category ?? (p.atc ? ATC_GROUPS[p.atc[0]] : null) ?? null;
 /** The class people see: what the product is used for where that matters (an eye lubricant, not 'pain'), else its class. */
 export const displayClass = (p: { category?: string | null; atc?: string | null; use_group?: string | null; name?: string | null;
-  dosage_form?: string | null; inn?: string | null }) => {
-  const g = p.use_group ?? useGroup(p.name, p.dosage_form, p.inn);
-  return (g && GROUP_LABEL[g]) || productClass(p);
+  dosage_form?: string | null; inn?: string | null; kind?: string | null }) => {
+  const g = productGroup(p);
+  return (g && GROUP_LABEL[g]) || (p.kind === 'supplement' ? 'Dietary supplements' : productClass(p));
 };
 
 /** What each service needs from the manufacturer, shown before they ask for it. */
@@ -233,7 +233,7 @@ export const WIZARD = ['company', 'markets', 'goals', 'help', 'timeline', 'scope
 export type WizardStep = (typeof WIZARD)[number];
 
 // ---------------------------------------------------------------- one row per molecule
-type Pack = { molecule_id: number | null; strength?: string | null; dosage_form?: string | null };
+type Pack = { molecule_id: number | null; strength?: string | null; dosage_form?: string | null; group?: string | null };
 const tidy = (s: string) => s.replace(/\s+/g, ' ').replace(/(\d)\s*(mg|mcg|µg|g|ml|iu|%)\b/gi, (_, n, u) => `${n} ${u.toLowerCase()}`).trim();
 
 /** Products folded to one row per molecule (the first, best-ranked row stands for it), with how many products it
@@ -241,7 +241,8 @@ const tidy = (s: string) => s.replace(/\s+/g, ' ').replace(/(\d)\s*(mg|mcg|µg|g
 export function byMolecule<T extends Pack>(list: T[]): (T & { packs: number; variants: string })[] {
   const groups = new Map<string, T[]>();
   list.forEach((p, i) => {
-    const k = p.molecule_id != null ? `m${p.molecule_id}` : `p${i}`;
+    // one ingredient used in different places (hyaluronate eye drops, eye surgery, joints) stays apart
+    const k = p.molecule_id != null ? `m${p.molecule_id}|${p.group ?? ''}` : `p${i}`;
     groups.set(k, [...(groups.get(k) ?? []), p]);
   });
   return [...groups.values()].map((g) => {

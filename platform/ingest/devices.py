@@ -16,14 +16,19 @@ GROUPS = [
               r"\bhylan\b|(?:hyaluron\w*).*(?:knee|joint|articul|osteoarth)|(?:knee|joint|osteoarth).*hyaluron"),
     ("nasal", r"saline nasal|nasal saline|(?:nasal|nose).*(?:saline|sea ?water|isotonic|hypertonic|wash|rinse|spray|drops)|"
               r"sea ?water|sinus rinse|nasal wash|neti pot|sterimar|neilmed|nasamist|pediamist|linaqua|aquaease|physiomer|marimer|synolin"),
+    ("inhaled_saline", r"hypertonic[^,]*inhal|inhal[^,]*hypertonic|nebuli[sz]\w*[^,]*(?:saline|sodium chloride)|ingasalin|hyaneb|nebusal|mucoclear|hyper-?sal\b"),
+    ("dermal_filler", r"(?:dermal|facial|lip|hyaluronic[^,]*) filler|bellarti|juvederm|restylane|belotero|teosyal|stylage|profhilo|radiesse|sculptra"),
     ("eye_drops", r"eye ?drop|eye gel|lubricat\w* eye|eye lubricant|dry eye|artificial tear|\btears\b|hylo-?(?:comod|gel|care|dual|fresh)|"
                   r"systane|hyfresh|maxmoist|hayazol|hyazol|gylan|refresh (?:liquigel|tears|plus)|optive|thealoz|eye (?:mist|spray)"),
 ]
+# contact lens care is checked before the hardware words below ('lens')
+CONTACT_LENS = r"contact lens|lens care|multi-?(?:purpose|function\w*) solution|aquaoptic|renu\b|opti-?free|biotrue|complete revitalens|solo-?care|avizor"
 # Hardware and diagnostics that share words with the groups above (knee prostheses, oxygen cannulas, intraocular lenses)
 NOT_GROUPED = (r"cannula|oxygen|mask|prosthe|arthroplast|brace|immobili|implant|\blens|\biol\b|blade|\btest|assay|tube|airway|cpap|"
                r"ventilat|aspirat|suction|prong|knife|catheter|swab|kit for|analy[sz]er|scanner|system$|hinge|nail|screw|plate")
 GROUP_LABEL = {"eye_drops": "Eye lubricants (dry eye)", "eye_surgery": "Eye-surgery viscoelastics",
-               "joint": "Joint injections (hyaluronic acid)", "nasal": "Nasal saline"}
+               "joint": "Joint injections (hyaluronic acid)", "nasal": "Nasal saline", "contact_lens": "Contact lens care",
+               "dermal_filler": "Dermal fillers", "inhaled_saline": "Inhaled saline (nebuliser)"}
 
 
 # what lubricants and nasal washes are made of: an eye drop or nasal spray with another active ingredient is a medicine
@@ -33,6 +38,8 @@ LUBRICANTS = (r"hyaluron|carmellose|carboxymethyl|hypromellose|hydroxypropyl|car
 
 def use_group(*texts):
     t = " ".join(x for x in texts if x).lower()
+    if re.search(CONTACT_LENS, t):
+        return "contact_lens"
     if re.search(NOT_GROUPED, t):
         return None
     return next((g for g, rx in GROUPS if re.search(rx, t)), None)
@@ -133,7 +140,7 @@ def tag_registrations(cur):
     changed = 0
     for rid, brand, generic, form, old in cur.execute("""select id, brand, generic_name, dosage_form, use_group from registrations
                                                          where (brand || ' ' || coalesce(generic_name, '') || ' ' || coalesce(dosage_form, ''))
-                                                         ~* '(eye|ophth|tear|nasal|nose|visc|hyalur|articul|knee|joint|saline|sinus|sea ?water)'
+                                                         ~* '(eye|ophth|tear|nasal|nose|visc|hyalur|articul|knee|joint|saline|sinus|sea ?water|nebuli|hypertonic|inhal|lens|filler)'
                                                             or use_group is not null""").fetchall():
         g = registration_group(brand, generic, form)
         if g != old:
@@ -164,6 +171,6 @@ def tag_products(cur):
     """Use groups for manufacturers' products that have none yet (they can change it on the product page)."""
     for pid, name, form, inn in cur.execute("""select p.id, p.name, p.dosage_form, m.inn from mfr_products p
                                                left join molecules m on m.id = p.molecule_id where p.use_group is null""").fetchall():
-        g = use_group(name, form, inn)
+        g = registration_group(name, inn, form)     # a glaucoma or decongestant drop is not a lubricant or saline
         if g:
             cur.execute("update mfr_products set use_group = %s where id = %s", (g, pid))

@@ -182,7 +182,7 @@ LEGACY = {}   # product line -> the same product as the earlier reader named it 
 EXTRA = {}    # product line -> what a curated list says beyond the name: medicine, device or supplement, and its use group
 KINDS = {"md": "device", "device": "device", "medical device": "device", "drug": "medicine", "medicine": "medicine",
          "ds": "supplement", "supplement": "supplement", "dietary supplement": "supplement"}
-GROUPS = ("eye_drops", "eye_surgery", "joint", "nasal")
+GROUPS = ("eye_drops", "eye_surgery", "joint", "nasal", "contact_lens", "dermal_filler", "inhaled_saline")
 
 
 class Products(list):

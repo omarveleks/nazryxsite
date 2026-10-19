@@ -8,10 +8,10 @@ import { requireUser } from '@/lib/auth';
 import { one, rows, withUser } from '@/lib/db';
 import { BE_STATUS, beSuggestion, fmtDate, fmtMoney, levelLabel, registeredLine } from '@/lib/format';
 import { DEVICE_REQ_SQL, REQ_SQL, appliesTo, forProduct, type Requirement } from '@/lib/regulatory';
-import { PRICE_SQL, packOf, priceBasis, unitShort, unitWord, usd, type MoleculePrice } from '@/lib/prices';
-import { AGENCY_KINDS, LAUNCH_STAGES, MFR_PLANS, NEEDS_PLAN, SERVICES, canUse, tierIn, countryName, mfrProductsSql, productClass, reasons } from '@/lib/mfr';
+import { PRICE_SQL, packOf, priceBasis, priceFits, unitShort, unitWord, usd, type MoleculePrice } from '@/lib/prices';
+import { AGENCY_KINDS, LAUNCH_STAGES, MFR_PLANS, NEEDS_PLAN, SERVICES, canUse, tierIn, countryName, displayClass, mfrProductsSql, productClass, reasons } from '@/lib/mfr';
 import { brandPresence, segmentBrands, type BrandRow } from '@/lib/competitors';
-import { GROUP_LABEL, isDevice, useGroup } from '@/lib/segments';
+import { GROUP_LABEL, isDevice, productGroup } from '@/lib/segments';
 
 export const metadata = { title: 'Product' };
 
@@ -38,7 +38,7 @@ export default async function MfrProduct({ params, searchParams }: { params: Pro
     const reqs = forProduct(await rows(db, kind === 'device' ? DEVICE_REQ_SQL : REQ_SQL, [market]) as Requirement[], { ...p, category: productClass(p) });
     const watched = p.molecule_id ? Boolean(await one(db, 'select 1 as x from watches where user_id = $1 and molecule_id = $2', [u.id, p.molecule_id])) : false;
     // competitor brands the manufacturer named, and others in the same use group (devices and medicines alike)
-    const group: string | null = p.use_group ?? useGroup(p.name, p.dosage_form, p.inn);
+    const group: string | null = productGroup(p);
     const watchList = await rows(db, 'select id, brand from mfr_competitors where product_id = $1 and user_id = $2 order by created_at', [id, u.id]);
     const comp = hasData(market) ? {
       group, brands: await brandPresence(db, market, watchList as { id: number; brand: string }[]),
@@ -87,7 +87,8 @@ export default async function MfrProduct({ params, searchParams }: { params: Pro
         unit_price, value, currency, bidders, url from tenders where country = $2 and $1 = any(molecule_ids)
         order by coalesce(awarded, closing, published) desc nulls last limit 6`, [p.molecule_id, market]) : [];
     // the molecule's average price in this market: listings, or an estimate from a neighbouring market
-    const avg = canUse(t, 'market') ? await one(db, `${PRICE_SQL} where molecule_id = $1 and country = $2`, [p.molecule_id, market]) as MoleculePrice | null : null;
+    const price = canUse(t, 'market') ? await one(db, `${PRICE_SQL} where molecule_id = $1 and country = $2`, [p.molecule_id, market]) as MoleculePrice | null : null;
+    const avg = price && priceFits(price, p.dosage_form) ? price : null;     // a vial price says nothing about a capsule
     // a market with only one or two products prices the brand; a generic usually enters lower (measured on lists that say which is which)
     const costs = avg ? await one(db, 'select freight, duty, distributor, pharmacy, vat from market_costs where country = $1', [market]) : null;
     const brands = avg ? await one(db, `select (select registrants from country_molecules where molecule_id = $1 and country = $2) as registrants,
@@ -97,8 +98,8 @@ export default async function MfrProduct({ params, searchParams }: { params: Pro
   if (!d) notFound();
   const { p, market } = d;
   const be = p.be_study ? null : beSuggestion(p.forms ?? p.dosage_form);
-  const g = p.use_group ?? useGroup(p.name, p.dosage_form, p.inn);
-  const cls = (g && GROUP_LABEL[g]) || productClass(p);   // an eye lubricant is not 'pain' because it shares hyaluronate with joint injections
+  const g = productGroup(p);
+  const cls = displayClass(p);   // an eye lubricant is not 'pain' because it shares hyaluronate with joint injections
   return (
     <Shell user={u} title={p.inn ?? p.name} crumb={<><Link href="/m/products">My products</Link> / {p.inn ?? p.name}</>}
       sub={[p.inn ? p.name : null, cls].filter(Boolean).join(' · ') || 'Product'}
@@ -306,7 +307,7 @@ function trade(retail: number, c: any) {
   const wholesale = exVat / (1 + Number(c?.pharmacy ?? 0.35));
   return { wholesale, buying: wholesale / (1 + Number(c?.distributor ?? 0.25)) };
 }
-const DEVICE_CLASS: Record<string, string> = { eye_drops: 'b', nasal: 'ab', eye_surgery: 'c', joint: 'cd' };
+const DEVICE_CLASS: Record<string, string> = { eye_drops: 'b', nasal: 'ab', eye_surgery: 'c', joint: 'cd', contact_lens: 'bc', dermal_filler: 'd', inhaled_saline: 'ab' };
 const amt = (cur: string, v: number) => `${cur} ${Math.round(v).toLocaleString('en')}`;
 /** Made in the market, or imported (and from where); nothing when the register does not say. */
 function Origin({ made, market }: { made: string | null; market: string }) {

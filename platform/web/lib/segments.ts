@@ -2,21 +2,35 @@
 // joint injections, nasal saline). The same rules as ingest/devices.py.
 export const GROUP_LABEL: Record<string, string> = {
   eye_drops: 'Eye lubricants (dry eye)', eye_surgery: 'Eye-surgery viscoelastics', joint: 'Joint injections (hyaluronic acid)', nasal: 'Nasal saline',
+  contact_lens: 'Contact lens care', dermal_filler: 'Dermal fillers', inhaled_saline: 'Inhaled saline (nebuliser)',
 };
 const GROUPS: [string, RegExp][] = [
   ['eye_surgery', /viscoelast|visco-?surg|\bovd\b|provisc|healon|viscoat|discovisc|amvisc|hydroxy ?propyl ?methyl ?cellulose 2|hpmc 2|appavisc|adgevisk|kogevisk|ophthalmic (?:surgical|viscosurgical)/i],
   ['joint', /intra-?articular|viscosupplement|synvisc|durolane|ostenil|fermathron|hyalgan|orthovisc|armaviscon|hyorth|hyal forte|\bhylan\b|hyaluron\w*.*(?:knee|joint|articul|osteoarth)|(?:knee|joint|osteoarth).*hyaluron/i],
   ['nasal', /saline nasal|nasal saline|(?:nasal|nose).*(?:saline|sea ?water|isotonic|hypertonic|wash|rinse|spray|drops)|sea ?water|sinus rinse|nasal wash|neti pot|sterimar|neilmed|nasamist|pediamist|linaqua|aquaease|physiomer|marimer|synolin/i],
+  ['inhaled_saline', /hypertonic[^,]*inhal|inhal[^,]*hypertonic|nebuli[sz]\w*[^,]*(?:saline|sodium chloride)|ingasalin|hyaneb|nebusal|mucoclear|hyper-?sal\b/i],
+  ['dermal_filler', /(?:dermal|facial|lip|hyaluronic[^,]*) filler|bellarti|juvederm|restylane|belotero|teosyal|stylage|profhilo|radiesse|sculptra/i],
   ['eye_drops', /eye ?drop|eye gel|lubricat\w* eye|eye lubricant|dry eye|artificial tear|\btears\b|hylo-?(?:comod|gel|care|dual|fresh)|systane|hyfresh|maxmoist|hayazol|hyazol|gylan|refresh (?:liquigel|tears|plus)|optive|thealoz|eye (?:mist|spray)/i],
 ];
+// contact lens care is checked before the hardware words below ('lens')
+const CONTACT_LENS = /contact lens|lens care|multi-?(?:purpose|function\w*) solution|aquaoptic|renu\b|opti-?free|biotrue|complete revitalens|solo-?care|avizor/i;
 const NOT_GROUPED = /cannula|oxygen|mask|prosthe|arthroplast|brace|immobili|implant|\blens|\biol\b|blade|\btest|assay|tube|airway|cpap|ventilat|aspirat|suction|prong|knife|catheter|swab|kit for|analy[sz]er|scanner|system$|hinge|nail|screw|plate/i;
 // medicines inside a group's words that are not that kind of product (antibiotic or steroid eye drops are not lubricants)
 const NOT_LUBRICANT = /hydrocort|betameth|chloramph|alerchek|aurocrome|aurosol|apdrop|combiplus|eyfem|mo-floren|cyclogyl|mydriacyl|oculast|cipro|oflox|moxi|gati|tobra|genta|chloramph|neomy|dexa|predn|fluoro|lotepred|ketorol|diclof|nepaf|bromf|olopat|ketotif|azelast|cromo|timolol|latano|brimon|dorzol|brinz|travop|bimat|atropin|tropicam|cyclop|phenyleph|naphaz|tetrahydroz|xylometaz|oxymetaz|fluticas|mometas|budeso|beclom|cyclospor|acular|nevanac|vigamox|tobradex|maxitrol|maxidex|patanol|exocin|flarex|relestat/i;
 
 export function useGroup(...texts: (string | null | undefined)[]) {
   const t = texts.filter(Boolean).join(' ');
+  if (CONTACT_LENS.test(t)) return 'contact_lens';
   if (!t || NOT_GROUPED.test(t)) return null;
   return GROUPS.find(([, rx]) => rx.test(t))?.[0] ?? null;
+}
+
+/** A product's use group: the one set on it, else from its name. A medicine with another active ingredient (a glaucoma
+ *  or antibiotic drop, a decongestant spray) is not an eye lubricant or nasal saline. Same rule as ingest/devices.py. */
+export function productGroup(p: { use_group?: string | null; kind?: string | null; name?: string | null; dosage_form?: string | null; inn?: string | null }) {
+  const g = p.use_group ?? useGroup(p.name, p.dosage_form, p.inn);
+  if ((g === 'eye_drops' || g === 'nasal') && p.kind !== 'device' && p.inn && !LUBRICANTS.test(p.inn)) return null;
+  return g;
 }
 
 /** Whether a listing or registration is in the group, as a like-for-like competitor (no medicated drops). */
@@ -52,6 +66,6 @@ export function brandOf(name: string) {
  *  and lubricants we could not match to a medicine. */
 export function isDevice(p: { kind?: string | null; use_group?: string | null; name?: string | null; dosage_form?: string | null; inn?: string | null; molecule_id?: number | null }) {
   if (p.kind) return p.kind === 'device';
-  const g = p.use_group ?? useGroup(p.name, p.dosage_form, p.inn);
+  const g = productGroup(p);
   return ['eye_surgery', 'joint', 'nasal'].includes(g ?? '') || Boolean(g && !p.molecule_id);
 }

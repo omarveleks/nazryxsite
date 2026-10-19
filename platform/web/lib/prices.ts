@@ -27,3 +27,18 @@ export const usd = (v: string | number) => `$${Number(v) < 1 ? Number(v).toFixed
 export function priceBasis(p: MoleculePrice) {
   return p.basis === 'listings' ? `Based on ${p.n} ${p.n === 1 ? 'price' : 'prices'} in ${countryName(p.country)}.` : 'Estimated.';
 }
+
+/** The unit a product is sold by, from its form; null when the form does not say. */
+export function formUnit(form?: string | null) {
+  const f = (form ?? '').toLowerCase();
+  if (/tablet|capsule|caplet|lozenge|pastille|softgel/.test(f)) return 'tablet or capsule';
+  if (/inject|ampoule|ampule|vial|infusion|intraven|syringe/.test(f)) return 'ampoule or vial';
+  if (/drop|syrup|solution|suspension|spray|gel|cream|ointment|liquid|inhal|aerosol|emulsion|lotion|powder/.test(f)) return 'ml';
+  return null;
+}
+/** Whether a molecule's average price is for the same kind of product: a vial price is no guide to a capsule. */
+export function priceFits(p: MoleculePrice, form?: string | null) {
+  const u = formUnit(form);
+  if (!u) return true;
+  return u === 'ml' ? p.unit === 'ml' || p.unit === 'g' : p.unit === u;
+}
