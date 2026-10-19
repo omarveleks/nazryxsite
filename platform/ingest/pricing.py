@@ -20,7 +20,7 @@ SOUTH_ASIA = ("PK", "IN", "BD")
 NEIGHBOURS = {"KZ": ("KG", "UZ") + NEARBY["cis"], "KG": ("KZ", "UZ") + NEARBY["cis"], "UZ": ("KZ", "KG") + NEARBY["cis"],
               "KE": ("TZ", "NG") + SOUTH_ASIA, "TZ": ("KE", "NG") + SOUTH_ASIA,
               # Nigeria's medicines come mostly from India and China and its own makers; Ghana shares its West African market
-              "NG": ("GH",) + SOUTH_ASIA}
+              "NG": ("GH", "KE", "TZ") + SOUTH_ASIA}
 CURRENCY = {"KZ": "KZT", "KG": "KGS", "UZ": "UZS", "KE": "KES", "TZ": "TZS", "PK": "PKR", "GB": "GBP", "FR": "EUR",
             "NG": "NGN", "GH": "GHS", "ZA": "ZAR", "BY": "BYN", "AM": "AMD", "AZ": "AZN", "IN": "INR", "BD": "BDT"}
 ABROAD = ("PK", "GB", "FR")    # far reference countries: last, only for molecules nothing nearer prices, Pakistan first
@@ -1202,8 +1202,8 @@ def prices_NG(cur, s):
         for k in NG_SHOPIFY:
             out += [f"{k}|{p}" for p in range(1, 41)]             # Shopify: pages until one comes back empty
         h = s.get("https://medplusnig.com/products", params={"data_from": "latest", "page": 1}, timeout=120)
-        last = max([int(x) for x in re.findall(r"[?&]page=(\d+)", h.text if h.ok else "")] or [1])
-        out += [f"medplus|{p}" for p in range(1, last + 1)]
+        last = max([int(x) for x in re.findall(r"[?&](?:amp;)?page=(\d+)", h.text if h.ok else "")] or [0])
+        out += [f"medplus|{p}" for p in range(1, (last or 200) + 1)]      # no page links found: read until pages come back empty
         return out
 
     def items(ref):
