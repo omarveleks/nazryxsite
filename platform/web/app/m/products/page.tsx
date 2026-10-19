@@ -115,12 +115,11 @@ export default async function MfrProducts({ searchParams }: { searchParams: Prom
   // a price for every product we can: same group, the ingredient's average in the same form, pharmacy packs in the same form;
   // here first, then from another market converted to this one's currency (an estimate)
   const conv = (v: number, from: string) => d.local && d.fx[from] && d.fx[d.local] ? v / d.fx[from] * d.fx[d.local] : null;
-  const priceFor = (p: (typeof mols)[number]): { price: number; brand?: number; per: string; currency: string } | null => {
-    const out = (v: number | null, cur: string, per: string, brand?: number | null) => {
+  const priceFor = (p: (typeof mols)[number]): { price: number; per: string; currency: string } | null => {
+    const out = (v: number | null, cur: string, per: string) => {
       if (v == null) return null;
       const x = cur === d.local ? v : conv(v, cur);
-      const y = brand == null ? undefined : cur === d.local ? brand : conv(brand, cur) ?? undefined;
-      return x == null ? null : { price: x, brand: y, per, currency: d.local! };
+      return x == null ? null : { price: x, per, currency: d.local! };
     };
     if (p.group) {
       const gp = d.groupPrices[p.group];
@@ -132,8 +131,8 @@ export default async function MfrProducts({ searchParams }: { searchParams: Prom
       const pr = (c === market ? d.prices : d.otherPrices).find((x) => x.molecule_id === p.molecule_id && x.country === c);
       if (pr && priceFits(pr, p.dosage_form)) {
         const per = packOf(pr) > 1 ? `${packOf(pr)} ${pr.unit}` : unitShort(pr);
-        // the generic's price, and the brand's beside it
-        const r = out(Number(pr.generic_price ?? pr.unit_price) * packOf(pr), pr.currency, per, pr.brand_price ? Number(pr.brand_price) * packOf(pr) : null);
+        // the generic's price: what a generic sells for
+        const r = out(Number(pr.generic_price ?? pr.unit_price) * packOf(pr), pr.currency, per);
         if (r) return r;
       }
       const same = d.listings.filter((l) => l.country === c && l.molecule_id === p.molecule_id && (!u || !formUnit(l.name) || formUnit(l.name) === u));
@@ -276,8 +275,7 @@ export default async function MfrProducts({ searchParams }: { searchParams: Prom
                   if (!visible(i)) return '—';
                   const q = priceFor(p);
                   const fmt = (v: number) => `${q!.currency} ${Math.round(v).toLocaleString('en')}`;
-                  return q ? <>{q.brand ? 'Generic ' : ''}{fmt(q.price)} / {q.per}
-                    {q.brand && <div className="small">Brand {fmt(q.brand)}</div>}<div className="sub2">Est. avg</div></> : '—';
+                  return q ? <>{fmt(q.price)} / {q.per}<div className="sub2">Est. avg</div></> : '—';
                 })()}</td>
               </tr>))}</tbody></table></div>)}
       </section>

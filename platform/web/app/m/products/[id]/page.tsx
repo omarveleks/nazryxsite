@@ -206,16 +206,18 @@ export default async function MfrProduct({ params, searchParams }: { params: Pro
             <section className="card stack">
               <div className="card-h"><h2>Price in {countryName(market)}</h2>
                 <span className="pill peach">Est. avg</span></div>
-              {/* a generic and a brand price, then the range a pharmacy shelf shows */}
-              <div className="grid g3">
-                {([['Generic', d.avg.generic_price ?? d.avg.unit_price, 't-blue'], ['Brand', d.avg.brand_price, 't-lav']] as const).map(([k, v, tone]) => (
-                  <div key={k} className={`tile ${tone}`}><span className="k">{k}</span>
-                    <span className="v num" style={{ fontSize: 22 }}>{v != null ? `${d.avg!.currency} ${fmtMoney(Number(v) * packOf(d.avg!))}` : '—'}</span>
-                    <span className="small">per {unitWord(d.avg!)}{v != null ? ` · ${usd(Number(v) / Number(d.avg!.unit_price) * Number(d.avg!.unit_usd) * packOf(d.avg!))}` : ''}</span></div>))}
-                <div className="tile t-mint"><span className="k">Range</span>
-                  <span className="v num" style={{ fontSize: 22 }}>{d.avg.lo != null && d.avg.hi != null ? `${fmtMoney(Number(d.avg.lo) * packOf(d.avg))}–${fmtMoney(Number(d.avg.hi) * packOf(d.avg))}` : '—'}</span>
-                  <span className="small">{d.avg.currency} per {unitWord(d.avg)}</span></div>
-              </div>
+              {/* low, average and high; one average when they are all the same price */}
+              {(() => {
+                const p = d.avg!, k = packOf(p), avg = Number(p.generic_price ?? p.unit_price) * k;
+                const lo = p.lo != null ? Math.min(Number(p.lo) * k, avg) : null, hi = p.hi != null ? Math.max(Number(p.hi) * k, avg) : null;
+                const same = (x: number | null) => x == null || Math.round(x) === Math.round(avg);
+                const tiles: [string, number, string][] = same(lo) && same(hi) ? [['Average', avg, 't-blue']]
+                  : [['Low', lo ?? avg, 't-mint'], ['Average', avg, 't-blue'], ['High', hi ?? avg, 't-lav']];
+                return <div className={`grid ${tiles.length === 1 ? '' : 'g3'}`}>{tiles.map(([label, v, tone]) => (
+                  <div key={label} className={`tile ${tone}`}><span className="k">{label}</span>
+                    <span className="v num" style={{ fontSize: 22 }}>{p.currency} {fmtMoney(v)}</span>
+                    <span className="small">per {unitWord(p)}{label === 'Average' ? ` · ${usd(v * Number(p.unit_usd) / Number(p.unit_price))}` : ''}</span></div>))}</div>;
+              })()}
               <p className="small muted">{priceBasis(d.avg)}</p>
               {!d.avg.generic_price && d.brands?.registrants != null && Number(d.brands.registrants) <= 2 && Number(d.brands.generic) < 1 && (
                 <p className="small"><span className="pill peach">Few products</span> Only {d.brands.registrants} {Number(d.brands.registrants) === 1 ? 'product is' : 'products are'} registered here, so these prices are mostly the brand&rsquo;s. A generic usually enters about {Math.round((1 - Number(d.brands.generic)) * 100)}% lower: around <b>{d.avg.currency} {fmtMoney(Number(d.avg.unit_price) * packOf(d.avg) * Number(d.brands.generic))}</b> per {unitWord(d.avg)}.</p>)}
