@@ -613,3 +613,33 @@ export async function toggleChecklist(f: FormData) {
     : db.query('delete from product_checklist where product_id = $1 and country = $2 and item = $3 and user_id = $4', [product, country, item, u.id]));
   redirect(`/m/products/${product}?market=${country}#documents`);
 }
+
+/** The competitor brands a manufacturer meets for one product (comma or line separated). */
+export async function addCompetitors(f: FormData) {
+  const u = await requireUser({ manufacturer: true });
+  const product = int(f, 'product_id'), market = str(f, 'market', 2);
+  const brands = [...new Set(str(f, 'brands', 600).split(/[,;\n]+/).map((b) => b.trim().replace(/\s+/g, ' ')).filter((b) => b.length >= 2 && b.length <= 80))].slice(0, 15);
+  await withUser(u.id, async (db) => {
+    for (const b of brands) {
+      await db.query(`insert into mfr_competitors (user_id, product_id, brand) select $1, id, $3 from mfr_products where id = $2 and user_id = $1
+                      on conflict do nothing`, [u.id, product, b]);
+    }
+  });
+  redirect(`/m/products/${product}?market=${market}#competitors`);
+}
+
+export async function removeCompetitor(f: FormData) {
+  const u = await requireUser({ manufacturer: true });
+  const product = int(f, 'product_id'), market = str(f, 'market', 2);
+  await withUser(u.id, (db) => db.query('delete from mfr_competitors where id = $1 and user_id = $2', [int(f, 'id'), u.id]));
+  redirect(`/m/products/${product}?market=${market}#competitors`);
+}
+
+/** What the product is used for, so competitors and prices compare like with like. */
+export async function setUseGroup(f: FormData) {
+  const u = await requireUser({ manufacturer: true });
+  const product = int(f, 'product_id'), market = str(f, 'market', 2), g = str(f, 'use_group', 20);
+  await withUser(u.id, (db) => db.query('update mfr_products set use_group = $3 where id = $1 and user_id = $2',
+    [product, u.id, ['eye_drops', 'eye_surgery', 'joint', 'nasal'].includes(g) ? g : null]));
+  redirect(`/m/products/${product}?market=${market}#competitors`);
+}

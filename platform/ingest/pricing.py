@@ -501,7 +501,7 @@ def due_items(cur, source, per_run, list_items, every_days=7):
                                          order by checked_at nulls first limit %s""", (source, every_days, per_run)).fetchall()]
 
 
-ITEM_SOURCES = {"KZ": ("prices_KZ", "prices_KZ_ep"), "TZ": ("prices_TZ",), "INTL": ("prices_INTL_pk", "prices_INTL_by")}
+ITEM_SOURCES = {"KZ": ("prices_KZ", "prices_KZ_ep"), "TZ": ("prices_TZ",), "KE": ("prices_KE_shop",), "INTL": ("prices_INTL_pk", "prices_INTL_by")}
 
 
 def catching_up(cur, country):
@@ -515,13 +515,16 @@ def checked(cur, source, ref, state=None):
                 (state, source, ref))
 
 
-def save_listing(cur, country, source, kind, ref, name, pack, molecule, units, price, currency, originator=None):
-    cur.execute("""insert into price_listings (country, source, kind, ref, name, pack, molecule_id, units, pack_price, currency, originator)
-                   values (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+def save_listing(cur, country, source, kind, ref, name, pack, molecule, units, price, currency, originator=None, description=None):
+    cur.execute("""insert into price_listings (country, source, kind, ref, name, pack, molecule_id, units, pack_price, currency, originator,
+                                               description)
+                   values (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                    on conflict (source, ref) do update set name = excluded.name, pack = excluded.pack, molecule_id = excluded.molecule_id,
                    units = excluded.units, pack_price = excluded.pack_price, currency = excluded.currency,
-                   originator = excluded.originator, seen = current_date""",
-                (country, source, kind, str(ref)[:200], (name or "")[:300], (pack or "")[:300], molecule, units, price, currency, originator))
+                   originator = excluded.originator, description = coalesce(excluded.description, price_listings.description),
+                   seen = current_date""",
+                (country, source, kind, str(ref)[:200], (name or "")[:300], (pack or "")[:300], molecule, units, price, currency, originator,
+                 (description or "")[:600] or None))
 
 
 NDDA = "https://register.ndda.kz/register/api/v1/PharmaRegister"
@@ -696,6 +699,41 @@ def prices_KE(cur, s):
                 n += 1
             cur.execute("""insert into source_items (source, ref, checked_at, state) values ('prices_KE', 'ppra', now(), %s)
                            on conflict (source, ref) do update set checked_at = now(), state = excluded.state""", (url,))
+    return n + mydawa(cur, s, names)
+
+
+# Kenya: an online pharmacy's product pages (schema.org prices; robots.txt allows product pages), every product kept
+MYDAWA = "https://mydawa.com"
+
+
+def mydawa(cur, s, names):
+    import time
+    from devices import GROUPS
+
+    def urls():
+        xml = s.get(f"{MYDAWA}/sitemap-products.xml", timeout=120).text
+        return [u for u in re.findall(r"<loc>([^<]+)</loc>", xml) if u.count("/") >= 4]
+
+    due = due_items(cur, "prices_KE_shop", TZ_PER_RUN, urls)
+    due += [r for (r,) in cur.execute("""select ref from source_items where source = 'prices_KE_shop' and ref <> '*list'
+                                         and checked_at is null""").fetchall() if r not in due]
+    # brands manufacturers watch, and device groups, first
+    watched = [b.lower() for (b,) in cur.execute("select distinct brand from mfr_competitors").fetchall()]
+    keys = [re.sub(r"[^a-z0-9]+", "-", w).strip("-") for w in watched]
+    first = lambda u: not (any(k and k in u.lower() for k in keys) or any(re.search(rx, u.replace("-", " ")) for _, rx in GROUPS))
+    n = 0
+    for url in sorted(due, key=first)[:TZ_PER_RUN]:
+        r = s.get(url, timeout=60)
+        for x in ld_products(r.text if r.ok else ""):
+            offer = x.get("offers") or {}
+            price = num(offer.get("price")) if isinstance(offer, dict) else None
+            if price:
+                mol = names.find(x.get("name") or "", x.get("description") or "")
+                save_listing(cur, "KE", "mydawa", "retail", url, x.get("name"), x.get("name"), mol, None, price,
+                             offer.get("priceCurrency") or "KES", description=x.get("description"))
+                n += 1
+        checked(cur, "prices_KE_shop", url)
+        time.sleep(1)
     return n
 
 
@@ -718,9 +756,9 @@ def prices_TZ(cur, s):
             offer = x.get("offers") or {}
             price = num(offer.get("price")) if isinstance(offer, dict) else None
             mol = names.find(x.get("name") or "", x.get("description") or "") if price else None
-            if mol:
+            if price:      # kept even without a matched medicine: devices and brands are looked up by name
                 save_listing(cur, "TZ", "afyadepo", "retail", url, x.get("name"), x.get("name"), mol, None, price,
-                             offer.get("priceCurrency") or "TZS")
+                             offer.get("priceCurrency") or "TZS", description=x.get("description"))
                 n += 1
         checked(cur, "prices_TZ", url)
         time.sleep(1)

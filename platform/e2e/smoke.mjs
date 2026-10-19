@@ -177,6 +177,10 @@ await k.goto(B + '/m/products');
 await k.locator('a b', { hasText: 'Doxycycline' }).first().click(); await k.waitForURL(/\/m\/products\/\d+/);
 const kp = await k.locator('main').innerText();
 check(kp.includes('Why Tanzania') && kp.includes('Route and timeline') && kp.includes('Unlock with Complete Market Access'), 'product page with paid parts locked');
+await k.fill('#competitors input[name=brands]', 'Systane, Hylo-Comod');
+await k.click('#competitors button:has-text("Add")'); await k.locator('#competitors td:has-text("Systane")').waitFor({ timeout: 15000 }).catch(() => {});
+check((await k.locator('#competitors').innerText()).includes('Systane') && (await k.locator('#competitors select[name=use_group]').count()) === 1,
+  'a manufacturer names competitor brands for a product and picks what it competes as');
 await k.goto(B + '/m');
 check((await k.locator('main').innerText()).includes('Market watch'), 'market watch on the home page');
 await k.goto(B + '/m/plan?want=access');

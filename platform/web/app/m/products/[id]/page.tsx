@@ -3,13 +3,15 @@ import { notFound } from 'next/navigation';
 import Shell from '@/components/Shell';
 import MarketPicker, { AgencyMarket, hasData, loadLive, pickMarket, targetMarkets } from '@/components/MarketPicker';
 import { Badges, Empty, Flash, LockIcon, PlanLock } from '@/components/ui';
-import { deleteMfrProduct, saveLaunch, toggleChecklist, unwatchMolecule, updateProductChecks, watchMolecule } from '@/app/actions/mfr';
+import { addCompetitors, deleteMfrProduct, removeCompetitor, setUseGroup, saveLaunch, toggleChecklist, unwatchMolecule, updateProductChecks, watchMolecule } from '@/app/actions/mfr';
 import { requireUser } from '@/lib/auth';
 import { one, rows, withUser } from '@/lib/db';
 import { BE_STATUS, beSuggestion, fmtDate, fmtMoney, levelLabel, registeredLine } from '@/lib/format';
 import { REQ_SQL, appliesTo, forProduct, type Requirement } from '@/lib/regulatory';
 import { PRICE_SQL, packOf, priceBasis, unitShort, unitWord, usd, type MoleculePrice } from '@/lib/prices';
 import { AGENCY_KINDS, LAUNCH_STAGES, MFR_PLANS, NEEDS_PLAN, SERVICES, canUse, tierIn, countryName, mfrProductsSql, productClass, reasons } from '@/lib/mfr';
+import { brandPresence, segmentBrands, type BrandRow } from '@/lib/competitors';
+import { GROUP_LABEL, useGroup } from '@/lib/segments';
 
 export const metadata = { title: 'Product' };
 
@@ -33,7 +35,15 @@ export default async function MfrProduct({ params, searchParams }: { params: Pro
     const launches = await rows(db, 'select id, country, stage from launches where product_id = $1 and user_id = $2', [id, u.id]);
     const reqs = forProduct(await rows(db, REQ_SQL, [market]) as Requirement[], { ...p, category: productClass(p) });
     const watched = p.molecule_id ? Boolean(await one(db, 'select 1 as x from watches where user_id = $1 and molecule_id = $2', [u.id, p.molecule_id])) : false;
-    const base = { p, targets, market, t, sampled, launches, reqs, watched };
+    // competitor brands the manufacturer named, and others in the same use group (devices and medicines alike)
+    const group: string | null = p.use_group ?? useGroup(p.name, p.dosage_form, p.inn);
+    const watchList = await rows(db, 'select id, brand from mfr_competitors where product_id = $1 and user_id = $2 order by created_at', [id, u.id]);
+    const comp = hasData(market) ? {
+      group, brands: await brandPresence(db, market, watchList as { id: number; brand: string }[]),
+      others: group && canUse(t, 'market') ? await segmentBrands(db, market, group, watchList.map((w: any) => w.brand)) : [],
+      costs: await one(db, 'select distributor, pharmacy, vat from market_costs where country = $1', [market]),
+    } : null;
+    const base = { p, targets, market, t, sampled, launches, reqs, watched, comp };
     if (!p.molecule_id) return base;
     if (!hasData(market)) return base;
     const origin = canUse(t, 'market') ? await rows(db, `select initcap(lower(coalesce(manufacturing_country, 'not stated'))) as country, count(*)::int as n
@@ -70,7 +80,8 @@ export default async function MfrProduct({ params, searchParams }: { params: Pro
   if (!d) notFound();
   const { p, market } = d;
   const be = p.be_study ? null : beSuggestion(p.forms ?? p.dosage_form);
-  const cls = productClass(p);
+  const g = p.use_group ?? useGroup(p.name, p.dosage_form, p.inn);
+  const cls = (g && GROUP_LABEL[g]) || productClass(p);   // an eye lubricant is not 'pain' because it shares hyaluronate with joint injections
   return (
     <Shell user={u} title={p.inn ?? p.name} crumb={<><Link href="/m/products">My products</Link> / {p.inn ?? p.name}</>}
       sub={[p.inn ? p.name : null, cls].filter(Boolean).join(' · ') || 'Product'}
@@ -81,6 +92,7 @@ export default async function MfrProduct({ params, searchParams }: { params: Pro
       <MarketPicker u={u} targets={d.targets} current={market} path={`/m/products/${id}`} />
       <div className="split">
         <div className="stack">
+          {d.comp && <Competitors c={d.comp} id={id} market={market} u={u} open={canUse(d.t, 'market')} />}
           {!p.molecule_id ? (
             <section className="card stack"><h2>Not matched yet</h2>
               <p className="muted">Our team is matching &ldquo;{p.name}&rdquo; to the market. You can still ask for any service in the meantime.</p></section>
@@ -239,6 +251,70 @@ export default async function MfrProduct({ params, searchParams }: { params: Pro
 
 // What a manufacturer can charge ex-works and still sell at the market's prices: the shelf price taken back through VAT,
 // the pharmacy and distributor mark-ups, duty and freight. With their own ex-works price, where it lands on the shelf.
+/** Retail to wholesale (what pharmacies pay) and to the distributor's buying price, with the market's VAT and margins. */
+function trade(retail: number, c: any) {
+  const exVat = retail / (1 + Number(c?.vat ?? 0));
+  const wholesale = exVat / (1 + Number(c?.pharmacy ?? 0.35));
+  return { wholesale, buying: wholesale / (1 + Number(c?.distributor ?? 0.25)) };
+}
+const amt = (cur: string, v: number) => `${cur} ${Math.round(v).toLocaleString('en')}`;
+
+function Competitors({ c, id, market, u, open }: { c: { group: string | null; brands: BrandRow[]; others: any[]; costs: any }; id: number; market: string; u: any; open: boolean }) {
+  const range = (ps: number[], cur: string) => ps.length ? (Math.min(...ps) === Math.max(...ps) ? amt(cur, ps[0]) : `${amt(cur, Math.min(...ps))}–${Math.round(Math.max(...ps)).toLocaleString('en')}`) : '—';
+  return (
+    <section className="card stack" id="competitors">
+      <div className="card-h"><div><h2>Competitor brands in {countryName(market)}</h2>
+        <p className="note">Registered as a medicine or a medical device, and what they sell for in pharmacies. Wholesale and distributor prices are worked back from the shelf price with this market&rsquo;s margins.</p></div></div>
+      <form action={setUseGroup} className="row" style={{ gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+        <input type="hidden" name="product_id" value={id} /><input type="hidden" name="market" value={market} />
+        <span className="small">Compare with</span>
+        <select className="input" name="use_group" defaultValue={c.group ?? ''} style={{ width: 'auto' }} aria-label="What the product is used for">
+          <option value="">Same medicine</option>{Object.entries(GROUP_LABEL).map(([k, l]) => <option key={k} value={k}>{l}</option>)}</select>
+        <button className="btn btn-ghost btn-sm" type="submit">Save</button>
+      </form>
+      {c.brands.length > 0 && (open ? (
+        <div className="tbl-wrap"><table className="tbl"><thead><tr><th>Brand</th><th>Registered</th><th className="r">Shelf price</th><th className="r">Wholesale (est.)</th><th className="r">Distributor buys at (est.)</th><th /></tr></thead>
+          <tbody>{c.brands.map((b) => {
+            const cur = b.prices[0]?.currency ?? '';
+            const ps = b.prices.map((x) => x.price);
+            const mid = ps.length ? ps.sort((x, y) => x - y)[Math.floor(ps.length / 2)] : null;
+            const t = mid != null ? trade(mid, c.costs) : null;
+            return (
+              <tr key={b.id}>
+                <td><b>{b.brand}</b>{b.prices.length > 0 && <div className="sub2">{b.prices.slice(0, 3).map((x) => x.name).join(' · ')}</div>}</td>
+                <td className="small">{b.medicine || b.device ? <span className="pill mint">{b.device ? `Device${b.deviceClass ? `, ${b.deviceClass}` : ''}` : 'Medicine'}</span> : <span className="pill">Not found</span>}
+                  {b.since ? <div className="sub2">since {b.since}</div> : null}</td>
+                <td className="r num">{range(ps, cur)}</td>
+                <td className="r num">{t ? amt(cur, t.wholesale) : '—'}</td>
+                <td className="r num">{t ? amt(cur, t.buying) : '—'}</td>
+                <td className="r"><form action={removeCompetitor}><input type="hidden" name="id" value={b.id} /><input type="hidden" name="product_id" value={id} /><input type="hidden" name="market" value={market} />
+                  <button className="btn btn-ghost btn-sm" type="submit" aria-label={`Remove ${b.brand}`}>✕</button></form></td>
+              </tr>);
+          })}</tbody></table></div>)
+        : (<>
+          <div className="row" style={{ gap: 6, flexWrap: 'wrap' }}>{c.brands.map((b) => <span key={b.id} className="pill">{b.brand}</span>)}</div>
+          <PlanLock need="data" title="Where your competitor brands are registered and what they sell for" u={u} market={market} /></>))}
+      <form action={addCompetitors} className="row" style={{ gap: 8, flexWrap: 'wrap' }}>
+        <input type="hidden" name="product_id" value={id} /><input type="hidden" name="market" value={market} />
+        <input className="input" name="brands" placeholder="Brands you compete with, comma separated (e.g. Systane, Hylo-Comod)" style={{ flex: '1 1 260px' }} aria-label="Competitor brands" required />
+        <button className="btn btn-blue btn-sm" type="submit">Add</button>
+      </form>
+      {c.group && open && (c.others.length > 0 ? (<>
+        <h3>Also in {countryName(market)}: {GROUP_LABEL[c.group].toLowerCase()}</h3>
+        <div className="tbl-wrap"><table className="tbl"><thead><tr><th>Brand</th><th>Registered</th><th className="r">Shelf price</th><th className="r">Wholesale (est.)</th></tr></thead>
+          <tbody>{c.others.map((o) => {
+            const mid = o.prices.length ? [...o.prices].sort((x: number, y: number) => x - y)[Math.floor(o.prices.length / 2)] : null;
+            return (
+              <tr key={o.brand}><td><b>{o.brand}</b>{o.packs.length > 0 && <div className="sub2">{o.packs.join(' · ')}</div>}</td>
+                <td className="small">{o.registered ? <span className="pill mint">{o.registered}</span> : <span className="pill">Not on the register</span>}</td>
+                <td className="r num">{range(o.prices, o.currency)}</td>
+                <td className="r num">{mid != null ? amt(o.currency, trade(mid, c.costs).wholesale) : '—'}</td></tr>);
+          })}</tbody></table></div></>)
+        : <p className="small muted">No other {GROUP_LABEL[c.group].toLowerCase()} found in {countryName(market)}&rsquo;s registers or pharmacy listings yet.</p>)}
+      <p className="note">Prices are pharmacy shelf prices found online. Hospital products such as viscoelastics and joint injections are rarely sold in pharmacies; ask us and we check them for you.</p>
+    </section>);
+}
+
 function MarginCheck({ p, c, id, market, exw, units }: { p: MoleculePrice; c: Record<string, string>; id: number; market: string; exw?: string; units?: string }) {
   const chain = ['freight', 'duty', 'distributor', 'pharmacy', 'vat'].reduce((m, k) => m * (1 + Number(c[k])), 1);
   const perUSD = Number(p.unit_price) / Number(p.unit_usd);                 // local currency per US dollar

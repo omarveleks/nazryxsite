@@ -550,6 +550,9 @@ def run(conn, only=None):
                 except Exception:
                     cur.execute("rollback to savepoint tr")
                     log.exception("translation failed")
+            elif kind == "devices":
+                import devices
+                n = devices.collect(cur, s, country)
             elif kind == "news":
                 import reg_news
                 url = cur.execute("select url from data_sources where key = %s", (key,)).fetchone()[0]
