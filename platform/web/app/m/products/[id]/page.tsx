@@ -8,7 +8,7 @@ import { requireUser } from '@/lib/auth';
 import { one, rows, withUser } from '@/lib/db';
 import { BE_STATUS, beSuggestion, fmtDate, fmtMoney, levelLabel, registeredLine } from '@/lib/format';
 import { DEVICE_REQ_SQL, REQ_SQL, appliesTo, forProduct, type Requirement } from '@/lib/regulatory';
-import { PRICE_SQL, packOf, priceBasis, priceFits, unitShort, unitWord, usd, type MoleculePrice } from '@/lib/prices';
+import { PRICE_SQL, packOf, priceBasis, priceFor, unitShort, unitWord, usd, type MoleculePrice } from '@/lib/prices';
 import { AGENCY_KINDS, LAUNCH_STAGES, MFR_PLANS, NEEDS_PLAN, SERVICES, canUse, tierIn, countryName, displayClass, mfrProductsSql, productClass, reasons } from '@/lib/mfr';
 import { brandPresence, segmentBrands, type BrandRow } from '@/lib/competitors';
 import { GROUP_LABEL, isDevice, productGroup } from '@/lib/segments';
@@ -88,7 +88,7 @@ export default async function MfrProduct({ params, searchParams }: { params: Pro
         order by coalesce(awarded, closing, published) desc nulls last limit 6`, [p.molecule_id, market]) : [];
     // the molecule's average price in this market: listings, or an estimate from a neighbouring market
     const price = canUse(t, 'market') ? await one(db, `${PRICE_SQL} where molecule_id = $1 and country = $2`, [p.molecule_id, market]) as MoleculePrice | null : null;
-    const avg = price && priceFits(price, p.dosage_form) ? price : null;     // a vial price says nothing about a capsule
+    const avg = priceFor(price, p.dosage_form);     // the product's own form: a vial price says nothing about a capsule
     // a market with only one or two products prices the brand; a generic usually enters lower (measured on lists that say which is which)
     const costs = avg ? await one(db, 'select freight, duty, distributor, pharmacy, vat from market_costs where country = $1', [market]) : null;
     const brands = avg ? await one(db, `select (select registrants from country_molecules where molecule_id = $1 and country = $2) as registrants,

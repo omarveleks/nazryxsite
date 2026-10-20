@@ -10,7 +10,7 @@ import { requireUser } from '@/lib/auth';
 import { one, rows, withUser } from '@/lib/db';
 import { HIGH_DEMAND, LAUNCH_STAGES, MFR_COUNTRIES, MFR_FILE_KINDS, canUse, countryName, covers, displayClass, productClass, tierIn, byMolecule } from '@/lib/mfr';
 import { fmtDate } from '@/lib/format';
-import { PRICE_SQL, formUnit, median, packOf, priceFits, unitShort, type MoleculePrice } from '@/lib/prices';
+import { PRICE_SQL, formUnit, median, packOf, priceFor as fittingPrice, unitShort, type MoleculePrice } from '@/lib/prices';
 import { isDevice, productGroup } from '@/lib/segments';
 import { segmentBrands } from '@/lib/competitors';
 
@@ -152,8 +152,8 @@ export default async function MfrProducts({ searchParams }: { searchParams: Prom
     if (!p.molecule_id) return null;
     const u = formUnit(p.dosage_form);
     for (const c of d.order) {
-      const pr = (c === market ? d.prices : d.otherPrices).find((x) => x.molecule_id === p.molecule_id && x.country === c);
-      if (pr && priceFits(pr, p.dosage_form)) {
+      const pr = fittingPrice((c === market ? d.prices : d.otherPrices).find((x) => x.molecule_id === p.molecule_id && x.country === c), p.dosage_form);
+      if (pr) {
         const per = packOf(pr) > 1 ? `${packOf(pr)} ${pr.unit}` : unitShort(pr);
         // the generic's price: what a generic sells for
         const r = out(Number(pr.unit_price) * packOf(pr), pr.currency, per, c, typeOf(p.dosage_form));

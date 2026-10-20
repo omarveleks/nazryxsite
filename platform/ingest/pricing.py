@@ -517,6 +517,42 @@ def rebuild(cur):
         if added and mid not in members.setdefault(k, []):
             members[k].append(mid)
 
+    # the other forms a medicine comes in (vitamin D3 drops beside its usual capsules), each priced the same way for the
+    # products sold in that form: this market's own shelf (three or more prices decide; fewer count double), its
+    # neighbours carried over by the price gap for that kind of product, the median of these
+    by_unit = {}
+    for (c, m), obs in groups.items():
+        for o in obs:
+            if o[0] == RANK["retail"]:
+                by_unit.setdefault((m, o[2]), []).append((c, o))
+    for (m, u), items in by_unit.items():
+        named = [o[3] for _, o in items if o[3]]
+        st_ = max(set(named), key=named.count) if named else None
+        per = {}
+        for c, o in items:
+            if st_ is None or o[3] == st_ or (o[3] is None and u in ("ml", "g")):
+                per.setdefault(c, []).append((o[4] / o[6] / float(fx[CURRENCY[c]]), o[7], o[8]))
+        for c in markets:
+            if (c, m) not in out or out[(c, m)]["unit"] == u:
+                continue
+            own = [x[0] for x in per.get(c, [])]
+            if len(own) >= 3:
+                voices, basis = own, "listings"
+            else:
+                voices, basis = ([statistics.median(own)] * 2 if own else []), "estimate"
+                for n in NEIGHBOURS[c]:
+                    if n in per and n in sources:
+                        t_ = next((x[2] for x in per[n] if x[2]), "all")
+                        voices.append(statistics.median(x[0] for x in per[n]) * gap(c, n, t_)[0])
+            if not voices:
+                continue
+            rate, usd = float(fx[CURRENCY[c]]), statistics.median(voices)
+            sizes = [x[1] for k in (c, *NEIGHBOURS[c]) for x in per.get(k, []) if x[1]]
+            out[(c, m)].setdefault("forms", {})[u] = dict(
+                basis=basis, strength=st_, unit_price=round(usd * rate, 4), unit_usd=round(usd, 6),
+                lo=round(min(voices) * rate, 4), hi=round(max(voices) * rate, 4), n=sum(len(per.get(k, [])) for k in (c, *NEIGHBOURS[c])),
+                pack_size=statistics.median_low(sizes) if sizes else None)
+
     # a generic and a brand price for each medicine and market, for the form and strength shown: this market's own
     # listings, else its neighbours' (East Africa: each other, Nigeria and South Asia), scaled by the measured price gap;
     # a brand with no price anywhere near is the generic marked up by how brands compare with generics on our data
@@ -554,7 +590,7 @@ def rebuild(cur):
     import json
     cur.execute("delete from molecule_prices")
     with cur.copy("""copy molecule_prices (country, molecule_id, basis, kinds, currency, unit, strength, unit_price, unit_usd, lo, hi, n,
-                     from_country, factor, overlap, by_strength, pack_size, generic_price, brand_price) from stdin""") as cp:
+                     from_country, factor, overlap, by_strength, pack_size, generic_price, brand_price, forms) from stdin""") as cp:
         written = set()                                 # a molecule in two families keeps the first (best) price
         for (c, k), v in out.items():
             if c not in MARKETS:
@@ -566,7 +602,8 @@ def rebuild(cur):
                 cp.write_row((c, m, v["basis"], v["kinds"], CURRENCY[c], v["unit"], v["strength"], round(v["unit_price"], 4), round(v["unit_usd"], 6),
                               round(v["lo"], 4), round(v["hi"], 4), v["n"], v.get("from_country"), v.get("factor"), v.get("overlap"),
                               json.dumps(v["by"], ensure_ascii=False), v.get("pack_size"),
-                              round(v["generic"], 4) if v.get("generic") else None, round(v["brand"], 4) if v.get("brand") else None))
+                              round(v["generic"], 4) if v.get("generic") else None, round(v["brand"], 4) if v.get("brand") else None,
+                              json.dumps(v["forms"]) if v.get("forms") else None))
     log.info("molecule prices: %s", len(written))
     return len(written)
 
@@ -1094,6 +1131,23 @@ WORD_SYNONYMS = {"adrenalin": "epinefrin", "noradrenalin": "norepinefrin", "lign
                  "albuterol": "salbutamol", "acetaminofen": "parasetamol", "kgolekalsiferol": "kolekalsiferol", "glukoz": "dekstroz"}
 
 
+# vitamins by their ingredient names, as our molecules are named ('Vitamin D3', 'vitamin-b12', 'Cholecalciferol [Vitamin D3]')
+VITAMINS = [(r"\bvit(?:amin)?[\s-]*d3?\b", "cholecalciferol"), (r"\bvit(?:amin)?[\s-]*d2\b", "ergocalciferol"),
+            (r"\bvit(?:amin)?[\s-]*b12\b", "cyanocobalamin"), (r"\bvit(?:amin)?[\s-]*b1\b", "thiamine"),
+            (r"\bvit(?:amin)?[\s-]*b2\b", "riboflavin"), (r"\bvit(?:amin)?[\s-]*b6\b", "pyridoxine"),
+            (r"\bvit(?:amin)?[\s-]*b9\b", "folic acid"), (r"\bvit(?:amin)?[\s-]*c\b", "ascorbic acid"),
+            (r"\bvit(?:amin)?[\s-]*a\b", "retinol"), (r"\bvit(?:amin)?[\s-]*e\b", "tocopherol"),
+            (r"\bvit(?:amin)?[\s-]*k1?\b", "phytomenadione")]
+
+
+def ingredient_text(t):
+    """A generic's name as ingredients: bracketed notes dropped, vitamins by their ingredient names."""
+    t = re.sub(r"\[[^\]]*\]|\([^)]*\)", " ", (t or "").lower().replace("-", " "))
+    for rx, name in VITAMINS:
+        t = re.sub(rx, name, t)
+    return t
+
+
 def word_key(w):
     """One spelling of one ingredient word: 'Ksilometazolin' and 'xylometazoline', 'adrenaline' and 'epinephrine'."""
     k = family(w) or w
@@ -1123,7 +1177,7 @@ def prices_SASIA(cur, s):
     names, generics, n = Names(cur, "KE"), Generics(cur), 0
     words, first = tracked_words(cur)
     salts = {word_key(x) for x in SALT_WORDS}
-    parts = lambda t: {word_key(x) for x in re.findall(r"[a-z]{4,}", t.lower())} - salts
+    parts = lambda t: {word_key(x) for x in re.findall(r"[a-z]{4,}", ingredient_text(t))} - salts
     useful = lambda t: bool(parts(t)) and parts(t) <= words           # every ingredient is one we track
     # portfolio first, single ingredients before combinations
     order = lambda ref: (0 if parts(ref.split("|")[-1]) <= first else 1, "+" in ref or ref.count("-") > 2)
@@ -1147,7 +1201,7 @@ def prices_SASIA(cur, s):
     SASIA_MORE |= len(due) > SA_PER_RUN
     for ref in sorted(due, key=order)[:SA_PER_RUN]:
         path, title = ref.split("|", 1)
-        mol = english_molecule(cur, names, generics, title.replace(" + ", "+").replace("+", " + "))
+        mol = english_molecule(cur, names, generics, ingredient_text(title).replace(" + ", "+").replace("+", " + "))
         if not mol:                                       # an ingredient we track, in a name we cannot match
             checked(cur, "prices_BD", ref)
             continue
@@ -1188,7 +1242,7 @@ def prices_SASIA(cur, s):
             continue
         page_ = r.content.decode("utf-8", "ignore") if r.ok else ""         # 1mg does not declare its character set
         title = re.search(r"<h1[^>]*>(.*?)</h1>", page_, re.S)
-        mol = english_molecule(cur, names, generics, text(title.group(1))) if title else None
+        mol = english_molecule(cur, names, generics, ingredient_text(text(title.group(1)))) if title else None
         brands = re.findall(r'"name":"([^"]+)","manufacturer_name":"([^"]*)","price_range":\{[^}]*\},"variants_available":"[^"]*","slug":"(/brands/[^"]+)"',
                             page_ if mol else "")
         missed = False

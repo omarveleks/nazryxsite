@@ -1300,6 +1300,34 @@ def test_eye_drops_east_africa_from_its_own_shelves_and_south_asia(env):
         c.rollback()
 
 
+def test_a_medicine_in_another_form_has_its_own_price(env):
+    """Vitamin D3 sells mostly as capsules, but a manufacturer's product is drops: the drops get their own price per ml from
+    the shelves that sell drops, beside the capsule headline."""
+    import json
+    import pricing
+    with psycopg.connect(URL) as c:
+        cur = c.cursor()
+        for t in ("price_listings", "reference_prices", "tenders"):
+            cur.execute(f"delete from {t}")
+        m = (cur.execute("select id from molecules where canonical_key = 'cholecalciferol'").fetchone() or cur.execute(
+            "insert into molecules (inn, canonical_key, category) values ('Cholecalciferol', 'cholecalciferol', 'medicine') returning id").fetchone())[0]
+        rows = [("BD", f"D{i} 40000 IU Capsule · 1 unit", 35, "BDT") for i in range(6)]
+        rows += [("BD", f"S{i} 400 IU/ml Oral Solution · 50 ml bottle", 250, "BDT") for i in range(2)]
+        rows += [("KE", n, p, "KES") for n, p in (("Ciferol D3 Drops 30ml", 633), ("Dhigh Drops 400IU 30ml", 429),
+                                                   ("Vitamin D3 Drops 15ml (Sara D3)", 579), ("Vitsol D3 Drops 15ml", 442))]
+        for i, (co, name, price, ccy) in enumerate(rows):
+            cur.execute("""insert into price_listings (country, source, kind, ref, molecule_id, name, pack, units, pack_price, currency)
+                           values (%s, 'shop', 'retail', %s, %s, %s, %s, 1, %s, %s)""", (co, f"d3{i}", m, name, name, price, ccy))
+        cur.execute("update fx_rates set per_usd = case currency when 'KES' then 129 when 'TZS' then 2620 when 'BDT' then 122 else per_usd end")
+        pricing.rebuild(cur)
+        got = {k: (u, f) for k, u, f in cur.execute("select country, unit, forms from molecule_prices where molecule_id = %s", (m,))}
+        assert got["KE"][0] == "tablet or capsule"
+        drops = got["KE"][1]["ml"]
+        assert drops["basis"] == "listings" and 20 < drops["unit_price"] < 30          # KES 14-39 per ml on Kenya's shelves
+        assert got["TZ"][1]["ml"]["basis"] == "estimate"
+        c.rollback()
+
+
 def test_researched_regulatory_detail_replaces_starter_rules(env, tmp_path):
     """Researched rules replace the generic starter rules (team-written ones stay); low-confidence ones are drafts;
     routes, the document checklist and regulator news pages load; an unchanged file is not reloaded."""

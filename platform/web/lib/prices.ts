@@ -8,10 +8,14 @@ export type MoleculePrice = {
   from_country: string | null; factor: string | null; overlap: number | null;
   by_strength: { strength: string; unit: number; pack: number; n: number }[]; pack_size: string | null;
   generic_price: string | null; brand_price: string | null;   // per unit, local currency
+  // the other forms it comes in (drops beside the usual capsules), per unit of that form
+  forms?: Record<string, { basis: 'listings' | 'estimate'; strength: string | null; unit_price: number; unit_usd: number;
+    lo: number; hi: number; n: number; pack_size: number | null }> | null;
 };
 
 export const PRICE_SQL = `select molecule_id, country, basis, kinds, currency, unit, strength, unit_price, unit_usd, lo, hi, n,
-  from_country, factor, overlap, by_strength, pack_size, generic_price, brand_price from molecule_prices`;
+  from_country, factor, overlap, by_strength, pack_size, generic_price, brand_price, to_jsonb(molecule_prices) -> 'forms' as forms
+  from molecule_prices`;
 
 const UNIT_SHORT: Record<string, string> = { 'tablet or capsule': 'tablet', 'ampoule or vial': 'vial', pack: 'pack', ml: 'ml', g: 'g' };
 
@@ -42,6 +46,19 @@ export function priceFits(p: MoleculePrice, form?: string | null) {
   const u = formUnit(form);
   if (!u) return true;
   return u === 'ml' ? p.unit === 'ml' || p.unit === 'g' : p.unit === u;
+}
+
+/** The price for a product's own form: the headline when it fits, else the same medicine's price in that form (drops
+ *  beside the usual capsules), or null when nothing near prices that form. */
+export function priceFor(p: MoleculePrice | null | undefined, form?: string | null): MoleculePrice | null {
+  if (!p) return null;
+  if (priceFits(p, form)) return p;
+  const u = formUnit(form);
+  const f = u ? (u === 'ml' ? p.forms?.ml ?? p.forms?.g : p.forms?.[u]) : null;
+  if (!f) return null;
+  return { ...p, basis: f.basis, unit: u === 'ml' && !p.forms?.ml ? 'g' : u!, strength: null, unit_price: String(f.unit_price),
+    unit_usd: String(f.unit_usd), lo: String(f.lo), hi: String(f.hi), n: f.n, pack_size: f.pack_size == null ? null : String(f.pack_size),
+    by_strength: [], generic_price: null, brand_price: null };
 }
 
 /** The middle of a list of numbers. */
