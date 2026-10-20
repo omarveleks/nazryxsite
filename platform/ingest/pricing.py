@@ -642,8 +642,13 @@ ITEM_SOURCES = {"KZ": ("prices_KZ", "prices_KZ_ep"), "TZ": ("prices_TZ",), "KE":
                 "SASIA": ("prices_BD", "prices_IN", "prices_PK_shop"), "NG": ("prices_NG",)}
 
 
+SASIA_MORE = False        # South Asia: more pages worth reading than one run reads (its lists hold every generic)
+
+
 def catching_up(cur, country):
     """True while a source read one record at a time has records it has never read: it then runs again straight away."""
+    if country == "SASIA":
+        return SASIA_MORE
     return bool(cur.execute("""select 1 from source_items where source = any(%s) and ref <> '*list' and checked_at is null
                                limit 1""", (list(ITEM_SOURCES.get(country, ())),)).fetchone())
 
@@ -1130,19 +1135,26 @@ def prices_SASIA(cur, s):
         while True:
             h = s.get(f"{MEDEX}/generics", params={"page": page}, timeout=60).text
             got = re.findall(r'href="https://medex\.com\.bd/generics/(\d+/[a-z0-9-]+)"[^>]*>.*?dcind-title">\s*([^<]+?)\s*<', h, re.S)
-            out += [f"{g}|{t}" for g, t in got if useful(t)]
+            out += [f"{g}|{t}" for g, t in got]            # every generic: which to read is chosen when reading
             if not got or page > 150:
                 return out
             page += 1
             time.sleep(1)
 
-    for ref in sorted(due_items(cur, "prices_BD", 100000, medex_list, every_days=30), key=order)[:SA_PER_RUN]:
+    global SASIA_MORE
+    SASIA_MORE = False
+    due = [r for r in due_items(cur, "prices_BD", 100000, medex_list, every_days=30) if useful(r.split("|", 1)[-1])]
+    SASIA_MORE |= len(due) > SA_PER_RUN
+    for ref in sorted(due, key=order)[:SA_PER_RUN]:
         path, title = ref.split("|", 1)
         mol = english_molecule(cur, names, generics, title.replace(" + ", "+").replace("+", " + "))
-        r = page(s, f"{MEDEX}/generics/{path}/brand-names", timeout=60) if mol else None
-        if mol and r is None:
+        if not mol:                                       # an ingredient we track, in a name we cannot match
+            checked(cur, "prices_BD", ref)
             continue
-        for row in re.findall(r'<tr class="brand-row"(.*?)</tr>', r.text if r.ok and mol else "", re.S):
+        r = page(s, f"{MEDEX}/generics/{path}/brand-names", timeout=60)
+        if r is None:
+            continue
+        for row in re.findall(r'<tr class="brand-row"(.*?)</tr>', r.text if r.ok else "", re.S):
             cells = [text(c) for c in re.findall(r"<td[^>]*>(.*?)</td>", row, re.S)]
             if len(cells) < 5:
                 continue
@@ -1165,11 +1177,12 @@ def prices_SASIA(cur, s):
         out = []
         for i in (1, 2, 3):
             xml = s.get(f"{ONEMG}/sitemap_generics_{i}.xml", timeout=120)
-            out += [u.rsplit("/", 1)[1] for u in re.findall(r"<loc>([^<]+/generics/[^<]+)</loc>", xml.text if xml.ok else "")
-                    if useful(re.sub(r"-\d+$", "", u.rsplit("/", 1)[1]))]
+            out += [u.rsplit("/", 1)[1] for u in re.findall(r"<loc>([^<]+/generics/[^<]+)</loc>", xml.text if xml.ok else "")]
         return out
 
-    for slug in sorted(due_items(cur, "prices_IN", 100000, onemg_list, every_days=30), key=order)[:SA_PER_RUN // 5]:
+    due = [g for g in due_items(cur, "prices_IN", 100000, onemg_list, every_days=30) if useful(re.sub(r"-\d+$", "", g))]
+    SASIA_MORE |= len(due) > SA_PER_RUN // 5
+    for slug in sorted(due, key=order)[:SA_PER_RUN // 5]:
         r = page(s, f"{ONEMG}/generics/{slug}", timeout=60)
         if r is None:
             continue
@@ -1222,6 +1235,7 @@ def prices_SASIA(cur, s):
         cur.execute("update source_items set state = 'generic' where source = 'prices_PK_shop' and ref = %s", (u,))
     tracked = {r for (r,) in cur.execute("select ref from source_items where source = 'prices_PK_shop' and state = 'generic'")}
     pf = portfolio_first(cur)
+    SASIA_MORE |= len(due) > SA_PER_RUN
     for url in sorted(due, key=lambda u: (u not in tracked, pf(u)))[:SA_PER_RUN]:
         r = page(s, url, timeout=60)
         if r is None:
