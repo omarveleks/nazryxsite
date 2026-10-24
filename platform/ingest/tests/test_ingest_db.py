@@ -1328,6 +1328,95 @@ def test_a_medicine_in_another_form_has_its_own_price(env):
         c.rollback()
 
 
+def test_price_checks_measure_accuracy_and_flag_what_looks_wrong(env):
+    """After a rebuild: where Kenya's shelf price is known, the estimate from its neighbours alone is compared with it
+    (accuracy per product type); a shelf price far from its neighbours is flagged; a portfolio product with no price
+    for its form is listed."""
+    import pricing
+    with psycopg.connect(URL) as c:
+        cur = c.cursor()
+        for t in ("price_listings", "reference_prices", "tenders", "price_checks"):
+            cur.execute(f"delete from {t}")
+        mols = []
+        for key in ("alfazol", "bravozol", "charlizol", "deltazol", "echozol", "foxtrozol", "golfazol", "hotelzol", "indizol",
+                    "julietzol", "kilozol", "limazol", "mikezol"):        # names differing by letters: one family each
+            mols.append((cur.execute("select id from molecules where canonical_key = %s", (key,)).fetchone() or cur.execute(
+                "insert into molecules (inn, canonical_key, category) values (%s, %s, 'medicine') returning id", (key.title(), key)).fetchone())[0])
+        n = 0
+        for i, m in enumerate(mols):
+            ke = 3.0 * (i + 1) * (10 if i == 12 else 1)          # the last one: a Kenyan price 10x its usual level (30x India)
+            for j in range(3):
+                n += 1
+                cur.execute("""insert into price_listings (country, source, kind, ref, molecule_id, name, pack, units, pack_price, currency)
+                               values ('KE', 'shop', 'retail', %s, %s, 'X 500 mg tablets', 'X 500 mg tablets 10s', 10, %s, 'KES')""",
+                            (f"ke{n}", m, ke * 10 * 129 / 100))
+                cur.execute("""insert into price_listings (country, source, kind, ref, molecule_id, name, pack, units, pack_price, currency)
+                               values ('IN', 'shop', 'retail', %s, %s, 'X 500 mg tablets', 'X 500 mg tablets 10s', 10, %s, 'INR')""",
+                            (f"in{n}", m, 1.0 * (i + 1) * 10 * 88 / 100))
+        cur.execute("update fx_rates set per_usd = case currency when 'KES' then 129 when 'INR' then 88 else per_usd end, updated_at = now()")
+        uid = cur.execute("""insert into users (email, name, role, account_type, password_hash)
+                             values ('checks@example.com', 'C', 'customer', 'manufacturer', 'x') returning id""").fetchone()[0]
+        cur.execute("insert into mfr_products (user_id, name, molecule_id, dosage_form, kind) values (%s, 'X drops', %s, 'Eye drops', 'medicine')",
+                    (uid, mols[0]))
+        pricing.rebuild(cur)
+        acc = {(c_, t): (float(v), n_) for c_, t, v, n_ in cur.execute(
+            "select country, form_type, value, n from price_checks where kind = 'accuracy'")}
+        assert acc[("KE", "tablet")][1] == 13 and acc[("KE", "tablet")][0] < 0.05     # Kenya at 3x India: the measured gap gets it
+        out = cur.execute("select country, molecule_id, value from price_checks where kind = 'outlier'").fetchall()
+        assert [(o[0], o[1]) for o in out] == [("KE", mols[12])] and float(out[0][2]) < 0.2
+        assert cur.execute("select count(*) from price_checks where kind = 'no_price' and country = 'KE' and molecule_id = %s",
+                           (mols[0],)).fetchone()[0] == 1                    # an eye drop: only tablets are priced
+        assert cur.execute("select count(*) from price_checks where kind = 'gap' and country = 'KE' and detail->>'source' = 'IN'").fetchone()[0] > 0
+        c.rollback()
+
+
+def test_class_checks_flag_products_filed_as_the_wrong_kind(env):
+    import price_checks
+    with psycopg.connect(URL) as c:
+        cur = c.cursor()
+        mol = lambda key, cat: (cur.execute("select id from molecules where canonical_key = %s", (key,)).fetchone() or cur.execute(
+            "insert into molecules (inn, canonical_key, category) values (%s, %s, %s) returning id", (key.title(), key, cat)).fetchone())[0]
+        aml, amox, hyal = mol("amlozzine", "Cardiovascular Medicines"), mol("amoxizzine", "Anti-infective Medicines"), \
+            mol("sodium hyaluronate", "Ophthalmological Preparations")
+        uid = cur.execute("""insert into users (email, name, role, account_type, password_hash)
+                             values ('classes@example.com', 'C', 'customer', 'manufacturer', 'x') returning id""").fetchone()[0]
+        rows = [("Amlo 5 tablets", aml, "Tablets", "device", None), ("Amoxi capsules", amox, "Capsules", "supplement", None),
+                ("Vitamin D3 dietary supplement capsules", None, "Capsules", "medicine", None),
+                ("Hylo eye drops", hyal, "Eye drops", "medicine", "eye_drops"), ("Hyal eye drops", hyal, "Eye drops", "device", "eye_drops")]
+        for name, m, form, kind, group in rows:
+            cur.execute("insert into mfr_products (user_id, name, molecule_id, dosage_form, kind, use_group) values (%s, %s, %s, %s, %s, %s)",
+                        (uid, name, m, form, kind, group))
+        price_checks.class_checks(cur)
+        got = {(k, d["name"]) for k, d in cur.execute(
+            "select c.kind, c.detail from price_checks c join mfr_products p on p.id = c.product_id where p.user_id = %s", (uid,))}
+        assert got == {("class_device_is_medicine", "Amlo 5 tablets"), ("class_supplement_is_medicine", "Amoxi capsules"),
+                       ("class_says_supplement", "Vitamin D3 dietary supplement capsules"), ("class_sold_as_device", "Hylo eye drops")}
+        c.rollback()
+
+
+def test_a_brand_every_shop_stocks_counts_once(env):
+    """Four shops list the originator at 15,000 and two generics sell at 1,000-1,200: the market price is the typical
+    product's, not the originator's (one voice per product, a brand named after the ingredient included)."""
+    import pricing
+    with psycopg.connect(URL) as c:
+        cur = c.cursor()
+        for t in ("price_listings", "reference_prices", "tenders"):
+            cur.execute(f"delete from {t}")
+        m = (cur.execute("select id from molecules where canonical_key = 'ceftriaxone'").fetchone() or cur.execute(
+            "insert into molecules (inn, canonical_key, category) values ('Ceftriaxone', 'ceftriaxone', 'medicine') returning id").fetchone())[0]
+        rows = [("Rocephin 1g Powder for solution – Ceftriaxone, 1 Inj", 15200), ("Rocephine Ceftriaxone Injection 1g IV", 16460), ("ROCEPHIN 1G IV INJECTION", 14850),
+                ("Ceftriaxone 1g (Rocephin) Injection", 15000), ("Ceftriaxone 1g Injection", 1000), ("Zoxon 1000mg powder for injection 1 vial", 1200)]
+        for i, (name, price) in enumerate(rows):
+            cur.execute("""insert into price_listings (country, source, kind, ref, molecule_id, name, pack, units, pack_price, currency)
+                           values ('NG', 'shop', 'retail', %s, %s, %s, %s, 1, %s, 'NGN')""", (f"cef{i}", m, name, name, price))
+        cur.execute("update fx_rates set per_usd = case currency when 'NGN' then 1500 else per_usd end")
+        pricing.rebuild(cur)
+        p = cur.execute("select basis, unit_price, lo, hi, n from molecule_prices where molecule_id = %s and country = 'NG'", (m,)).fetchone()
+        assert p[0] == "listings" and float(p[1]) == 1200 and p[4] == 6       # three products: 1,000, 1,200 and Rocephin
+        assert float(p[2]) == 1000 and float(p[3]) > 14000                    # the originator still shows as the high end
+        c.rollback()
+
+
 def test_researched_regulatory_detail_replaces_starter_rules(env, tmp_path):
     """Researched rules replace the generic starter rules (team-written ones stay); low-confidence ones are drafts;
     routes, the document checklist and regulator news pages load; an unchanged file is not reloaded."""

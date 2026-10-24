@@ -34,9 +34,6 @@ const NEIGHBOURS: Record<string, string[]> = {
   TZ: ['KE', 'NG', 'IN', 'PK', 'BD'], KE: ['TZ', 'NG', 'IN', 'PK', 'BD'], NG: ['KE', 'TZ', 'GH', 'IN', 'PK', 'BD'],
   KZ: ['KG', 'UZ'], KG: ['KZ', 'UZ'], UZ: ['KZ', 'KG'],
 };
-// salt and hydrate words that do not change the medicine, for matching pharmacy listings to a product
-const SALTS = 'sodium|potassium|calcium|magnesium|hydrochloride|hcl|dihydrochloride|hydrobromide|maleate|besilate|besylate|mesylate|mesilate|'
-  + 'sulfate|sulphate|citrate|acetate|phosphate|tartrate|fumarate|succinate|bromide|dipropionate|propionate|monohydrate|dihydrate|trihydrate|anhydrous';
 // a use group's product type, for its price gap
 const GROUP_TYPE: Record<string, string> = { eye_drops: 'eye', contact_lens: 'eye', nasal: 'nasal', inhaled_saline: 'nasal',
   eye_surgery: 'injection', joint: 'injection', dermal_filler: 'injection' };
@@ -90,13 +87,8 @@ export default async function MfrProducts({ searchParams }: { searchParams: Prom
       if (v != null) { groupPrices[g] = { price: v, per: PER_ML.includes(g) ? '10 ml' : 'pack', currency: curOf[c], n, from: c }; break; }
     }
     const otherPrices = ids.length ? await rows(db, `${PRICE_SQL} where molecule_id = any($1) and country <> $2`, [ids, market]) as MoleculePrice[] : [];
-    // pharmacy packs of the same ingredient whatever its salt is called ('Bromfenac Sodium' is Bromfenac), under the product's molecule
-    const listings = ids.length ? await rows(db, `with k as (select id, trim(regexp_replace(regexp_replace(lower(inn), '\\m(${SALTS})\\M', '', 'g'), '\\s+', ' ', 'g')) as k
-          from molecules), sib as (select a.id as mine, b.id as other from k a join k b on a.k = b.k and a.k <> '' where a.id = any($1))
-        select l.country, sib.mine as molecule_id, l.name, l.pack_price::float as price, l.currency from price_listings l join sib on sib.other = l.molecule_id
-        where l.kind = 'retail' and l.pack_price > 0`, [ids]) : [];
     const local = curOf[market] ?? null;
-    return { targets, market, products, facts, launches, files, watched, watchCount, prices, groupFacts, groupPrices, listings, otherPrices, fx, local, order, gaps };
+    return { targets, market, products, facts, launches, files, watched, watchCount, prices, groupFacts, groupPrices, otherPrices, fx, local, order, gaps };
   });
   const market = d.market;
   const analysis = canUse(tierIn(u, market), 'portfolio');
@@ -150,7 +142,6 @@ export default async function MfrProducts({ searchParams }: { searchParams: Prom
       return gp ? out(gp.price, gp.currency, gp.per, gp.from, GROUP_TYPE[p.group] ?? 'all') : null;
     }
     if (!p.molecule_id) return null;
-    const u = formUnit(p.dosage_form);
     for (const c of d.order) {
       const pr = fittingPrice((c === market ? d.prices : d.otherPrices).find((x) => x.molecule_id === p.molecule_id && x.country === c), p.dosage_form);
       if (pr) {
@@ -159,9 +150,7 @@ export default async function MfrProducts({ searchParams }: { searchParams: Prom
         const r = out(Number(pr.unit_price) * packOf(pr), pr.currency, per, c, typeOf(p.dosage_form));
         if (r) return r;
       }
-      const same = d.listings.filter((l) => l.country === c && l.molecule_id === p.molecule_id && (!u || !formUnit(l.name) || formUnit(l.name) === u));
-      const r = out(median(same.map((l) => l.price)), same[0]?.currency, 'pack', c, typeOf(p.dosage_form));
-      if (r) return r;
+      // never a median of raw pharmacy packs: their sizes differ (10 tablets or 100), so it says nothing per unit
     }
     return null;
   };

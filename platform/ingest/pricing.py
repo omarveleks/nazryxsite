@@ -55,6 +55,7 @@ FORM_TYPES = (("injection", None), ("eye", r"\beye|ophth|occul|ocul|глаз"), 
               ("inhaled", r"inhal|nebul|aerosol|ингал|аэроз"), ("topical", r"cream|ointment|\bgel\b|lotion|крем|мазь|гель|линимент"),
               ("oral liquid", r"syrup|suspension|elixir|oral (?:solution|drops)|сироп|сусп"))
 MIN_TYPE = 10             # medicines of one type priced in both countries before their price gap is measured from data
+BY_PRODUCT = True         # a market's price: each product (brand) one voice, at its median across shops; see product_key
 
 
 def form_type(unit, text):
@@ -67,9 +68,16 @@ def form_type(unit, text):
     return next((k for k, rx in FORM_TYPES if rx and re.search(rx, t, re.I)), "other")
 
 
+INHALER = re.compile(r"inhaler|evohaler|accuhaler|turbuhaler|diskus|rotacap|aerosol for inhal|inhalation aerosol|metered.dose|"
+                     r"\bmdi\b|\bpuffs?\b|\b\d+\s*doses\b|аэрозоль для ингал|ингалятор|доз\b", re.I)
+
+
 def unit_of(text):
+    """What one unit is: a tablet or capsule, an ampoule or vial, an inhaler, else a pack of unknown size (a last resort:
+    'Mesalazine 1g' could hold 10 tablets or 100)."""
     t = text or ""
-    return "ampoule or vial" if INJ.search(t) else "tablet or capsule" if SOLID.search(t) else "pack"
+    inhaler = INHALER.search(t) and not re.search(r"nasal|\bnose|назал|в нос|nazal", t, re.I)    # a nasal spray counts doses too
+    return ("ampoule or vial" if INJ.search(t) else "inhaler" if inhaler else "tablet or capsule" if SOLID.search(t) else "pack")
 
 
 def units_in(text):
@@ -283,6 +291,14 @@ def sanity(obs):
     return kept
 
 
+def product_key(text, inn_words, ref):
+    """Which product a listing is, so one brand stocked by many shops counts once: its brand word ('Rocephin 1g'
+    -> 'rocephin', 'Rocephine' alike). A listing named by its ingredient ('Ciprofloxacin 500mg', 'Амоксициллин') may
+    be any maker's: its own product, unless it names a brand further on (see brands_in_text in rebuild)."""
+    w = re.match(r"[a-zа-яё][a-zа-яё\-]{2,}", (text or "").strip().lower())
+    return f"#{ref}" if not w or w.group(0) in inn_words else re.sub(r"(?<=\w{4})[es]$", "", w.group(0))
+
+
 def rebuild(cur):
     fx = dict(cur.execute("select currency, per_usd from fx_rates").fetchall())
     sources = tuple(c for c in MARKETS + OTHERS if CURRENCY[c] in fx)       # a country without an exchange rate sits out
@@ -296,6 +312,8 @@ def rebuild(cur):
     obs_all = observations(cur)
     # brand names known from makers (a multinational's product anywhere): the same name in a shop without a maker is a brand
     inn_words = {w for (inn,) in cur.execute("select inn from molecules where inn is not null") for w in re.findall(r"[a-z]{4,}", inn.lower())}
+    from country_load import load_ru
+    inn_words |= {w for ru in load_ru() for w in re.findall(r"[а-яё]{4,}", ru)}
     brand_words = {w.group(0) for (*_, text, _u, _p, _c, b) in obs_all if b and (w := re.match(r"[a-z][a-z\-]{3,}", (text or "").lower()))
                    and w.group(0) not in inn_words}
     for c, m, kind, text, units, price, ccy, brand in obs_all:
@@ -310,10 +328,12 @@ def rebuild(cur):
         if brand is None:
             w = re.match(r"[a-z][a-z\-]{3,}", (text or "").lower())
             brand = bool(w and w.group(0) in brand_words)
-        st = strength_of(text)
+        # a bottle's or tube's size is not its strength ('5 ml' of 0.09% drops, a '20g' tube of cream)
+        st = strength_of(VOLUME.sub(" ", text or "") if unit in ("ml", "g") else text)
         if unit in ("ml", "g") and st and re.fullmatch(r"[\d.]+ (ml|g)", st):
-            st = None                                  # a bottle's size is not its strength ('5 ml' of 0.09% drops)
+            st = None
         raw.append(dict(c=c, m=fam.get(m, m), kind=kind, unit=unit, strength=st, units=float(units), brand=brand, text=text,
+                        product=product_key(text, inn_words, len(raw)),
                         price=float(price), usd_rate=float(fx[ccy]), volume=volume, countable=bool(COUNTED.search(text or "")
                                                                                              and not NOT_COUNTED.search(text or ""))))
     # 'ЦЕФТРИАКСОН 1г №1' names no form: a counted item takes the form the medicine usually comes in (a vial here)
@@ -325,12 +345,23 @@ def rebuild(cur):
     for o in raw:
         if o["unit"] == "pack" and o["countable"] and o["m"] in forms:
             o["unit"] = max(forms[o["m"]], key=forms[o["m"]].get)
+    # an ingredient-named listing that names a brand further on ('Ceftriaxone 1g (Rocephin)') is that brand's
+    brands = {}
+    for o in raw:
+        if not o["product"].startswith("#"):
+            brands.setdefault(o["m"], set()).add(o["product"])
+    for o in raw:
+        if o["product"].startswith("#") and o["m"] in brands:
+            words = {re.sub(r"(?<=\w{4})[es]$", "", w) for w in re.findall(r"[a-zа-яё][a-zа-яё\-]{3,}", (o["text"] or "").lower())}
+            hit = sorted(words & brands[o["m"]])
+            if hit:
+                o["product"] = hit[0]
     groups, kept = {}, sanity(raw)
     for o in kept:
         local = float(fx[CURRENCY[o["c"]]])               # into the market's own currency
         groups.setdefault((o["c"], o["m"]), []).append((RANK[o["kind"]], o["kind"], o["unit"], o["strength"],
                                                          o["usd"] * o["usd_rate"], o["price"], o["usd_rate"] / local, o.get("volume"),
-                                                         form_type(o["unit"], o["text"])))
+                                                         form_type(o["unit"], o["text"]), o["product"]))
     # every market's headline is the molecule's usual form and strength across all countries (paracetamol 500 mg tablet),
     # so markets compare like for like; tablets count double when choosing it
     usual_form = {}
@@ -339,9 +370,12 @@ def rebuild(cur):
             if o[3]:
                 k = usual_form.setdefault(m, {})
                 k[(o[2], o[3])] = k.get((o[2], o[3]), 0) + (2 if o[2] == "tablet or capsule" else 1)
-    usual_form = {m: max(v, key=v.get) for m, v in usual_form.items()}
+    # a pack of unknown size says nothing per unit: it is the usual form only when nothing else prices the molecule
+    usual_form = {m: max(v, key=lambda k: (k[0] != "pack", v[k])) for m, v in usual_form.items()}
     out, weak = {}, {}
     for (c, m), obs in groups.items():
+        if any(o[2] != "pack" for o in obs):
+            obs = [o for o in obs if o[2] != "pack"]                   # packs of unknown size only when nothing else is known
         best = min(o[0] for o in obs)
         obs = [o for o in obs if o[0] == best]                         # the best kind of evidence this market has
         sizes = {}
@@ -374,12 +408,20 @@ def rebuild(cur):
                 strengths.setdefault(o[3], []).append((o[4] / o[6], o[5] / o[6]))
         by = sorted(({"strength": k, "unit": round(sum(u for u, _ in v) / len(v), 4), "pack": round(sum(p for _, p in v) / len(v), 2),
                       "n": len(v)} for k, v in strengths.items()), key=lambda x: -x["n"])[:6]
-        local = sorted(o[4] / o[6] for o in obs if (o[2], o[3]) == (unit, usual))      # in the market's own currency
+        mine = [o for o in obs if (o[2], o[3]) == (unit, usual)]
+        if BY_PRODUCT:      # one voice per product: a brand every shop stocks (often the originator) cannot pull the price
+            per = {}
+            for o in mine:
+                per.setdefault(o[9], []).append(o[4] / o[6])
+            local = sorted(statistics.median(v) for v in per.values())
+        else:
+            local = sorted(o[4] / o[6] for o in mine)     # in the market's own currency
         avg = statistics.median(local)               # one premium brand or promotion cannot pull it
         vols = [o[7] for o in obs if (o[2], o[3]) == (unit, usual) and o[7]]
         types = [o[8] for o in obs if (o[2], o[3]) == (unit, usual)]
         out[(c, m)] = dict(basis="listings", kinds=sorted({o[1] for o in obs}), unit=unit, strength=usual, unit_price=avg,
-                           unit_usd=avg / float(fx[CURRENCY[c]]), lo=pct(local, 0.1), hi=pct(local, 0.9), n=len(local), by=by,
+                           unit_usd=avg / float(fx[CURRENCY[c]]), lo=pct(local, 0.1), hi=pct(local, 0.9), n=len(mine), by=by,
+                           products=len(local),
                            pack_size=statistics.median_low(vols) if vols else None, ftype=max(set(types), key=types.count))
     # where a market only publishes official maximums, the shelf price is the maximum times how shelf prices compare with
     # maximums where both are known (measured on our data)
@@ -450,45 +492,52 @@ def rebuild(cur):
     by_mol = {}
     for (n, m), v in direct.items():
         by_mol.setdefault(m, []).append((n, v))
-    for c in markets:
+
+    def estimate(c, m, own_shelf=True):
+        """What market c's price for molecule m would be from its neighbours (and its own few shelf prices), or None.
+        own_shelf=False leaves this market's own prices out: what we would say if we knew nothing here (the backtest)."""
         rate = float(fx[CURRENCY[c]])
-        for m, priced in by_mol.items():
-            if (c, m) in out:
+        priced = by_mol.get(m, [])
+        cands = []
+        for n, v in priced:
+            if n not in NEIGHBOURS[c]:                       # only neighbouring markets price alike: no Central Asia for East Africa
                 continue
-            cands = []
-            for n, v in priced:
-                if n not in NEIGHBOURS[c]:                       # only neighbouring markets price alike: no Central Asia for East Africa
-                    continue
-                factor, overlap, tier = gap(c, n, v.get("ftype", "all"))
-                cands.append((tier <= 3, v["strength"], v["unit"], v["unit_usd"] * factor, v["lo"] / float(fx[CURRENCY[n]]) * factor,
-                              v["hi"] / float(fx[CURRENCY[n]]) * factor, v["n"], n, v["kinds"], factor, overlap, v.get("pack_size"),
-                              v.get("ftype")))
-            for n in NEIGHBOURS[c]:                              # a neighbour's own single shelf price is a voice too
-                if (n, m) in weak and (n, m) not in direct:
-                    u_, st_, usd_, t_ = weak[(n, m)]
-                    f_ = gap(c, n, t_ or "all")[0]
-                    cands.append((True, st_, u_, usd_ * f_, usd_ * f_, usd_ * f_, 1, n, ["retail"], f_, 0, None, t_))
-            own = []
-            if (c, m) in weak:                                   # this market's own shelf price: it counts double
-                u_, st_, usd_, t_ = weak[(c, m)]
-                own = [(True, st_, u_, usd_, usd_, usd_, 1, c, ["retail"], 1.0, 0, None, t_),
-                       (True, st_, u_, usd_, usd_, usd_, 0, c, ["retail"], 1.0, 0, None, t_)]
-            if not cands and not own:
-                continue
-            if any(x[0] for x in cands):
-                cands = [x for x in cands if x[0]]
-            # the form and strength compared: the one most sources price (this market's own voice does not choose it)
-            usual = max({(x[2], x[1]) for x in cands or own}, key=lambda k: sum(1 for x in cands or own if (x[2], x[1]) == k))
-            # one form and strength, like for like; a bottle or tube that does not state its strength compares per ml or g
-            like = lambda x: (x[2], x[1]) == usual or (x[2] == usual[0] and usual[0] in ("ml", "g") and None in (x[1], usual[1]))
-            cands = [x for x in cands if like(x)] + [x for x in own if like(x)]
-            usd = statistics.median(x[3] for x in cands)
-            main = min(cands, key=lambda x: abs(x[3] - usd))
-            out[(c, m)] = dict(basis="estimate", kinds=main[8], unit=usual[0], strength=usual[1], unit_price=usd * rate, unit_usd=usd,
-                               lo=statistics.median(x[4] for x in cands) * rate, hi=statistics.median(x[5] for x in cands) * rate,
-                               n=sum(x[6] for x in cands), by=[], from_country=main[7], factor=main[9], overlap=len(cands),
-                               pack_size=statistics.median_low([x[11] for x in cands if x[11]] or [0]) or None,
-                               ftype=main[12] or next((x[12] for x in cands if x[12]), None))
+            factor, overlap, tier = gap(c, n, v.get("ftype", "all"))
+            cands.append((tier <= 3, v["strength"], v["unit"], v["unit_usd"] * factor, v["lo"] / float(fx[CURRENCY[n]]) * factor,
+                          v["hi"] / float(fx[CURRENCY[n]]) * factor, v["n"], n, v["kinds"], factor, overlap, v.get("pack_size"),
+                          v.get("ftype")))
+        for n in NEIGHBOURS[c]:                              # a neighbour's own single shelf price is a voice too
+            if (n, m) in weak and (n, m) not in direct:
+                u_, st_, usd_, t_ = weak[(n, m)]
+                f_ = gap(c, n, t_ or "all")[0]
+                cands.append((True, st_, u_, usd_ * f_, usd_ * f_, usd_ * f_, 1, n, ["retail"], f_, 0, None, t_))
+        own = []
+        if own_shelf and (c, m) in weak:                     # this market's own shelf price: it counts double
+            u_, st_, usd_, t_ = weak[(c, m)]
+            own = [(True, st_, u_, usd_, usd_, usd_, 1, c, ["retail"], 1.0, 0, None, t_),
+                   (True, st_, u_, usd_, usd_, usd_, 0, c, ["retail"], 1.0, 0, None, t_)]
+        if not cands and not own:
+            return None
+        if any(x[0] for x in cands):
+            cands = [x for x in cands if x[0]]
+        # the form and strength compared: the one most sources price (this market's own voice does not choose it)
+        usual = max({(x[2], x[1]) for x in cands or own}, key=lambda k: sum(1 for x in cands or own if (x[2], x[1]) == k))
+        # one form and strength, like for like; a bottle or tube that does not state its strength compares per ml or g
+        like = lambda x: (x[2], x[1]) == usual or (x[2] == usual[0] and usual[0] in ("ml", "g") and None in (x[1], usual[1]))
+        cands = [x for x in cands if like(x)] + [x for x in own if like(x)]
+        usd = statistics.median(x[3] for x in cands)
+        main = min(cands, key=lambda x: abs(x[3] - usd))
+        return dict(basis="estimate", kinds=main[8], unit=usual[0], strength=usual[1], unit_price=usd * rate, unit_usd=usd,
+                    lo=statistics.median(x[4] for x in cands) * rate, hi=statistics.median(x[5] for x in cands) * rate,
+                    n=sum(x[6] for x in cands), by=[], from_country=main[7], factor=main[9], overlap=len(cands),
+                    pack_size=statistics.median_low([x[11] for x in cands if x[11]] or [0]) or None,
+                    ftype=main[12] or next((x[12] for x in cands if x[12]), None),
+                    voices=len({x[7] for x in cands}), gap_tiers=sorted({gap(c, x[7], x[12] or "all")[2] for x in cands if x[7] != c}))
+
+    for c in markets:
+        for m in by_mol.keys() | {m for (cc, m) in weak if cc == c}:
+            if (c, m) not in out and (e := estimate(c, m)):
+                out[(c, m)] = e
     # combinations nobody prices: their ingredients' prices added up, scaled by how combination packs compare with their
     # ingredients where both are priced (measured on our data)
     samples = []
@@ -586,6 +635,25 @@ def rebuild(cur):
             gen = brand * generic_vs_originator
         v["generic"] = gen * rate if gen else None
         v["brand"] = brand * rate if brand and (gen is None or brand >= gen) else None
+
+    # checks: how close estimates come where the shelf price is known, and what looks wrong (Admin > Data)
+    cur.execute("savepoint checks")
+    try:
+        import price_checks
+        set_n = {(c, s, t): n for c, s, t, n in cur.execute("select country, source, form_type, n from price_gaps where basis = 'set'")}
+        gap_used = {}
+        for c in markets:
+            for s in NEIGHBOURS[c]:
+                for t in dict.fromkeys(["tablet", "injection", *(k for k, _ in FORM_TYPES), "all"]):
+                    r, k, tier = gap(c, s, t)
+                    if tier in (0, 1) or (tier == 2 and t == "all"):
+                        gap_used[(c, s, t)] = (r, k if tier == 0 else set_n.get((c, s, t), 0), "measured" if tier == 0 else "set")
+        n_checks = price_checks.run(cur, direct, out, estimate, gap_used, fx, markets, members) + price_checks.class_checks(cur)
+        cur.execute("release savepoint checks")
+        log.info("price checks: %s", n_checks)
+    except Exception:
+        cur.execute("rollback to savepoint checks")
+        log.exception("price checks failed")
 
     import json
     cur.execute("delete from molecule_prices")
@@ -1363,6 +1431,8 @@ def prices_NG(cur, s):
             r = get(f"{NG_WOO[src]}/wp-json/wc/store/v1/products", params={"per_page": 100, "page": p}, timeout=120)
             for x in r.json() if r.ok else []:
                 pr = x.get("prices") or {}
+                if x.get("is_in_stock") is False:          # out of stock: its price is often months old
+                    continue
                 if pr.get("price"):
                     yield x.get("id"), x.get("name"), int(pr["price"]) / 10 ** int(pr.get("currency_minor_unit") or 0)
         elif src == "drugstore":
@@ -1373,6 +1443,8 @@ def prices_NG(cur, s):
             r = get(f"{NG_SHOPIFY[src]}/products.json", params={"limit": 250, "page": p}, timeout=120)
             for x in (r.json().get("products", []) if r.ok else []):
                 for v in x.get("variants") or []:
+                    if v.get("available") is False:          # out of stock: its price is often months old
+                        continue
                     vt = v.get("title") or ""
                     title = x.get("title") + ("" if vt in ("", "Default Title") or vt.lower() in x.get("title", "").lower() else f" {vt}")
                     yield v.get("id"), title, num(v.get("price"))

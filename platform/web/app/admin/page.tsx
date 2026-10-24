@@ -14,6 +14,7 @@ import { StagePill } from '@/components/ui';
 import { deleteAccountDoc, deleteSupplierDoc, savePlanPrices, uploadAccountDoc, uploadSupplierDoc } from '@/app/actions/docs';
 import RegulatoryTab from './RegulatoryTab';
 import CallsTab from './CallsTab';
+import ChecksSection from './ChecksSection';
 import { ACCOUNT_DOC_KINDS, SUPPLIER_DOC_KINDS, daysLeft } from '@/lib/docs';
 
 export const metadata = { title: 'Admin' };
@@ -54,6 +55,14 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
       out.coverage = await rows(db, `with reg as (select distinct country, molecule_id from registrations where active and molecule_id is not null)
         select r.country, count(*)::int as total, count(p.molecule_id)::int as priced, count(*) filter (where p.basis = 'listings')::int as direct
         from reg r left join molecule_prices p using (country, molecule_id) group by 1 order by 1`);
+      // the worker's price and class checks (price_checks.py): up to 40 of each kind, worst first
+      out.checks = (await one(db, "select to_regclass('public.price_checks') is not null as ok"))?.ok ? await rows(db, `
+        select * from (select c.kind, c.country, c.form_type, c.value, c.n, c.detail, m.inn, p.name as product, p.user_id, u.email,
+                              count(*) over (partition by c.kind)::int as total,
+                              row_number() over (partition by c.kind order by abs(ln(greatest(coalesce(c.value, 1), 1e-9))) desc, c.n desc nulls last) as rn
+                       from price_checks c left join molecules m on m.id = c.molecule_id left join mfr_products p on p.id = c.product_id
+                       left join users u on u.id = p.user_id) x
+        where rn <= 40 or kind in ('accuracy', 'gap')`) : null;
     }
     if (tab === 'review') {
       out.sugg = await rows(db, `select s.molecule_id, m.inn, m.category, t.id as to_id, t.inn as to_inn, s.confidence, s.reason
@@ -236,6 +245,7 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
             </>);
           })()}
         </section>
+        <ChecksSection checks={d.checks ?? null} />
         {overdue && <div className="err" role="alert">Tanzania list update overdue{last ? ` by ${Math.round(-msLeft / 36e5)} hours` : ''}: upload the latest export below.</div>}
         <div className="grid g2">
           <section className="card stack">

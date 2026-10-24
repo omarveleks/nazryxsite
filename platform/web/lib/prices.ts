@@ -17,7 +17,7 @@ export const PRICE_SQL = `select molecule_id, country, basis, kinds, currency, u
   from_country, factor, overlap, by_strength, pack_size, generic_price, brand_price, to_jsonb(molecule_prices) -> 'forms' as forms
   from molecule_prices`;
 
-const UNIT_SHORT: Record<string, string> = { 'tablet or capsule': 'tablet', 'ampoule or vial': 'vial', pack: 'pack', ml: 'ml', g: 'g' };
+const UNIT_SHORT: Record<string, string> = { 'tablet or capsule': 'tablet', 'ampoule or vial': 'vial', inhaler: 'inhaler', pack: 'pack', ml: 'ml', g: 'g' };
 
 // Drops, syrups and creams are compared per ml or g and shown per usual bottle or tube ('5 ml').
 export const packOf = (p: MoleculePrice) => ((p.unit === 'ml' || p.unit === 'g') && p.pack_size ? Number(p.pack_size) : 1);
@@ -36,6 +36,7 @@ export function priceBasis(p: MoleculePrice) {
 /** The unit a product is sold by, from its form; null when the form does not say. */
 export function formUnit(form?: string | null) {
   const f = (form ?? '').toLowerCase();
+  if (/inhaler|evohaler|accuhaler|turbuhaler|\bmdi\b|aerosol/.test(f) && !/solution|nebul/.test(f)) return 'inhaler';
   if (/tablet|capsule|caplet|lozenge|pastille|softgel|\bcaps?\b|\btabs?\b/.test(f)) return 'tablet or capsule';
   if (/inject|ampoule|ampule|vial|infusion|intraven|syringe/.test(f)) return 'ampoule or vial';
   if (/drop|syrup|solution|suspension|spray|gel|cream|ointment|liquid|inhal|aerosol|emulsion|lotion|powder/.test(f)) return 'ml';
@@ -44,6 +45,7 @@ export function formUnit(form?: string | null) {
 /** Whether a molecule's average price is for the same kind of product: a vial price is no guide to a capsule. */
 export function priceFits(p: MoleculePrice, form?: string | null) {
   const u = formUnit(form);
+  if (p.unit === 'pack') return false;          // a pack of unknown size: 10 tablets or 100?
   if (!u) return true;
   return u === 'ml' ? p.unit === 'ml' || p.unit === 'g' : p.unit === u;
 }
@@ -52,7 +54,7 @@ export function priceFits(p: MoleculePrice, form?: string | null) {
  *  beside the usual capsules), or null when nothing near prices that form. */
 export function priceFor(p: MoleculePrice | null | undefined, form?: string | null): MoleculePrice | null {
   if (!p) return null;
-  if (priceFits(p, form)) return p;
+  if (priceFits(p, form) && p.unit !== 'pack') return p;     // a pack of unknown size says nothing: never shown
   const u = formUnit(form);
   const f = u ? (u === 'ml' ? p.forms?.ml ?? p.forms?.g : p.forms?.[u]) : null;
   if (!f) return null;

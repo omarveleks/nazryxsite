@@ -72,11 +72,11 @@ export default async function MfrProduct({ params, searchParams }: { params: Pro
     const route = canUse(t, 'pathway') ? await one(db, 'select label, description, months_low, months_high from registration_routes where key = $1', [routeKey]) : null;
     // this market's routes this product can use, fastest first (fast-track and priority need their own criteria)
     const allRoutes = canUse(t, 'pathway') ? await rows(db, `select key, label, description, months_low, months_high, fee_usd_low, fee_usd_high, eligibility
-        from country_routes where country = $1 order by sort`, [market]) : [];
+        from country_routes where country = $1 and scope = 'medicine' order by sort`, [market]) : [];   // device routes are the device branch's
     const routes = allRoutes.filter((r) => r.eligibility !== 'sra_or_pq' || p.who_pq || p.sra_approved)
       .filter((r) => !/fast|priority/.test(r.key)).sort((a, b) => (a.months_low ?? 99) - (b.months_low ?? 99));
     // the documents this market asks for, the ones that apply to this product, and which the manufacturer has ready
-    const checklist = canUse(t, 'requirements') ? (await rows(db, 'select id, name, applies, match, note from reg_checklist where country = $1 order by sort', [market]))
+    const checklist = canUse(t, 'requirements') ? (await rows(db, `select id, name, applies, match, note from reg_checklist where country = $1 and scope = 'medicine' order by sort`, [market]))
       .filter((c) => c.applies === 'all' || appliesTo({ ...c, topic: '', title: c.name, body: '' } as Requirement, { ...p, category: productClass(p) })) : null;
     const ready = checklist ? (await rows(db, 'select item from product_checklist where product_id = $1 and country = $2', [id, market])).map((r) => r.item as string) : [];
     // distributors strong in the class who do not carry this molecule yet (codes only; names stay with Nazryx)

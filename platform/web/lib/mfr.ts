@@ -202,10 +202,21 @@ export const ATC_GROUPS: Record<string, string> = {
 };
 export const productClass = (p: { category?: string | null; atc?: string | null }) => p.category ?? (p.atc ? ATC_GROUPS[p.atc[0]] : null) ?? null;
 /** The class people see: what the product is used for where that matters (an eye lubricant, not 'pain'), else its class. */
+// A product used in the eye, ear or nose, or breathed in, is classed by that use whatever the molecule's usual class:
+// dexamethasone eye drops are ophthalmological though dexamethasone is mostly tablets and injections (classify.py, LOCAL)
+const ROUTE_CLASS: [RegExp, string][] = [
+  [/\beye|ophthalm|ocular|глаз/i, 'Ophthalmological Preparations'],
+  [/\bear\b|\bears\b|\botic\b|auricular|ушн/i, 'Ear, Nose and Throat Medicines'],
+  [/nasal|\bnose\b|назал|в нос/i, 'Ear, Nose and Throat Medicines'],
+  [/inhal|nebul|respule|ингал/i, 'Medicines Acting on the Respiratory Tract'],
+];
 export const displayClass = (p: { category?: string | null; atc?: string | null; use_group?: string | null; name?: string | null;
   dosage_form?: string | null; inn?: string | null; kind?: string | null }) => {
   const g = productGroup(p);
-  return (g && GROUP_LABEL[g]) || (p.kind === 'supplement' ? 'Dietary supplements' : productClass(p));
+  if (g && GROUP_LABEL[g]) return GROUP_LABEL[g];
+  if (p.kind === 'supplement') return 'Dietary supplements';
+  const route = p.kind === 'device' ? null : ROUTE_CLASS.find(([rx]) => rx.test(`${p.dosage_form ?? ''} ${p.name ?? ''}`));
+  return route ? route[1] : productClass(p);
 };
 
 /** What each service needs from the manufacturer, shown before they ask for it. */
