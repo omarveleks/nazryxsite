@@ -3,7 +3,8 @@ import { notFound } from 'next/navigation';
 import Shell from '@/components/Shell';
 import { Empty, Flash, StagePill } from '@/components/ui';
 import { deleteAccountDoc, setMfrPlan, setVerified, uploadAccountDoc } from '@/app/actions/docs';
-import { deleteAccount, setAccountSuspended, uploadPortfolioFor } from '@/app/actions/admin';
+import { deleteAccount, matchProduct, setAccountSuspended, viewAs, uploadPortfolioFor } from '@/app/actions/admin';
+import { brandOf } from '@/lib/match';
 import { requireTeam } from '@/lib/auth';
 import { one, rows, withUser } from '@/lib/db';
 import { ACCOUNT_DOC_KINDS } from '@/lib/docs';
@@ -28,7 +29,10 @@ export default async function AdminAccount({ params, searchParams }: { params: P
       focus: await one(db, 'select * from user_focus where user_id = $1', [id]),
       claim: await one(db, `select k.*, coalesce(c.display_name, k.company_name) as company from company_claims k left join companies c on c.id = k.company_id
                             where k.user_id = $1 order by k.created_at desc limit 1`, [id]),
-      products: await rows(db, `select p.name, m.inn from mfr_products p left join molecules m on m.id = p.molecule_id where p.user_id = $1 order by p.created_at limit 200`, [id]),
+      // unmatched first (with why), then the rest
+      products: await rows(db, `select p.id, p.name, m.inn, p.kind, to_jsonb(p) ->> 'match_note' as note from mfr_products p
+                                left join molecules m on m.id = p.molecule_id where p.user_id = $1
+                                order by (p.molecule_id is null and coalesce(p.kind, 'medicine') <> 'device') desc, p.created_at limit 2000`, [id]),
       requests: await rows(db, `select r.id, r.stage, r.updated_at, coalesce(m.inn, r.molecule_text) as molecule from requests r
                                 left join molecules m on m.id = r.molecule_id where r.user_id = $1 order by r.updated_at desc limit 30`, [id]),
       engagements: await rows(db, 'select id, kind, country, stage, status, updated_at from engagements where user_id = $1 order by updated_at desc limit 30', [id]),
@@ -78,9 +82,26 @@ export default async function AdminAccount({ params, searchParams }: { params: P
             <section className="card stack">
               <div className="card-h"><h2>Catalogue ({d.products.length})</h2>
                 {p.catalogue_path && <a href={`/files/mcatalogue/${id}`}>Uploaded file: {p.catalogue_name}</a>}</div>
+              {(() => {
+                const open = d.products.filter((x) => !x.inn && x.kind !== 'device');
+                return open.length > 0 && (
+                  <div className="stack" style={{ gap: 8 }}>
+                    <p className="small"><b>{open.length} not matched.</b> The worker matches them by ingredient, then by brand (registers, pharmacy
+                      shelves, MedEx). What it cannot match waits here: type the ingredient (INN) to match it.</p>
+                    <div className="tbl-wrap"><table className="tbl"><thead><tr><th>Product</th><th>Why</th><th>Ingredient (INN)</th></tr></thead>
+                      <tbody>{open.map((x) => (
+                        <tr key={x.id}><td>{x.name}</td><td className="small">{x.note ?? 'Being matched (a few minutes)'}</td>
+                          <td><form action={matchProduct} className="row" style={{ gap: 6, flexWrap: 'wrap' }}>
+                            <input type="hidden" name="user_id" value={id} /><input type="hidden" name="product_id" value={x.id} />
+                            <input type="hidden" name="brand" value={brandOf(x.name) ?? ''} />
+                            <input className="input" name="inn" placeholder="e.g. omeprazole" required style={{ maxWidth: 200 }} aria-label={`Ingredient of ${x.name}`} />
+                            <button className="btn btn-ghost btn-sm" type="submit">Match{brandOf(x.name) && open.filter((y) => brandOf(y.name) === brandOf(x.name)).length > 1
+                              ? ` all ${open.filter((y) => brandOf(y.name) === brandOf(x.name)).length}` : ''}</button></form></td></tr>))}</tbody></table></div>
+                  </div>);
+              })()}
               {d.products.length === 0 ? <Empty>No products yet.</Empty> : (
-                <div className="small" style={{ columns: '2 220px' }}>{d.products.map((x, i) => (
-                  <div key={i}>{x.name}{x.inn ? '' : <span className="sub2"> · not matched</span>}</div>))}</div>)}
+                <div className="small" style={{ columns: '2 220px' }}>{d.products.filter((x) => x.inn || x.kind === 'device').map((x, i) => (
+                  <div key={i}>{x.name}{x.inn ? <span className="sub2"> · {x.inn}</span> : null}</div>))}</div>)}
             </section>)}
           {d.focus && (
             <section className="card stack"><h2>Distributor focus</h2>
@@ -172,6 +193,9 @@ export default async function AdminAccount({ params, searchParams }: { params: P
                 restore lets them back in.</p>
               <form action={setAccountSuspended}><input type="hidden" name="user_id" value={id} /><input type="hidden" name="suspend" value={a.disabled ? '0' : '1'} />
                 <button className="btn btn-ghost btn-sm" type="submit">{a.disabled ? 'Restore access' : 'Suspend account'}</button></form>
+              <p className="note">View as opens their portal exactly as they see it, read-only, for an hour. Logged in Activity.</p>
+              <form action={viewAs}><input type="hidden" name="user_id" value={id} />
+                <button className="btn btn-blue btn-sm" type="submit">View as {a.email}</button></form>
               {u.team_owner && (
                 <details>
                   <summary className="btn-link small" style={{ cursor: 'pointer' }}>Delete account</summary>

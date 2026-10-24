@@ -34,6 +34,14 @@ def tick():
     with connect() as conn:
         cur = conn.cursor()
         catalogue.run(cur)            # catalogues (Excel, Word, PDF) into the manufacturer's products
+        cur.execute("savepoint rematch")
+        try:
+            import collect
+            catalogue.rematch(cur, collect.session())   # products still unmatched: the newer matcher, then their brand
+            cur.execute("release savepoint rematch")
+        except Exception:
+            cur.execute("rollback to savepoint rematch")
+            log.exception("re-matching products failed")
         billing.process(cur)          # plans switched on or off, invoices and order confirmations
         digest.send_weekly(cur)       # the weekly summary for manufacturers (email and WhatsApp)
         digest.call_reminders(cur)    # the day before a booked call

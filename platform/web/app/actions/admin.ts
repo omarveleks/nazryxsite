@@ -1,6 +1,9 @@
 'use server';
 import { redirect } from 'next/navigation';
-import { requireTeam } from '@/lib/auth';
+import { requireTeam, sha, VIEW_COOKIE } from '@/lib/auth';
+import { brandOf } from '@/lib/match';
+import { cookies } from 'next/headers';
+import { randomBytes } from 'node:crypto';
 import { dbMessage, one, withUser } from '@/lib/db';
 import { back, int, str } from '@/lib/forms';
 import { BE_STATUS, DOSSIER_ITEMS, DOSSIER_STATUS, GMP_BY, ORDER_STATUSES, SHIPMENT_DOCS, STAGES } from '@/lib/format';
@@ -530,4 +533,34 @@ export async function deleteAccount(f: FormData) {
   if (!u.team_owner) back(`/admin/accounts/${id}`, { error: 'Only an owner can delete accounts.' });
   await team((db) => db.query('select admin_delete_account($1, $2)', [id, str(f, 'confirm_email', 200)]), `/admin/accounts/${id}`);
   redirect('/admin?tab=accounts&deleted=1');
+}
+
+/** Open a customer's portal as they see it, read-only, for an hour (Exit in the bar at the top ends it). */
+export async function viewAs(f: FormData) {
+  await requireTeam('accounts');
+  const id = str(f, 'user_id', 40);
+  const token = randomBytes(32).toString('base64url');
+  await team((db) => db.query('select admin_start_view($1, $2)', [sha(token), id]), `/admin/accounts/${id}`);
+  (await cookies()).set(VIEW_COOKIE, token, {
+    httpOnly: true, sameSite: 'lax', path: '/', maxAge: 3600,
+    secure: process.env.NODE_ENV === 'production' && process.env.INSECURE_COOKIES !== '1',
+  });
+  redirect('/m');
+}
+
+/** Match a catalogue product to its ingredient by hand; every unmatched product of the account with the same brand
+ *  ('Lotil-10', 'Lotil-20') takes it too. */
+export async function matchProduct(f: FormData) {
+  await requireTeam('accounts');
+  const id = str(f, 'user_id', 40), inn = str(f, 'inn', 200).trim(), brand = str(f, 'brand', 60);
+  const back_ = `/admin/accounts/${id}`;
+  await team(async (db) => {
+    const m = await one(db, `select id from molecules where lower(inn) = lower($1) or canonical_key = lower($1)
+                             union all select molecule_id from molecule_aliases where alias = lower($1) limit 1`, [inn]);
+    if (!m) back(back_, { error: `No medicine called "${inn}". Use its INN, as in "omeprazole" or "sodium alginate + calcium carbonate".` });
+    const products = (await db.query(`select id, name from mfr_products where user_id = $1 and molecule_id is null`, [id])).rows as { id: number; name: string }[];
+    const ids = products.filter((p) => p.id === int(f, 'product_id') || (brand && brandOf(p.name) === brand)).map((p) => p.id);
+    await db.query('update mfr_products set molecule_id = $1 where id = any($2) and user_id = $3', [m!.id, ids, id]);
+  }, back_);
+  redirect(`${back_}?saved=1`);
 }

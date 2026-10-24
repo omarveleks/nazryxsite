@@ -21,3 +21,18 @@ export async function findMolecule(db: Db, name: string): Promise<number | null>
                            limit 1`, [name, moleculeKeyish(name)]);
   return m ? Number(m.id ?? m.molecule_id) : null;
 }
+
+const FORM_OR_RELEASE = new Set(['tablet', 'tablets', 'tab', 'tabs', 'capsule', 'capsules', 'cap', 'caps', 'injection', 'inj', 'syrup',
+  'suspension', 'cream', 'ointment', 'gel', 'drops', 'drop', 'eye', 'ear', 'oral', 'solution', 'powder', 'for', 'infusion', 'sr', 'er', 'mr',
+  'xr', 'cr', 'tr', 'ec', 'fc', 'f.c', 'odt', 'timed', 'sustained', 'delayed', 'controlled', 'release', 'chewable', 'pellets', 'mups', 'sachet',
+  'lotion', 'vial', 'ampoule', 'iv', 'im']);
+/** The brand in a product line, as the worker reads it (catalogue.brand_of): the words before its strength or form
+ *  ('Lotil-10 Capsule' -> 'lotil', 'Gastro DS Suspension' -> 'gastro ds'). */
+export function brandOf(line: string): string | null {
+  const words: string[] = [];
+  for (const w of line.toLowerCase().replace(/-(?=\d)/g, ' ').split(/\s+/)) {
+    if (!w || /^\d/.test(w) || FORM_OR_RELEASE.has(w.replace(/[.,]$/, ''))) break;
+    words.push(w);
+  }
+  return words.join(' ').slice(0, 60) || null;
+}

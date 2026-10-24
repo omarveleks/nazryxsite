@@ -1,4 +1,5 @@
 import { Pool, type PoolClient, type QueryResultRow } from 'pg';
+import { viewingId } from './viewing';
 
 // The app connects as the restricted role `nazryx_app`. Row-level security in Postgres decides what each
 // signed-in user can read; every query runs inside withUser(), which sets app.user_id for the transaction.
@@ -24,6 +25,7 @@ export async function withUser<T>(userId: string | null, fn: (db: Db) => Promise
   const c = await pool.connect();
   try {
     await c.query('begin');
+    if (userId && userId === viewingId()) await c.query('set transaction read only');   // the team viewing an account
     await c.query("select set_config('app.user_id', $1, true)", [userId ?? '']);
     const out = await fn(c);
     await c.query('commit');

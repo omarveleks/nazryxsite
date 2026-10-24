@@ -33,6 +33,13 @@ export default function Shell({ user, title, sub, crumb, actions, children }: {
         </div>
       </aside>
       <main className="main">
+        {(user.viewed_by || user.view_ended) && (
+          <div className={user.viewed_by ? 'ok' : 'err'} role="status" style={{ display: 'flex', gap: 12, justifyContent: 'space-between', flexWrap: 'wrap' }}>
+            <span>{user.viewed_by
+              ? <>Viewing <b>{user.email}</b> as they see it. Read-only: nothing here can be changed.</>
+              : <>Your view of an account has ended. Exit it to make changes again.</>}</span>
+            <a className="btn-link" href="/view-as/exit">Exit view</a>
+          </div>)}
         <div className="topbar">
           <div>
             {crumb && <div className="crumb">{crumb}</div>}

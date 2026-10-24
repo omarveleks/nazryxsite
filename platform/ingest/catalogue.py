@@ -7,6 +7,7 @@ read by their columns and lines, and a PDF is left for the team ('manual'). Ever
 same way the app matches a typed name.
 """
 import base64
+import datetime as dt
 import csv
 import io
 import json
@@ -34,6 +35,10 @@ NAME_HEADERS = ("trade", "brand", "product", "name", "description", "item", "des
 # French, Spanish and German salt and descriptor words the shared molecule key does not know
 EXTRA_SALTS = {"chlorhydrate", "hydrochlorure", "fulmarate", "fumarato", "maleato", "micronise", "micronisee", "trihydrate",
                "sodique", "potassique", "calcique", "base"}
+# release and pack words in a product line ('Diclofenac-100 TR Timed Release', 'Ciprofloxacin-DS Pellets', 'Siligel MUPS')
+RELEASE_WORDS = {"ds", "tr", "timed", "release", "sustained", "delayed", "controlled", "extended", "prolonged", "modified",
+                 "pellets", "pellet", "granules", "mups", "xr", "cr", "ec", "fc", "odt", "chewable", "paediatric", "pediatric",
+                 "chrono", "rapid", "extra", "kids", "junior", "adult", "mini", "dt"}
 # French spellings and vitamin names the shared synonyms do not cover
 LOCAL_NAMES = [(r"\bvitamine\b", "vitamin"), (r"\bvitamin d3?\b", "cholecalciferol"), (r"\bvitamin d2\b", "ergocalciferol"),
                (r"\bvitamin ([a-z])\b", r"vitamin-\1"),
@@ -250,9 +255,11 @@ class Generics:
     @staticmethod
     def clean(name):
         s = unicodedata.normalize("NFKD", str(name)).encode("ascii", "ignore").decode().lower()
+        s = re.sub(r"(?<=[a-z])-(?=\d|(?:ds|tr|sr|xr|cr|er|mr|ec|dt)\b)", " ", s)      # 'Etoricoxib-60', 'Ciprofloxacin-DS'
+        s = re.sub(r"\bf\.c\.?(?=\s|$)", " ", s)
         for pat, rep in LOCAL_NAMES:
             s = re.sub(pat, rep, s)
-        return " ".join(w for w in re.split(r"(\s+|\+|/|&)", s) if w.strip() not in EXTRA_SALTS)
+        return " ".join(w for w in re.split(r"(\s+|\+|/|&)", s) if w.strip() not in EXTRA_SALTS | RELEASE_WORDS)
 
     def token(self, t):
         """One word corrected to a known ingredient word: a missing or extra final 'e' (French, German), else a close
@@ -402,3 +409,105 @@ def run(cur, client="auto"):
                         ("Catalogue could not be read", f"{name}: {str(e)[:200]}"))
             log.exception("catalogue %s failed", fid)
     return done
+
+
+# ------------------------------------------------------------------ products named by their brand only
+MEDEX = "https://medex.com.bd"
+BRAND_LOOKUPS = 20            # brands looked up on MedEx a pass (two pages each, a second apart)
+
+
+def brand_of(line):
+    """The brand in a product line: the words before its strength or form ('Lotil-10 Capsule' -> 'lotil',
+    'Gastro DS Suspension' -> 'gastro ds', 'Cefuxim CV Powder for Suspension' -> 'cefuxim cv')."""
+    words = []
+    for w in re.split(r"[\s]+", re.sub(r"-(?=\d)", " ", (line or "").lower())):
+        if not w or re.match(r"\d", w) or w.strip(".,") in FORM_WORDS or FORM.fullmatch(w) or w in RELEASE_WORDS - {"ds"}:
+            break
+        words.append(w)
+    return " ".join(words)[:60] or None
+
+
+squash = lambda t: re.sub(r"[^a-z0-9]", "", (t or "").lower())
+
+
+def brand_index(cur):
+    """Brand words on any register or pharmacy shelf we read, to the molecule at least three in four of them name."""
+    seen = {}
+    for name, mol in cur.execute("""select brand, molecule_id from registrations where molecule_id is not null and brand is not null
+                                    union all select name, molecule_id from price_listings where molecule_id is not null and name is not null"""):
+        b = brand_of(name)
+        if b and len(squash(b)) >= 4:
+            seen.setdefault(squash(b), []).append(mol)
+    out = {}
+    for k, ms in seen.items():
+        top = max(set(ms), key=ms.count)
+        if len(ms) >= 2 and ms.count(top) * 4 >= len(ms) * 3:
+            out[k] = top
+    return out
+
+
+def medex_generic(s, brand):
+    """The generic of a brand sold in Bangladesh (MedEx: every brand, its maker and generic). None when no brand there
+    is called exactly that."""
+    import html as htmllib
+    import time
+    r = s.get(f"{MEDEX}/search", params={"search": brand}, timeout=60)
+    links = re.findall(r'<a[^>]+href="(https://medex\.com\.bd/brands/\d+/[^"]+)"[^>]*>(.*?)</a>', r.text if r.ok else "", re.S)
+    for url, label in links:
+        name = re.split(r"\s\d|\(", htmllib.unescape(re.sub(r"<[^>]+>", " ", label)).strip())[0]
+        if squash(name) == squash(brand):
+            time.sleep(1)
+            page = s.get(url, timeout=60)
+            g = re.search(r'title="Generic Name"[^>]*>\s*<a[^>]+href="https://medex\.com\.bd/generics/[^"]+"[^>]*>(.*?)</a>',
+                          page.text if page.ok else "", re.S)
+            return re.sub(r"\s+", " ", htmllib.unescape(re.sub(r"<[^>]+>", " ", g.group(1)))).strip() if g else None
+    return None
+
+
+def rematch(cur, s=None):
+    """Products still without a molecule: matched again with the current matcher, then by their brand (our registers
+    and shelves, else MedEx). Each brand is looked up on MedEx once a month at most. Returns how many were matched."""
+    # each product once (a note says why it is still unmatched); a release that matches better clears the notes
+    rows = cur.execute("""select id, name from mfr_products where molecule_id is null and match_note is null
+                          and coalesce(kind, 'medicine') <> 'device'""").fetchall()
+    if not rows:
+        return 0
+    generics, known = Generics(cur), None
+    cached = {ref: (state, checked) for ref, state, checked in cur.execute(
+        "select ref, state, checked_at from source_items where source = 'brand_medex'").fetchall()}
+    asked = matched = 0
+    for pid, name in rows:
+        mol = generics.molecule(cur, name)
+        b = brand_of(name)
+        if not mol and b:
+            known = brand_index(cur) if known is None else known
+            mol = known.get(squash(b))
+        if not mol and b and len(squash(b)) >= 4:
+            state, checked = cached.get(b, (None, None))
+            fresh = checked and (dt.datetime.now(dt.timezone.utc) - checked).days < 30
+            if not fresh and s is not None and asked < BRAND_LOOKUPS:
+                asked += 1
+                try:
+                    state = medex_generic(s, b) or ""
+                except Exception:
+                    state = None                     # MedEx did not answer: asked again next pass
+                if state is not None:
+                    cur.execute("""insert into source_items (source, ref, checked_at, state) values ('brand_medex', %s, now(), %s)
+                                   on conflict (source, ref) do update set checked_at = now(), state = excluded.state""", (b, state))
+                    cached[b] = (state, dt.datetime.now(dt.timezone.utc))
+            if state:
+                mol = generics.molecule(cur, state) or new_molecule(cur, state)
+        if not mol and b and len(squash(b)) >= 7:          # 'Dexlanso': the start of exactly one INN
+            hits = {name for k, (name, _) in generics.inn.items() if squash(k).startswith(squash(b))}
+            if len(hits) == 1:
+                mol = generics.molecule(cur, hits.pop())
+        if mol:
+            cur.execute("update mfr_products set molecule_id = %s, match_note = null where id = %s and molecule_id is null", (mol, pid))
+            matched += 1
+        else:
+            state = cached.get(b, (None, None))[0] if b else None
+            note = ("Named by its brand only, and no register, pharmacy or MedEx lists that brand: match it by hand"
+                    if state == "" else "No ingredient we know in its name: match it by hand" if not b or state is not None
+                    else None)                                 # None: its brand is still to be looked up
+            cur.execute("update mfr_products set match_note = %s where id = %s", (note, pid))
+    return matched

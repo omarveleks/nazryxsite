@@ -5,9 +5,11 @@ import { cookies } from 'next/headers';
 import { redirect, notFound } from 'next/navigation';
 import { createHash, randomBytes } from 'node:crypto';
 import { pool, withUser, one } from './db';
+import { setViewing } from './viewing';
 
 export const SESSION_COOKIE = 'nzx_session';
 export const CHALLENGE_COOKIE = 'nzx_2step';
+export const VIEW_COOKIE = 'nzx_view';     // the team viewing a customer's portal (read-only, an hour)
 const SESSION_DAYS = 30;
 
 export type User = {
@@ -18,6 +20,8 @@ export type User = {
   mfr_plan: string | null; mfr_plan_chosen: boolean; mfr_active: string | null; mfr_tier: number;
   team_owner: boolean; team_permissions: string[]; tour_step: number | null; mfr_verified: boolean;
   mfr_markets: string[]; mfr_interval: string;
+  viewed_by?: string | null;      // the team member viewing this account, when it is a view
+  view_ended?: boolean;           // a view that has ended is still in the browser: changes wait for its exit link
 };
 
 export const sha = (s: string) => createHash('sha256').update(s).digest('hex');
@@ -50,11 +54,29 @@ export async function destroySession() {
 }
 
 export const getUser = cache(async (): Promise<User | null> => {
-  const token = (await cookies()).get(SESSION_COOKIE)?.value;
+  const jar = await cookies();
+  const token = jar.get(SESSION_COOKIE)?.value;
   if (!token) return null;
   const r = await pool.query('select auth_session_user($1) as id', [sha(token)]);
   const id: string | null = r.rows[0]?.id ?? null;
   if (!id) return null;
+  const view = jar.get(VIEW_COOKIE)?.value;
+  if (view) {
+    // the team viewing a customer: their portal, read-only, while the team member's own session and permission last
+    const v: string | null = (await pool.query('select auth_view_user($1, $2) as id', [sha(view), sha(token)])).rows[0]?.id ?? null;
+    if (v) {
+      const admin = await withUser(id, (db) => one<{ email: string }>(db, 'select email from users where id = $1', [id]));
+      setViewing(v);
+      const u = await loadUser(v);
+      return u ? { ...u, viewed_by: admin?.email ?? 'the team' } : null;
+    }
+    const u = await loadUser(id);
+    return u ? { ...u, view_ended: true } : null;
+  }
+  return loadUser(id);
+});
+
+function loadUser(id: string) {
   return withUser(id, (db) => one<User>(db, `
     select u.id, u.email, u.name, u.role, u.team_owner, u.team_permissions, app_plan() as plan, u.country, u.company_id, u.credits, u.onboarded,
            u.owner_id, u.language, u.whatsapp, u.notify_email, u.notify_whatsapp,
@@ -68,7 +90,7 @@ export const getUser = cache(async (): Promise<User | null> => {
                        order by k.created_at desc limit 1) cl on true
     left join manufacturer_profiles mp on mp.user_id = u.id
     where u.id = $1`, [id]));
-});
+}
 
 /** Signed-in customer pages: the manufacturer area, and `shared` pages (settings, help). The distributor side is
  *  paused, so a distributor account only reaches the shared pages. The team can open everything. */

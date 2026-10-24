@@ -632,7 +632,11 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
             <div className="tbl-wrap"><table className="tbl"><thead><tr><th>When</th><th>Who</th><th>What</th><th>Details</th></tr></thead>
               <tbody>{d.log.map((a: any, i: number) => (
                 <tr key={i}><td className="small nowrap">{ago(a.at)}</td><td className="small">{a.email ?? 'system'}</td>
-                  <td className="small">{a.action === 'insert' ? 'Added' : 'Changed'} {a.table_name.replace(/_/g, ' ')} <span className="muted">#{a.row_id}</span></td>
+                  <td className="small">{({ insert: 'Added', update: 'Changed', delete: 'Deleted' } as Record<string, string>)[a.action] ?? ({
+                    'view as': 'Viewed the portal of', suspend: 'Suspended', restore: 'Restored', 'delete account': 'Deleted account',
+                  } as Record<string, string>)[a.action] ?? a.action} {['view as', 'suspend', 'restore'].includes(a.action) ? 'account'
+                    : a.table_name.replace(/_/g, ' ')} {a.table_name === 'users' && a.row_id ? <Link href={`/admin/accounts/${a.row_id}`} className="muted">#{a.row_id}</Link>
+                    : <span className="muted">#{a.row_id}</span>}</td>
                   <td className="small" style={{ maxWidth: 420 }}>{a.action === 'update'
                     ? Object.entries(a.changes ?? {}).map(([k, v]: [string, any]) => Array.isArray(v) ? `${k}: ${JSON.stringify(v[0])} → ${JSON.stringify(v[1])}` : `${k}: ${String(v)}`).join('; ')
                     : Object.entries(a.changes ?? {}).filter(([k]) => !['id', 'created_at', 'updated_at'].includes(k)).slice(0, 4).map(([k, v]) => `${k}: ${typeof v === 'object' ? JSON.stringify(v) : String(v)}`).join('; ')}</td></tr>))}
