@@ -145,9 +145,15 @@ def test_tanzanian_labels():
 
 def test_liki_pharmacy_prices():
     card = '<div class="drugstore-card__product-price">{} <small>сум</small></div>'
-    page = ("<h1>Амлодипин Озон таблетки по 5 мг №30: цена в Ташкенте</h1>"
+    page = ("<h1>Амлодипин Озон таблетки по 5 мг №30: цена в Ташкенте</h1> <span>4 аптеки</span>"
             + "".join(card.format(p) for p in ("6 200", "6 200", "9 000", "15 000")))
-    assert pricing.liki_prices(page) == ("Амлодипин Озон таблетки по 5 мг №30", [6200.0, 6200.0, 9000.0, 15000.0])
+    assert pricing.liki_prices(page) == ("Амлодипин Озон таблетки по 5 мг №30", [6200.0, 6200.0, 9000.0, 15000.0], 4)
+    assert pricing.liki_median([6200, 6200, 9000, 15000], 4) == 7600
+    shown = list(range(100, 120))                       # the 20 cheapest of more pharmacies
+    assert pricing.liki_median(shown, 30) == 115        # the 15th cheapest of 30: among those shown
+    assert pricing.liki_median(shown, 500) is None      # not among them, and no range to place it in
+    assert round(pricing.liki_median(shown, 500, (100, 300))) == round(100 * 3 ** pricing.LIKI_T)
+    assert pricing.liki_median(shown, 500, (100, 110)) == 119.0      # never below the dearest shown
 
 
 def test_shops_that_mix_tablet_and_pack_prices():

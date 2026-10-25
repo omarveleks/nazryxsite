@@ -1528,16 +1528,37 @@ def prices_NG(cur, s):
 # More pharmacy shelves in our markets, each read a few hundred pages a run as its robots.txt allows (crawl delays kept),
 # every product kept and matched to a medicine where we can. Out of stock: left out (its price is often months old).
 # (country, source key, sitemap, product URL test, seconds between pages, pages a run)
+# Until a shop's first pass is done, a run reads for SHOP_SECONDS (not a set number of pages) and the next run starts
+# straight away (catching_up); medicines first, then everything else.
 LD_SHOPS = {
-    "pharmaplus": ("KE", "prices_KE_pp", "https://shop.pharmaplus.co.ke/sitemaps/products/sitemap.xml", "/products/", 10, 60),
-    "biosfera": ("KZ", "prices_KZ_bio", "https://biosfera.kz/sitemap-products.xml", "/ru/product/", 1, 300),
-    "dawazetu": ("TZ", "prices_TZ_dz", "https://dawazetu.com/sitemap.xml", "/product/", 2, 250),
+    "pharmaplus": ("KE", "prices_KE_pp", "https://shop.pharmaplus.co.ke/sitemaps/products/sitemap.xml", "/products/", 10, 100000),
+    "biosfera": ("KZ", "prices_KZ_bio", "https://biosfera.kz/sitemap-products.xml", "/ru/product/", 0.5, 100000),
+    "dawazetu": ("TZ", "prices_TZ_dz", "https://dawazetu.com/sitemap.xml", "/product/", 2, 100000),
 }
+SHOP_SECONDS = 15 * 60
+RU_LAT = dict(zip("абвгдеёжзийклмнопрстуфхцчшщъыьэюя", ["a", "b", "v", "g", "d", "e", "e", "zh", "z", "i", "y", "k", "l", "m", "n", "o", "p",
+                                                       "r", "s", "t", "u", "f", "h", "ts", "ch", "sh", "sch", "", "y", "", "e", "yu", "ya"]))
+
+
+def medicine_first(cur, country):
+    """Sort key for a shop's product URLs: the portfolio first, then pages whose address names a medicine we track or a
+    brand registered in the region (in Latin letters, as shops write their addresses), then the rest (cosmetics, devices)."""
+    words = {k[:7] for (key,) in cur.execute("select canonical_key from molecules where canonical_key is not null")
+             for k in key.split() if len(k) >= 6}
+    for (brand,) in cur.execute("select distinct brand from registrations where country = any(%s) and brand is not null",
+                                ([country, *NEIGHBOURS[country]],)):
+        w = re.match(r"[a-zа-яё]{5,}", brand.strip().lower())
+        if w:
+            words.add("".join(RU_LAT.get(ch, ch) for ch in w.group(0))[:7])
+    portfolio = portfolio_first(cur)
+    return lambda u: (portfolio(u), not any(w[:7] in words for w in re.findall(r"[a-z]{5,}", u.rsplit("/", 1)[-1].lower())))
 GOODLIFE = "https://www.goodlife.co.ke"        # WooCommerce; robots.txt asks for 30 seconds between requests
-GL_PER_RUN = 10                                # catalogue pages of 100 a run (five minutes)
+
 LIKI = "https://liki.uz"                       # each product's prices in every Tashkent pharmacy that stocks it
 LIKI_CITY = "/pharmacy/tashkent_r1713"
-LIKI_PER_RUN = 300
+LIKI_SHOWN = 20          # a product's pharmacy page lists only its 20 cheapest pharmacies, cheapest first
+LIKI_T = 0.43            # where the median pharmacy's price sits between the cheapest and the dearest (log scale), measured
+                         # on 113 complete lists of 8-20 pharmacies (Tashkent, Samarkand, Namangan, Bukhara; Oct 2026)
 
 
 def in_stock(offer):
@@ -1562,10 +1583,12 @@ def ld_shop(cur, s, key, names):
     """A pharmacy whose product pages state their price in schema.org markup (LD_SHOPS)."""
     import time
     c, source, smap, path, delay, per_run = LD_SHOPS[key]
-    first = portfolio_first(cur)
+    first = medicine_first(cur, c)
     due = due_items(cur, source, 100000, lambda: sitemap_urls(s, smap, lambda u: path in u))
-    n = 0
+    n, stop = 0, time.monotonic() + SHOP_SECONDS
     for url in sorted(due, key=first)[:per_run]:
+        if time.monotonic() > stop:
+            break
         r = page(s, url, timeout=60)
         if r is None:
             continue
@@ -1590,8 +1613,10 @@ def goodlife(cur, s, names):
         r = page(s, f"{GOODLIFE}/wp-json/wc/store/v1/products", params={"per_page": 100, "page": 1}, timeout=120)
         return [str(p) for p in range(1, int(r.headers.get("X-WP-TotalPages") or 0) + 1)] if r is not None and r.ok else []
 
-    n = 0
-    for p in due_items(cur, "prices_KE_gl", GL_PER_RUN, pages):
+    n, stop = 0, time.monotonic() + SHOP_SECONDS
+    for p in due_items(cur, "prices_KE_gl", 100000, pages):
+        if time.monotonic() > stop:
+            break
         r = page(s, f"{GOODLIFE}/wp-json/wc/store/v1/products", params={"per_page": 100, "page": p}, timeout=120)
         if r is None:
             continue
@@ -1608,35 +1633,70 @@ def goodlife(cur, s, names):
     return n
 
 
+def liki_median(prices, count, price_range=None):
+    """The median pharmacy's price from the cheapest ones shown (cheapest first) and how many pharmacies stock it:
+    exact while the median pharmacy is among those shown, else placed in the product's full range (cheapest to dearest,
+    from its own page) at LIKI_T, never below the dearest shown."""
+    ps = sorted(prices)
+    if not ps:
+        return None
+    if not count or count <= len(ps):
+        return statistics.median(ps)
+    if count // 2 < len(ps):
+        return float(ps[count // 2])
+    if not price_range:
+        return None
+    lo, hi = price_range
+    return max(float(ps[-1]), lo * (hi / lo) ** LIKI_T) if lo and hi and hi >= lo else None
+
+
+def liki_range(text):
+    """(cheapest, dearest) in Tashkent from a liki.uz product page ('Цены в Ташкенте от 25 000 сум до 75 000 сум')."""
+    t = re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", text))
+    m = re.search(r"Цены в Ташкенте от ([\d ]+) сум до ([\d ]+) сум", t)
+    return (num(m.group(1).replace(" ", "")), num(m.group(2).replace(" ", ""))) if m else None
+
+
 def liki_prices(text):
-    """(product name, [prices in UZS]) from a liki.uz product's pharmacy page: one price per pharmacy stocking it."""
+    """(product name, [prices in UZS], pharmacies stocking it) from a liki.uz product's pharmacy page: the cheapest
+    LIKI_SHOWN pharmacies, one price each."""
     title = re.search(r"<h1[^>]*>(.*?)</h1>", text, re.S)
     name = re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", title.group(1))).strip() if title else ""
     name = re.sub(r":\s*цена в .*$", "", name)                   # 'Амлодипин ... №30: цена в Ташкенте'
 
     # one card per pharmacy, its price in 'drugstore-card__product-price' ('6 200 <small>сум</small>')
     prices = [num(re.sub(r"\D", "", p)) for p in re.findall(r'drugstore-card__product-price">\s*([\d\s\u00a0]+?)\s*<small', text)]
-    return name, [p for p in prices if p]
+    count = re.search(r"цена в Ташкенте\s*</h1>\s*(?:<[^>]+>\s*)*(\d+) апт", text) or \
+        re.search(r"цена в Ташкенте (\d+) апт", re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", text)))
+    return name, [p for p in prices if p], int(count.group(1)) if count else None
 
 
 def liki(cur, s):
     """Uzbekistan's shelf: each product's price in every Tashkent pharmacy listing it; the product's price is their median."""
     import time
-    names, n = Names(cur, "UZ"), 0
-    first = portfolio_first(cur)
+    names, n, stop = Names(cur, "UZ"), 0, time.monotonic() + SHOP_SECONDS
+    first = medicine_first(cur, "UZ")
     due = due_items(cur, "prices_UZ_liki", 100000,
                     lambda: sitemap_urls(s, f"{LIKI}/sitemap.xml", lambda u: "/shop/" in u and "/uz/" not in u and re.search(r"-p\d+$", u)))
-    for url in sorted(due, key=first)[:LIKI_PER_RUN]:
+    for url in sorted(due, key=first):
+        if time.monotonic() > stop:
+            break
         r = page(s, url + LIKI_CITY, timeout=60)
         if r is None:
             continue
-        name, prices = liki_prices(r.text if r.ok else "")
-        if name and prices:
-            save_listing(cur, "UZ", "liki", "retail", url, name, name, names.find(name), None, statistics.median(prices), "UZS",
-                         description=f"{len(prices)} pharmacies in Tashkent")
+        name, prices, count = liki_prices(r.text if r.ok else "")
+        rng = None
+        if prices and count and count // 2 >= len(prices):          # the median pharmacy is not among those shown
+            time.sleep(0.5)
+            pr = page(s, url, timeout=60)
+            rng = liki_range(pr.text) if pr is not None and pr.ok else None
+        price = liki_median(prices, count, rng)
+        if name and price:
+            save_listing(cur, "UZ", "liki", "retail", url, name, name, names.find(name), None, round(price), "UZS",
+                         description=f"{count or len(prices)} pharmacies in Tashkent")
             n += 1
         checked(cur, "prices_UZ_liki", url)
-        time.sleep(1.5)
+        time.sleep(0.5)
     return n
 
 
