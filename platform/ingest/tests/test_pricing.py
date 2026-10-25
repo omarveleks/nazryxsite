@@ -110,3 +110,25 @@ def test_a_page_that_does_not_load_is_skipped_and_a_site_that_stops_answering_is
     assert pricing.page(S(), "https://other.test/fine") == "ok"
     pricing.fresh_run()
     assert not pricing.DOWN
+
+
+def test_ampoule_doses_box_notes_and_inflected_names():
+    assert pricing.dose_of("ОНО Раствор для инъекций 2 мг/мл 2мл ампулы №5(1x5)") == "4 mg"    # 2 mg/ml x 2 ml
+    assert pricing.dose_of("Gentamicin 40mg/ml 2ml x10 amps") == "80 mg"
+    assert pricing.dose_of("Раствор для инъекций, 4 мг/2 мл, 2 мл, №5") == "4 mg"             # already the dose
+    assert pricing.dose_of("Ceftriaxone 1g vial") == "1000 mg"
+    t = pricing.BOX.sub(" ", "Antazol 0.1% Nasal Drop · 15 ml drop: ৳ 20.00 (12's pack: ৳ 240.00) · nasal spray or drops")
+    assert pricing.unit_of(t) == "pack" and pricing.units_in(t) == 1 and pricing.volume_of(t) == (15.0, "ml")   # one bottle
+    words = {"цефтриаксон", "ceftriaxone"}
+    assert pricing.product_key("Цефтриаксона натриевая соль 1 г", words, 7) == "#7"         # the ingredient, inflected
+    assert pricing.product_key("Аксон 1 гр", words, 8) == "аксон"
+
+
+def test_sanity_keeps_cheap_generic_packs_and_bottles():
+    def o(c, price, units, unit="tablet or capsule", kind="cap"):
+        return dict(c=c, m="prednisolon", unit=unit, strength="5 mg", units=units, price=price, usd_rate=1.0, kind=kind)
+    obs = [o("A", 3.0, 10), o("B", 3.3, 10), o("C", 2.7, 10), o("D", 3.0, 10),
+           o("E", 0.6, 10, kind="retail"),                    # a cheap generic: a fifth of the others, a real pack price
+           o("F", 3.0, 10, unit="ml", kind="retail")]         # a 10 ml bottle at 3: never one ml at 3
+    kept = {x["c"]: x for x in pricing.sanity(obs)}
+    assert kept["E"]["units"] == 10 and kept["F"]["units"] == 10

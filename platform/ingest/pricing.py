@@ -45,6 +45,9 @@ def volume_of(text):
     return hits[-1] if hits else None
 
 
+# MedEx's box note after the price of one bottle or strip ('15 ml drop: ৳ 20.00 (12's pack: ৳ 240.00)'): says nothing
+# about what the price buys, and its '12's' is no count of tablets
+BOX = re.compile(r"\([^()]*:\s*৳\s*[\d.,]+\)")
 COUNTED = re.compile(r"№\s*\d|\b\d+\s*'?s\b|\bx\s*\d+", re.I)
 NOT_COUNTED = re.compile(r"\d\s*(?:ml|мл|л)\b|крем|мазь|гел|сироп|капл|спрей|аэроз|сусп|раствор д/нар|cream|ointment|gel\b|syrup|"
                          r"drops|spray|suspension|lotion|shampoo|шампун|лосьон|паст", re.I)
@@ -55,6 +58,7 @@ FORM_TYPES = (("injection", None), ("eye", r"\beye|ophth|occul|ocul|глаз"), 
               ("inhaled", r"inhal|nebul|aerosol|ингал|аэроз"), ("topical", r"cream|ointment|\bgel\b|lotion|крем|мазь|гель|линимент"),
               ("oral liquid", r"syrup|suspension|elixir|oral (?:solution|drops)|сироп|сусп"))
 MIN_TYPE = 10             # medicines of one type priced in both countries before their price gap is measured from data
+SANE = 8                  # a price this many times off the expected level (after each country's level) is a data error
 BY_PRODUCT = True         # a market's price: each product (brand) one voice, at its median across shops; see product_key
 
 
@@ -114,6 +118,22 @@ def strength_of(text):
     if u == "g":
         v, u = v * 1000, "mg"
     return f"{v:g} {u}"
+
+
+# an ampoule written as its concentration and volume ('40 mg/ml 2 ml'): its dose is the two multiplied (80 mg).
+# '4 мг/2 мл' already names the dose
+CONC = re.compile(r"(\d+(?:[.,]\d+)?)\s*(mg|мг|mcg|мкг|µg|iu|ме|ед)\s*/\s*(?:1\s*)?(?:ml|мл)(?![a-zа-я])", re.I)
+AMP_VOL = re.compile(r"(?<![/\d.,])(?<!/\s)(\d+(?:[.,]\d+)?)\s*(?:ml|мл)(?![a-zа-я])", re.I)
+
+
+def dose_of(text):
+    """An ampoule's or vial's strength: its dose when the label gives a concentration and a volume, else as written."""
+    t = text or ""
+    c, v = CONC.search(t), AMP_VOL.search(CONC.sub(" ", t))
+    if c and v and float(v.group(1).replace(",", ".")) > 0:
+        n, u = float(c.group(1).replace(",", ".")) * float(v.group(1).replace(",", ".")), c.group(2).lower()
+        return f"{round(n, 4):g} {UNIT_EN.get(u, u)}"
+    return strength_of(t)
 
 
 DOWN = set()         # sites that stopped answering during this run (collect.run reports them)
@@ -282,11 +302,13 @@ def sanity(obs):
             kept.append(o)
             continue
         expect = r * level.get(o["c"], 1.0)
-        if o["kind"] == "retail" and o["units"] > 1 and o["usd"] < expect / 4:
+        # the shop lists the price of one tablet under a pack label: only when the pack reading is far off and the
+        # one-tablet reading lands near the expected price (a cheap generic 100-pack is often genuinely cheap)
+        if o["kind"] == "retail" and o["unit"] in ("tablet or capsule", "ampoule or vial") and o["units"] > 1 and o["usd"] < expect / SANE:
             per_tablet = o["price"] / o["usd_rate"]
-            if abs(math.log(per_tablet / expect)) < abs(math.log(o["usd"] / expect)):
-                o["units"], o["usd"] = 1, per_tablet                 # the shop lists the price of one tablet
-        if 1 / 8 <= o["usd"] / expect <= 8:
+            if expect / 3 <= per_tablet <= expect * 3:
+                o["units"], o["usd"] = 1, per_tablet
+        if 1 / SANE <= o["usd"] / expect <= SANE:
             kept.append(o)
     return kept
 
@@ -296,7 +318,13 @@ def product_key(text, inn_words, ref):
     -> 'rocephin', 'Rocephine' alike). A listing named by its ingredient ('Ciprofloxacin 500mg', 'Амоксициллин') may
     be any maker's: its own product, unless it names a brand further on (see brands_in_text in rebuild)."""
     w = re.match(r"[a-zа-яё][a-zа-яё\-]{2,}", (text or "").strip().lower())
-    return f"#{ref}" if not w or w.group(0) in inn_words else re.sub(r"(?<=\w{4})[es]$", "", w.group(0))
+    if not w:
+        return f"#{ref}"
+    word = w.group(0)
+    # an ingredient in any grammatical form ('цефтриаксона' is цефтриаксон): its first 5 or more letters name one
+    if any(word[:k] in inn_words for k in range(5, len(word) + 1)):
+        return f"#{ref}"
+    return re.sub(r"(?<=\w{4})[es]$", "", word)
 
 
 def rebuild(cur):
@@ -319,6 +347,7 @@ def rebuild(cur):
     for c, m, kind, text, units, price, ccy, brand in obs_all:
         if c not in sources or ccy not in fx:
             continue
+        text = BOX.sub(" ", text or "")
         units = units if units is not None else units_in(text)
         if not units:
             continue                                  # a counted pack that does not say how many: no unit price
@@ -329,7 +358,8 @@ def rebuild(cur):
             w = re.match(r"[a-z][a-z\-]{3,}", (text or "").lower())
             brand = bool(w and w.group(0) in brand_words)
         # a bottle's or tube's size is not its strength ('5 ml' of 0.09% drops, a '20g' tube of cream)
-        st = strength_of(VOLUME.sub(" ", text or "") if unit in ("ml", "g") else text)
+        st = strength_of(VOLUME.sub(" ", text or "")) if unit in ("ml", "g") else dose_of(text) if unit == "ampoule or vial" \
+            else strength_of(text)
         if unit in ("ml", "g") and st and re.fullmatch(r"[\d.]+ (ml|g)", st):
             st = None
         raw.append(dict(c=c, m=fam.get(m, m), kind=kind, unit=unit, strength=st, units=float(units), brand=brand, text=text,
@@ -371,7 +401,8 @@ def rebuild(cur):
                 k = usual_form.setdefault(m, {})
                 k[(o[2], o[3])] = k.get((o[2], o[3]), 0) + (2 if o[2] == "tablet or capsule" else 1)
     # a pack of unknown size says nothing per unit: it is the usual form only when nothing else prices the molecule
-    usual_form = {m: max(v, key=lambda k: (k[0] != "pack", v[k])) for m, v in usual_form.items()}
+    # ties go the same way every run (by the form and strength itself), so the same data always gives the same prices
+    usual_form = {m: max(v, key=lambda k: (k[0] != "pack", v[k], str(k))) for m, v in usual_form.items()}
     out, weak = {}, {}
     for (c, m), obs in groups.items():
         if any(o[2] != "pack" for o in obs):
@@ -388,7 +419,7 @@ def rebuild(cur):
             continue                     # this market only prices another form (an infusion, a gel): estimate the usual one
         else:
             unit, usual = want if want in sizes else max(sizes, key=lambda k: (sizes[k] * (2 if k[0] == "tablet or capsule" else 1),
-                                                                               k[1] is not None))
+                                                                               k[1] is not None, str(k)))
         # in our own markets, one or two listings without a strength (or one shop listing) are not enough to call it market
         # data; a country we only borrow from keeps every price as evidence for the estimate
         if c in MARKETS and usual is None and sizes[(unit, usual)] < 3:
@@ -422,7 +453,7 @@ def rebuild(cur):
         out[(c, m)] = dict(basis="listings", kinds=sorted({o[1] for o in obs}), unit=unit, strength=usual, unit_price=avg,
                            unit_usd=avg / float(fx[CURRENCY[c]]), lo=pct(local, 0.1), hi=pct(local, 0.9), n=len(mine), by=by,
                            products=len(local),
-                           pack_size=statistics.median_low(vols) if vols else None, ftype=max(set(types), key=types.count))
+                           pack_size=statistics.median_low(vols) if vols else None, ftype=max(sorted(set(types), key=str), key=types.count))
     # where a market only publishes official maximums, the shelf price is the maximum times how shelf prices compare with
     # maximums where both are known (measured on our data)
     both = []
@@ -521,7 +552,7 @@ def rebuild(cur):
         if any(x[0] for x in cands):
             cands = [x for x in cands if x[0]]
         # the form and strength compared: the one most sources price (this market's own voice does not choose it)
-        usual = max({(x[2], x[1]) for x in cands or own}, key=lambda k: sum(1 for x in cands or own if (x[2], x[1]) == k))
+        usual = max({(x[2], x[1]) for x in cands or own}, key=lambda k: (sum(1 for x in cands or own if (x[2], x[1]) == k), k == usual_form.get(m), str(k)))
         # one form and strength, like for like; a bottle or tube that does not state its strength compares per ml or g
         like = lambda x: (x[2], x[1]) == usual or (x[2] == usual[0] and usual[0] in ("ml", "g") and None in (x[1], usual[1]))
         cands = [x for x in cands if like(x)] + [x for x in own if like(x)]
@@ -576,7 +607,7 @@ def rebuild(cur):
                 by_unit.setdefault((m, o[2]), []).append((c, o))
     for (m, u), items in by_unit.items():
         named = [o[3] for _, o in items if o[3]]
-        st_ = max(set(named), key=named.count) if named else None
+        st_ = max(sorted(set(named)), key=named.count) if named else None
         per = {}
         for c, o in items:
             if st_ is None or o[3] == st_ or (o[3] is None and u in ("ml", "g")):
@@ -1283,6 +1314,8 @@ def prices_SASIA(cur, s):
             brand, form, strength, maker, price = cells[:5]
             for amount, label in [(m.group(2), m.group(1)) for m in re.finditer(r"([^:৳]+?):\s*৳\s*([\d,.]+)", price)]:
                 label = label.strip()
+                if label.startswith("("):                       # '(12's pack: ৳ 240.00)': the box the unit before it comes in
+                    continue
                 if label.lower().startswith("unit price"):        # a tablet, capsule or sachet: the price of one
                     save_listing(cur, "BD", "medex", "retail", f"{path}|{brand}|{strength}|unit", brand, f"{brand} {strength} {form} · 1 unit",
                                  mol, 1, num(amount.replace(",", "")), "BDT", originator=is_brand(maker), description=maker)
