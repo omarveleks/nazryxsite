@@ -141,3 +141,31 @@ def test_tanzanian_labels():
     assert pricing.units_in("Vitamin C 1000mg 110 Tablets") == 110
     assert pricing.units_in("Artefan 40/240 tablets6s") == 6
     assert pricing.units_in("Azuma 500mg Azithromycin Antibiotic Tablets - 1 Strip of 3 Tablets") == 3
+
+
+def test_liki_pharmacy_prices():
+    card = '<div class="drugstore-card__product-price">{} <small>сум</small></div>'
+    page = ("<h1>Амлодипин Озон таблетки по 5 мг №30: цена в Ташкенте</h1>"
+            + "".join(card.format(p) for p in ("6 200", "6 200", "9 000", "15 000")))
+    assert pricing.liki_prices(page) == ("Амлодипин Озон таблетки по 5 мг №30", [6200.0, 6200.0, 9000.0, 15000.0])
+
+
+def test_shops_that_mix_tablet_and_pack_prices():
+    def o(c, price, units, mixed=False):
+        return dict(c=c, m="montelukast", unit="tablet or capsule", strength="10 mg", units=units, price=price, usd_rate=1.0,
+                    kind="retail", mixed=mixed)
+    others = [o("A", 60.0, 1), o("B", 66.0, 1), o("C", 54.0, 1)]                # about 60 a tablet elsewhere
+    kept = {x["price"]: x for x in pricing.sanity(others + [o("K", 72.0, 14, True), o("K", 860.0, 14, True),
+                                                             o("K", 150.0, 3, True), o("K", 9.0, 14, True)])}
+    assert kept[72.0]["units"] == 1            # 72 for a 14-pack: one tablet's price
+    assert kept[860.0]["units"] == 14          # 860 for a 14-pack: the pack's
+    assert 150.0 not in kept                   # 150 for 3: 50 a tablet or 150 a tablet, both near 60: left out
+    assert 9.0 not in kept                     # fits neither
+
+
+def test_a_name_names_its_medicine_before_its_description():
+    n = pricing.Names.__new__(pricing.Names)
+    n.inn = type("I", (), {"find": staticmethod(lambda *t: sorted({w for x in t for w in (1, 2) if ("albendazole", "mebendazole")[w - 1] in (x or "").lower()}))})()
+    n.fam, n.combos, n.brand = {1: "albendazol", 2: "mebendazol"}, {}, {}
+    assert n.find("Albendazole 400mg Tablets", "Treats worms, like mebendazole") == 1
+    assert n.find("Zentel 400mg", "Contains albendazole") == 1

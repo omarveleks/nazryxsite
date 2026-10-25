@@ -518,7 +518,18 @@ def prices_UZ(cur, s):
     return n
 
 
-PRICES = {"UZ": prices_UZ, "KZ": pricing.prices_KZ, "KE": pricing.prices_KE, "TZ": pricing.prices_TZ,
+def prices_UZ_all(cur, s):
+    """The official list every three days; the pharmacy shelf (read a few hundred products a run) every run."""
+    n = 0
+    if not cur.execute("""select 1 from source_items where source = 'prices_UZ' and ref = '*referent'
+                          and checked_at > now() - interval '72 hours'""").fetchone():
+        n = prices_UZ(cur, s)
+        cur.execute("""insert into source_items (source, ref, checked_at) values ('prices_UZ', '*referent', now())
+                       on conflict (source, ref) do update set checked_at = now()""")
+    return n + pricing.shelf(cur, "liki", lambda: pricing.liki(cur, s))
+
+
+PRICES = {"UZ": prices_UZ_all, "KZ": pricing.prices_KZ, "KE": pricing.prices_KE, "TZ": pricing.prices_TZ,
           "KG": pricing.prices_KG, "INTL": pricing.prices_INTL, "NEAR": pricing.prices_NEAR,
           "SASIA": pricing.prices_SASIA, "NG": pricing.prices_NG}
 

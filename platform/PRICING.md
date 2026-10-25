@@ -9,15 +9,18 @@ The code is the authority: `ingest/pricing.py` (prices), `ingest/price_checks.py
 
 | Market | Its own prices | Neighbours (estimates borrow from these only) |
 |---|---|---|
-| Kazakhstan | NDDA maximum prices, Europharma pharmacy chain | Kyrgyzstan, Uzbekistan, Belarus, Armenia, Azerbaijan |
+| Kazakhstan | NDDA maximum prices, Europharma and Biosfera pharmacy chains | Kyrgyzstan, Uzbekistan, Belarus, Armenia, Azerbaijan |
 | Kyrgyzstan | bimed.kg pharmacy catalogue, DLSMI maximum prices | Kazakhstan, Uzbekistan, Belarus, Armenia, Azerbaijan |
-| Uzbekistan | official reference and maximum prices | Kazakhstan, Kyrgyzstan, Belarus, Armenia, Azerbaijan |
-| Kenya | PPRA price survey, MyDawa pharmacy | Tanzania, Nigeria, Pakistan, India, Bangladesh |
-| Tanzania | AfyaDepot pharmacy | Kenya, Nigeria, Pakistan, India, Bangladesh |
+| Uzbekistan | liki.uz (each product's price in every Tashkent pharmacy stocking it), official reference and maximum prices | Kazakhstan, Kyrgyzstan, Belarus, Armenia, Azerbaijan |
+| Kenya | PPRA price survey, MyDawa, Pharmaplus and Goodlife pharmacies | Tanzania, Nigeria, Pakistan, India, Bangladesh |
+| Tanzania | AfyaDepot and DawaZetu pharmacies | Kenya, Nigeria, Pakistan, India, Bangladesh |
 | Nigeria | seven pharmacies (Bonamour, Asset, Mariam Grey, drugstore.ng, HealthPlus, Precious, MedPlus) | Ghana, Kenya, Tanzania, Pakistan, India, Bangladesh |
 
 South Asia (MedEx Bangladesh, 1mg India, dawaai Pakistan) is where East Africa's generics are made, so its prices
 carry over to Kenya, Tanzania and Nigeria. Central Asia never borrows from Africa or South Asia, nor the reverse.
+
+Shops are read as their robots.txt allows (crawl delays kept); sites that block automated readers (i-teka.kz,
+osonapteka.uz, neman.kg) or show only the lowest price (arzonapteka.uz) are not used. Out-of-stock prices are left out.
 Europe (UK Drug Tariff, France BDPM) is read but never priced into a market: originator prices say nothing about
 an emerging market's shelf.
 
@@ -34,7 +37,9 @@ an emerging market's shelf.
 4. **Sanity.** Each price is checked against the same medicine, form and strength in other countries after allowing
    for each country's price level. A tablet or vial pack priced over 8x too low, whose price would be right for one
    unit, is read as one unit (a cheap generic pack is often really that cheap, and a bottle is never one ml); anything
-   still over 8x off is dropped.
+   still over 8x off is dropped. Kenya's shops price some packs per tablet and others per pack with nothing in the
+   label to say which ('Montiget 4mg 14S' at one tablet's price, 'Montiget 5mg 14S' at the pack's): their packs are
+   kept only when exactly one reading lands within 3x of what other countries say.
 5. **One voice per brand.** A market's price is the median over its products, each brand once at its median across
    shops, so a brand stocked by every shop does not outvote the rest. An ingredient-named listing ('Ceftriaxone 1g',
    'Цефтриаксона натриевая соль') is the generic; one that names a brand further on is that brand.

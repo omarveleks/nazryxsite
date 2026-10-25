@@ -58,6 +58,9 @@ FORM_TYPES = (("injection", None), ("eye", r"\beye|ophth|occul|ocul|глаз"), 
               ("inhaled", r"inhal|nebul|aerosol|ингал|аэроз"), ("topical", r"cream|ointment|\bgel\b|lotion|крем|мазь|гель|линимент"),
               ("oral liquid", r"syrup|suspension|elixir|oral (?:solution|drops)|сироп|сусп"))
 MIN_TYPE = 10             # medicines of one type priced in both countries before their price gap is measured from data
+# shops that price some packs per tablet and others per pack, with nothing in the label to tell which ('Montiget 4mg 14S'
+# at one tablet's price, 'Montiget 5mg 14S' at the pack's): a pack is kept only when one reading clearly fits (sanity)
+MIXED_BASIS = {"mydawa", "pharmaplus", "goodlife"}
 SANE = 8                  # a price this many times off the expected level (after each country's level) is a data error
 BY_PRODUCT = True         # a market's price: each product (brand) one voice, at its median across shops; see product_key
 
@@ -239,17 +242,17 @@ def ingredients(name, singles):
 
 
 def observations(cur):
-    """(country, molecule, kind, text, units, pack price, currency, brand) from every source. brand: True for an originator
-    or international brand, False for a generic, None when the source does not say (worked out in rebuild)."""
-    rows = cur.execute("""select country, molecule_id, kind, coalesce(pack, name), units, pack_price, currency, originator
+    """(country, molecule, kind, text, units, pack price, currency, brand, source) from every source. brand: True for an
+    originator or international brand, False for a generic, None when the source does not say (worked out in rebuild)."""
+    rows = cur.execute("""select country, molecule_id, kind, coalesce(pack, name), units, pack_price, currency, originator, source
                           from price_listings where molecule_id is not null and pack_price > 0""").fetchall()
     for c, m, text, price, ccy in cur.execute("""select country, molecule_id, coalesce(pack, name), max_retail, currency
                                                   from reference_prices where molecule_id is not null and max_retail > 0"""):
-        rows.append((c, m, "cap", text, units_in(text), price, ccy, None))
+        rows.append((c, m, "cap", text, units_in(text), price, ccy, None, "reference"))
     for c, m, title, price, ccy in cur.execute("""select country, molecule_ids[1], coalesce(title_en, title), unit_price, currency
                                                    from tenders where cardinality(molecule_ids) = 1 and unit_price > 0
                                                    and coalesce(awarded, closing, published) > current_date - 730"""):
-        rows.append((c, m, "tender", title, 1, price, ccy, False))        # tenders buy generics
+        rows.append((c, m, "tender", title, 1, price, ccy, False, "tender"))        # tenders buy generics
     return rows
 
 
@@ -301,9 +304,18 @@ def sanity(obs):
         k = (o["m"], o["unit"], o["strength"])
         r = ref(k, o["c"])
         if r is None:
-            kept.append(o)
+            if not (o.get("mixed") and o["units"] > 1):         # a mixed shop's pack with nothing to tell its basis: left out
+                kept.append(o)
             continue
         expect = r * level.get(o["c"], 1.0)
+        if o.get("mixed") and o["unit"] in ("tablet or capsule", "ampoule or vial") and o["units"] > 1:
+            # a shop that prices some packs per tablet and others per pack: kept only when exactly one reading fits
+            per_tablet = o["price"] / o["usd_rate"]
+            fits = [u for u, v in ((o["units"], o["usd"]), (1, per_tablet)) if expect / 3 <= v <= expect * 3]
+            if len(fits) == 1:
+                o["units"], o["usd"] = fits[0], o["price"] / fits[0] / o["usd_rate"]
+                kept.append(o)
+            continue
         # the shop lists the price of one tablet under a pack label: only when the pack reading is far off and the
         # one-tablet reading lands near the expected price (a cheap generic 100-pack is often genuinely cheap)
         if o["kind"] == "retail" and o["unit"] in ("tablet or capsule", "ampoule or vial") and o["units"] > 1 and o["usd"] < expect / SANE:
@@ -344,9 +356,9 @@ def rebuild(cur):
     inn_words = {w for (inn,) in cur.execute("select inn from molecules where inn is not null") for w in re.findall(r"[a-z]{4,}", inn.lower())}
     from country_load import load_ru
     inn_words |= {w for ru in load_ru() for w in re.findall(r"[а-яё]{4,}", ru)}
-    brand_words = {w.group(0) for (*_, text, _u, _p, _c, b) in obs_all if b and (w := re.match(r"[a-z][a-z\-]{3,}", (text or "").lower()))
+    brand_words = {w.group(0) for (*_, text, _u, _p, _c, b, _s) in obs_all if b and (w := re.match(r"[a-z][a-z\-]{3,}", (text or "").lower()))
                    and w.group(0) not in inn_words}
-    for c, m, kind, text, units, price, ccy, brand in obs_all:
+    for c, m, kind, text, units, price, ccy, brand, source in obs_all:
         if c not in sources or ccy not in fx:
             continue
         text = BOX.sub(" ", text or "")
@@ -366,7 +378,7 @@ def rebuild(cur):
             st = None
         raw.append(dict(c=c, m=fam.get(m, m), kind=kind, unit=unit, strength=st, units=float(units), brand=brand, text=text,
                         product=product_key(text, inn_words, len(raw)),
-                        price=float(price), usd_rate=float(fx[ccy]), volume=volume, countable=bool(COUNTED.search(text or "")
+                        price=float(price), usd_rate=float(fx[ccy]), volume=volume, mixed=source in MIXED_BASIS, countable=bool(COUNTED.search(text or "")
                                                                                              and not NOT_COUNTED.search(text or ""))))
     # 'ЦЕФТРИАКСОН 1г №1' names no form: a counted item takes the form the medicine usually comes in (a vial here)
     forms = {}
@@ -754,11 +766,13 @@ class Names:
                 self.brand[w] = top
 
     def find(self, name, extra=""):
-        mols = self.inn.find(name, extra)
-        if len(mols) == 1:
-            return mols[0]
-        if mols:                                       # several ingredients: the combination of exactly those, if we know it
-            return self.combos.get("+".join(sorted({self.fam.get(m, "") for m in mols})))
+        # the name first; a description (often naming other medicines: 'unlike mebendazole') only when the name names none
+        for text in (name, extra):
+            mols = self.inn.find(text)
+            if len(mols) == 1:
+                return mols[0]
+            if mols:                                   # several ingredients: the combination of exactly those, if we know it
+                return self.combos.get("+".join(sorted({self.fam.get(m, "") for m in mols})))
         w = re.match(r"[a-zа-яё][a-zа-яё\-]{3,}", (name or "").strip().lower())
         return self.brand.get(w.group(0)) if w else None
 
@@ -776,7 +790,8 @@ def due_items(cur, source, per_run, list_items, every_days=7):
                                          order by checked_at nulls first limit %s""", (source, every_days, per_run)).fetchall()]
 
 
-ITEM_SOURCES = {"KZ": ("prices_KZ", "prices_KZ_ep"), "TZ": ("prices_TZ",), "KE": ("prices_KE_shop",), "INTL": ("prices_INTL_pk", "prices_INTL_by"),
+ITEM_SOURCES = {"KZ": ("prices_KZ", "prices_KZ_ep", "prices_KZ_bio"), "TZ": ("prices_TZ", "prices_TZ_dz"),
+                "KE": ("prices_KE_shop", "prices_KE_pp", "prices_KE_gl"), "UZ": ("prices_UZ_liki",), "INTL": ("prices_INTL_pk", "prices_INTL_by"),
                 "SASIA": ("prices_BD", "prices_IN", "prices_PK_shop"), "NG": ("prices_NG",)}
 
 
@@ -842,12 +857,13 @@ def prices_KZ(cur, s):
             n += 1
         checked(cur, "prices_KZ", rid)
         time.sleep(0.5)
-    return n + europharma(cur, s)
+    return n + europharma(cur, s) + shelf(cur, "biosfera", lambda: ld_shop(cur, s, "biosfera", Names(cur, "KZ")))
 
 
 def sitemap_urls(s, url, keep):
     """Page URLs from a sitemap, following one level of sitemap indexes."""
-    xml = s.get(url, timeout=120).text
+    r = s.get(url, timeout=120)
+    xml = __import__("gzip").decompress(r.content).decode("utf-8", "replace") if url.endswith(".gz") else r.text
     locs = re.findall(r"<loc>\s*([^<\s]+)\s*</loc>", xml)
     if "<sitemapindex" in xml:
         return [u for sm in locs if "product" in sm for u in sitemap_urls(s, sm, keep)]
@@ -931,8 +947,8 @@ def prices_KG(cur, s):
     return n
 
 
-# Kenya: the procurement regulator's quarterly market price survey (national average of five towns). A pharmacy chain's
-# feed was tried and left out: its prices mix per tablet, per strip and per box with nothing to tell them apart.
+# Kenya: the procurement regulator's quarterly market price survey (national average of five towns), and pharmacy shops.
+# The shops mix per-tablet and per-pack prices with nothing in the label to tell them apart: MIXED_BASIS in sanity.
 PPRA = "https://ppra.go.ke/market-price-index/"
 MONTHS = {m: i for i, m in enumerate(["january", "february", "march", "april", "may", "june", "july", "august", "september",
                                       "october", "november", "december"], 1)}
@@ -982,7 +998,8 @@ def prices_KE(cur, s):
                 n += 1
             cur.execute("""insert into source_items (source, ref, checked_at, state) values ('prices_KE', 'ppra', now(), %s)
                            on conflict (source, ref) do update set checked_at = now(), state = excluded.state""", (url,))
-    return n + mydawa(cur, s, names)
+    return (n + mydawa(cur, s, names) + shelf(cur, "pharmaplus", lambda: ld_shop(cur, s, "pharmaplus", names))
+            + shelf(cur, "goodlife", lambda: goodlife(cur, s, names)))
 
 
 # Kenya: an online pharmacy's product pages (schema.org prices; robots.txt allows product pages), every product kept
@@ -1058,7 +1075,7 @@ def prices_TZ(cur, s):
                 n += 1
         checked(cur, "prices_TZ", url)
         time.sleep(1)
-    return n
+    return n + shelf(cur, "dawazetu", lambda: ld_shop(cur, s, "dawazetu", names))
 
 
 # Abroad (third tier): official price lists of an exporting country and two reference countries, read in bulk.
@@ -1505,6 +1522,121 @@ def prices_NG(cur, s):
                 n += 1
         checked(cur, "prices_NG", ref)
         time.sleep(NG_DELAY.get(src, 1))
+    return n
+
+
+# More pharmacy shelves in our markets, each read a few hundred pages a run as its robots.txt allows (crawl delays kept),
+# every product kept and matched to a medicine where we can. Out of stock: left out (its price is often months old).
+# (country, source key, sitemap, product URL test, seconds between pages, pages a run)
+LD_SHOPS = {
+    "pharmaplus": ("KE", "prices_KE_pp", "https://shop.pharmaplus.co.ke/sitemaps/products/sitemap.xml", "/products/", 10, 60),
+    "biosfera": ("KZ", "prices_KZ_bio", "https://biosfera.kz/sitemap-products.xml", "/ru/product/", 1, 300),
+    "dawazetu": ("TZ", "prices_TZ_dz", "https://dawazetu.com/sitemap.xml", "/product/", 2, 250),
+}
+GOODLIFE = "https://www.goodlife.co.ke"        # WooCommerce; robots.txt asks for 30 seconds between requests
+GL_PER_RUN = 10                                # catalogue pages of 100 a run (five minutes)
+LIKI = "https://liki.uz"                       # each product's prices in every Tashkent pharmacy that stocks it
+LIKI_CITY = "/pharmacy/tashkent_r1713"
+LIKI_PER_RUN = 300
+
+
+def in_stock(offer):
+    return "OutOfStock" not in str((offer or {}).get("availability") or "") if isinstance(offer, dict) else True
+
+
+def shelf(cur, name, fn):
+    """One more shop for a market: a site that fails is logged and left for next run, never losing the market's other
+    sources read in the same run."""
+    cur.execute("savepoint shelf")
+    try:
+        n = fn()
+        cur.execute("release savepoint shelf")
+        return n
+    except Exception:
+        cur.execute("rollback to savepoint shelf")
+        log.exception("%s: not read this run", name)
+        return 0
+
+
+def ld_shop(cur, s, key, names):
+    """A pharmacy whose product pages state their price in schema.org markup (LD_SHOPS)."""
+    import time
+    c, source, smap, path, delay, per_run = LD_SHOPS[key]
+    first = portfolio_first(cur)
+    due = due_items(cur, source, 100000, lambda: sitemap_urls(s, smap, lambda u: path in u))
+    n = 0
+    for url in sorted(due, key=first)[:per_run]:
+        r = page(s, url, timeout=60)
+        if r is None:
+            continue
+        for x in ld_products(r.text if r.ok else ""):
+            offer = x.get("offers") or {}
+            price = num(offer.get("price")) if isinstance(offer, dict) else None
+            if price and in_stock(offer):
+                save_listing(cur, c, key, "retail", url, x.get("name"), x.get("name"), names.find(x.get("name") or "", x.get("description") or ""),
+                             None, price, offer.get("priceCurrency") or CURRENCY[c], description=(x.get("description") or "")[:300])
+                n += 1
+        checked(cur, source, url)
+        time.sleep(delay)
+    return n
+
+
+def goodlife(cur, s, names):
+    """Kenya's largest pharmacy chain, its whole catalogue a hundred products a page (WooCommerce store API)."""
+    import html as htmllib
+    import time
+
+    def pages():
+        r = page(s, f"{GOODLIFE}/wp-json/wc/store/v1/products", params={"per_page": 100, "page": 1}, timeout=120)
+        return [str(p) for p in range(1, int(r.headers.get("X-WP-TotalPages") or 0) + 1)] if r is not None and r.ok else []
+
+    n = 0
+    for p in due_items(cur, "prices_KE_gl", GL_PER_RUN, pages):
+        r = page(s, f"{GOODLIFE}/wp-json/wc/store/v1/products", params={"per_page": 100, "page": p}, timeout=120)
+        if r is None:
+            continue
+        for x in r.json() if r.ok else []:
+            pr = x.get("prices") or {}
+            if x.get("is_in_stock") is False or not pr.get("price"):
+                continue
+            name = htmllib.unescape(x.get("name") or "").strip()
+            price = int(pr["price"]) / 10 ** int(pr.get("currency_minor_unit") or 0)
+            save_listing(cur, "KE", "goodlife", "retail", f"goodlife|{x.get('id')}", name, name, names.find(name), None, price, "KES")
+            n += 1
+        checked(cur, "prices_KE_gl", p)
+        time.sleep(30)
+    return n
+
+
+def liki_prices(text):
+    """(product name, [prices in UZS]) from a liki.uz product's pharmacy page: one price per pharmacy stocking it."""
+    title = re.search(r"<h1[^>]*>(.*?)</h1>", text, re.S)
+    name = re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", title.group(1))).strip() if title else ""
+    name = re.sub(r":\s*цена в .*$", "", name)                   # 'Амлодипин ... №30: цена в Ташкенте'
+
+    # one card per pharmacy, its price in 'drugstore-card__product-price' ('6 200 <small>сум</small>')
+    prices = [num(re.sub(r"\D", "", p)) for p in re.findall(r'drugstore-card__product-price">\s*([\d\s\u00a0]+?)\s*<small', text)]
+    return name, [p for p in prices if p]
+
+
+def liki(cur, s):
+    """Uzbekistan's shelf: each product's price in every Tashkent pharmacy listing it; the product's price is their median."""
+    import time
+    names, n = Names(cur, "UZ"), 0
+    first = portfolio_first(cur)
+    due = due_items(cur, "prices_UZ_liki", 100000,
+                    lambda: sitemap_urls(s, f"{LIKI}/sitemap.xml", lambda u: "/shop/" in u and "/uz/" not in u and re.search(r"-p\d+$", u)))
+    for url in sorted(due, key=first)[:LIKI_PER_RUN]:
+        r = page(s, url + LIKI_CITY, timeout=60)
+        if r is None:
+            continue
+        name, prices = liki_prices(r.text if r.ok else "")
+        if name and prices:
+            save_listing(cur, "UZ", "liki", "retail", url, name, name, names.find(name), None, statistics.median(prices), "UZS",
+                         description=f"{len(prices)} pharmacies in Tashkent")
+            n += 1
+        checked(cur, "prices_UZ_liki", url)
+        time.sleep(1.5)
     return n
 
 
