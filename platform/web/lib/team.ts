@@ -16,7 +16,7 @@ export type TeamPermission = 'requests' | 'manufacturers' | 'accounts' | 'claims
 /** Admin tabs and the permission each needs ('team' = owners only). */
 export const TAB_PERMISSION: Record<string, TeamPermission | 'team'> = {
   data: 'data', review: 'data', claims: 'claims', requests: 'requests', questions: 'questions', manufacturers: 'manufacturers',
-  documents: 'documents', regulatory: 'regulatory', calls: 'manufacturers', accounts: 'accounts', billing: 'accounts', content: 'content',
+  documents: 'documents', regulatory: 'regulatory', calls: 'manufacturers', accounts: 'accounts', usage: 'accounts', billing: 'accounts', content: 'content',
   activity: 'activity', team: 'team',
 };
 

@@ -14,6 +14,7 @@ import { StagePill } from '@/components/ui';
 import { deleteAccountDoc, deleteSupplierDoc, savePlanPrices, uploadAccountDoc, uploadSupplierDoc } from '@/app/actions/docs';
 import RegulatoryTab from './RegulatoryTab';
 import CallsTab from './CallsTab';
+import UsageTab from './UsageTab';
 import ChecksSection from './ChecksSection';
 import { ACCOUNT_DOC_KINDS, SUPPLIER_DOC_KINDS, daysLeft } from '@/lib/docs';
 
@@ -187,12 +188,12 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
   const n = (x: number) => (x ? ` (${x})` : '');
   const pages: Record<string, string> = {
     data: 'Sources and uploads', review: `Review queue${n(c.suggestions + c.dups)}`, manufacturers: `Manufacturers${n(c.mfr_open)}`,
-    accounts: `Accounts${n(c.plan_requests)}`, calls: 'Calls', billing: 'Invoices', documents: 'Documents', regulatory: 'Regulatory',
+    accounts: `Accounts${n(c.plan_requests)}`, usage: 'Usage', calls: 'Calls', billing: 'Invoices', documents: 'Documents', regulatory: 'Regulatory',
     content: 'Content and prices', team: 'Team', activity: 'Activity',
   };
   const areas = [
     { key: 'data', label: `Data${n(c.suggestions + c.dups)}`, pages: ['data', 'review'] },
-    { key: 'customers', label: `Customers${n(c.mfr_open + c.plan_requests)}`, pages: ['manufacturers', 'accounts', 'calls'] },
+    { key: 'customers', label: `Customers${n(c.mfr_open + c.plan_requests)}`, pages: ['manufacturers', 'accounts', 'usage', 'calls'] },
     { key: 'billing', label: 'Billing', pages: ['billing'] },
     { key: 'documents', label: `Documents${n(c.expiring)}`, pages: ['documents'] },
     { key: 'regulatory', label: 'Regulatory', pages: ['regulatory'] },
@@ -589,6 +590,7 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
       </>)}
       {tab === 'regulatory' && <RegulatoryTab userId={u.id} country={sp.rc} />}
       {tab === 'calls' && <CallsTab userId={u.id} />}
+      {tab === 'usage' && <UsageTab userId={u.id} />}
       {tab === 'none' && <section className="card"><p className="muted">Your account has no Admin areas yet. Ask an owner to give you access.</p></section>}
       {tab === 'team' && (<>
         <section className="card stack">

@@ -1,7 +1,7 @@
 import { teamCan, type TeamPermission } from './team';
 import 'server-only';
 import { cache } from 'react';
-import { cookies } from 'next/headers';
+import { cookies, headers } from 'next/headers';
 import { redirect, notFound } from 'next/navigation';
 import { createHash, randomBytes } from 'node:crypto';
 import { pool, withUser, one } from './db';
@@ -60,6 +60,9 @@ export const getUser = cache(async (): Promise<User | null> => {
   const r = await pool.query('select auth_session_user($1) as id', [sha(token)]);
   const id: string | null = r.rows[0]?.id ?? null;
   if (!id) return null;
+  // the page this request opens (Admin > Usage); never holds the page up or fails it
+  const path = (await headers()).get('x-nzx-path');
+  if (path) pool.query('select auth_record_view($1, $2)', [sha(token), path]).catch(() => {});
   const view = jar.get(VIEW_COOKIE)?.value;
   if (view) {
     // the team viewing a customer: their portal, read-only, while the team member's own session and permission last

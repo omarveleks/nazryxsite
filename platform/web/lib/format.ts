@@ -71,9 +71,10 @@ export function fmtDate(d: string | Date | null | undefined) {
 export function ago(d: string | Date | null | undefined) {
   if (!d) return 'never';
   const h = (Date.now() - new Date(d).getTime()) / 36e5;
-  if (h < 1) return `${Math.max(1, Math.round(h * 60))} minutes ago`;
-  if (h < 48) return `${Math.round(h)} hours ago`;
-  return `${Math.round(h / 24)} days ago`;
+  const n = (v: number, unit: string) => `${v} ${unit}${v === 1 ? '' : 's'} ago`;
+  if (h < 1) return n(Math.max(1, Math.round(h * 60)), 'minute');
+  if (h < 48) return n(Math.round(h), 'hour');
+  return n(Math.round(h / 24), 'day');
 }
 
 export const title = (s: string | null | undefined) =>

@@ -9,6 +9,7 @@ import { requireTeam } from '@/lib/auth';
 import { one, rows, withUser } from '@/lib/db';
 import { ACCOUNT_DOC_KINDS } from '@/lib/docs';
 import { fmtDate } from '@/lib/format';
+import UsageSection from './UsageSection';
 import { APPROACHES, GOALS, LAUNCH_SCOPES, MFR_COUNTRIES, MFR_FILE_KINDS, MFR_PLANS, NEEDS, PLAN_ORDER, SERVICES, TIMELINES, countryName, suggestPlan } from '@/lib/mfr';
 
 export const metadata = { title: 'Account' };
@@ -211,6 +212,7 @@ export default async function AdminAccount({ params, searchParams }: { params: P
             </section>)}
         </div>
       </div>
+      <UsageSection teamId={u.id} accountId={id} />
     </Shell>
   );
 }
