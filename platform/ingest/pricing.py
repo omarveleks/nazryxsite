@@ -1527,31 +1527,54 @@ def prices_NG(cur, s):
 
 # More pharmacy shelves in our markets, each read a few hundred pages a run as its robots.txt allows (crawl delays kept),
 # every product kept and matched to a medicine where we can. Out of stock: left out (its price is often months old).
-# (country, source key, sitemap, product URL test, seconds between pages, pages a run)
-# Until a shop's first pass is done, a run reads for SHOP_SECONDS (not a set number of pages) and the next run starts
-# straight away (catching_up); medicines first, then everything else.
+# (country, source key, sitemap, product URL test, seconds between pages, seconds a run, medicines only)
+# Until a shop's first pass is done, a run reads for its seconds (not a set number of pages) and the next run starts
+# straight away (catching_up); medicines first, then everything else. A shop with a long crawl delay reads only pages
+# whose address names a medicine (its cosmetics, baby food and diapers would take days at one page in ten seconds).
 LD_SHOPS = {
-    "pharmaplus": ("KE", "prices_KE_pp", "https://shop.pharmaplus.co.ke/sitemaps/products/sitemap.xml", "/products/", 10, 100000),
-    "biosfera": ("KZ", "prices_KZ_bio", "https://biosfera.kz/sitemap-products.xml", "/ru/product/", 0.5, 100000),
-    "dawazetu": ("TZ", "prices_TZ_dz", "https://dawazetu.com/sitemap.xml", "/product/", 2, 100000),
+    "pharmaplus": ("KE", "prices_KE_pp", "https://shop.pharmaplus.co.ke/sitemaps/products/sitemap.xml", "/products/", 10, 30 * 60, True),
+    "biosfera": ("KZ", "prices_KZ_bio", "https://biosfera.kz/sitemap-products.xml", "/ru/product/", 0.5, 15 * 60, False),
+    "dawazetu": ("TZ", "prices_TZ_dz", "https://dawazetu.com/sitemap.xml", "/product/", 2, 15 * 60, False),
 }
 SHOP_SECONDS = 15 * 60
 RU_LAT = dict(zip("абвгдеёжзийклмнопрстуфхцчшщъыьэюя", ["a", "b", "v", "g", "d", "e", "e", "zh", "z", "i", "y", "k", "l", "m", "n", "o", "p",
                                                        "r", "s", "t", "u", "f", "h", "ts", "ch", "sh", "sch", "", "y", "", "e", "yu", "ya"]))
 
 
-def medicine_first(cur, country):
-    """Sort key for a shop's product URLs: the portfolio first, then pages whose address names a medicine we track or a
-    brand registered in the region (in Latin letters, as shops write their addresses), then the rest (cosmetics, devices)."""
+FORM_IN_URL = re.compile(r"(?:^|-)(?:tabs?|tablets?|caps?|capsules?|caplets?|syrup|suspension|susp|inj|injections?|drops|cream|ointment|"
+                         r"oint|gel|inhaler|evohaler|sachets?|lozenges?|pastilles?|pessar(?:y|ies)|suppositor(?:y|ies)|solution|spray|"
+                         r"elixir|expectorant|linctus|vials?|ampoules?|amps?)(?:-|$|\d)|(?:^|-)\d+(?:-\d+)?(?:mg|mcg|iu|g)(?:-|$)")   # or a strength ('-500mg-')
+
+
+# words in product addresses that name no medicine: everyday words found in brand or ingredient names, and supplement
+# ingredients (a magnesium or vitamin product in a shop is a supplement far more often than a medicine)
+URL_STOP = {"advanc", "normal", "human", "natura", "natural", "power", "extra", "active", "herbal", "health", "beauty", "family",
+            "vitamin", "multivi", "calcium", "magnesi", "zinc", "omega", "collage", "biotin", "protein", "organic", "classic",
+            "sodium", "potassi", "glucose", "water", "baby", "kids", "women", "lotion", "cleans", "serum", "essence", "relief"}
+
+
+def medicine_urls(cur, country):
+    """(names, looks): whether a product address names a medicine we track or a brand registered in the region (in Latin
+    letters, as shops write their addresses), and whether it names one or a medicine's form ('-tablets-', '-eye-drops-')."""
     words = {k[:7] for (key,) in cur.execute("select canonical_key from molecules where canonical_key is not null")
              for k in key.split() if len(k) >= 6}
     for (brand,) in cur.execute("select distinct brand from registrations where country = any(%s) and brand is not null",
                                 ([country, *NEIGHBOURS[country]],)):
-        w = re.match(r"[a-zа-яё]{5,}", brand.strip().lower())
+        w = re.match(r"[a-zа-яё]{6,}", brand.strip().lower())
         if w:
             words.add("".join(RU_LAT.get(ch, ch) for ch in w.group(0))[:7])
+    words = {w for w in words if not any(w.startswith(s) or s.startswith(w) for s in URL_STOP)}
+    slug = lambda u: u.rstrip("/").rsplit("/", 1)[-1].lower()
+    names = lambda u: any(w[:7] in words for w in re.findall(r"[a-z]{5,}", slug(u)))
+    return names, lambda u: names(u) or bool(FORM_IN_URL.search(slug(u)))
+
+
+def medicine_first(cur, country):
+    """Sort key for a shop's product URLs: the portfolio first, then pages naming a medicine or a registered brand, then
+    pages naming a medicine's form, then the rest (cosmetics, devices)."""
+    names, looks = medicine_urls(cur, country)
     portfolio = portfolio_first(cur)
-    return lambda u: (portfolio(u), not any(w[:7] in words for w in re.findall(r"[a-z]{5,}", u.rsplit("/", 1)[-1].lower())))
+    return lambda u: (portfolio(u), not names(u), not looks(u))
 GOODLIFE = "https://www.goodlife.co.ke"        # WooCommerce; robots.txt asks for 30 seconds between requests
 
 LIKI = "https://liki.uz"                       # each product's prices in every Tashkent pharmacy that stocks it
@@ -1582,11 +1605,12 @@ def shelf(cur, name, fn):
 def ld_shop(cur, s, key, names):
     """A pharmacy whose product pages state their price in schema.org markup (LD_SHOPS)."""
     import time
-    c, source, smap, path, delay, per_run = LD_SHOPS[key]
+    c, source, smap, path, delay, seconds, medicines_only = LD_SHOPS[key]
     first = medicine_first(cur, c)
-    due = due_items(cur, source, 100000, lambda: sitemap_urls(s, smap, lambda u: path in u))
-    n, stop = 0, time.monotonic() + SHOP_SECONDS
-    for url in sorted(due, key=first)[:per_run]:
+    looks = medicine_urls(cur, c)[1] if medicines_only else (lambda u: True)
+    due = due_items(cur, source, 100000, lambda: sitemap_urls(s, smap, lambda u: path in u and looks(u)))
+    n, stop = 0, time.monotonic() + seconds
+    for url in sorted(due, key=first):
         if time.monotonic() > stop:
             break
         r = page(s, url, timeout=60)

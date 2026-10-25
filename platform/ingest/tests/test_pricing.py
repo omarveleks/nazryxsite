@@ -175,3 +175,10 @@ def test_a_name_names_its_medicine_before_its_description():
     n.fam, n.combos, n.brand = {1: "albendazol", 2: "mebendazol"}, {}, {}
     assert n.find("Albendazole 400mg Tablets", "Treats worms, like mebendazole") == 1
     assert n.find("Zentel 400mg", "Contains albendazole") == 1
+
+
+def test_shop_addresses_that_name_a_medicine_form():
+    looks = lambda s: bool(pricing.FORM_IN_URL.search(s))
+    assert looks("celestamine-tablets-30s") and looks("onazin-eye-drops-10ml") and looks("hydrea-500mg-100s")
+    assert looks("lunahist-expectorant-100ml")
+    assert not looks("pampers-pants-maxi-unisex-28-s") and not looks("bio-oil-skincare-oil-natural-125ml")
