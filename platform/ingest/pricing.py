@@ -35,12 +35,12 @@ STRENGTH = re.compile(r"(\d+(?:[.,]\d+)?)\s*(mg|mq|мг|mcg|мкг|µg|gm|g|г|m
 UNIT_EN = {"мг": "mg", "mq": "mg", "мкг": "mcg", "µg": "mcg", "г": "g", "gm": "g", "мл": "ml", "ме": "IU", "ед": "IU", "iu": "IU"}
 
 
-VOLUME = re.compile(r"(?<![/\d.,])(\d+(?:[.,]\d+)?)\s*(ml|мл|g|gm|г|гр)(?![a-zа-я/])", re.I)
+VOLUME = re.compile(r"(?<![/\d.,])(\d+(?:[.,]\d+)?)\s*(ml|mls|mils?|мл|g|gm|gms|г|гр)(?![a-zа-я/])", re.I)   # '100mils' (Tanzania)
 
 
 def volume_of(text):
     """The bottle or tube size: '5мл', '100 ml', '30 g'; not the '5 ml' of '250 mg/5 ml'. (amount, 'ml' or 'g')"""
-    hits = [(float(v.replace(",", ".")), "ml" if u.lower() in ("ml", "мл") else "g") for v, u in VOLUME.findall(text or "")]
+    hits = [(float(v.replace(",", ".")), "ml" if u.lower() in ("ml", "mls", "mil", "mils", "мл") else "g") for v, u in VOLUME.findall(text or "")]
     hits = [h for h in hits if h[0] > 0]
     return hits[-1] if hits else None
 
@@ -100,9 +100,11 @@ def units_in(text):
         return 1                                                                         # '1 Single Tablet'
     m = (re.search(r"(\d+)\s*x\s*(\d+)\s*(?:tab|cap|amp|vial|sachet|supp|блист|'?s\b)", t)     # 2 x 10 tabs, 10x10's
          or re.search(r"(?:pack|box|strip|bottle) of\s*(\d+)()", t)
+         or (re.search(r"\b(\d+)()\s*[',]?s\b", t) if re.search(r"\d\s*(?:tablets?|capsules?|caplets?)\b", t) else None)
          or re.search(r"(?<![\w/-])(\d+)()\s*(?:tablets?|tabs?|capsules?|caps?|sachets?|ampoules?|amps?|vials?|suppositories|"
                       r"pessaries|lozenges)\b", t)                                     # not 'Benza-200 Tablets'
          or re.search(r"\b(\d+)()\s*[',]?s\b", t)
+         or re.search(r"(?:tablets?|tabs|capsules?|caps)(\d+)()\s*'?s\b", t)                       # 'tablets10s'
          or re.search(r"(?:^|\s)x\s*(\d+)()\b(?!\s*(?:ml|g)\b)", t))                    # '5mg x28', 'x100'
     if m:
         return int(m.group(1)) * int(m.group(2) or 1)

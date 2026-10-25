@@ -132,3 +132,12 @@ def test_sanity_keeps_cheap_generic_packs_and_bottles():
            o("F", 3.0, 10, unit="ml", kind="retail")]         # a 10 ml bottle at 3: never one ml at 3
     kept = {x["c"]: x for x in pricing.sanity(obs)}
     assert kept["E"]["units"] == 10 and kept["F"]["units"] == 10
+
+
+def test_tanzanian_labels():
+    assert pricing.volume_of("Calpo Suspension -100mils") == (100.0, "ml")                 # 'mils' and 'mls' are ml
+    assert pricing.volume_of("Otrivin Adult Nasal Drops - 10mls") == (10.0, "ml")
+    assert pricing.units_in("Gofen 400 Capsules - 10's") == 10                             # the brand's 400 is no count
+    assert pricing.units_in("Vitamin C 1000mg 110 Tablets") == 110
+    assert pricing.units_in("Artefan 40/240 tablets6s") == 6
+    assert pricing.units_in("Azuma 500mg Azithromycin Antibiotic Tablets - 1 Strip of 3 Tablets") == 3

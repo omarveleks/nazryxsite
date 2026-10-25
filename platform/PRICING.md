@@ -111,17 +111,22 @@ are corrected where the hands-on check disagrees. The latest is below.
 ### Latest manual check
 
 October 2026. Basket: 31 medicines in every form (tablets, injections, eye and nasal drops, creams, inhalers,
-combinations), 1,339 shelf and official prices read by hand from all six markets and South Asia. Each market's own
+combinations), 1,414 shelf and official prices read by hand from all six markets and South Asia. Each market's own
 prices were hidden in turn and its prices estimated from its neighbours alone, then compared with its real ones,
 medicine by medicine.
 
 | Market | Medicines tested | Typical error before → after | Within 50% before → after | Bias before → after |
 |---|---|---|---|---|
-| Kenya | 21 | 47% → 48% | 52% → 52% | 0.72 → 0.72 |
-| Kyrgyzstan | 17 | 48% → 32% | 53% → 59% | 1.43 → 1.05 |
-| Kazakhstan | 18 | 62% → 71% | 39% → 44% | 0.63 → 0.93 |
-| Nigeria | 27 → 29 | 58% → 44% | 48% → 59% | 1.25 → 1.07 |
-| Uzbekistan | 21 | 80% → 62% | 29% → 38% | 1.73 → 1.23 |
+| Kenya | 21 | 47% → 57% | 52% → 48% | 0.72 → 0.69 |
+| Kyrgyzstan | 17 | 48% → 38% | 53% → 65% | 1.43 → 1.16 |
+| Kazakhstan | 18 | 62% → 65% | 39% → 44% | 0.63 → 0.93 |
+| Nigeria | 27 → 29 | 58% → 41% | 48% → 52% | 1.25 → 1.06 |
+| Tanzania | 13 | not tested before → 43% | → 54% | → 1.05 |
+| Uzbekistan | 21 | 80% → 62% | 29% → 33% | 1.73 → 1.17 |
+
+The check after every rebuild (Admin, 'Accuracy': only the medicine's own shelf hidden, gaps measured) on the same
+data: Nigeria 0.48 → 0.35, Kazakhstan 0.81 → 0.44, Uzbekistan 0.65 → 0.53, Kyrgyzstan 0.80 → 0.57, Tanzania 0.43,
+Kenya 0.59 → 0.67 (typical error; Kenya's is the brand mix below).
 
 Bias is the estimate over the real price (1.0 is right on the whole). This is the hardest test: with a market's own
 prices hidden, its measured gaps go too. On the pages a market's few own shelf prices count double, and gaps are
@@ -145,6 +150,12 @@ What was wrong, and what changed:
 - **Prices changed between runs on the same data.** Tied votes for the form and strength went by the order of a set,
   which changes with each process (Kyrgyzstan's ondansetron came out at 20 or 68 KGS). Ties now go the same way.
 - **Inflected names** ('Цефтриаксона натриевая соль') were counted as a brand of their own.
+- **Tanzanian labels.** '100mils' and '10mls' were not read as a size, so 13% of the Tanzanian pharmacy's products
+  (syrups, drops, suspensions) had no price per ml and were never shown; 'Gofen 400 Capsules - 10's' was read as 400
+  capsules (a price 40x too low); 'tablets10s' was not read as 10.
+- **Tanzania had no shelf check.** It has one now (75 prices, 25 medicines). Its cheap chronic-disease generics
+  (amlodipine, metformin, losartan at TZS 10-130 a tablet) are far below Kenya's: estimates from its neighbours run
+  high for them and right for antibiotics, injections and creams.
 
 What is right and stays: most remaining misses are real. Kenya's shelf for cetirizine, ibuprofen and diclofenac is
 mostly originator brands at 5-10x the generics South Asia sells, so estimates from South Asia run low (bias 0.72);
