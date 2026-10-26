@@ -191,6 +191,13 @@ export const tierIn = (u: { role: string; mfr_active: string | null; mfr_tier: n
   covers(u, market) ? u.mfr_tier : 0;
 /** Annual billing: ten months for twelve. */
 export const yearly = (monthly: number) => monthly * 10;
+
+/** Markets each card plan includes, and the default monthly price of each market beyond them (Admin > Content sets it). */
+export const PLAN_MARKETS: Record<string, number> = { data: 1, access: 4 };
+export const EXTRA_MARKET: Record<string, number> = { data: 299, access: 499 };
+/** The markets a plan includes that an account has taken: its paid markets that are not extra-market subscriptions. */
+export const INCLUDED_TAKEN_SQL = `select cardinality(array(select unnest(paid_markets) except select country from market_subscriptions
+  where user_id = $1 and active))::int as n from manufacturer_profiles where user_id = $1`;
 export const canUse = (tier: number, feature: string) => !NEEDS_PLAN[feature] || tier >= TIER[NEEDS_PLAN[feature]];
 
 /** WHO ATC main groups, to name a class for products we cannot match to a tracked molecule. */

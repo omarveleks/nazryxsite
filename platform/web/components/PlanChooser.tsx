@@ -1,7 +1,7 @@
 import { choosePlan, openBillingPortal, startCheckout } from '@/app/actions/mfr';
 import { stripeReady } from '@/lib/stripe';
 import Link from 'next/link';
-import { MFR_COUNTRIES, MFR_PLANS, PLAN_ORDER, countryName, suggestPlan, yearly, type PlanKey } from '@/lib/mfr';
+import { EXTRA_MARKET, MFR_COUNTRIES, MFR_PLANS, PLAN_MARKETS, PLAN_ORDER, countryName, suggestPlan, yearly, type PlanKey } from '@/lib/mfr';
 
 export type PlanPrices = Record<string, { amount: number | null; note: string | null }>;
 export async function loadPlanPrices(db: any): Promise<PlanPrices> {
@@ -30,7 +30,10 @@ export default function PlanChooser({ p, prices, products, from, want, interval 
   const year = interval === 'year';
   const targets: string[] = (p.target_countries ?? []).filter((c: string) => MFR_COUNTRIES.some((x) => x.code === c));
   const included = pick && targets.includes(pick) ? pick : p.primary_market && targets.includes(p.primary_market) ? p.primary_market : targets[0] ?? 'TZ';
-  const extra = Number(prices.mfr_market?.amount ?? 49);
+  const extraFor = (k: string) => Number(prices[`mfr_market_${k}`]?.amount ?? EXTRA_MARKET[k] ?? 499);
+  // the markets a plan includes: the one picked first, then the others they chose, up to the plan's number
+  const includedFor = (k: string) => [included, ...targets.filter((c) => c !== included)].slice(0, PLAN_MARKETS[k] ?? 1);
+  const money = (monthly: number, y: boolean) => `$${(y ? yearly(monthly) : monthly).toLocaleString('en')} ${y ? 'a year' : 'a month'}`;
   const base = from === 'onboarding' ? '/m/onboarding?q=plan' : `/m/plan?${want ? `want=${want}&` : ''}`;
   const link = (o: { billing?: string; market?: string }) =>
     `${base}${base.endsWith('?') || base.endsWith('&') ? '' : '&'}billing=${o.billing ?? interval}&market=${o.market ?? included}`;
@@ -64,7 +67,9 @@ export default function PlanChooser({ p, prices, products, from, want, interval 
                 {targets.filter((c) => !paidMarkets.includes(c)).map((c) => (
                   <Link key={c} className="pill" href={`/m/add-market?market=${c}`}>+ Add {countryName(c)}</Link>))}
               </div>
-              <span className="note">Each extra market ${p.billing_interval === 'year' ? `${yearly(extra).toLocaleString('en')} a year` : `${extra} a month`}.</span>
+              <span className="note">{PLAN_MARKETS[active] && paidMarkets.length < PLAN_MARKETS[active]
+                ? `Your plan includes ${PLAN_MARKETS[active]} markets: add ${PLAN_MARKETS[active] - paidMarkets.length} more at no extra cost. Beyond that, each extra market `
+                : 'Each extra market '}{money(extraFor(active), p.billing_interval === 'year')}.</span>
             </div>)}
         </section>
       ) : (
@@ -81,7 +86,7 @@ export default function PlanChooser({ p, prices, products, from, want, interval 
           <Link className={`pill ${year ? 'solid' : ''}`} href={link({ billing: 'year' })}>Yearly · two months free</Link>
         </div>
         {targets.length > 1 && !p.active_plan && (
-          <div className="row" style={{ gap: 6 }} aria-label="Market included"><span className="lbl">Market included</span>
+          <div className="row" style={{ gap: 6 }} aria-label="Market included"><span className="lbl">{targets.length > 1 ? 'First market' : 'Market included'}</span>
             {targets.map((c) => <Link key={c} className={`pill ${c === included ? 'solid' : ''}`} href={link({ market: c })}>{countryName(c)}</Link>)}</div>)}
       </div>
       <div className="grid g3" data-tour="plans">
@@ -93,11 +98,14 @@ export default function PlanChooser({ p, prices, products, from, want, interval 
             <form key={k} action={byCard ? startCheckout : choosePlan} className="card stack" style={on ? { borderColor: 'var(--blue)', borderWidth: 2 } : undefined}>
               <input type="hidden" name="plan" value={k} /><input type="hidden" name="from" value={from} />
               <input type="hidden" name="interval" value={interval} /><input type="hidden" name="market" value={included} />
+              {k !== 'entry' && <input type="hidden" name="markets" value={includedFor(k).join(',')} />}
               <div className="between" style={{ alignItems: 'flex-start' }}><h2>{pl.name}</h2>
                 {isActive ? <span className="pill solid">Your plan</span> : asked ? <span className="pill blue">Requested</span>
                   : on ? <span className="pill blue">{want ? 'Unlocks it' : 'Suggested'}</span> : null}</div>
               <div>{amount ? <><b className="num" style={{ fontSize: 26 }}>{amount}</b><span className="muted"> / {year ? 'year' : 'month'}</span>
-                  <div className="sub2">{countryName(included)} included · each extra market ${year ? yearly(extra).toLocaleString('en') : extra} {per}</div></>
+                  <div className="sub2">{(PLAN_MARKETS[k] ?? 1) === 1 ? `${countryName(included)} included`
+                    : `${PLAN_MARKETS[k]} markets included${includedFor(k).length ? ` (${includedFor(k).map(countryName).join(', ')}${includedFor(k).length < PLAN_MARKETS[k] ? ', more any time' : ''})` : ''}`}
+                    {' '}· each extra market {money(extraFor(k), year)}</div></>
                 : <><b style={{ fontSize: 20 }}>Get in touch</b><div className="sub2">Every market you choose</div></>}{pr?.note && <div className="sub2">{pr.note}</div>}</div>
               <p className="muted">{pl.for}</p>
               <ul className="small" style={{ margin: 0, paddingLeft: 18 }}>{pl.includes.map((i) => <li key={i}>{i}</li>)}</ul>
@@ -122,8 +130,9 @@ export default function PlanChooser({ p, prices, products, from, want, interval 
 
       <div className="grid g3">
         <section className="card stack"><span className="lbl">Basic and Access</span><h2>Subscribe by card</h2>
-          <p className="muted">Monthly, or yearly with two months free. One market included, more at ${extra} a month each. Cancel any time
-            from this page; everything opens as soon as the payment goes through.</p></section>
+          <p className="muted">Monthly, or yearly with two months free. {MFR_PLANS.data.name}: one market included, more at ${extraFor('data')} a month
+            each. {MFR_PLANS.access.name}: four markets included, more at ${extraFor('access')} a month each. Cancel any time from this page;
+            everything opens as soon as the payment goes through.</p></section>
         <section className="card stack"><span className="lbl">Market Entry</span><h2>We talk first</h2>
           <p className="muted">Our team scopes your markets and products with you and sends a proposal within one working day.</p></section>
         <section className="card stack"><span className="lbl">Paperwork</span><h2>Done for you</h2>

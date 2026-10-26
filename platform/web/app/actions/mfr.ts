@@ -9,7 +9,8 @@ import { dbMessage, one, withUser } from '@/lib/db';
 import { back, int, str } from '@/lib/forms';
 import { findMolecule } from '@/lib/match';
 import { AGENCY_KINDS, APPROACHES, GOALS, LAUNCH_SCOPES, CERTIFICATIONS, COMPANY_SIZES, CONTACT_ROLES, DOSAGE_FORMS, MFR_COUNTRIES, MFR_PLANS, NEEDS,
-  SERVICES, THERAPEUTIC_AREAS, TIMELINES, NEEDS_PLAN, LAUNCH_STAGES, MFR_FILE_KINDS, WIZARD, type WizardStep, canUse, countryName, covers, suggestPlan, tierOf, yearly, type PlanKey } from '@/lib/mfr';
+  SERVICES, THERAPEUTIC_AREAS, TIMELINES, NEEDS_PLAN, LAUNCH_STAGES, MFR_FILE_KINDS, WIZARD, type WizardStep, canUse, countryName, covers, suggestPlan, tierOf, yearly, type PlanKey,
+  EXTRA_MARKET, INCLUDED_TAKEN_SQL, PLAN_MARKETS } from '@/lib/mfr';
 import { DOSSIER_ITEMS } from '@/lib/format';
 import { saveUpload } from '@/lib/uploads';
 import { TOUR } from '@/lib/tour';
@@ -233,14 +234,17 @@ export async function startCheckout(f: FormData) {
     p: await one(db, 'select stripe_customer, primary_market, target_countries from manufacturer_profiles where user_id = $1', [u.id]),
   }));
   if (!d.price?.amount_usd) return choosePlan(f);
-  // the plan includes one market: the one chosen on the plan page, else the market they work on now
+  // the markets the plan includes (one for Basic, four for Access): the one chosen on the plan page first, else the
+  // market they work on now, then the others they chose
   const chosen = str(f, 'market', 2);
   const targets: string[] = d.p?.target_countries ?? [];
   const market = targets.includes(chosen) ? chosen : d.p?.primary_market && targets.includes(d.p.primary_market) ? d.p.primary_market : targets[0] ?? 'TZ';
+  const asked = str(f, 'markets', 40).split(',').filter((c) => targets.includes(c));
+  const markets = [...new Set([market, ...asked, ...targets])].slice(0, PLAN_MARKETS[plan] ?? 1);
   let url = '';
   try {
-    url = await checkoutUrl({ userId: u.id, email: u.email, plan, planName: `${MFR_PLANS[plan].name} (${countryName(market)})`,
-      amountUsd: interval === 'year' ? yearly(d.price.amount_usd) : d.price.amount_usd, interval, markets: [market],
+    url = await checkoutUrl({ userId: u.id, email: u.email, plan, planName: `${MFR_PLANS[plan].name} (${markets.map(countryName).join(', ')})`,
+      amountUsd: interval === 'year' ? yearly(d.price.amount_usd) : d.price.amount_usd, interval, markets,
       origin: await origin(), customer: d.p?.stripe_customer });
   } catch (e) {
     back('/m/plan', { error: `Card payment could not start: ${(e as Error).message}. Try again, or ask us to invoice you.` });
@@ -569,8 +573,9 @@ export async function unwatchMolecule(f: FormData) {
   back(to, { saved: '1' });
 }
 
-/** Add a market to the plan, from the market switch. By card: a small subscription for that market, at the plan's billing
- *  interval ($49 a month, or ten months a year). Invoiced plans: a request the team turns on. */
+/** Add a market to the plan, from the market switch. Within the markets the plan includes (Access: four), at no charge.
+ *  Beyond them, by card: a small subscription for that market at the plan's billing interval (the plan's extra-market
+ *  price a month, or ten months a year). Invoiced plans: a request the team turns on. */
 export async function addMarket(f: FormData) {
   const u = await requireUser({ manufacturer: true });
   const market = str(f, 'market', 2);
@@ -579,10 +584,15 @@ export async function addMarket(f: FormData) {
   if (!u.mfr_active) redirect(`/m/plan?want=data&market=${market}`);
   if (covers(u, market)) redirect(to);
   const d = await withUser(u.id, async (db) => ({
-    price: await one(db, "select amount_usd from plan_prices where key = 'mfr_market'"),
+    price: await one(db, 'select amount_usd from plan_prices where key = $1', [`mfr_market_${u.mfr_active}`]),
     p: await one(db, 'select stripe_customer, stripe_subscription, billing_interval from manufacturer_profiles where user_id = $1', [u.id]),
+    taken: (await one<{ n: number }>(db, INCLUDED_TAKEN_SQL, [u.id]))?.n ?? 0,
   }));
-  const monthly = Number(d.price?.amount_usd ?? 49);
+  if (d.taken < (PLAN_MARKETS[u.mfr_active] ?? 0)) {            // one of the markets the plan includes: no charge
+    const ok = await withUser(u.id, async (db) => (await one<{ ok: boolean }>(db, 'select mfr_take_included_market($1) as ok', [market]))?.ok);
+    if (ok) redirect(to);
+  }
+  const monthly = Number(d.price?.amount_usd ?? EXTRA_MARKET[u.mfr_active] ?? 499);
   if (stripeReady() && d.p?.stripe_subscription) {
     const interval = d.p.billing_interval === 'year' ? 'year' : 'month';
     let url = '';

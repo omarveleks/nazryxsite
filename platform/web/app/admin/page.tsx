@@ -6,7 +6,7 @@ import { TAB_PERMISSION, TEAM_PERMISSIONS, teamCan } from '@/lib/team';
 import { addTeamMember, removeTeamMember, updateTeamMember } from '@/app/actions/team';
 import { one, rows, withUser } from '@/lib/db';
 import { STAGES, ago, fmtDate, title } from '@/lib/format';
-import { MFR_PLANS, SERVICES, countryName } from '@/lib/mfr';
+import { MFR_PLANS, PLAN_MARKETS, SERVICES, countryName } from '@/lib/mfr';
 import { createInvoice, deleteInvoice, markInvoicePaid, saveInvoiceSettings, saveMarketCosts } from '@/app/actions/admin';
 import { answerQuestion, reviewManufacturer, grantCredits, keepSeparate, saveRoutes, setMoleculeRoute, matchMolecule, mergeCompanies, postRegulatory, addPrice, editUseCase, queueRecompute,
   rejectSuggestion, resetPassword, resetTwoStep, reviewClaim, setPlan, updateSource } from '@/app/actions/admin';
@@ -732,12 +732,14 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
                     <input className="input" name={`note_${k}`} defaultValue={cur?.note ?? ''} placeholder="Note shown under the price (optional)" aria-label={`${label}: note`} style={{ flex: '1 1 220px' }} />
                   </div>);
               })}
-              <div className="row">
-                <b style={{ flex: '0 1 220px' }}>Each extra market</b>
-                <input className="input" name="amount_mfr_market" defaultValue={d.prices.find((x: any) => x.key === 'mfr_market')?.amount_usd ?? ''} placeholder="USD per month"
-                  inputMode="numeric" aria-label="Each extra market: US dollars per month" style={{ flex: '0 1 220px' }} />
-                <span className="note" style={{ flex: '1 1 220px' }}>A plan includes one market. Yearly billing is ten months for twelve.</span>
-              </div>
+              {(['data', 'access'] as const).map((k) => (
+                <div key={k} className="row">
+                  <b style={{ flex: '0 1 220px' }}>Each extra market, {MFR_PLANS[k].name}</b>
+                  <input className="input" name={`amount_mfr_market_${k}`} defaultValue={d.prices.find((x: any) => x.key === `mfr_market_${k}`)?.amount_usd ?? ''} placeholder="USD per month"
+                    inputMode="numeric" aria-label={`Each extra market on ${MFR_PLANS[k].name}: US dollars per month`} style={{ flex: '0 1 220px' }} />
+                  <span className="note" style={{ flex: '1 1 220px' }}>{MFR_PLANS[k].name} includes {PLAN_MARKETS[k] === 1 ? 'one market' : `${PLAN_MARKETS[k]} markets`}.
+                    Yearly billing is ten months for twelve.</span>
+                </div>))}
               <button className="btn btn-blue btn-sm" type="submit" style={{ alignSelf: 'flex-start' }}>Save prices</button>
             </form>
           </section>

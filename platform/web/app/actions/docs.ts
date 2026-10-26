@@ -183,11 +183,12 @@ export async function savePlanPrices(f: FormData) {
                         on conflict (key) do update set amount_usd = excluded.amount_usd, note = excluded.note, updated_at = now()`,
           [`mfr_${k}`, amount, str(f, `note_mfr_${k}`, 200) || null]);
       }
-      const market = int(f, 'amount_mfr_market');
-      if (market != null) {
+      for (const k of ['data', 'access']) {                 // each plan's price for a market beyond those it includes
+        const market = int(f, `amount_mfr_market_${k}`);
+        if (market == null) continue;
         if (market <= 0 || market > 100000) throw new Error('Use a monthly price in whole US dollars.');
-        await db.query(`insert into plan_prices (key, amount_usd, updated_at) values ('mfr_market', $1, now())
-                        on conflict (key) do update set amount_usd = excluded.amount_usd, updated_at = now()`, [market]);
+        await db.query(`insert into plan_prices (key, amount_usd, updated_at) values ($1, $2, now())
+                        on conflict (key) do update set amount_usd = excluded.amount_usd, updated_at = now()`, [`mfr_market_${k}`, market]);
       }
     });
   } catch (e) {

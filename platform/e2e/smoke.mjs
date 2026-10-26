@@ -189,7 +189,9 @@ await k.goto(B + '/m/plan?want=access');
 check((await k.locator('main').innerText()).includes('To unlock that') && (await k.locator('main').innerText()).includes('Compare the plans'), 'upgrade flow names the plan that unlocks it');
 await k.goto(B + '/m/plan?billing=year');
 const yearText = await k.locator('main').innerText();
-check(yearText.includes('$1,990') && yearText.includes('/ year') && /included · each extra market \$490 a year/.test(yearText), 'plans: yearly billing at ten months, one market included, extra markets priced');
+check(yearText.includes('$4,990') && yearText.includes('$19,990') && yearText.includes('/ year') && /included · each extra market \$2,990 a year/.test(yearText)
+  && /4 markets included/.test(yearText) && /each extra market \$4,990 a year/.test(yearText),
+  'plans: yearly billing at ten months; Basic one market, Access four; each plan prices its extra markets');
 check((await k.goto(B + '/m/tenders')).status() === 200 && (await k.locator('nav').innerText()).includes('Tenders')
   && (await k.locator('main').innerText()).includes('Unlock with Basic Market Data'), 'tenders page in the menu, locked without a plan');
 await k.goto(B + '/m/regulatory');
