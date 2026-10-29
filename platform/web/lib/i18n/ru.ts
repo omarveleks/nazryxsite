@@ -702,6 +702,7 @@ const ru: Record<string, string> = {
   "Renewals, variations and safety reporting kept on time for you.": "Продления, изменения и отчёты по безопасности — вовремя.",
   "Mention": "Упоминание",
   "Hand up": "Поднятая рука",
+  "Côte d’Ivoire": "Кот-д’Ивуар",
   // misc
   "on the official TMDA list, level {level}": "в официальном списке TMDA, уровень {level}",
   "on the official TMDA list": "в официальном списке TMDA",

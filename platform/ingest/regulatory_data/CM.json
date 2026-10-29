@@ -1,0 +1,61 @@
+{
+ "country": "CM",
+ "regulator": "Direction de la Pharmacie, du Médicament et des Laboratoires (DPML), Ministry of Public Health – https://dpml.cm",
+ "checked": "2026-10",
+ "facts": [
+  {"topic": "Route", "applies": "all", "match": null, "title": "Regulator and legal basis",
+   "body": "The DPML of the Ministry of Public Health (MINSANTE) runs homologation under Law 90/035 of 10 August 1990 on the pharmacy profession (no product may be sold without an AMM) and the decree on the homologation of medicines. The Commission Nationale du Médicament (CNM) gives the opinion; the minister signs the AMM. LANACOME, the national quality-control laboratory, tests the samples filed with the dossier. The DPML publishes a searchable repertoire of approved medicines (about 10,800 AMMs granted since 1990, 5,000 or so in force).",
+   "source": "https://dpml.cm/images/2024/homologation/Guide-d_homologation-des-produits-pharmaceutiques-29_06_2023.pdf", "confidence": "high"},
+  {"topic": "Local representative", "applies": "all", "match": null, "title": "A pharmacien interlocuteur in Cameroon",
+   "body": "The applicant appoints a pharmacien interlocuteur registered with the Ordre National des Pharmaciens du Cameroun, who countersigns the letter of commitment and is the interface between the laboratory and the authority. The application names the representative in Cameroon and the pharmacist, and gives the CIF price in FCFA.",
+   "source": "https://dpml.cm/images/2024/homologation/Guide-d_homologation-des-produits-pharmaceutiques-29_06_2023.pdf", "confidence": "high"},
+  {"topic": "Dossier", "applies": "all", "match": null, "title": "CTD in the CEMAC format, French or English",
+   "body": "The homologation guide of 29 June 2023 requires the CTD adopted in the CEMAC zone (modules 1 to 5, annex 1 of the guide), in French or English. Module 1 carries the application letter signed by the laboratory's regulatory pharmacist, the letter of commitment countersigned by the pharmacien interlocuteur, the pharmacist's registration certificate, GMP certificates of every site, the manufacturing licence, the AMM in the country of origin (certified copy) and the fee receipt.",
+   "source": "https://dpml.cm/images/2024/homologation/Guide-d_homologation-des-produits-pharmaceutiques-29_06_2023.pdf", "confidence": "high"},
+  {"topic": "Samples", "applies": "all", "match": null, "title": "Samples for LANACOME with at least 12 months of shelf life",
+   "body": "Finished-product samples and the batch certificates of analysis (and active substance where asked) go with the dossier, in the quantities of table 1 of the guide, marked 'échantillon médical gratuit'. Remaining shelf life at filing must be at least 12 months.",
+   "source": "https://dpml.cm/images/2024/homologation/Guide-d_homologation-des-produits-pharmaceutiques-29_06_2023.pdf", "confidence": "high"},
+  {"topic": "Timeline", "applies": "all", "match": null, "title": "CNM opinion within three months, minister within two; 197 days median in practice",
+   "body": "The CNM studies the specialised commissions' conclusions and gives its opinion within three months of filing; it may order further expertise at the applicant's cost (LANACOME, IMPM). The minister then has two months to decide. A 2016 to 2023 study of DPML files found a median evaluation time of 197 days and a refusal rate of 68.8%, with the product's origin and category weighing on both.",
+   "source": "https://www.hsd-fmsb.org/index.php/hsd/article/download/7721/5843/23953", "confidence": "medium"},
+  {"topic": "Fees", "applies": "all", "match": null, "title": "Homologation fee set by the authority, receipt in module 1",
+   "body": "The guide asks for the receipt of the homologation fee at the amount fixed by the authority, without printing a schedule. Ask the DPML for the current amounts for an imported medicine (study of the dossier, LANACOME analysis, AMM) before budgeting.",
+   "source": "https://dpml.cm/images/2024/homologation/Guide-d_homologation-des-produits-pharmaceutiques-29_06_2023.pdf", "confidence": "low"},
+  {"topic": "After approval", "applies": "all", "match": null, "title": "Five-year AMM, renewal on modules 1 and 3, appeal within three months",
+   "body": "An AMM is valid five years. Renewal files modules 1 and 3 of the CTD (more may be asked). A refusal can be appealed to the minister within three months. Importers of products holding a Cameroonian AMM follow the circular of 9 August 2019; advertising of over-the-counter medicines to the public is banned (press release of 21 October 2019).",
+   "source": "https://dpml.cm/index.php/fr/procedure/homologation/medicaments", "confidence": "high"},
+  {"topic": "Route", "applies": "all", "match": null, "title": "Molecules under a suspension of new AMMs (2015 decision)",
+   "body": "Decision 3363/D/MINSANTE/CAB of 26 October 2015 suspended new AMMs for three years on a list of molecules, combinations, strengths and forms considered saturated. The DPML still posts it; confirm with the DPML whether your molecule is affected before filing.",
+   "source": "https://dpml.cm/images/Formulaires/Homologation/Decision%20suspension%20molecule%202015%20-%20page1.pdf", "confidence": "low"},
+  {"topic": "Import", "applies": "all", "match": null, "title": "CEMAC tariff, VAT exempt at sale",
+   "body": "Cameroon applies the CEMAC common external tariff (medicines in the 5% band) and the 19.25% import VAT unless exempt; medicines are exempt from VAT at sale, and the VAT paid on their purchase is not deductible, so it sits in the cost. The DPML publishes approved wholesale prices product by product; imported medicines must be sold at the approved prices.",
+   "source": "https://lefisk.cm/blog/comptabilite-pharmacie-officine-cameroun-tva-medicaments-parapharmacie-stock-prorata", "confidence": "low"},
+  {"topic": "After approval", "applies": "all", "match": null, "title": "Essential list 2022 by facility category; CENAME tenders",
+   "body": "The national essential medicines list (LNME 2022) is organised by facility category (first and second category hospitals, regional, district, arrondissement centres, integrated health centres). CENAME, the national supply centre, tenders for medicines and essential devices on the ARMP's procurement portal (pridesoft.armp.cm), including international open tenders.",
+   "source": "https://dpml.cm/index.php/fr/catalogue/liste-nationale-des-medicaments-essentiels", "confidence": "medium"}
+ ],
+ "routes": [
+  {"key": "full", "label": "Full review (national, CNM)",
+   "description": "The only route: CEMAC CTD with a pharmacien interlocuteur, LANACOME samples, CNM opinion (three months by rule), ministerial decision (two months), AMM for five years. Median 197 days of evaluation in 2016 to 2023 with a high refusal rate; plan for a complete dossier and a strong local pharmacist. Fee per the DPML's schedule, on request.",
+   "months_low": 7, "months_high": 15, "fee_usd_low": null, "fee_usd_high": null,
+   "source": "https://dpml.cm/images/2024/homologation/Guide-d_homologation-des-produits-pharmaceutiques-29_06_2023.pdf", "confidence": "medium"}
+ ],
+ "documents": [
+  {"name": "AMM application form (DPML) and letter to the minister, stamped", "applies": "all", "match": null, "note": "Form issued free by the DPML; letter signed by the laboratory's regulatory pharmacist", "source": "https://dpml.cm/images/Formulaires/Homologation/formulaire%20de%20demande%20AMM%20medicaments%20MINSANTE-DPML%20Cameroun.docx"},
+  {"name": "Letter of commitment countersigned by the pharmacien interlocuteur", "applies": "all", "match": null, "note": "With the pharmacist's current registration at the Ordre National des Pharmaciens du Cameroun", "source": "https://dpml.cm/images/2024/homologation/Guide-d_homologation-des-produits-pharmaceutiques-29_06_2023.pdf"},
+  {"name": "CEMAC CTD modules 1 to 5 (French or English)", "applies": "all", "match": null, "note": null, "source": "https://dpml.cm/images/2024/homologation/Guide-d_homologation-des-produits-pharmaceutiques-29_06_2023.pdf"},
+  {"name": "GMP certificates of every site in the manufacture of the finished product", "applies": "all", "match": null, "note": "In force at filing", "source": "https://dpml.cm/images/2024/homologation/Guide-d_homologation-des-produits-pharmaceutiques-29_06_2023.pdf"},
+  {"name": "Manufacturing licence of the applicant, in force", "applies": "all", "match": null, "note": null, "source": "https://dpml.cm/images/2024/homologation/Guide-d_homologation-des-produits-pharmaceutiques-29_06_2023.pdf"},
+  {"name": "Certified copy of the AMM in the country of origin", "applies": "all", "match": null, "note": null, "source": "https://dpml.cm/images/2024/homologation/Guide-d_homologation-des-produits-pharmaceutiques-29_06_2023.pdf"},
+  {"name": "Receipt of the homologation fee", "applies": "all", "match": null, "note": "Amount set by the authority", "source": "https://dpml.cm/images/2024/homologation/Guide-d_homologation-des-produits-pharmaceutiques-29_06_2023.pdf"},
+  {"name": "Finished-product samples with batch certificates of analysis", "applies": "all", "match": null, "note": "Quantities per table 1 of the guide; at least 12 months of shelf life left", "source": "https://dpml.cm/images/2024/homologation/Guide-d_homologation-des-produits-pharmaceutiques-29_06_2023.pdf"},
+  {"name": "Bioequivalence study against the reference product", "applies": "form", "match": "tablet|capsule|oral", "note": "Multisource oral solid forms", "source": "https://dpml.cm/images/2024/homologation/Guide-d_homologation-des-produits-pharmaceutiques-29_06_2023.pdf"},
+  {"name": "Stability data for zone IVb (30 °C / 75% RH)", "applies": "all", "match": null, "note": null, "source": "https://dpml.cm/images/2024/homologation/Guide-d_homologation-des-produits-pharmaceutiques-29_06_2023.pdf"},
+  {"name": "Labels, leaflet and summary of product characteristics in French (and English)", "applies": "all", "match": null, "note": null, "source": "https://dpml.cm/images/2024/homologation/Guide-d_homologation-des-produits-pharmaceutiques-29_06_2023.pdf"}
+ ],
+ "news": [
+  {"name": "DPML homologation procedures page", "url": "https://dpml.cm/index.php/fr/procedure/homologation/medicaments"},
+  {"name": "DPML standards and legislation", "url": "https://dpml.cm/fr/publications/normes-et-legislation"},
+  {"name": "LANACOME news", "url": "https://lanacome.cm/my-blog-page/"}
+ ]
+}

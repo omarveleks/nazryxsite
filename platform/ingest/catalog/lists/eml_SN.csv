@@ -1,0 +1,408 @@
+name,local,atc,level
+amikacin,Amikacine,,4
+amoxicillin,Amoxicilline,,2
+amoxicillicine,Amoxicillicine,,
+amoxicillin + clavulanic acid,Amoxicilline + Acide Clavulanique,,3
+ampicillin,Ampicilline,,2
+azithromycin,Azithromycine,,2
+benzathine benzylpenicillin,Benzathine -benzylpénicilline,,2
+benzathine benzylpenicillin,Benzathine-benzylpénicilline,,2
+benzylpenicillin,Benzylpénicilline,,2
+cefazolin,Céfazoline,,3
+cefixime,Céfixime,,3
+cefotaxime,Céfotaxime,,3
+ceftriaxone,Ceftriaxone,,2
+ciprofloxacine,Ciprofloxacine,,2
+doxycycline,Doxycycline,,2
+erythromycin,Erythromycine,,2
+gentamicin,Gentamicine,,3
+oxacillin,Oxacilline,,3
+flucloxacillin,flucloxacilline,,
+phenoxymethylpenicillin,Phénoxyméthylpénicilline,,2
+sulfamethoxazole + trimethoprim,Sulfaméthoxazole + Triméthoprime,,2
+vancomycin,Vancomycine,,3
+pyostacycine,Pyostacycine,,3
+thiamphenicol,Thiamphénicol,,3
+imipeneme + cilastatin,Imipéneme + Cilastatine,,4
+pristinamycin,Pristinamycine,,4
+cefuroxime,Céfuroxime,,4
+para amino salicylic acid,Acide Para Amino Salicylique,,
+cycloserine,Cyclosérine,,2
+ethambutol,Ethambutol,,2
+ethionamide,Ethionamide,,2
+isoniazide,Isoniazide,,2
+kanamycin,Kanamycine,,2
+levofloxacine,Lévofloxacine,,2
+pyrazinamide,Pyrazinamide,,2
+rifampicine + isoniazide,Rifampicine + Isoniazide,,2
+rifampicine + isoniazide + pyrazinamide,Rifampicine + Isoniazide + Pyrazinamide,,
+butol,butol,,
+clofazimine,Clofazimine,,
+prothionamide,Prothionamide,,
+moxifloxacine,Moxifloxacine,,
+bedaquiline,Bédaquiline,,
+capreomycin,Capréomycine,,
+linezolide,Linézolide,,
+dapsone,Dapsone,,2
+rifampicine,Rifampicine,,2
+artesunate + amodiaquine,Artésunate + Amodiaquine,,1
+artemether + lumefantrine,Artéméther + Luméfantrine,,
+dihydroartemisinine + piperaquine,DihydroArtémisinine + Pipéraquine,,
+artesunate,Artésunate,,2
+artemether,Artéméther,,2
+artesunate,Artesunate,,2
+sulfadoxine + pyrimethamine,Sulfadoxine + Pyriméthamine,,2
+artemether + lumefantrine,Artémèther + luméfantrine,,1
+quinine,Quinine,,3
+primaquine,Primaquine,,3
+metronidazole,Métronidazole,,2
+amphotericine b liposomale,Amphotéricine B liposomale,,4
+amphotericine b,Amphotéricine B,,3
+econazole,Econazole,,
+fluconazole,Fluconazole,,3
+griseofulvin,Griséofulvine,,2
+ketoconazole,Kétoconazole,,2
+nystatin,Nystatine,,2
+terbinafine,Terbinafine,,3
+albendazole,Albendazole,,2
+mebendazole,Mebendazole,,1
+ivermectin,Ivermectine,,2
+praziquantel,Praziquantel,,2
+aciclovir,Aciclovir,,3
+valaciclovir,Valaciclovir,,3
+ganciclovir,Ganciclovir,,4
+sofosbuvir,Sofosbuvir,,4
+abacavir,Abacavir,,3
+lamivudine,Lamivudine,,3
+zidovudine,Zidovudine,,3
+tenofovir,Ténofovir,,3
+tenofovir + emtricitabine,Ténofovir + Emtricitabine,,2
+tenofovir + lamivudine,Ténofovir + Lamivudine,,2
+zidovudine + lamivudine,Zidovudine + Lamivudine,,2
+zidovudine + lamivudine + abacavir,Zidovudine + Lamivudine + Abacavir,,
+abacavir + lamivudine,Abacavir + Lamivudine,,2
+efavirenz,Efavirenz,,2
+nevirapine,Névirapine,,2
+etravirine,Etravirine,,
+atazanavir + ritonavir,Atazanavir + Ritonavir,,3
+darunavir,Darunavir,,3
+lopinavir + ritonavir,Lopinavir + Ritonavir,,2
+ritonavir,Ritonavir,,3
+zidovudine + lamivudine + nevirapine,zidovudine + Lamivudine + Névirapine,,
+tenofovir + emtricitabine + efavirenz,Ténofovir + Emtricitabine + Efavirenz,,
+tenofovir + lamivudine + efavirenz,Ténofovir + Lamivudine + Efavirenz,,
+raltegravir,Raltégravir,,4
+dolutegravir,Dolutégravir,,4
+oxygen,Oxygène,,3
+protoxyde d'azote,Protoxyde d’azote,,3
+halothane,Halothane,,3
+isoflurane,Isoflurane,,3
+sevoflurane,Sévoflurane,,3
+ketamine,Kétamine,,3
+propofol,Propofol,,3
+etomidate,Etomidate,,3
+diazepam,Diazépam,,2
+midazolam,Midazolam,,5
+thiopental,Thiopental,,3
+droperidol,Dropéridol,,5
+bupivacaine hyperbare,Bupivacaïne hyperbare,,2
+bupivacaine isobare,Bupivacaïne isobare,,2
+lidocaine,Lidocaïne,,2
+lidocaine epinephrine,Lidocaïne épinéphrine,,3
+ropivacaine,Ropivacaïne,,3
+atropine,Atropine,,3
+neostigmine,Néostigmine,,3
+rocuronium,Rocuronium,,
+vecuronium bromide,Vécuronium bromure,,4
+atracurium besilate,Atracurium bésilate,,4
+fentanyl,Fentanyl,,3
+sufentanil,Sufentanil,,3
+alfentanyl,Alfentanyl,,5
+morphine chlorhydrate,Morphine chlorhydrate,,4
+nalbuphine,Nalbuphine,,5
+tramadol,Tramadol,,5
+acetylsalicylate lysine,Acétylsalicylate de lysine,,2
+acetylsalicylic acid,Acide acétylsalicylique,,1
+mefenamic acid,Acide méfénamique,,2
+niflumic acid,Acide niflumique,,4
+ibuprofen,Ibuprofène,,2
+indometacine,Indométacine,,1
+ketoprofen,Kétoprofène,,3
+diclofenac,Diclofénac,,2
+paracetamol,Paracétamol,,1
+prednisone,Prednisone,,2
+buprenorphine,Buprénorphine,,
+morphine chlorhydrate lp,Morphine chlorhydrate LP,,3
+morphine,Morphine,,
+methadone,Méthadone,,
+bethamethasone,Bethaméthasone,,2
+cetirizine,Cétirizine,,2
+dexamethasone,Dexaméthasone,,2
+dexchlorpheniramine,Dexchlorphéniramine,,2
+hydrocortisone,Hydrocortisone,,
+methylprednisolone,Méthylprednisolone,,2
+promethazine,Prométhazine,,2
+charbon,Charbon,,2
+disulfurame,Disulfurame,,4
+flumazenil,Flumazénil,,4
+n acetylcysteine,N-acétylcystéine,,4
+naloxone,Naloxone,,4
+pralidoxime,Pralidoxime,,3
+edta disodic calcic,EDTA disodique calcique,,
+deferoxamine,Déferoxamine,,
+glucagon,Glucagon,,
+sulfate protamine,Sulfate de Protamine,,
+succimer,Succimer,,
+magnesium sulfate,Sulfate de magnésium,,2
+valproic acid,Acide valproïque,,4
+sodium valproate lp,Valproate de sodium LP,,4
+sodium valproate,Valproate de sodium,,
+amitriptyline,Amitriptyline,,4
+carbamazepine,Carbamazépine,,4
+chlorpromazine,Chlorpromazine,,4
+clonazepam,Clonazépam,,4
+clonazepam,Clonazepam,,4
+diazepam,Diazepam,,4
+phenytoine,phénytoïne,,3
+fluphenazine,Fluphénazine,,4
+haloperidol,Halopéridol,,4
+levomepromazine,Lévomépromazine,,5
+phenobarbital,Phénobarbital,,2
+trihexyphenidyle,Trihexyphénidyle,,4
+tropatepine,Tropatépine,,4
+folic acid,Acide folique,,2
+cyanocobalamine,Cyanocobalamine,,3
+erythropoietine,Erythropoïétine,,5
+sels ferreux forme pediatric,Sels ferreux Forme pédiatrique,,2
+epoetine beta,Epoétine bêta,,5
+iron ferric,Fer ferrique,,5
+iron + folic acid,Fer + acide folique,,1
+sels ferreux forme adulte,Sels ferreux Forme adulte,,1
+etamsylate,Etamsylate,,2
+misoprostol,Misoprostol,,1
+tranexamic acid,acide tranexamique,,
+phytomenadione,Phytoménadione,,
+fluindione,fluindione,,
+acenocoumarol,Acénocoumarol,,3
+enoxaparin,Enoxaparine,,3
+heparinate non fractionnee,Héparinate non fractionnée,,3
+heparinate sodium,Héparinate de sodium,,3
+streptokinase,Streptokinase,,3
+allupurinol,allupurinol,,3
+gelatine fluide modifiee,Gélatine fluide modifiée,,4
+concentre facteur viii,Concentré de facteur VIII,,4
+concentre facteur ix,Concentré de facteur IX,,4
+immunoglobuline anti d,Immunoglobuline anti-D,,4
+immunoglobuline polyvalent,Immunoglobuline polyvalent,,
+facteurs antihemophilliques a + b,Facteurs antihémophilliques A et B,,4
+hydroxyethylamidon,Hydroxyéthylamidon,,4
+diltiazem,Diltiazem,,4
+dinitrate d'isosorbide,Dinitrate d’isosorbide,,4
+trinitrate glycerine,Trinitrate de glycérine,,4
+altizide + spironolactone,Altizide + spironolactone,,4
+amlodipine,Amlodipine,,3
+atenolol,Aténolol,,4
+bisoprolol,Bisoprolol,,4
+captopril,Captopril,,4
+clonidine,Clonidine,,4
+furosemide,Furosémide,,2
+hydrochlorothiazide,Hydrochlorothiazide,,3
+methyldopa,Méthyldopa,,2
+nicardipine,Nicardipine,,2
+nifedipine,Nifédipine,,3
+propranolol,Propranolol,,4
+spironolactone,Spironolactone,,4
+amiodarone,Amiodarone,,4
+digoxin,Digoxine,,3
+dopamine,Dopamine,,4
+norepinephrine,Noradrénaline,,3
+dobutamine,Dobutamine,,4
+epinephrine,Epinéphrine,,2
+ephedrine,Ephédrine,,3
+metalyse,Metalyse,,5
+isoprenaline,Isoprénaline,,4
+alprostadil,Alprostadil,,4
+verapamil,Vérapamil,,4
+griseofulvin,Griseofulvine,,2
+bethametasone,Béthamétasone,,2
+clobetasone,Clobétasone,,2
+mupirocine,Mupirocine,,2
+alcool,Alcool,,3
+alcool iode,Alcool iodé,,2
+eau oxygenee,Eau oxygénée,,3
+eosine aqueuse,Eosine aqueuse,,1
+formaldehyde,Formaldéhyde,,4
+hypochlorite sodium,Hypochlorite de sodium,,1
+polyvidone iode,Polyvidone iodé,,2
+violet gentiane,Violet de gentiane,,3
+talc,Talc,,2
+vaseline,Vaseline,,2
+benzoate benzyle,Benzoate de benzyle,,1
+vaseline salicylee,Vaseline salicylée,,3
+thiocolchicoside,Thiocolchicoside,,3
+ocytocin,Ocytocine,,2
+salbutamol,Salbutamol,,3
+betamethasone,betamethasone,,3
+cimetidine,Cimétidine,,2
+omeprazole,Oméprazole,,3
+sels d'aluminium + magnesium,Sels d’Aluminium et de Magnésium,,2
+granisetron chlorhydrate,Granisétron chlorhydrate,,4
+ondasetron,Ondasétron,,
+metopimazine,Métopimazine,,2
+anti infl + astrigent + anest local,Anti-infl. + Astrigent + Anest local,,2
+diosmine,Diosmine,,3
+bromide n butyl hyoscine,Bromure de N-butyl-Hyoscine,,2
+phloroglucinol + trimethylphloroglucinol,Phloroglucinol + trimethylphloroglucinol,,3
+paraffine liquide,Paraffine liquide,,2
+lactulose,Lactulose,,2
+trimebutine,Trimébutine,,3
+sels rehydratation orale faible osmolarite glucose,Sels de réhydratation orale faible osmolarité Glucose,,
+resomal,ReSoMal,,1
+zinc,Zinc (sulfate),,
+carbocysteine,Carbocystéine,,2
+terpine + codeine,Terpine + codéine,,2
+oxomemazine + guaifenesine,Oxomémazine + guaïfénésine,,
+terbutaline,Terbutaline,,2
+citrate cafeine,Citrate de cafeine,,2
+lidocaine adrenalinee,Lidocaïne adrénalinée,,3
+zinc oxide leger,Oxyde de zinc leger,,3
+pulperyl,Pulpéryl,,3
+serum anti d,Sérum anti-D,,3
+serum antirabic,Sérum antirabique,,3
+tetanus antitoxin,Sérum antitétanique,,3
+serum antilymphocytaire,Serum antilymphocytaire,,4
+serum antivenimeux polyvalent,Sérum antivenimeux polyvalent,,2
+vaccine anti rougeoleux,Vaccin anti rougeoleux,,2
+vaccine antiamaril,Vaccin antiamaril,,2
+vaccine anticoquelucheux,Vaccin anticoquelucheux,,2
+vaccine antidiphteric,Vaccin antidiphtérique,,2
+vaccine antihaemophilus,Vaccin antihaemophilus,,2
+vaccine antihepatite b,Vaccin antihépatite B,,2
+vaccine antimeningococcic,Vaccin antiméningococcique,,2
+vaccine antipneumococcic,Vaccin antipneumococcique,,2
+vaccine antipoliomyelitic,Vaccin antipoliomyélitique,,2
+vaccine antirabic,Vaccin antirabique,,2
+vaccine antitetanic,Vaccin antitétanique,,2
+vaccine antituberculeux,Vaccin antituberculeux,,2
+vaccine anti papillomavirus,Vaccin Anti-papillomavirus,,2
+vaccine pentavalent,Vaccin Pentavalent,,2
+sodium bicarbonate,Bicarbonate de sodium,,3
+potassium chloride,Chlorure de potassium,,3
+sodium chloride,Chlorure de sodium,,2
+calcium chloride,Chlorure de calcium,,2
+magnesium chloride,Chlorure de magnésium,,2
+calcium gluconate,Gluconate de calcium,,2
+glucose,Glucose,,2
+glycocolle,Glycocolle,,4
+lactate ringer,Lactate de Ringer,,2
+mannitol,Mannitol,,4
+albumine human,Albumine humaine,,5
+potassium sulfate,Sulfate de potassium,,4
+acyclovir,Acyclovir,,
+cetoxonium,Cétoxonium,,2
+chloramphenicol + dexamethasone,Chloramphénicol + Dexaméthasone,,3
+chlortetracycline + tetracycline,Chlortétracycline ou Tétracycline,,
+fluoresceine,Fluorescéine,,4
+neomycin + polymyxine,Néomycine + Polymyxine,,5
+norfloxacine,Norfloxacine,,3
+oxybuprocaine,Oxybuprocaïne,,3
+tetracaine,Tétracaïne,,4
+acetazolamide,Acétazolamide,,4
+brinzolamide,Brinzolamide,,4
+carteolol,Cartéolol,,3
+pilocarpine,Pilocarpine,,4
+timolol,Timolol,,4
+visqueux en seringue pre rempli,Visqueux en seringue pré rempli,,
+cyclopentolate,cyclopentolate,,
+tropicamide,Tropicamide,,4
+picloxydine,Picloxydine,,2
+cromoglycate,Cromoglycate,,3
+levocabastine,Lévocabastine,,3
+fluoresceine,Fluoresceine,,3
+ranibizumab,Ranibizumab,,
+ascorbic acid,Acide ascorbique,,2
+alfacalcidol,Alfacalcidol,,4
+calcium gluconate,Calcium gluconate,,2
+iodate potassium,Iodate de potassium,,1
+pyridoxine,Pyridoxine,,3
+retinol,Rétinol,,1
+thiamine,Thiamine,,3
+glimepiride,Glimépiride,,3
+insulin isophane,Insuline Lente,,3
+insulin rapide,Insuline Rapide,,3
+metformin,Metformine,,3
+metformin retard,Metformine retard,,3
+benzylthiouracil,Benzylthiouracil,,4
+carbimazole,Carbimazole,,4
+cortisone,Cortisone,,4
+cyproterone,Cyprotérone,,4
+bicalutamide,Bicalutamide,,
+gosereline,Goséréline,,
+levothyroxine,Lévothyroxine,,4
+tetracosactide,Tétracosactide,,4
+bleomycin,Bléomycine,,4
+carboplatine,Carboplatine,,
+chlormetine,Chlormétine,,5
+cisplatine,Cisplatine,,
+cyclophosphamide,Cyclophosphamide,,5
+doxorubicine,Doxorubicine,,4
+epirubicine,Epirubicine,,4
+etoposide,Etoposide,,4
+fluorouracil,Fluorouracil,,5
+hydroxycarbamide,Hydroxycarbamide,,5
+melphalan,Melphalan,,5
+methotrexate,Méthotrexate,,4
+paclitaxel,Paclitaxel,,4
+tamoxifen,Tamoxifène,,4
+vinblastine,Vinblastine,,4
+vincristine,Vincristine,,4
+bevacizumab,bevacizumab,,4
+trastuzumab,trastuzumab,,4
+rituximab,rituximab,,4
+capecitabine,capecitabine,,4
+ibandronate,ibandronate,,4
+filgrastim,filgrastim,,4
+zoledronic acid,Acide Zolédronique,,4
+triptoreline,Triptoréline,,4
+calcium folinate,Folinate de calcium,,4
+actinomycin d,Actinomycine D,,4
+pemetrexed,Pemetrexed,,4
+thalidomide,Thalidomide,,4
+anastrozole,Anastrozole,,4
+gemcitabine,Gemcitabine,,4
+letrozole,Letrozole,,4
+sunitinib,Sunitinib,,4
+acides amines essentiels,Acides aminés essentiels,,3
+acides gras essentiels,Acides gras essentiels,,5
+complexe vitaminic,Complexe vitaminique,,3
+oligo elements,Oligo-éléments,,5
+fenoxazolin,Fénoxazoline,,4
+phenazone + lidocaine,Phénazone + Lidocaïne,,3
+xylometazolin,Xylométazoline,,3
+ethinylestradiol + norgestrel + fumarate,Ethinylestradiol + norgestrel + fumarate,,
+ethinylestradiol + levonorgestrel + fumarate,Ethinylestradiol + levonorgestrel + fumarate,,
+ferreux,ferreux,,
+levonorgestrel,Levonorgestrel,,2
+etonogestrel,Etonogestrel,,
+acetate medroxyprogesterone,Acétate médroxyprogestérone,,1
+anneau vaginal a progesterone,Anneau vaginal a progesterone,,
+test diagnostic rapide paludisme,Test de diagnostic rapide du paludisme,,1
+bicarbonate,Bicarbonate,,4
+calciferol,Calciférol,,
+calcium carbonate,Carbonate de calcium,,4
+cyclosporin,cyclosporine,,4
+cinacalcet,Cinacalcet,,4
+furosemide,Furosemide,,4
+prednisolone,prednisolone,,4
+sevelamer chlorhydrate,Sévélamer chlorhydrate,,4
+azathioprine,Azathioprine,,5
+basiliximab,Basiliximab,,5
+micophenolate mofetil,Micophénolate mofétil,,5
+solution conservation d'organes,Solution de conservation d'organes,,
+tacrolimus,Tacrolimus,,5
+alfuzosine,Alfuzosine,,4
+levodopa benserazide chlorhydrate,Levodopa benserazide chlorhydrate,,
+donepezil chlorhydrate,donepezil chlorhydrate,,4
+extrait ginko biloba,Extrait de ginko biloba,,4
+l dopa,L dopa,,
+piracetam,Piracétam,,4

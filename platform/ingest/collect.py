@@ -177,7 +177,19 @@ def reg_NG(s, tmp, cur):
     return _json_rows(nigeria.registry_rows(s, cur), tmp, "ng-register.json")
 
 
-REGISTRIES = {"KZ": reg_KZ, "KE": reg_KE, "UZ": reg_UZ, "KG": reg_KG, "TZ": reg_TZ, "NG": reg_NG}
+def reg_SN(s, tmp):
+    """Senegal's list of marketing authorisations on arp.sn (francophone.py)."""
+    import francophone
+    return _json_rows(francophone.sn_registry(s, log), tmp, "sn-register.json")
+
+
+def reg_CM(s, tmp):
+    """Cameroon's repertoire of approved medicines on dpml.cm (francophone.py)."""
+    import francophone
+    return _json_rows(francophone.cm_registry(s, log), tmp, "cm-register.json")
+
+
+REGISTRIES = {"KZ": reg_KZ, "KE": reg_KE, "UZ": reg_UZ, "KG": reg_KG, "TZ": reg_TZ, "NG": reg_NG, "SN": reg_SN, "CM": reg_CM}
 WITH_CURSOR = {"NG"}                             # readers that remember what they learned between runs
 
 

@@ -28,7 +28,7 @@ from norm import company_key, display_name, form_of, molecule_key, same_stem, sp
 import loader  # noqa: E402
 import xlsx_rows  # noqa: E402
 
-COUNTRIES = {"KZ": "KAZAKHSTAN", "KG": "KYRGYZSTAN", "UZ": "UZBEKISTAN", "KE": "KENYA", "NG": "NIGERIA"}
+COUNTRIES = {"KZ": "KAZAKHSTAN", "KG": "KYRGYZSTAN", "UZ": "UZBEKISTAN", "KE": "KENYA", "NG": "NIGERIA", "SN": "SENEGAL", "CI": "COTE D'IVOIRE", "CM": "CAMEROON"}
 CATALOG = os.path.join(HERE, "catalog", "medicines.csv")
 ATC_NAMES = os.path.join(HERE, "catalog", "atc_names.csv")
 RU_NAMES = os.path.join(HERE, "catalog", "ru_names.csv")
@@ -282,7 +282,14 @@ def read_ng(path):
     return out
 
 
-ADAPTERS = {"KZ": read_kz, "KG": read_kg, "UZ": read_uz, "KE": read_ke, "NG": read_ng}
+def read_collected(path):
+    """Senegal and Cameroon come only from the collector (francophone.py), as JSON in the one registry shape."""
+    if str(path).endswith(".json"):
+        return json.load(open(path, encoding="utf-8"))
+    raise ValueError("This register is read from the regulator's site by the collector; upload is not needed.")
+
+
+ADAPTERS = {"KZ": read_kz, "KG": read_kg, "UZ": read_uz, "KE": read_ke, "NG": read_ng, "SN": read_collected, "CM": read_collected}
 
 
 # ------------------------------------------------------------------ names in English, and the molecule each row is
@@ -565,6 +572,11 @@ def uzbek_latin(name):
 
 
 LIST_NAMES = {"KG": latin_inn, "UZ": uzbek_latin}
+try:
+    from francophone import fr_inn as _fr_inn
+    LIST_NAMES.update({"SN": _fr_inn, "CI": _fr_inn, "CM": _fr_inn})
+except ImportError:   # the web build copies only parts of the worker
+    pass
 # lists whose unmatched entries become new molecules (openings): clean, typed lists only, not the scanned one
 NEW_FROM_LIST = {"KG", "KE", "KZ", "NG"}
 

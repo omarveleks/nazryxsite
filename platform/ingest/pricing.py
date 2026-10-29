@@ -22,7 +22,8 @@ NEIGHBOURS = {"KZ": ("KG", "UZ") + NEARBY["cis"], "KG": ("KZ", "UZ") + NEARBY["c
               # Nigeria's medicines come mostly from India and China and its own makers; Ghana shares its West African market
               "NG": ("GH", "KE", "TZ") + SOUTH_ASIA}
 CURRENCY = {"KZ": "KZT", "KG": "KGS", "UZ": "UZS", "KE": "KES", "TZ": "TZS", "PK": "PKR", "GB": "GBP", "FR": "EUR",
-            "NG": "NGN", "GH": "GHS", "ZA": "ZAR", "BY": "BYN", "AM": "AMD", "AZ": "AZN", "IN": "INR", "BD": "BDT"}
+            "NG": "NGN", "GH": "GHS", "ZA": "ZAR", "BY": "BYN", "AM": "AMD", "AZ": "AZN", "IN": "INR", "BD": "BDT",
+            "SN": "XOF", "CI": "XOF", "CM": "XAF"}
 ABROAD = ("PK", "GB", "FR")    # far reference countries: last, only for molecules nothing nearer prices, Pakistan first
 OTHERS = NEARBY["africa"] + NEARBY["cis"] + ABROAD + ("IN", "BD")
 RANK = {"survey": 0, "retail": 0, "cap": 1, "reimbursement": 2, "tender": 3}

@@ -707,6 +707,7 @@ const fr: Record<string, string> = {
   "Renewals, variations and safety reporting kept on time for you.": "Renouvellements, variations et pharmacovigilance tenus à temps pour vous.",
   "Mention": "Mention",
   "Hand up": "Main levée",
+  "Côte d’Ivoire": "Côte d’Ivoire",
   // misc
   "on the official TMDA list, level {level}": "sur la liste officielle TMDA, niveau {level}",
   "on the official TMDA list": "sur la liste officielle TMDA",
