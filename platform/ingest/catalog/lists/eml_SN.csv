@@ -1,7 +1,7 @@
 name,local,atc,level
 amikacin,Amikacine,,4
 amoxicillin,Amoxicilline,,2
-amoxicillicine,Amoxicillicine,,
+amoxicilline,Amoxicilline,,
 amoxicillin + clavulanic acid,Amoxicilline + Acide Clavulanique,,3
 ampicillin,Ampicilline,,2
 azithromycin,Azithromycine,,2
@@ -21,7 +21,7 @@ flucloxacillin,flucloxacilline,,
 phenoxymethylpenicillin,Phénoxyméthylpénicilline,,2
 sulfamethoxazole + trimethoprim,Sulfaméthoxazole + Triméthoprime,,2
 vancomycin,Vancomycine,,3
-pyostacycine,Pyostacycine,,3
+pristinamycine,Pristinamycine (Pyostacine),,3
 thiamphenicol,Thiamphénicol,,3
 imipeneme + cilastatin,Imipéneme + Cilastatine,,4
 pristinamycin,Pristinamycine,,4
@@ -35,8 +35,7 @@ kanamycin,Kanamycine,,2
 levofloxacin,Lévofloxacine,,2
 pyrazinamide,Pyrazinamide,,2
 rifampicin + isoniazide,Rifampicine + Isoniazide,,2
-rifampicin + isoniazide + pyrazinamide,Rifampicine + Isoniazide + Pyrazinamide,,
-butol,butol,,
+rifampicin + isoniazide + pyrazinamide + ethambutol,Rifampicine + Isoniazide + Pyrazinamide + Ethambutol,,
 clofazimine,Clofazimine,,
 prothionamide,Prothionamide,,
 moxifloxacin,Moxifloxacine,,
@@ -188,7 +187,7 @@ enoxaparin,Enoxaparine,,3
 heparinate non fractionnee,Héparinate non fractionnée,,3
 heparinate sodium,Héparinate de sodium,,3
 streptokinase,Streptokinase,,3
-allupurinol,allupurinol,,3
+allopurinol,Allopurinol,,3
 gelatine fluide modifiee,Gélatine fluide modifiée,,4
 concentre facteur viii,Concentré de facteur VIII,,4
 concentre facteur ix,Concentré de facteur IX,,4

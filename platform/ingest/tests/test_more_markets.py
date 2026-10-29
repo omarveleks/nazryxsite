@@ -79,3 +79,51 @@ def test_essential_lists_ship():
         assert len(rows) >= at_least, (cc, len(rows))
         names = {r["name"].lower() for r in rows}
         assert "paracetamol" in names and "amoxicillin" in names, cc
+
+
+def test_ghana_generic_from_product_name():
+    known = mm.catalogue_names()
+    assert mm.gh_generic_from_name("TAZY 250 TABLETS ( Azithromycin 250mg)", known) == "azithromycin"
+    assert mm.gh_generic_from_name("AMLODIPINE/ TELMISARTAN TABLETS", known) == "amlodipine + telmisartan"
+    assert mm.gh_generic_from_name("ARTEMETHER 20MG/LUMEFANTRINE 120MG TABLETS", known) == "artemether + lumefantrine"
+    assert mm.gh_generic_from_name("DARTKETO CREAM ( Ketoconazole 2w/w%)", known) == "ketoconazole"
+    assert mm.gh_generic_from_name("METFORMIN HYDROCHLORIDE 500 MG TABLETS BP", known) == "metformin"
+    # a brand, a supplement or a bracket full of vitamins never becomes a molecule
+    assert mm.gh_generic_from_name("GLYDA 10 TABLETS", known) is None
+    assert mm.gh_generic_from_name("NATURE'S WAY VITAMIN D3 SOFTGELS", known) is None
+    assert mm.gh_generic_from_name("PREGNACARE CAPSULES (Each capsule contains Vit B6/Vit B12/Folic Acid/Iron/Zinc)", known) is None
+    row = mm.gh_rows({"data": [{"product_category": "Drug", "classification": "POM", "product_name": "ATORVASTATIN 20 TABLETS", "generic_name": None,
+                                "registration_number": "FDA/SD.25-9", "status": "Valid", "expiry_date": "2099-01-01"}]})[0]
+    assert row["generic"] == "atorvastatin"
+
+
+def test_ghana_reads_on_when_the_certificate_has_lapsed():
+    import requests
+
+    class Reply:
+        def raise_for_status(self): pass
+        def json(self): return {"data": []}
+
+    class Session:
+        calls = []
+        def get(self, url, **kw):
+            self.calls.append(kw.get("verify", True))
+            if kw.get("verify", True):
+                raise requests.exceptions.SSLError("certificate verify failed: certificate has expired")
+            return Reply()
+
+    class Log:
+        warned = []
+        def warning(self, msg, *a): self.warned.append(msg % a)
+        def info(self, *a): pass
+
+    s, log = Session(), Log()
+    assert mm.gh_registry(s, log) == []
+    assert s.calls == [True, False] and "certificate" in log.warned[0]
+
+    class Hostile(Session):
+        def get(self, url, **kw):
+            raise requests.exceptions.SSLError("hostname mismatch")
+    import pytest
+    with pytest.raises(requests.exceptions.SSLError):
+        mm.gh_registry(Hostile(), log)

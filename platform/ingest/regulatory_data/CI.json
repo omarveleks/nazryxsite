@@ -3,54 +3,179 @@
  "regulator": "Autorité Ivoirienne de Régulation Pharmaceutique (AIRP) – https://www.airp.ci",
  "checked": "2026-10",
  "facts": [
-  {"topic": "Route", "applies": "all", "match": null, "title": "Regulator and legal basis",
+  {
+   "topic": "Route",
+   "applies": "all",
+   "match": null,
+   "title": "Regulator and legal basis",
    "body": "The AIRP, created by Law 2017-541 of 3 August 2017 (art. 18: no pharmaceutical product may be placed on the market without a marketing authorisation, the AMM) and organised by decree 2018-926, grants AMMs for medicines. Côte d'Ivoire applies the UEMOA regulation 04/2020/CM/UEMOA on homologation, so the dossier, the review clock and the five-year validity are the UEMOA ones. The AIRP publishes no searchable register of authorised medicines yet.",
-   "source": "https://civlii.laws.africa/en/akn/ci/act/2017/541/fra@2022-02-21/publication", "confidence": "high"},
-  {"topic": "Dossier", "applies": "all", "match": null, "title": "UEMOA CTD, in French",
+   "source": "https://extranet.who.int/cpcd/health-legislation/loi-ndeg-2017-541-du-3-aout-2017-relative-la-regulation-du-secteur",
+   "confidence": "high"
+  },
+  {
+   "topic": "Dossier",
+   "applies": "all",
+   "match": null,
+   "title": "UEMOA CTD, in French",
    "body": "The dossier follows the UEMOA Common Technical Document (modules 1 to 5) and is filed in French; English submissions with translated annexes draw more questions and longer cycles. Modules 2 to 5 prepared for Senegal or another UEMOA state are reused; module 1 is specific to Côte d'Ivoire.",
-   "source": "https://arp.sn/cms-assets/d02376ab-4901-470d-a8b1-8ecb8376750c", "confidence": "high"},
-  {"topic": "Timeline", "applies": "all", "match": null, "title": "120 days of regulatory time under UEMOA; 12 to 24 months in practice",
+   "source": "https://arp.sn/cms-assets/d02376ab-4901-470d-a8b1-8ecb8376750c",
+   "confidence": "high"
+  },
+  {
+   "topic": "Timeline",
+   "applies": "all",
+   "match": null,
+   "title": "120 days of regulatory time under UEMOA; 12 to 24 months in practice",
    "body": "The UEMOA regulation sets 120 days of regulatory time for a new AMM, a variation or a renewal, 360 days at most, with the clock stopped while the applicant answers. Service providers report 12 to 24 months from a clean CTD submission to the AMM in Côte d'Ivoire; the AIRP publishes no performance figures.",
-   "source": "https://arp.sn/cms-assets/d02376ab-4901-470d-a8b1-8ecb8376750c", "confidence": "medium"},
-  {"topic": "Fees", "applies": "all", "match": null, "title": "Fees set by AIRP decision 007/AIRP/CR of 24 April 2023",
+   "source": "https://arp.sn/cms-assets/d02376ab-4901-470d-a8b1-8ecb8376750c",
+   "confidence": "medium"
+  },
+  {
+   "topic": "Fees",
+   "applies": "all",
+   "match": null,
+   "title": "Fees set by AIRP decision 007/AIRP/CR of 24 April 2023",
    "body": "AMM fees are fixed by a decision of the AIRP's board (Décision 007/AIRP/CR of 24 April 2023, published 12 May 2023). The schedule is not published online; the AIRP gives it on request and each filing carries the receipt of payment. Budget for a fee in the same range as the other UEMOA states (about 1 to 2 million FCFA per product) until confirmed.",
-   "source": "https://www.leemafrique.org/fr/forms.asp", "confidence": "low"},
-  {"topic": "Route", "applies": "all", "match": null, "title": "Abridged dossier for WHO-prequalified products",
+   "source": "https://www.leemafrique.org/fr/forms.asp",
+   "confidence": "low"
+  },
+  {
+   "topic": "Route",
+   "applies": "all",
+   "match": null,
+   "title": "Abridged dossier for WHO-prequalified products",
    "body": "Under the UEMOA annexes a WHO-prequalified product files an abridged dossier through the collaborative procedure: the authority obtains WHO's assessment report and asks for modules 4 and 5 only when needed.",
-   "source": "https://arp.sn/cms-assets/d02376ab-4901-470d-a8b1-8ecb8376750c", "confidence": "medium"},
-  {"topic": "Import", "applies": "all", "match": null, "title": "Import authorisation per shipment",
+   "source": "https://arp.sn/cms-assets/d02376ab-4901-470d-a8b1-8ecb8376750c",
+   "confidence": "medium"
+  },
+  {
+   "topic": "Import",
+   "applies": "all",
+   "match": null,
+   "title": "Import authorisation per shipment",
    "body": "Each import of pharmaceutical products needs an AIRP import authorisation, filed at the AIRP mail office with the complete dossier and the fee receipt; it is valid three months, renewable once, for a single import. Medicines sit in category 0 of the UEMOA common external tariff (no customs duty, community levies apply) and are exempt from VAT.",
-   "source": "https://www.gucecotedivoire.ci/pwic/importation-des-produits-pharmaceutiques-en-ci/", "confidence": "medium"},
-  {"topic": "After approval", "applies": "all", "match": null, "title": "Essential list 2024, public procurement through the Nouvelle PSP",
+   "source": "https://www.gucecotedivoire.ci/pwic/importation-des-produits-pharmaceutiques-en-ci/",
+   "confidence": "medium"
+  },
+  {
+   "topic": "After approval",
+   "applies": "all",
+   "match": null,
+   "title": "Essential list 2024, public procurement through the Nouvelle PSP",
    "body": "The national essential medicines and biomedical equipment list (LNME 2024) is set by order 00848 MSHPCMU/CAB of 10 September 2024, with facility levels A to E and the WHO AWaRe class for antibiotics. The Nouvelle Pharmacie de la Santé Publique (NPSP-CI) buys for the public sector and aims to source 20% locally by 2026 and 40% by 2028. Pharmacy prices are regulated.",
-   "source": "https://cdn.who.int/media/docs/default-source/essential-medicines/national-essential-medicines-lists-(neml)/afro_neml/cote-d-ivoire_neml_2024_compressed.pdf", "confidence": "medium"},
-  {"topic": "After approval", "applies": "all", "match": null, "title": "Five-year validity, suspensions published",
+   "source": "https://cdn.who.int/media/docs/default-source/essential-medicines/national-essential-medicines-lists-(neml)/afro_neml/cote-d-ivoire_neml_2024_compressed.pdf",
+   "confidence": "medium"
+  },
+  {
+   "topic": "After approval",
+   "applies": "all",
+   "match": null,
+   "title": "Five-year validity, suspensions published",
    "body": "An AMM is valid five years (UEMOA regulation 04/2020). The AIRP publishes suspensions and withdrawals of AMMs and runs market surveillance campaigns on quality.",
-   "source": "https://www.koaci.com/article/2022/12/14/cote-divoire/societe/cote-divoire-sante-suspension-des-autorisations-de-mise-sur-le-marche-de-trois-medicaments_165464.html", "confidence": "medium"}
+   "source": "https://www.koaci.com/article/2022/12/14/cote-divoire/societe/cote-divoire-sante-suspension-des-autorisations-de-mise-sur-le-marche-de-trois-medicaments_165464.html",
+   "confidence": "medium"
+  }
  ],
  "routes": [
-  {"key": "full", "label": "Full review (UEMOA national procedure)",
+  {
+   "key": "full",
+   "label": "Full review (UEMOA national procedure)",
    "description": "Default route: UEMOA CTD in French filed with the AIRP, screening, expert evaluation, national commission, AMM. 120 days of regulatory time under the regulation; 12 to 24 months reported in practice. Fee per AIRP decision 007/2023, given on request.",
-   "months_low": 10, "months_high": 24, "fee_usd_low": null, "fee_usd_high": null,
-   "source": "https://civlii.laws.africa/en/akn/ci/act/2017/541/fra@2022-02-21/publication", "confidence": "low"},
-  {"key": "reliance", "label": "WHO prequalification (abridged dossier)",
+   "months_low": 10,
+   "months_high": 24,
+   "fee_usd_low": null,
+   "fee_usd_high": null,
+   "source": "https://extranet.who.int/cpcd/health-legislation/loi-ndeg-2017-541-du-3-aout-2017-relative-la-regulation-du-secteur",
+   "confidence": "low"
+  },
+  {
+   "key": "reliance",
+   "label": "WHO prequalification (abridged dossier)",
    "description": "A WHO-prequalified product files an abridged dossier under the collaborative procedure; the AIRP relies on WHO's assessment report.",
-   "months_low": 4, "months_high": 10, "fee_usd_low": null, "fee_usd_high": null,
-   "source": "https://arp.sn/cms-assets/d02376ab-4901-470d-a8b1-8ecb8376750c", "confidence": "low"}
+   "months_low": 4,
+   "months_high": 10,
+   "fee_usd_low": null,
+   "fee_usd_high": null,
+   "source": "https://arp.sn/cms-assets/d02376ab-4901-470d-a8b1-8ecb8376750c",
+   "confidence": "low"
+  }
  ],
  "documents": [
-  {"name": "AMM application letter to the AIRP, in French", "applies": "all", "match": null, "note": null, "source": "https://civlii.laws.africa/en/akn/ci/act/2017/541/fra@2022-02-21/publication"},
-  {"name": "UEMOA CTD modules 1 to 5, in French", "applies": "all", "match": null, "note": "Module 1 specific to Côte d'Ivoire", "source": "https://arp.sn/cms-assets/d02376ab-4901-470d-a8b1-8ecb8376750c"},
-  {"name": "Receipt of the AIRP fee (decision 007/AIRP/CR of 2023)", "applies": "all", "match": null, "note": null, "source": "https://www.leemafrique.org/fr/forms.asp"},
-  {"name": "GMP certificate of each manufacturing site", "applies": "all", "match": null, "note": null, "source": "https://arp.sn/cms-assets/d02376ab-4901-470d-a8b1-8ecb8376750c"},
-  {"name": "Certificate of pharmaceutical product (WHO format)", "applies": "all", "match": null, "note": null, "source": "https://arp.sn/cms-assets/d02376ab-4901-470d-a8b1-8ecb8376750c"},
-  {"name": "Summary of product characteristics, leaflet and labels in French", "applies": "all", "match": null, "note": null, "source": "https://arp.sn/cms-assets/d02376ab-4901-470d-a8b1-8ecb8376750c"},
-  {"name": "Bioequivalence study against the reference product", "applies": "form", "match": "tablet|capsule|oral", "note": "Multisource oral solid forms", "source": "https://arp.sn/cms-assets/d02376ab-4901-470d-a8b1-8ecb8376750c"},
-  {"name": "Stability data for zone IVb (30 °C / 75% RH)", "applies": "all", "match": null, "note": null, "source": "https://arp.sn/cms-assets/d02376ab-4901-470d-a8b1-8ecb8376750c"},
-  {"name": "Registration samples with batch certificates of analysis", "applies": "all", "match": null, "note": null, "source": "https://arp.sn/cms-assets/d02376ab-4901-470d-a8b1-8ecb8376750c"},
-  {"name": "Import authorisation for each shipment after approval", "applies": "all", "match": null, "note": "Valid three months, renewable once, one import", "source": "https://www.gucecotedivoire.ci/pwic/importation-des-produits-pharmaceutiques-en-ci/"}
+  {
+   "name": "AMM application letter to the AIRP, in French",
+   "applies": "all",
+   "match": null,
+   "note": null,
+   "source": "https://extranet.who.int/cpcd/health-legislation/loi-ndeg-2017-541-du-3-aout-2017-relative-la-regulation-du-secteur"
+  },
+  {
+   "name": "UEMOA CTD modules 1 to 5, in French",
+   "applies": "all",
+   "match": null,
+   "note": "Module 1 specific to Côte d'Ivoire",
+   "source": "https://arp.sn/cms-assets/d02376ab-4901-470d-a8b1-8ecb8376750c"
+  },
+  {
+   "name": "Receipt of the AIRP fee (decision 007/AIRP/CR of 2023)",
+   "applies": "all",
+   "match": null,
+   "note": null,
+   "source": "https://www.leemafrique.org/fr/forms.asp"
+  },
+  {
+   "name": "GMP certificate of each manufacturing site",
+   "applies": "all",
+   "match": null,
+   "note": null,
+   "source": "https://arp.sn/cms-assets/d02376ab-4901-470d-a8b1-8ecb8376750c"
+  },
+  {
+   "name": "Certificate of pharmaceutical product (WHO format)",
+   "applies": "all",
+   "match": null,
+   "note": null,
+   "source": "https://arp.sn/cms-assets/d02376ab-4901-470d-a8b1-8ecb8376750c"
+  },
+  {
+   "name": "Summary of product characteristics, leaflet and labels in French",
+   "applies": "all",
+   "match": null,
+   "note": null,
+   "source": "https://arp.sn/cms-assets/d02376ab-4901-470d-a8b1-8ecb8376750c"
+  },
+  {
+   "name": "Bioequivalence study against the reference product",
+   "applies": "form",
+   "match": "tablet|capsule|oral",
+   "note": "Multisource oral solid forms",
+   "source": "https://arp.sn/cms-assets/d02376ab-4901-470d-a8b1-8ecb8376750c"
+  },
+  {
+   "name": "Stability data for zone IVb (30 °C / 75% RH)",
+   "applies": "all",
+   "match": null,
+   "note": null,
+   "source": "https://arp.sn/cms-assets/d02376ab-4901-470d-a8b1-8ecb8376750c"
+  },
+  {
+   "name": "Registration samples with batch certificates of analysis",
+   "applies": "all",
+   "match": null,
+   "note": null,
+   "source": "https://arp.sn/cms-assets/d02376ab-4901-470d-a8b1-8ecb8376750c"
+  },
+  {
+   "name": "Import authorisation for each shipment after approval",
+   "applies": "all",
+   "match": null,
+   "note": "Valid three months, renewable once, one import",
+   "source": "https://www.gucecotedivoire.ci/pwic/importation-des-produits-pharmaceutiques-en-ci/"
+  }
  ],
  "news": [
-  {"name": "AIRP (regulator site)", "url": "https://www.airp.ci/"}
+  {
+   "name": "AIRP (regulator site)",
+   "url": "https://www.airp.ci/"
+  }
  ]
 }

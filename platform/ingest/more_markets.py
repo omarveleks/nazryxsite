@@ -7,9 +7,13 @@ Ethiopia's eRIS needs a login and Uganda's register sits behind a bot challenge:
 Each site is read once a week, one request a second."""
 import csv
 import datetime as dt
+import functools
 import io
+import os
 import re
 import time
+
+import requests
 
 TODAY = dt.date.today()
 PAUSE = 1.0
@@ -79,7 +83,7 @@ def gh_row(r):
         active = False
     maker = _clean((r.get("manufacturer") or "").split(",")[0])
     agent = _clean((r.get("representative_company_local_agent_applicant") or r.get("client_name") or "").split(",")[0])
-    generic = gh_generic(r.get("generic_name"))
+    generic = gh_generic(r.get("generic_name")) or gh_generic_from_name(r.get("product_name"), catalogue_names())
     form = _clean(r.get("dosage_form_indication"))
     if form and (form.lower() == (r.get("generic_name") or "").strip().lower() or (generic and form.lower() == generic)):
         form = None
@@ -89,8 +93,55 @@ def gh_row(r):
                 status="Registered" if active else "Expired", active=active)
 
 
+GH_FORMS = re.compile(r"\b(?:tablets?|tabs?|caplets?|capsules?|caps?|injection|injections|inj|syrup|suspension|solution|oral|cream|gel|ointment|lotion|"
+                      r"drops?|inhaler|inhalation|powder|infusion|sachets?|lozenges?|spray|eye|ear|nasal|vaginal|rectal|pessar(?:y|ies)|suppositor(?:y|ies)|"
+                      r"ophthalmic|opthalmic|dispersible|effervescent|chewable|soluble|film[- ]coated|coated|sr|xr|er|mr|cr|la|forte|plus|iv|im|bp|usp|ip|ep|"
+                      r"for|in|with|and|kit|vial|vials|ampoules?|amps?|bottle|strip|blister|pack|co|dt)\b", re.I)
+GH_STRENGTH = re.compile(r"\d+(?:[.,]\d+)?\s*(?:mg|mcg|µg|g|ml|iu|%|w/w|w/v|v/v)*(?:\s*/\s*(?:\d+(?:[.,]\d+)?\s*(?:mg|mcg|µg|ml|g|iu|%|w/w|w/v|v/v)*|(?:mg|mcg|µg|ml|g|iu|%)))*", re.I)
+GH_SALTS = re.compile(r"\b(?:hydrochloride|hcl|dihydrochloride|hydrobromide|sodium|disodium|potassium|calcium|magnesium|besylate|besilate|maleate|mesylate|"
+                      r"fumarate|succinate|tartrate|citrate|hyclate|monohydrate|dihydrate|trihydrate|anhydrous|acetate|phosphate|sulfate|sulphate|"
+                      r"propionate|dipropionate|valerate|xinafoate|diethylamine|base)\b", re.I)
+
+
+@functools.lru_cache(maxsize=1)
+def catalogue_names():
+    """Lower-case names of the medicines catalogue shipped with the worker: the only generics a brand name is allowed to become."""
+    path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "catalog", "medicines.csv")
+    with open(path, encoding="utf-8") as f:
+        return frozenset(r["name"].strip().lower() for r in csv.DictReader(f) if r.get("name"))
+
+
+def gh_generic_from_name(name, known):
+    """The generic for a product the registry lists without one: the INN in brackets after the brand
+    ('TAZY 250 TABLETS ( Azithromycin 250mg)' -> 'azithromycin'), or a product named after its molecules
+    ('ATORVASTATIN 20 TABLETS', 'AMLODIPINE/ TELMISARTAN TABLETS'). A brand that is not a catalogue molecule stays nameless."""
+    name = str(name or "")
+    m = re.search(r"\(([^()]{4,})\)", name)
+    if m:
+        g = gh_generic(GH_STRENGTH.sub(" ", m.group(1)))
+        parts = [re.sub(r"\s+", " ", GH_SALTS.sub(" ", p)).strip() for p in (g or "").split(" + ") if p]
+        if parts and all(p in known for p in parts):
+            return " + ".join(dict.fromkeys(parts))
+    base = GH_STRENGTH.sub(" ", re.sub(r"\(.*?\)", " ", name))
+    base = GH_FORMS.sub(" ", GH_SALTS.sub(" ", base))
+    parts = [re.sub(r"[^a-z ]+", " ", p.lower()).strip() for p in re.split(r"\s*(?:/|\+|&)\s*", base)]
+    parts = [re.sub(r"\s+", " ", p) for p in parts if p.strip()]
+    if 1 <= len(parts) <= 4 and all(p in known for p in parts):
+        return " + ".join(dict.fromkeys(parts))
+    return None
+
+
 def gh_registry(s, log=None):
-    r = s.get(GH, params=GH_PARAMS, headers={**UA, "X-Requested-With": "XMLHttpRequest", "Accept": "application/json"}, timeout=600)
+    hdr = {**UA, "X-Requested-With": "XMLHttpRequest", "Accept": "application/json"}
+    try:
+        r = s.get(GH, params=GH_PARAMS, headers=hdr, timeout=600)
+    except requests.exceptions.SSLError as e:
+        if "certificate has expired" not in str(e):
+            raise
+        # the FDA lets its 90-day certificate lapse now and then; the register is public data, so read on and say so
+        if log:
+            log.warning("fdaghana: the site's TLS certificate has expired; read without verification until the FDA renews it")
+        r = s.get(GH, params=GH_PARAMS, headers=hdr, timeout=600, verify=False)
     r.raise_for_status()
     rows = gh_rows(r.json())
     if log:

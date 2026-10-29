@@ -3,57 +3,187 @@
  "regulator": "National Drug Authority (NDA) – https://www.nda.or.ug",
  "checked": "2026-10",
  "facts": [
-  {"topic": "Route", "applies": "all", "match": null, "title": "Regulator and legal basis",
+  {
+   "topic": "Route",
+   "applies": "all",
+   "match": null,
+   "title": "Regulator and legal basis",
    "body": "The NDA registers human medicines under the National Drug Policy and Authority Act (Cap. 206), being replaced by the National Drug and Health Products Authority Act, 2026. The National Drug Register (over 4,000 human, veterinary and public-health products) is public: a search on the NDA site and monthly PDF lists per category. Uganda is a WHO Maturity Level 3 regulator and takes part in the East African Community joint assessment.",
-   "source": "https://www.nda.or.ug/", "confidence": "high"},
-  {"topic": "Local representative", "applies": "all", "match": null, "title": "A local technical representative",
+   "source": "https://www.nda.or.ug/",
+   "confidence": "high"
+  },
+  {
+   "topic": "Local representative",
+   "applies": "all",
+   "match": null,
+   "title": "A local technical representative",
    "body": "A foreign licence holder appoints a local technical representative licensed by the NDA in Uganda, named on the register with the licence holder; the representative files, answers queries and handles pharmacovigilance and recalls.",
-   "source": "https://www.nda.or.ug/wp-content/uploads/2024/07/NATIONAL-DRUG-REGISTER-OF-UGANDA-HUMAN-MEDICINES-JULY-2024-1.pdf", "confidence": "high"},
-  {"topic": "Timeline", "applies": "all", "match": null, "title": "90-day verification route; 8 to 18 months otherwise",
+   "source": "https://www.nda.or.ug/wp-content/uploads/2024/07/NATIONAL-DRUG-REGISTER-OF-UGANDA-HUMAN-MEDICINES-JULY-2024-1.pdf",
+   "confidence": "high"
+  },
+  {
+   "topic": "Timeline",
+   "applies": "all",
+   "match": null,
+   "title": "90-day verification route; 8 to 18 months otherwise",
    "body": "The NDA runs a verification (reliance) review with a 90-day target for products approved by stringent regulators or WHO prequalified, abridged reviews and a priority track. Service providers report 8 to 12 months for an abridged generic, 12 to 18 months for a full review and 4 to 6 months for WHO-prequalified products. The NDA's service delivery timelines were revised in July 2024.",
-   "source": "https://www.frontiersin.org/journals/medicine/articles/10.3389/fmed.2024.1438041/full", "confidence": "medium"},
-  {"topic": "Site and GMP", "applies": "all", "match": null, "title": "NDA GMP inspection of the foreign site",
-   "body": "Each foreign manufacturing site is inspected by the NDA (or recognised through EAC joint inspections, PIC/S or WHO prequalification) before registration; the inspection is charged separately and the applicant pays travel. Budget USD 4,000 to 15,000 per site plus expenses.",
-   "source": "https://www.hamadco.in/insights/uganda-nda-drug-registration", "confidence": "low"},
-  {"topic": "Fees", "applies": "all", "match": null, "title": "Registration fees",
-   "body": "Registration fees are set per product in the NDA fees schedule: about USD 500 per product for registration (older guides) with ranges of USD 300 to 1,200 reported by service providers, plus annual retention and the separate GMP inspection fee. Confirm the current schedule with the NDA.",
-   "source": "https://www.pharmabiz.com/Services/ExportImport/Countries/Uganda.aspx", "confidence": "low"},
-  {"topic": "Dossier", "applies": "all", "match": null, "title": "CTD in the EAC format",
+   "source": "https://www.frontiersin.org/journals/medicine/articles/10.3389/fmed.2024.1438041/full",
+   "confidence": "medium"
+  },
+  {
+   "topic": "Site and GMP",
+   "applies": "all",
+   "match": null,
+   "title": "NDA GMP inspection of the foreign site",
+   "body": "Each foreign manufacturing site is inspected by the NDA (or recognised through EAC joint inspections, PIC/S or WHO prequalification) before registration; the inspection is charged separately and the applicant pays travel. The 2014 fee regulations priced it at USD 3,000 (East Africa), 4,000 (rest of Africa) and 6,000 (outside Africa) per site; under the 2025 regulations importers report USD 8,000 per product category for a site outside Africa, up to USD 24,000.",
+   "source": "https://observer.ug/business/ugandans-face-scarcity-and-expensive-drugs-on-market/",
+   "confidence": "medium"
+  },
+  {
+   "topic": "Fees",
+   "applies": "all",
+   "match": null,
+   "title": "Fees: USD 1,250 to register, USD 500 a year to keep",
+   "body": "The National Drug Policy and Authority (Fees) Regulations, 2014 set the first registration of an imported human medicine at USD 1,250 per product and the annual retention of a registered product at USD 500; a general import permit costs UGX 300,000 and each commercial consignment pays a 2% verification fee on the FOB value. New Fees Regulations took effect on 1 October 2025; importers quoted USD 1,500 per registered item and the same USD 500 retention in October 2025. Confirm the current line with the NDA before budgeting.",
+   "source": "https://ugandatrades.go.ug/media/Drug%20Fees%20Regulation_1.pdf",
+   "confidence": "medium"
+  },
+  {
+   "topic": "Dossier",
+   "applies": "all",
+   "match": null,
+   "title": "CTD in the EAC format",
    "body": "The dossier follows the East African Community CTD (modules 1 to 5) in English, with GMP evidence, a certificate of pharmaceutical product, bioequivalence for multisource oral solid forms, stability for zone IVb and samples for the National Drug Quality Control Laboratory.",
-   "source": "https://omcmedical.com/ministry-of-health-uganda-approval-processes-for-pharmaceutical-products", "confidence": "medium"},
-  {"topic": "Import", "applies": "all", "match": null, "title": "Duty-free and VAT-exempt medicines",
+   "source": "https://omcmedical.com/ministry-of-health-uganda-approval-processes-for-pharmaceutical-products",
+   "confidence": "medium"
+  },
+  {
+   "topic": "Import",
+   "applies": "all",
+   "match": null,
+   "title": "Duty-free and VAT-exempt medicines",
    "body": "Medicines enter at 0% under the East African Community Common External Tariff and are exempt from VAT under the VAT Act (with the Uganda Revenue Authority listing the covered items); each shipment needs an NDA import verification.",
-   "source": "https://ura.go.ug/en/pharmaceutical-manufacturers/", "confidence": "medium"},
-  {"topic": "After approval", "applies": "all", "match": null, "title": "Essential list 2023, public procurement through NMS",
+   "source": "https://ura.go.ug/en/pharmaceutical-manufacturers/",
+   "confidence": "medium"
+  },
+  {
+   "topic": "After approval",
+   "applies": "all",
+   "match": null,
+   "title": "Essential list 2023, public procurement through NMS",
    "body": "The Essential Medicines and Health Supplies List of Uganda (EMHSLU 2023) sets levels of use (HC1 to NR) and a vital/essential/necessary class; National Medical Stores buys for public facilities and the Joint Medical Store for faith-based ones.",
-   "source": "https://guluhospital.net/wp-content/uploads/2023/11/Uganda-Essential-Medicines-Health-Supplies-List-2023.pdf", "confidence": "medium"}
+   "source": "https://guluhospital.net/wp-content/uploads/2023/11/Uganda-Essential-Medicines-Health-Supplies-List-2023.pdf",
+   "confidence": "medium"
+  }
  ],
  "routes": [
-  {"key": "full", "label": "Full review (NDA)",
-   "description": "EAC CTD through a local technical representative, NDA GMP inspection of the site, samples to the national laboratory. 12 to 18 months in practice; fee per product plus the inspection.",
-   "months_low": 12, "months_high": 18, "fee_usd_low": 500, "fee_usd_high": 1200,
-   "source": "https://www.hamadco.in/insights/uganda-nda-drug-registration", "confidence": "low"},
-  {"key": "reliance", "label": "Verification review (stringent approval or WHO prequalification)",
+  {
+   "key": "full",
+   "label": "Full review (NDA)",
+   "description": "EAC CTD through a local technical representative, NDA GMP inspection of the site, samples to the national laboratory. 12 to 18 months in practice; USD 1,250 to 1,500 per product plus USD 500 a year retention and the inspection.",
+   "months_low": 12,
+   "months_high": 18,
+   "fee_usd_low": 1250,
+   "fee_usd_high": 1500,
+   "source": "https://ugandatrades.go.ug/media/Drug%20Fees%20Regulation_1.pdf",
+   "confidence": "medium"
+  },
+  {
+   "key": "reliance",
+   "label": "Verification review (stringent approval or WHO prequalification)",
    "description": "For products approved by a stringent regulator or WHO prequalified: verification review with a 90-day target, GMP recognised; 4 to 6 months in practice.",
-   "months_low": 3, "months_high": 6, "fee_usd_low": 500, "fee_usd_high": 1200,
-   "source": "https://www.frontiersin.org/journals/medicine/articles/10.3389/fmed.2024.1438041/full", "confidence": "low"},
-  {"key": "eac", "label": "EAC joint assessment",
+   "months_low": 3,
+   "months_high": 6,
+   "fee_usd_low": 1250,
+   "fee_usd_high": 1500,
+   "source": "https://www.frontiersin.org/journals/medicine/articles/10.3389/fmed.2024.1438041/full",
+   "confidence": "low"
+  },
+  {
+   "key": "eac",
+   "label": "EAC joint assessment",
    "description": "One dossier assessed jointly by the EAC regulators (Uganda, Kenya, Tanzania, Rwanda, Burundi, South Sudan), then national registration in each; Uganda recognises the joint outcome.",
-   "months_low": 8, "months_high": 14, "fee_usd_low": 500, "fee_usd_high": 1200,
-   "source": "https://www.nda.or.ug/", "confidence": "low"}
+   "months_low": 8,
+   "months_high": 14,
+   "fee_usd_low": 1250,
+   "fee_usd_high": 1500,
+   "source": "https://www.nda.or.ug/",
+   "confidence": "low"
+  }
  ],
  "documents": [
-  {"name": "Appointment of a local technical representative licensed by the NDA", "applies": "all", "match": null, "note": null, "source": "https://www.nda.or.ug/"},
-  {"name": "EAC CTD modules 1 to 5 in English", "applies": "all", "match": null, "note": null, "source": "https://omcmedical.com/ministry-of-health-uganda-approval-processes-for-pharmaceutical-products"},
-  {"name": "GMP certificate of each site and NDA inspection or recognition", "applies": "all", "match": null, "note": "Inspection charged separately", "source": "https://www.hamadco.in/insights/uganda-nda-drug-registration"},
-  {"name": "Certificate of pharmaceutical product (WHO format)", "applies": "all", "match": null, "note": null, "source": "https://omcmedical.com/ministry-of-health-uganda-approval-processes-for-pharmaceutical-products"},
-  {"name": "Samples for the National Drug Quality Control Laboratory", "applies": "all", "match": null, "note": null, "source": "https://omcmedical.com/ministry-of-health-uganda-approval-processes-for-pharmaceutical-products"},
-  {"name": "Bioequivalence study against the comparator", "applies": "form", "match": "tablet|capsule|oral", "note": null, "source": "https://omcmedical.com/ministry-of-health-uganda-approval-processes-for-pharmaceutical-products"},
-  {"name": "Stability data for zone IVb (30 °C / 75% RH)", "applies": "all", "match": null, "note": null, "source": "https://omcmedical.com/ministry-of-health-uganda-approval-processes-for-pharmaceutical-products"},
-  {"name": "Labels and leaflet in English", "applies": "all", "match": null, "note": null, "source": "https://omcmedical.com/ministry-of-health-uganda-approval-processes-for-pharmaceutical-products"},
-  {"name": "Proof of payment of the NDA registration fee", "applies": "all", "match": null, "note": null, "source": "https://www.nda.or.ug/"}
+  {
+   "name": "Appointment of a local technical representative licensed by the NDA",
+   "applies": "all",
+   "match": null,
+   "note": null,
+   "source": "https://www.nda.or.ug/"
+  },
+  {
+   "name": "EAC CTD modules 1 to 5 in English",
+   "applies": "all",
+   "match": null,
+   "note": null,
+   "source": "https://omcmedical.com/ministry-of-health-uganda-approval-processes-for-pharmaceutical-products"
+  },
+  {
+   "name": "GMP certificate of each site and NDA inspection or recognition",
+   "applies": "all",
+   "match": null,
+   "note": "Inspection charged separately",
+   "source": "https://www.hamadco.in/insights/uganda-nda-drug-registration"
+  },
+  {
+   "name": "Certificate of pharmaceutical product (WHO format)",
+   "applies": "all",
+   "match": null,
+   "note": null,
+   "source": "https://omcmedical.com/ministry-of-health-uganda-approval-processes-for-pharmaceutical-products"
+  },
+  {
+   "name": "Samples for the National Drug Quality Control Laboratory",
+   "applies": "all",
+   "match": null,
+   "note": null,
+   "source": "https://omcmedical.com/ministry-of-health-uganda-approval-processes-for-pharmaceutical-products"
+  },
+  {
+   "name": "Bioequivalence study against the comparator",
+   "applies": "form",
+   "match": "tablet|capsule|oral",
+   "note": null,
+   "source": "https://omcmedical.com/ministry-of-health-uganda-approval-processes-for-pharmaceutical-products"
+  },
+  {
+   "name": "Stability data for zone IVb (30 °C / 75% RH)",
+   "applies": "all",
+   "match": null,
+   "note": null,
+   "source": "https://omcmedical.com/ministry-of-health-uganda-approval-processes-for-pharmaceutical-products"
+  },
+  {
+   "name": "Labels and leaflet in English",
+   "applies": "all",
+   "match": null,
+   "note": null,
+   "source": "https://omcmedical.com/ministry-of-health-uganda-approval-processes-for-pharmaceutical-products"
+  },
+  {
+   "name": "Proof of payment of the NDA registration fee",
+   "applies": "all",
+   "match": null,
+   "note": null,
+   "source": "https://www.nda.or.ug/"
+  },
+  {
+   "name": "National Drug Policy and Authority (Fees) Regulations, 2014 (SI 31 of 2014)",
+   "url": "https://ugandatrades.go.ug/media/Drug%20Fees%20Regulation_1.pdf"
+  }
  ],
  "news": [
-  {"name": "NDA Uganda news", "url": "https://www.nda.or.ug/news/"}
+  {
+   "name": "NDA Uganda news",
+   "url": "https://www.nda.or.ug/news/"
+  }
  ]
 }

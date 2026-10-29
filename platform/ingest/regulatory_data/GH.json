@@ -34,8 +34,8 @@
    "topic": "Fees",
    "applies": "all",
    "match": null,
-   "title": "Fees: USD 1,200 per application, USD 240 a year",
-   "body": "A new, fast-track, reliance or renewal application costs USD 1,200 (2025 review of FDA requirements). The FDA's approved fees and charges then set the annual registration fee at the cedi equivalent of USD 240 for an imported allopathic medicine and USD 360 for a new chemical entity (orphan drugs USD 60); variations for foreign products USD 500 (major) and USD 300 (minor); label evaluation USD 100 per product and variant; laboratory sample USD 200. An FDA import levy of 1.80% of CIF value applies to drugs.",
+   "title": "Fees: USD 240 a year for an imported medicine (2023 schedule)",
+   "body": "The Fees and Charges (Miscellaneous Provisions) Regulations, 2023 (L.I. 2481) set the registration and re-registration fee for an imported allopathic medicine at the cedi equivalent of USD 240 per annum; a new chemical entity or a biological pays USD 360, an orphan drug USD 60. Variations for foreign products cost USD 500 (major) and USD 300 (minor); label evaluation USD 100 per product and variant; laboratory sample USD 200. Before 2023 (L.I. 2228 of 2016) an imported product paid USD 3,600 for a three-year registration, the 'USD 1,200 a year' still quoted by service providers. An FDA import levy of 1.80% of CIF value applies to drugs.",
    "source": "https://fdaghana.gov.gh/wp-content/uploads/2024/01/appfees.pdf",
    "confidence": "high"
   },
@@ -80,23 +80,23 @@
   {
    "key": "full",
    "label": "Full review (FDA Ghana)",
-   "description": "CTD through a Ghanaian local agent after FDA GMP approval of the site (audit USD 10,500 or a stringent-regulator waiver), samples to the FDA laboratory. Six-month target; median about 70 days in 2024 reviews. USD 1,200 per application, then USD 240 a year (USD 360 for a new chemical entity).",
+   "description": "CTD through a Ghanaian local agent after FDA GMP approval of the site (audit USD 10,500 or a stringent-regulator waiver), samples to the FDA laboratory. Six-month target; median about 70 days in 2024 reviews. USD 240 a year for an imported medicine under the 2023 fee schedule (USD 360 for a new chemical entity or biological), so about USD 720 over a three-year registration.",
    "months_low": 3,
    "months_high": 9,
-   "fee_usd_low": 1200,
-   "fee_usd_high": 1200,
+   "fee_usd_low": 240,
+   "fee_usd_high": 720,
    "source": "https://fdaghana.gov.gh/wp-content/uploads/2024/01/appfees.pdf",
    "confidence": "medium"
   },
   {
    "key": "reliance",
    "label": "Reliance / fast-track",
-   "description": "For products approved by a stringent regulator or WHO prequalified: reliance review with a 90-day target; fast-track for priorities in 180 days. Same USD 1,200 fee.",
+   "description": "For products approved by a stringent regulator or WHO prequalified: reliance review with a 90-day target; fast-track for priorities in 180 days. Same fee: USD 240 a year (USD 360 for a new chemical entity).",
    "months_low": 2,
    "months_high": 4,
-   "fee_usd_low": 1200,
-   "fee_usd_high": 1200,
-   "source": "https://www.ijdra.com/index.php/journal/article/download/767/406",
+   "fee_usd_low": 240,
+   "fee_usd_high": 720,
+   "source": "https://fdaghana.gov.gh/wp-content/uploads/2024/01/appfees.pdf",
    "confidence": "medium"
   }
  ],
@@ -168,7 +168,7 @@
  "news": [
   {
    "name": "FDA Ghana press releases and alerts",
-   "url": "https://fdaghana.gov.gh/press-releases/"
+   "url": "https://fdaghana.gov.gh/newsroom/press-release/"
   },
   {
    "name": "FDA Ghana fee schedule",
