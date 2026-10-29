@@ -65,7 +65,7 @@ check(tm.includes('My products') && tm.includes('Regulatory') && tm.includes('Ad
   && (await t.locator('main').innerText()).includes('Register these first'), 'the team works on the manufacturer side, with Admin');
 await t.goto(B + '/m/market?market=TZ'); await t.waitForLoadState('networkidle');
 const mkt = await t.locator('main').innerText();
-check(!mkt.includes('Uganda') && mkt.includes('Add your products'), 'manufacturer market has one market switch and no empty catalogue line');
+check(mkt.includes('Tanzania') && mkt.includes('Add your products'), 'manufacturer market opens on Tanzania with the add-products line');
 for (const tab of ['', '?tab=review', '?tab=documents', '?tab=manufacturers', '?tab=accounts', '?tab=content', '?tab=billing', '?tab=activity', '?tab=regulatory', '?tab=calls', '?tab=team']) {
   const r = await t.goto(B + '/admin' + tab); check(r.status() === 200, `admin ${tab || 'data updates'}`);
 }

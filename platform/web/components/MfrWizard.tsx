@@ -54,9 +54,9 @@ export default function MfrWizard({ q, p, products, error, note, found = [], lan
               <div className="card stack" style={{ borderColor: 'var(--blue)' }}>
                 <span className="lbl">{t('We found you in the registers')}</span>
                 {[...byCompany.entries()].map(([id, x]) => (
-                  <label key={id} className="choice"><input type="checkbox" name="claim" value={id} defaultChecked />
+                  <label key={id} className="choice"><input type="checkbox" name="claim" value={id} />
                     <span><b>{x.name}</b>: {x.n} registered {x.n === 1 ? 'product' : 'products'} in {x.markets.join(', ')}</span></label>))}
-                <span className="note">{t('Tick what is yours. Those products go straight into your portfolio, marked as registered by you, and we skip asking for them.')}</span>
+                <span className="note">{t('Tick only what is yours: a similar name can be another company. Those products go straight into your portfolio, marked as registered by you, and we skip asking for them.')}</span>
               </div>)}
             <div className="grid g2">{CORE_MARKETS.map((c) => (
               <label key={c.code} className="choice"><input type="checkbox" name="target_countries" value={c.code}
