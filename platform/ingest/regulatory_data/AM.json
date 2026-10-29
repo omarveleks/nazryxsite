@@ -1,0 +1,56 @@
+{
+ "country": "AM",
+ "regulator": "Scientific Centre of Drug and Medical Technology Expertise (SCDMTE), Ministry of Health – https://pharm.am",
+ "checked": "2026-10",
+ "facts": [
+  {"topic": "Route", "applies": "all", "match": null, "title": "Regulator and legal basis",
+   "body": "Medicines are registered by the Ministry of Health on the expertise of the Scientific Centre of Drug and Medical Technology Expertise, under the Law on Medicines and Government Decree 162-N of 28 February 2019. Armenia is in the Eurasian Economic Union: registration runs under the EAEU rules (Decision 78 of 3 November 2016) or, for the time being, under a national procedure (temporary rule, Ministry Order 3273-A of 30 May 2025). The Centre publishes a searchable database of registered medicines in English and Armenian.",
+   "source": "https://pharm.am/index.php/en/news-and-announcements/9879-order-n3273-a-of-may-30-2025-on-acceptance-of-applications-for-state-registration-of-medicines-for-human-use-in-accordance-with-the-temporary-rule-in-republic-of-armenia-and-on-repeal-of-order-n4896-a-of-september-11-2024-of-ministry-of-health", "confidence": "high"},
+  {"topic": "Timeline", "applies": "all", "match": null, "title": "National procedure up to 150 days; 30 days for recognised approvals",
+   "body": "The national procedure takes up to 150 calendar days. An accelerated procedure of about 30 days applies to medicines already registered in the EU, the USA or Japan, or prequalified by WHO. The EAEU procedure allows 210 days with Armenia as reference state and 100 days for recognition.",
+   "source": "https://deltaswiss.eu/delta-medical-armenia/pharmaceutical-registrations-armenia/", "confidence": "medium"},
+  {"topic": "Fees", "applies": "all", "match": null, "title": "State duty and expertise fees",
+   "body": "A state duty of AMD 40,000 (about USD 100) applies to registration; the Centre's expertise is priced by its paid-services order (029-A of 14 February 2022), with state fees for examination charged since May 2024 under the Law on State Duty. Ask the Centre for a quote per product.",
+   "source": "https://pharm.am/index.php/en/news-and-announcements/6952-order-on-approval-of-the-price-list-of-paid-services-provided-by-the-scientific-center-of-drug-and-medical-technologies-expertise-n-029-a-22-of-february-14-2022", "confidence": "low"},
+  {"topic": "Dossier", "applies": "all", "match": null, "title": "CTD, GMP, samples; Armenian labelling",
+   "body": "The dossier follows the CTD (EAEU format), with GMP certificates for each site (the Centre is a PIC/S-style inspectorate and recognises PIC/S and EAEU GMP), samples for laboratory control, and the patient leaflet and labels in Armenian.",
+   "source": "https://pharm.am/index.php/en/guide-to-using-database-of-registered-medicines", "confidence": "medium"},
+  {"topic": "After approval", "applies": "all", "match": null, "title": "Validity of national registrations",
+   "body": "National registrations run five years; the Centre has published the terms of validity of registrations granted under the national procedure as the market moves to EAEU registration. Renewals and variations follow the EAEU rules.",
+   "source": "https://pharm.am/index.php/en/news-and-announcements/10002-the-terms-of-validity-of-registrations-of-medicine-products-under-the-national-procedure", "confidence": "medium"},
+  {"topic": "Pricing", "applies": "all", "match": null, "title": "VAT and prescription rules",
+   "body": "Medicines are subject to the standard 20% VAT in Armenia (a 2017 proposal to exempt them was declined); prices are not state-regulated. Prescription-only sale is being phased in with an electronic prescription system.",
+   "source": "https://arka.am/en/news/society/armenian_government_declines_proposal_to_free_import_and_sale_of_medicines_from_vat/", "confidence": "low"},
+  {"topic": "After approval", "applies": "all", "match": null, "title": "Essential medicines list 2025",
+   "body": "The Ministry approved an essential medicines list in 2025; the Centre publishes it with its lists of prescription and over-the-counter medicines.",
+   "source": "https://pharm.am/index.php/en/news-and-announcements/9761-essential-medicines-list-2025", "confidence": "medium"}
+ ],
+ "routes": [
+  {"key": "eaeu", "label": "EAEU procedure (Armenia as reference state)",
+   "description": "One dossier for the Union: Armenia assesses as reference state (up to 210 days), other member states recognise (up to 100 days each).",
+   "months_low": 7, "months_high": 14, "fee_usd_low": null, "fee_usd_high": null,
+   "source": "https://pharm.am/index.php/en/news-and-announcements/9714-decision-of-eaeu-n78-of-november-03-2016-on-the-rules-of-medicines-registration-and-assessments", "confidence": "medium"},
+  {"key": "full", "label": "National procedure (temporary rule)",
+   "description": "Registration for Armenia alone under the 2025 temporary rule: up to 150 days, Armenian labelling, samples tested by the Centre. State duty AMD 40,000 plus expertise fees.",
+   "months_low": 5, "months_high": 9, "fee_usd_low": 100, "fee_usd_high": null,
+   "source": "https://deltaswiss.eu/delta-medical-armenia/pharmaceutical-registrations-armenia/", "confidence": "low"},
+  {"key": "reliance", "label": "Accelerated for EU, US, Japan or WHO-prequalified products",
+   "description": "About 30 days for medicines already approved by the EU, the USA or Japan, or WHO prequalified.",
+   "months_low": 1, "months_high": 3, "fee_usd_low": 100, "fee_usd_high": null,
+   "source": "https://deltaswiss.eu/delta-medical-armenia/pharmaceutical-registrations-armenia/", "confidence": "low"}
+ ],
+ "documents": [
+  {"name": "Application to the Ministry of Health through the Centre", "applies": "all", "match": null, "note": null, "source": "https://pharm.am/index.php/en/news-and-announcements/7509-information-about-medicines-registration"},
+  {"name": "CTD modules 1 to 5 (EAEU format)", "applies": "all", "match": null, "note": null, "source": "https://pharm.am/index.php/en/news-and-announcements/9714-decision-of-eaeu-n78-of-november-03-2016-on-the-rules-of-medicines-registration-and-assessments"},
+  {"name": "GMP certificate of each manufacturing site", "applies": "all", "match": null, "note": null, "source": "https://pharm.am/index.php/en/guide-to-using-database-of-registered-medicines"},
+  {"name": "Samples and reference standards for laboratory control", "applies": "all", "match": null, "note": null, "source": "https://deltaswiss.eu/delta-medical-armenia/pharmaceutical-registrations-armenia/"},
+  {"name": "Leaflet and labels in Armenian", "applies": "all", "match": null, "note": null, "source": "https://pharm.am/index.php/en/guide-to-using-database-of-registered-medicines"},
+  {"name": "Proof of registration in the EU, USA, Japan or WHO prequalification (accelerated route)", "applies": "all", "match": null, "note": null, "source": "https://deltaswiss.eu/delta-medical-armenia/pharmaceutical-registrations-armenia/"},
+  {"name": "State duty receipt (AMD 40,000) and expertise fee", "applies": "all", "match": null, "note": null, "source": "https://pharm.am/index.php/en/news-and-announcements/6952-order-on-approval-of-the-price-list-of-paid-services-provided-by-the-scientific-center-of-drug-and-medical-technologies-expertise-n-029-a-22-of-february-14-2022"},
+  {"name": "Bioequivalence study against the reference product", "applies": "form", "match": "tablet|capsule|oral", "note": null, "source": "https://pharm.am/index.php/en/news-and-announcements/9714-decision-of-eaeu-n78-of-november-03-2016-on-the-rules-of-medicines-registration-and-assessments"}
+ ],
+ "news": [
+  {"name": "SCDMTE news and announcements", "url": "https://pharm.am/index.php/en/news-and-announcements"},
+  {"name": "SCDMTE decrees", "url": "https://pharm.am/index.php/en/decrees"}
+ ]
+}

@@ -14,6 +14,12 @@ export const MFR_COUNTRIES: { code: string; name: string; core: boolean }[] = [
   { code: 'SN', name: 'Senegal', core: true },
   { code: 'CI', name: 'Côte d’Ivoire', core: true },
   { code: 'CM', name: 'Cameroon', core: true },
+  { code: 'ET', name: 'Ethiopia', core: true },
+  { code: 'UG', name: 'Uganda', core: true },
+  { code: 'GH', name: 'Ghana', core: true },
+  { code: 'AZ', name: 'Azerbaijan', core: true },
+  { code: 'AM', name: 'Armenia', core: true },
+  { code: 'BY', name: 'Belarus', core: true },
   { code: 'HT', name: 'Haiti', core: false },
 ];
 export const CORE_MARKETS = MFR_COUNTRIES.filter((c) => c.core);

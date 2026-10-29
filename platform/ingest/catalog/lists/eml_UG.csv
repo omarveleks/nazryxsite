@@ -1,0 +1,453 @@
+name,local,atc,level
+Halothane,,,3
+Isoflurane,,,4
+Medical air,,,3
+Oxygen,,,3
+Desflurane,,,5
+Nitrous oxide,,,4
+Sevoflurane,,,5
+Propofol,,,4
+Thiopental sodium,,,3
+Ketamine,,,3
+Etomidate,,,4
+Lignocaine,,,1
+Lignocaine (preservative free),,,3
+Bupivacaine (with dextrose),,,3
+Lignocaine + epinephrine,,,3
+Lignocaine + adrenaline,,,5
+Bupivacaine (with preservative),,,4
+Atropine,,,3
+Diazepam,,,3
+Ephedrine,,,3
+Droperidol,,,4
+Fentanyl,,,4
+Glycopyrrolate,,,4
+Lorazepam,,,4
+Midazolam,,,4
+Phenylephrine,,,4
+Remifentanil,,,5
+Diclofenac,,,3
+Ibuprofen,,,2
+Paracetamol,,,1
+Mefenamic acid,,,4
+Codeine,,,3
+Morphine,,,2
+Morphine (concentrated),,,5
+Pethidine,,,3
+Tramadol,,,4
+Acyclovir,,,3
+Amitriptyline,,,2
+Bisacodyl,,,2
+Carbamazepine,,,2
+Chlorpromazine,,,1
+Clonazepam,,,4
+Dexamethasone,,,3
+Fluconazole,,,3
+Haloperidol,,,3
+Hyoscine,,,3
+Liquid paraffin,,,3
+Metoclopramide,,,3
+Naloxone,,,3
+Phenytoin,,,1
+Prednisolone,,,2
+Promethazine,,,2
+Metronidazole,,,4
+Chlorphenamine maleate,,,1
+Epinephrine (adrenaline),,,1
+Hydrocortisone sodium succinate,,,2
+Cetirizine,,,4
+Charcoal (activated),,,1
+Acetylcysteine,,,4
+Calcium gluconate,,,2
+Phytomenadione (Vitamin K1),,,3
+Calcium folinate (folinic acid),,,4
+Desferrioxamine (Desferroxamine),,,5
+Dimercaprol,,,5
+Methionine,,,4
+Methylthioninium chloride,,,4
+Penicillamine,,,5
+Pralidoxime mesylate,,,4
+Benztropine,,,4
+Flumazenil,,,4
+Sodium thiosulphate,,,5
+Protamine,,,4
+Ethosuximide,,,4
+Magnesium sulphate,,,2
+Phenobarbital,,,1
+Sodium valproate,,,4
+Lamotrigine,,,4
+Levetiracetam,,,4
+Albendazole,,,1
+Ivermectin,,,1
+Mebendazole,,,1
+Praziquantel,,,2
+Niclosamide,,,3
+Diethylcarbamazine citrate,,,4
+Amoxicillin,,,1
+Amoxicillin + Clavulanic acid,,,4
+Ampicillin,,,2
+Benzathine penicillin,,,2
+Benzylpenicillin,,,1
+Cefalexin,,,4
+Cefixime,,,4
+Ceftriaxone,,,2
+Cloxacillin,,,2
+Phenoxy methyl-penicillin,,,1
+Procaine benzylpenicillinforte,,,4
+Cefuroxime,,,4
+Cefuroxime sodium,,,4
+Meropenem,,,4
+Imipenem + Cilastatin,,,4
+Piperacillin + Tazobactam,,,4
+Azithromycin,,,4
+Chloramphenicol,,,3
+Ciprofloxacin,,,1
+Cotrimoxazole,,,1
+Dapsone,,,1
+Doxycycline,,,1
+Erythromycin,,,2
+Gentamicin,,,2
+Nitrofurantoin,,,1
+Vancomycin,,,4
+Clindamycin,,,4
+Paromomycin sulphate,,,4
+Rifampicin + clofazimine + dapsone,,,2
+Rifampicin + Dapsone,,,2
+Rifampicin,,,2
+Clofazimine,,,2
+Ethambutol,,,2
+Isoniazid,,,2
+Pyrazinamide,,,2
+Rifampicin + Isoniazid,,,2
+Rifabutin,,,2
+Rifapentine + Isoniazid,,,2
+Rifapentine,,,2
+Delamanid,,,4
+Bedaquiline,,,4
+Cycloserine,,,4
+Ethionamide,,,4
+Levofloxacin,,,4
+Linezolid,,,4
+Prothionamide,,,4
+Clotrimazole,,,1
+Griseofulvin,,,2
+Nystatin,,,1
+Amphotericin B Deoxycholate,,,4
+Flucytosine,,,4
+Ketoconazole,,,4
+Tenofovir,,,2
+Nevirapine,,,2
+Dapivirine,,,2
+Efavirenz,,,2
+Atazanavir + (ritonavir),,,2
+Darunavir + (Ritonavir),,,2
+Darunavir ( + Ritonavir),,,2
+Ritonavir,,,2
+Lopinavir ( + ritonavir),,,2
+Abacavir + Lamivudine,,,2
+Tenofovir + Lamivudine,,,2
+Tenofovir + Emtricitabine,,,2
+Zidovudine + Lamivudine,,,2
+Tenofovir + Lamivudine + Efavirenz,,,2
+Raltegravir,,,2
+Dolutegravir,,,2
+Doultegravir,,,2
+Cabotegravir,,,2
+Tenofovir Disoproxil Fumarate,,,3
+Entecavir,,,4
+Oseltamivir phosphate,,,4
+Ganciclovir sodium,,,4
+Nirmatrelvir + ritonavir,,,4
+Lagevrio (Molnupiravir),,,4
+Sotrovimab,,,4
+Remdesivir,,,4
+Tinidazole,,,4
+SodiumStibogluconate,,,4
+Liposomal Amphotericin B,,,4
+Artemether,,,2
+Artemether + Lumefantrine,,,1
+Artesunate,,,2
+Artesunate + Amodiaquine,,,1
+Dihydroartemisinin + piperaquine,,,3
+Quinine,,,2
+Chloroquine,,,3
+Sulphadoxine + Pyrimethamine,,,1
+Mefloquine,,,4
+Pyrimethamine,,,4
+Sulfadiazine,,,4
+Pentamidine Isethionate,,,4
+Nifurtimox,,,4
+Melarsoprol,,,4
+Suramin Sodium,,,4
+Eflornithine,,,4
+Acetylsalicylic acid,,,1
+Ergotamine,,,4
+Sumatriptan,,,4
+Propranolol,,,3
+Pizotifen,,,4
+Azathioprine,,,5
+Cyclosporin,,,5
+Anti-thyomcyte globulin (ATG),,,5
+Immune globulin (IVIG,,,5
+Anastrozole,,,4
+Bicalutamide,,,4
+Bleomycin,,,4
+Capecitabine,,,4
+Carboplatin,,,4
+Chlorambucil,,,4
+Cisplatin,,,5
+Cyclophosphamide,,,5
+Cytarabine,,,5
+Dacarbazine,,,5
+Dactinomycin,,,5
+Daunorubicin,,,5
+Docetaxel,,,4
+Doxorubicin (adriamycin),,,5
+Etoposide,,,5
+Filgrastim,,,5
+Fluorouracil,,,5
+Gemcitabine,,,5
+Goserelin,,,4
+Hydroxycarbamide (hydroxyurea),,,4
+Ifosfamide-Mesna,,,5
+Irinotecan,,,5
+Mercaptopurine,,,5
+Mustine,,,5
+Oxaliplatin,,,5
+Paclitaxel,,,5
+Procarbazine,,,5
+Rituximab,,,5
+Stilboestrol,,,4
+Thalidomide,,,5
+Temozolamide,,,5
+Thioguanine,,,5
+Vinblastine sulfate,,,5
+Vincristine,,,4
+Betamethasone,,,3
+Tamoxifen,,,5
+Levodopa-Carbidopa,,,4
+Ferrous sulphate,,,1
+Ferrous sulphate + folic acid,,,1
+Ferrous Salt + Folic Acid,,,1
+Folic acid,,,1
+Hydroxocobalamin (vitamin B12),,,4
+Enoxaparin,,,4
+Heparin,,,4
+Tranexamic acid (TXA),,,2
+Phytomenadion (Vitamin K1),,,3
+Warfarin,,,4
+Rivaroxiban,,,4
+Apixaban,,,4
+Streptokinase,,,4
+Factor VIII concentrate,,,5
+Emicizumab,,,4
+Atenolol,,,4
+Isosorbide dinitrate,,,4
+Adenosine,,,4
+Amlodipine,,,2
+Amiodarone,,,5
+Procainamide,,,4
+Bendroflume- thiazide,,,2
+Captopril,,,3
+Enalapril,,,3
+Hydralazine,,,4
+Losartan,,,2
+Methyldopa,,,2
+Valsartan,,,4
+Telmisartan,,,2
+Hydrochlorothiazide,,,2
+Amlodipine + Losartan,,,2
+Losartan + Hydrochlorothiazide,,,2
+Candesartan cilexetil,,,5
+Labetalol,,,4
+Ramipril,,,4
+Indapamide,,,4
+Nebivolol,,,4
+Glucagon,,,4
+Digoxin,,,3
+Carvedilol,,,4
+Lisinopril,,,4
+Dobutamine,,,5
+Dopamine,,,4
+Norepinephrine (noradrenaline),,,4
+Clopidogrel,,,5
+Atorvastatin,,,4
+Artovastatin,,,3
+Rosuvastatin,,,3
+Benzoic acid + Salicylic acid,,,1
+Miconazole,,,4
+Chlorhexidine,,,3
+Framycetin,,,2
+Iodine,,,1
+Potassium permanganate,,,3
+Silver sulphadiazine,,,1
+Calamine,,,1
+Hydrocortisone,,,2
+Benzylperoxide,,,3
+Coal tar,,,3
+Podophyllum resin,,,3
+Benzyl benzoate,,,1
+NYDA (Dimethicone),,,1
+Acetic acid,,,2
+Barium sulphate,,,4
+"Iopromide 370, non- ionic",,,4
+"Iohexol 350, non-ionic",,,4
+Cetrimide + Chlorhexidine,,,1
+Chlorhexidine gluconate,,,1
+Hydrogen peroxide,,,1
+Povidone iodine,,,2
+Surgical spirit (ethanol),,,3
+Alcohol hand rub,,,1
+Calcium or sodium hypochlorite,,,1
+Glutaraldehyde,,,4
+Ethanol,,,1
+Glycerol,,,1
+Furosemide,,,3
+Spironolactone,,,4
+Omeprazole,,,2
+Ranitidine,,,4
+Rabeprazole,,,4
+Domperidone,,,4
+Ondansetron,,,4
+Granisetron,,,4
+Bismuth subgallate compound BP,,,3
+Lactulose,,,4
+Oral rehydration salts,,,1
+Zinc sulphate,,,1
+Loperamide,,,3
+Propantheline,,,4
+ACTH (corticotrophin),,,4
+Cortisone acetate,,,4
+Leuprolide acetate,,,5
+Methylpredni- solone,,,4
+Triamcinolone,,,4
+Testosterone enantate,,,4
+Ethinylestradiol + Levonorgestrel,,,1
+Ethinylestradiol + Norethisterone,,,1
+Ethinylestradiol + Norgestrel,,,1
+Levonorgestrel,,,1
+Norgestrel,,,1
+Moon beads,,,1
+Misoprostol + Mifepriston,,,3
+Insulin isophane,,,3
+Insulin isophane Aspert,,,3
+Glimepiride,,,4
+Metformin,,,2
+Pioglitazone,,,4
+Insulin glargine,,,4
+Gliclazide,,,4
+Vildagliptin,,,4
+Dapagliflozin,,,4
+Clomifene,,,4
+Bromocriptine,,,4
+Norethisterone,,,4
+Carbimazole,,,4
+Levothyroxine (thyroxine),,,4
+"Anti-D Immunoglobulin, human",,,4
+"Normal Immuno- Globulin, Human",,,5
+Anti-scorpion serum,,,4
+"Measles vaccine, live attenuated",,,1
+"Poliomyelitis vaccine, inactivated",,,1
+"Rotavirus vaccine, live attenuated",,,1
+Tetanus toxoid,,,1
+Anthrax vaccine,,,4
+Hepatitis B vaccine,,,3
+"Yellow fever vaccine, live",,,4
+Suxamethonium,,,3
+Atracurium besilate,,,4
+Rocuronium bromide,,,4
+Cisatracurium,,,4
+Neostigmine,,,3
+Pancuronium bromide,,,3
+Vecuronium bromide,,,5
+Povidone-iodine,,,4
+Tetracycline,,,1
+Tobramycin,,,4
+Dexamethasone + Tobramycin,,,4
+Neomycin + Betamethasone,,,4
+Sodium chromoglycate,,,4
+Econazole,,,4
+Natamycin,,,4
+Ganciclovir,,,4
+Bupivacaine,,,4
+Tetracaine (amethocaine),,,4
+Acetazolamide,,,4
+Diethyl- carbamazine,,,4
+Pilocarpine,,,4
+"Pilocarpine, intracameral",,,4
+Sodium hyaluronate,,,4
+Timolol maleate,,,4
+Tryptan blue,,,4
+Cyclopentolate,,,3
+Mitomycin,,,4
+Misoprostol,,,1
+Oxytocin,,,2
+Carbetocin (heat stable),,,2
+Nifedipine,,,2
+Salbutamol,,,4
+Peritoneal dialysis solution,,,4
+Fluphenazine decanoate,,,3
+Haloperidol decanoate,,,4
+Quetiapine,,,5
+Methylphenidate,,,4
+Olanzapine,,,4
+Risperidone,,,3
+Zuclopenthixol decanoate,,,4
+Fluoxetine,,,2
+Venlafaxine,,,4
+Bupropion hydrochloride,,,4
+Escitalopram,,,4
+Sertraline,,,4
+Alprazolam,,,4
+Pregabalin,,,4
+Lithium carbonate,,,4
+Lamotrigen,,,4
+Clomipramine,,,4
+Modafinil,,,4
+Zolpidem,,,4
+Melatonine,,,4
+Naltrexone,,,4
+Buprenorphine,,,5
+Clonidine,,,5
+Methadone,,,4
+Nicotine replacement therapy,,,5
+Acamprosete,,,5
+Thiamine,,,2
+Donepezil,,,4
+Memantine,,,4
+Tetrabenazine,,,4
+Benzhexol,,,1
+Procyclidine,,,4
+Salbutamol + Ipratropium,,,3
+Budesonide,,,4
+Tiotropium bromide,,,3
+Monteleukast,,,2
+Formoterol,,,4
+Ipratropium bromide,,,3
+Aminophylline,,,3
+Amoxicillin-Clavulanic acid,,,3
+Clarithromycin,,,4
+Calcium chloride (dihydrate),,,4
+Potassium chloride,,,4
+Water for injection,,,1
+Calcium lactate,,,2
+Pyridoxine (vitamin B6),,,2
+Retinol (vitamin A),,,1
+Vitamin B compound (B3 + B2 + B1),,,4
+Vitamin C (Ascorbic acid),,,4
+Ergocalciferol (Vitamin D2),,,5
+Hydroxycobalamin (vitamin B12),,,4
+Beclomethasone,,,4
+Xylometazoline,,,4
+Triamcinolone acetonide,,,4
+Vitamin K,,,2
+Allopurinol,,,4
+Colchicine,,,4
+Chloroquine sulphate or phosphate,,,4
+Methotrexate,,,4
+Cerebrolysin,,,5
+Piracetam,,,5
+Levodopa-cabidopa,,,4
+Amino acids (paediatric),,,5
+Fat emulsion,,,5
+Starch emulsion,,,5

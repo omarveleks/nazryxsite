@@ -783,6 +783,11 @@ const ru: Record<string, string> = {
   "Above the market": "Выше рынка",
   "Pack size": "Размер упаковки",
   "Market data, partners and registration in nine markets across Africa and Central Asia, from Tanzania and Nigeria to Kazakhstan and Senegal.": "Данные о рынке, партнёры и регистрация на девяти рынках Африки и Центральной Азии — от Танзании и Нигерии до Казахстана и Сенегала.",
+  "Ethiopia": "Эфиопия",
+  "Ghana": "Гана",
+  "Azerbaijan": "Азербайджан",
+  "Armenia": "Армения",
+  "Belarus": "Беларусь",
   // misc
   "on the official TMDA list, level {level}": "в официальном списке TMDA, уровень {level}",
   "on the official TMDA list": "в официальном списке TMDA",

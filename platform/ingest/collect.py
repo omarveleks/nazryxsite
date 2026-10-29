@@ -189,7 +189,16 @@ def reg_CM(s, tmp):
     return _json_rows(francophone.cm_registry(s, log), tmp, "cm-register.json")
 
 
-REGISTRIES = {"KZ": reg_KZ, "KE": reg_KE, "UZ": reg_UZ, "KG": reg_KG, "TZ": reg_TZ, "NG": reg_NG, "SN": reg_SN, "CM": reg_CM}
+def _more(fn, name):
+    def reader(s, tmp):
+        import more_markets
+        return _json_rows(getattr(more_markets, fn)(s, log), tmp, name)
+    return reader
+
+
+REGISTRIES = {"KZ": reg_KZ, "KE": reg_KE, "UZ": reg_UZ, "KG": reg_KG, "TZ": reg_TZ, "NG": reg_NG, "SN": reg_SN, "CM": reg_CM,
+              "GH": _more("gh_registry", "gh-register.json"), "AZ": _more("az_registry", "az-register.json"),
+              "BY": _more("by_registry", "by-register.json"), "AM": _more("am_registry", "am-register.json")}
 WITH_CURSOR = {"NG"}                             # readers that remember what they learned between runs
 
 

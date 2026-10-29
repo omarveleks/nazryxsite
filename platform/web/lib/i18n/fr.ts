@@ -788,6 +788,11 @@ const fr: Record<string, string> = {
   "Above the market": "Au-dessus du marché",
   "Pack size": "Taille du conditionnement",
   "Market data, partners and registration in nine markets across Africa and Central Asia, from Tanzania and Nigeria to Kazakhstan and Senegal.": "Données de marché, partenaires et enregistrement sur neuf marchés d’Afrique et d’Asie centrale, de la Tanzanie et du Nigeria au Kazakhstan et au Sénégal.",
+  "Ethiopia": "Éthiopie",
+  "Ghana": "Ghana",
+  "Azerbaijan": "Azerbaïdjan",
+  "Armenia": "Arménie",
+  "Belarus": "Biélorussie",
   // misc
   "on the official TMDA list, level {level}": "sur la liste officielle TMDA, niveau {level}",
   "on the official TMDA list": "sur la liste officielle TMDA",

@@ -1,0 +1,56 @@
+{
+ "country": "ET",
+ "regulator": "Ethiopian Food and Drug Authority (EFDA) – https://www.efda.gov.et",
+ "checked": "2026-10",
+ "facts": [
+  {"topic": "Route", "applies": "all", "match": null, "title": "Regulator and legal basis",
+   "body": "EFDA registers medicines under the Food and Medicine Administration Proclamation 1112/2019 and its Guideline for Registration of Medicine (1 March 2024). Applications run on the electronic regulatory information system eRIS (i-Register), which also carries the public lists of registered, suspended and cancelled products for signed-in users. A registration is valid five years.",
+   "source": "https://www.efda.gov.et/wp-content/uploads/2024/06/2024.03.01-Guideline-for-Registration-of-Medicine.pdf", "confidence": "high"},
+  {"topic": "Local representative", "applies": "all", "match": null, "title": "A licensed local agent is required",
+   "body": "A foreign manufacturer must appoint a local agent or representative licensed in Ethiopia before filing; the agency agreement names the products and the agent handles the application, correspondence, samples and the scheduling of overseas GMP inspections. An agreement between the local agent and an authorised third party is accepted when the licence holder authorises it.",
+   "source": "https://www.efda.gov.et/wp-content/uploads/2024/06/2024.03.01-Guideline-for-Registration-of-Medicine.pdf", "confidence": "high"},
+  {"topic": "Timeline", "applies": "all", "match": null, "title": "Screening in 15 days; 270, 180 or 90 working days of review",
+   "body": "Acceptance or deficiencies of an application are notified within 15 days of receipt; missing elements must be supplemented within the period given. EFDA's target review times are 270 working days for a new medicine, 180 for a generic and 90 for a WHO-prequalified product under the collaborative registration procedure, excluding the applicant's time to answer questions.",
+   "source": "https://oriterratrading.com/market-insights/efda-registration-import-medicines-ethiopia-guide-2026", "confidence": "medium"},
+  {"topic": "Site and GMP", "applies": "all", "match": null, "title": "EFDA GMP inspection of the foreign site, or a waiver",
+   "body": "Each manufacturing site needs a valid GMP certificate and manufacturing licence; EFDA inspects foreign sites itself (scheduled through the local agent) unless the site has already been inspected or waived by EFDA. WHO prequalification and a GMP certificate plus marketing authorisation from a stringent regulator support a waiver.",
+   "source": "https://www.efda.gov.et/wp-content/uploads/2024/06/2024.03.01-Guideline-for-Registration-of-Medicine.pdf", "confidence": "high"},
+  {"topic": "Fees", "applies": "all", "match": null, "title": "Service fees per application (Regulation 370/2015)",
+   "body": "Each application carries a service fee under the Authority's Rate of Service Fees Regulation (Council of Ministers Regulation 370/2015), paid per application and quoted on the receipt filed in module 1. The medicine fees are modest by regional standards; the GMP inspection of a foreign site is charged separately. Consult the current rate with EFDA.",
+   "source": "https://www.efda.gov.et/wp-content/uploads/2024/06/2024.03.01-Guideline-for-Registration-of-Medicine.pdf", "confidence": "medium"},
+  {"topic": "Dossier", "applies": "all", "match": null, "title": "CTD with product samples",
+   "body": "The dossier follows the CTD (modules 1 to 5) in English, with samples of the actual product (annex V of the guideline), stability data for zone IVb and, for generics, bioequivalence against a comparator; a product on the market for at least five years with ten production batches may rely on that history where the guideline allows.",
+   "source": "https://www.efda.gov.et/wp-content/uploads/2024/06/2024.03.01-Guideline-for-Registration-of-Medicine.pdf", "confidence": "high"},
+  {"topic": "Import", "applies": "all", "match": null, "title": "Import permits and taxes",
+   "body": "Medicines are a restricted import needing an EFDA import permit; VAT at 15% applies to imports unless exempt, and in 2025 the Ministry of Revenues enforced VAT on over-the-counter medicines. Public procurement runs through the Ethiopian Pharmaceutical Supply Service with its own procurement list.",
+   "source": "https://www.vatupdate.com/2025/08/20/ethiopia-imposes-vat-on-over-the-counter-medicines-enforcing-compliance-among-pharmaceutical-companies", "confidence": "low"},
+  {"topic": "After approval", "applies": "all", "match": null, "title": "Essential medicines list, 7th edition 2025",
+   "body": "EFDA launched the 7th edition of the Ethiopian Essential Medicines List in 2025; the 6th edition (2020) lists 610 medicines with the WHO AWaRe class for antibiotics. The portal carries the 2020 list until the 2025 file is published.",
+   "source": "https://www.efda.gov.et/2025/09/06/", "confidence": "medium"}
+ ],
+ "routes": [
+  {"key": "full", "label": "Full review (new medicine or generic)",
+   "description": "CTD through a licensed local agent on eRIS, samples, EFDA GMP inspection or waiver of the site. Target 180 working days for a generic and 270 for a new medicine, before the applicant's response time; the inspection schedule sets the real pace.",
+   "months_low": 12, "months_high": 24, "fee_usd_low": null, "fee_usd_high": null,
+   "source": "https://oriterratrading.com/market-insights/efda-registration-import-medicines-ethiopia-guide-2026", "confidence": "low"},
+  {"key": "reliance", "label": "WHO prequalification (collaborative procedure)",
+   "description": "A WHO-prequalified product is assessed on WHO's report in a 90-working-day target, with a GMP waiver for the prequalified site.",
+   "months_low": 4, "months_high": 9, "fee_usd_low": null, "fee_usd_high": null,
+   "source": "https://oriterratrading.com/market-insights/efda-registration-import-medicines-ethiopia-guide-2026", "confidence": "low"}
+ ],
+ "documents": [
+  {"name": "Agency agreement with a licensed local agent in Ethiopia", "applies": "all", "match": null, "note": "Names the products; the agent files on eRIS", "source": "https://www.efda.gov.et/wp-content/uploads/2024/06/2024.03.01-Guideline-for-Registration-of-Medicine.pdf"},
+  {"name": "Application on eRIS (i-Register) with the service fee receipt", "applies": "all", "match": null, "note": "Regulation 370/2015 rates", "source": "https://www.efda.gov.et/wp-content/uploads/2024/06/2024.03.01-Guideline-for-Registration-of-Medicine.pdf"},
+  {"name": "CTD modules 1 to 5 in English", "applies": "all", "match": null, "note": null, "source": "https://www.efda.gov.et/wp-content/uploads/2024/06/2024.03.01-Guideline-for-Registration-of-Medicine.pdf"},
+  {"name": "GMP certificate and manufacturing licence of each site, or EFDA inspection", "applies": "all", "match": null, "note": "Waiver for WHO-prequalified or stringent-regulator sites", "source": "https://www.efda.gov.et/wp-content/uploads/2024/06/2024.03.01-Guideline-for-Registration-of-Medicine.pdf"},
+  {"name": "Certificate of pharmaceutical product (WHO format)", "applies": "all", "match": null, "note": null, "source": "https://www.efda.gov.et/wp-content/uploads/2024/06/2024.03.01-Guideline-for-Registration-of-Medicine.pdf"},
+  {"name": "Samples of the actual product (annex V)", "applies": "all", "match": null, "note": null, "source": "https://www.efda.gov.et/wp-content/uploads/2024/06/2024.03.01-Guideline-for-Registration-of-Medicine.pdf"},
+  {"name": "Bioequivalence study against the comparator", "applies": "form", "match": "tablet|capsule|oral", "note": null, "source": "https://www.efda.gov.et/wp-content/uploads/2024/06/2024.03.01-Guideline-for-Registration-of-Medicine.pdf"},
+  {"name": "Stability data for zone IVb (30 °C / 75% RH)", "applies": "all", "match": null, "note": null, "source": "https://www.efda.gov.et/wp-content/uploads/2024/06/2024.03.01-Guideline-for-Registration-of-Medicine.pdf"},
+  {"name": "Labels and leaflet in English (and Amharic where required)", "applies": "all", "match": null, "note": null, "source": "https://www.efda.gov.et/wp-content/uploads/2024/06/2024.03.01-Guideline-for-Registration-of-Medicine.pdf"}
+ ],
+ "news": [
+  {"name": "EFDA news", "url": "https://www.efda.gov.et/category/uncategorized/"},
+  {"name": "EFDA publications library", "url": "https://www.efda.gov.et/publications-library/"}
+ ]
+}

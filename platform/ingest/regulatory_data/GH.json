@@ -1,0 +1,178 @@
+{
+ "country": "GH",
+ "regulator": "Food and Drugs Authority (FDA Ghana) – https://fdaghana.gov.gh",
+ "checked": "2026-10",
+ "facts": [
+  {
+   "topic": "Route",
+   "applies": "all",
+   "match": null,
+   "title": "Regulator and legal basis",
+   "body": "The FDA registers medicines under the Public Health Act, 2012 (Act 851), Part 7. No medicine may be imported, advertised or sold unless registered. The FDA reached WHO Maturity Level 3. Dossiers follow the ICH Common Technical Document (M4); submission is on paper or electronic files, not yet eCTD, and applicants check status with the FDA directly. The public product registry (verifypermit.fdaghana.gov.gh) lists every registered product with its holder, manufacturer, strength, form and expiry.",
+   "source": "https://www.ijdra.com/index.php/journal/article/download/767/406",
+   "confidence": "high"
+  },
+  {
+   "topic": "Local representative",
+   "applies": "all",
+   "match": null,
+   "title": "A Ghanaian local agent holds the application",
+   "body": "A foreign manufacturer applies through a local representative or agent in Ghana (a licensed importer or wholesaler), named on the registration and on the public registry. The agent handles the application, the samples, variations and renewals.",
+   "source": "https://www.ijdra.com/index.php/journal/article/download/767/406",
+   "confidence": "high"
+  },
+  {
+   "topic": "Timeline",
+   "applies": "all",
+   "match": null,
+   "title": "Six months target, about 70 days median",
+   "body": "The FDA decides a new application within six months when no query is raised, a fast-track application in 180 days and a reliance or renewal application in 90 days; queries get 12, then 6, then 3 months to answer. A 2024 review of African regulators measured the FDA's median approval time at about 70 calendar days, the shortest of those compared.",
+   "source": "https://www.frontiersin.org/journals/medicine/articles/10.3389/fmed.2024.1438041/full",
+   "confidence": "medium"
+  },
+  {
+   "topic": "Fees",
+   "applies": "all",
+   "match": null,
+   "title": "Fees: USD 1,200 per application, USD 240 a year",
+   "body": "A new, fast-track, reliance or renewal application costs USD 1,200 (2025 review of FDA requirements). The FDA's approved fees and charges then set the annual registration fee at the cedi equivalent of USD 240 for an imported allopathic medicine and USD 360 for a new chemical entity (orphan drugs USD 60); variations for foreign products USD 500 (major) and USD 300 (minor); label evaluation USD 100 per product and variant; laboratory sample USD 200. An FDA import levy of 1.80% of CIF value applies to drugs.",
+   "source": "https://fdaghana.gov.gh/wp-content/uploads/2024/01/appfees.pdf",
+   "confidence": "high"
+  },
+  {
+   "topic": "After approval",
+   "applies": "all",
+   "match": null,
+   "title": "Registration runs about three years, renewed through the agent",
+   "body": "Registrations on the public registry carry expiry dates about three years after approval and are renewed by the local agent; the registry flags products within three months of expiry. The FDA publishes recalls and alerts on unregistered products.",
+   "source": "https://verifypermit.fdaghana.gov.gh/publicsearch",
+   "confidence": "medium"
+  },
+  {
+   "topic": "Site and GMP",
+   "applies": "all",
+   "match": null,
+   "title": "Plant GMP approval before the dossier",
+   "body": "The manufacturing site needs FDA GMP approval before the product dossier is filed: an on-site audit (about three months the first time, two for renewal, USD 10,500) or a waiver when the site holds a valid GMP certificate from a stringent regulator listed by the FDA. Site approval is valid five years. Samples are tested in the FDA laboratory (USD 200 per sample).",
+   "source": "https://fdaghana.gov.gh/wp-content/uploads/2024/01/appfees.pdf",
+   "confidence": "medium"
+  },
+  {
+   "topic": "Import",
+   "applies": "all",
+   "match": null,
+   "title": "Duty and VAT",
+   "body": "Registered pharmaceuticals and their active ingredients are exempt from VAT (VAT Regulations as amended in 2024) and most finished medicines enter duty-free under the ECOWAS tariff; the FDA import levy of 1.80% of CIF applies. Importers must be licensed by the FDA (list published).",
+   "source": "https://www.vatupdate.com/2024/08/30/expansion-of-vat-exemptions-to-pharmaceuticals-for-cost-reduction-in-importation",
+   "confidence": "low"
+  },
+  {
+   "topic": "After approval",
+   "applies": "all",
+   "match": null,
+   "title": "Essential list 2017, NHIS reimbursement",
+   "body": "The Essential Medicines List (7th edition, 2017) sets levels of care A to D and marks medicines reimbursed by the National Health Insurance Scheme. Public procurement runs through the Ministry's and regional medical stores.",
+   "source": "https://www.medbox.org/document/ghana-essential-medicines-list",
+   "confidence": "medium"
+  }
+ ],
+ "routes": [
+  {
+   "key": "full",
+   "label": "Full review (FDA Ghana)",
+   "description": "CTD through a Ghanaian local agent after FDA GMP approval of the site (audit USD 10,500 or a stringent-regulator waiver), samples to the FDA laboratory. Six-month target; median about 70 days in 2024 reviews. USD 1,200 per application, then USD 240 a year (USD 360 for a new chemical entity).",
+   "months_low": 3,
+   "months_high": 9,
+   "fee_usd_low": 1200,
+   "fee_usd_high": 1200,
+   "source": "https://fdaghana.gov.gh/wp-content/uploads/2024/01/appfees.pdf",
+   "confidence": "medium"
+  },
+  {
+   "key": "reliance",
+   "label": "Reliance / fast-track",
+   "description": "For products approved by a stringent regulator or WHO prequalified: reliance review with a 90-day target; fast-track for priorities in 180 days. Same USD 1,200 fee.",
+   "months_low": 2,
+   "months_high": 4,
+   "fee_usd_low": 1200,
+   "fee_usd_high": 1200,
+   "source": "https://www.ijdra.com/index.php/journal/article/download/767/406",
+   "confidence": "medium"
+  }
+ ],
+ "documents": [
+  {
+   "name": "Application through a licensed local agent in Ghana",
+   "applies": "all",
+   "match": null,
+   "note": null,
+   "source": "https://www.ijdra.com/index.php/journal/article/download/767/406"
+  },
+  {
+   "name": "CTD modules 1 to 5 (ICH M4)",
+   "applies": "all",
+   "match": null,
+   "note": "Paper or electronic files; no eCTD yet",
+   "source": "https://www.ijdra.com/index.php/journal/article/download/767/406"
+  },
+  {
+   "name": "Proof of payment of the FDA fee",
+   "applies": "all",
+   "match": null,
+   "note": "USD 1,200 per application; USD 240 per annum (USD 360 new chemical entity)",
+   "source": "https://fdaghana.gov.gh/wp-content/uploads/2024/01/appfees.pdf"
+  },
+  {
+   "name": "GMP certificate of each manufacturing site",
+   "applies": "all",
+   "match": null,
+   "note": null,
+   "source": "https://www.ijdra.com/index.php/journal/article/download/767/406"
+  },
+  {
+   "name": "Certificate of pharmaceutical product (WHO format)",
+   "applies": "all",
+   "match": null,
+   "note": null,
+   "source": "https://www.ijdra.com/index.php/journal/article/download/767/406"
+  },
+  {
+   "name": "Labels, leaflet and summary of product characteristics in English",
+   "applies": "all",
+   "match": null,
+   "note": "Label evaluation USD 100 per product and variant",
+   "source": "https://fdaghana.gov.gh/wp-content/uploads/2024/01/appfees.pdf"
+  },
+  {
+   "name": "Samples for FDA laboratory testing",
+   "applies": "all",
+   "match": null,
+   "note": "USD 200 per sample",
+   "source": "https://fdaghana.gov.gh/wp-content/uploads/2024/01/appfees.pdf"
+  },
+  {
+   "name": "Bioequivalence study against the reference product",
+   "applies": "form",
+   "match": "tablet|capsule|oral",
+   "note": "Multisource oral solid forms",
+   "source": "https://www.ijdra.com/index.php/journal/article/download/767/406"
+  },
+  {
+   "name": "Stability data for zone IVb (30 °C / 75% RH)",
+   "applies": "all",
+   "match": null,
+   "note": null,
+   "source": "https://www.ijdra.com/index.php/journal/article/download/767/406"
+  }
+ ],
+ "news": [
+  {
+   "name": "FDA Ghana press releases and alerts",
+   "url": "https://fdaghana.gov.gh/press-releases/"
+  },
+  {
+   "name": "FDA Ghana fee schedule",
+   "url": "https://fdaghana.gov.gh/fee-schedule/"
+  }
+ ]
+}

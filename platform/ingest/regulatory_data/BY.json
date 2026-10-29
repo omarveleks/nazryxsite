@@ -1,0 +1,51 @@
+{
+ "country": "BY",
+ "regulator": "Ministry of Health, with the Center for Expertise and Testing in Health Care (RCETH) – https://rceth.by",
+ "checked": "2026-10",
+ "facts": [
+  {"topic": "Route", "applies": "all", "match": null, "title": "Regulator and legal basis",
+   "body": "The Ministry of Health registers medicines on the expert assessment of the Center for Expertise and Testing in Health Care (RCETH), under the Law on Medicines and Council of Ministers Resolution 254 of 1 April 2015. Belarus is in the Eurasian Economic Union, so a medicine is registered either under the EAEU rules (Decision 78 of 3 November 2016) with Belarus as reference or recognising state, or under the national procedure for the Belarusian market only. The state register (about 7,500 entries) is public on rceth.by.",
+   "source": "https://omcmedical.com/drug-registration-process-in-belarus", "confidence": "high"},
+  {"topic": "Timeline", "applies": "all", "match": null, "title": "210 days under the EAEU procedure",
+   "body": "The EAEU decentralised procedure allows up to 210 calendar days for registration and expertise; mutual recognition in a second state takes up to 100 days. The national procedure runs on a similar clock. The applicant first signs and pays an expertise contract with RCETH, then files the dossier.",
+   "source": "https://pharmvestnik.ru/content/news/Utverjden-poryadok-registracii-lekarstv-prednaznachennyh-dlya-obrasheniya-na-rynke-EAES.html", "confidence": "medium"},
+  {"topic": "Local representative", "applies": "all", "match": null, "title": "A local authorised representative",
+   "body": "A foreign applicant acts through a local authorised representative in Belarus; the marketing authorisation holder may be a non-resident.",
+   "source": "https://omcmedical.com/drug-registration-process-in-belarus", "confidence": "medium"},
+  {"topic": "Dossier", "applies": "all", "match": null, "title": "CTD in Russian, GMP for each site, samples for laboratory control",
+   "body": "The dossier is in CTD format (Russian), with GMP certificates or EAEU GMP conclusions for every manufacturing site, and samples of the finished product, pharmaceutical substance and reference standards for RCETH laboratory testing. Inspection of the production site and, in some cases, local clinical data can be required.",
+   "source": "https://omcmedical.com/drug-registration-process-in-belarus", "confidence": "medium"},
+  {"topic": "After approval", "applies": "all", "match": null, "title": "Five years, then confirmation; EAEU alignment",
+   "body": "A registration certificate runs five years; renewal is filed three months before expiry and, on confirmation, an open-ended certificate is issued. Products registered nationally had to be brought into line with EAEU requirements by the end of 2025.",
+   "source": "https://pravo.by/novosti/novosti-pravo-by/2018/march/27957/", "confidence": "medium"},
+  {"topic": "Pricing", "applies": "all", "match": null, "title": "Registered maximum manufacturer prices",
+   "body": "Manufacturers register maximum wholesale prices for medicines in a state register (Council of Ministers Resolution 776 of 2018); wholesale and retail mark-ups are capped by the Ministry of Antimonopoly Regulation and Trade. VAT on medicines is 10% (Tax Code art. 122), applied to medicines in the state register or the EAEU register.",
+   "source": "https://neg.by/novosti/otkrytj/mns-razyasnilo-nyuansy-nalogooblozheniya-nds-farmsubstantsiy/", "confidence": "medium"},
+  {"topic": "Fees", "applies": "all", "match": null, "title": "Expertise priced by RCETH's price list",
+   "body": "RCETH charges for the expertise under its current price list, paid before filing; there is no published flat fee. Ask RCETH for a quote per product and procedure.",
+   "source": "https://portal.rceth.by/Documents/Scheme_drug/Scheme_national_LS_uslovno_SV_extrenno.pdf", "confidence": "low"}
+ ],
+ "routes": [
+  {"key": "eaeu", "label": "EAEU procedure (Belarus as reference state)",
+   "description": "One dossier for the Union: Belarus assesses as reference state (up to 210 days), other member states recognise (up to 100 days each). Opens Kazakhstan, Kyrgyzstan, Armenia and Russia with the same file.",
+   "months_low": 7, "months_high": 14, "fee_usd_low": null, "fee_usd_high": null,
+   "source": "https://pharmvestnik.ru/content/news/Utverjden-poryadok-registracii-lekarstv-prednaznachennyh-dlya-obrasheniya-na-rynke-EAES.html", "confidence": "medium"},
+  {"key": "full", "label": "National procedure",
+   "description": "Registration for the Belarusian market alone, on RCETH expertise, with samples tested locally. Similar clock to the EAEU route; five-year certificate.",
+   "months_low": 7, "months_high": 12, "fee_usd_low": null, "fee_usd_high": null,
+   "source": "https://omcmedical.com/drug-registration-process-in-belarus", "confidence": "low"}
+ ],
+ "documents": [
+  {"name": "Expertise contract with RCETH, paid before filing", "applies": "all", "match": null, "note": null, "source": "https://portal.rceth.by/Documents/Scheme_drug/Scheme_national_LS_uslovno_SV_extrenno.pdf"},
+  {"name": "CTD modules 1 to 5 in Russian (EAEU format)", "applies": "all", "match": null, "note": null, "source": "https://omcmedical.com/drug-registration-process-in-belarus"},
+  {"name": "GMP certificate or EAEU GMP conclusion for each site", "applies": "all", "match": null, "note": null, "source": "https://omcmedical.com/drug-registration-process-in-belarus"},
+  {"name": "Samples of finished product, substance and reference standards", "applies": "all", "match": null, "note": "For RCETH laboratory control", "source": "https://omcmedical.com/drug-registration-process-in-belarus"},
+  {"name": "Power of attorney for the local authorised representative", "applies": "all", "match": null, "note": null, "source": "https://omcmedical.com/drug-registration-process-in-belarus"},
+  {"name": "Bioequivalence study against the reference product", "applies": "form", "match": "tablet|capsule|oral", "note": null, "source": "https://omcmedical.com/drug-registration-process-in-belarus"},
+  {"name": "Maximum wholesale price registration after approval", "applies": "all", "match": null, "note": "Resolution 776 of 2018", "source": "https://lepel.vitebsk-region.gov.by/gosreestr-predelnyx-otpusknyx-tsen-proizvoditelej-na-lekarstva-sozdan-v-belarusi-17161/en"}
+ ],
+ "news": [
+  {"name": "RCETH documents on medicines", "url": "https://rceth.by/en/Documents/Drug"},
+  {"name": "Ministry of Health of Belarus", "url": "https://minzdrav.gov.by/"}
+ ]
+}

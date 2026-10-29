@@ -1,0 +1,55 @@
+{
+ "country": "AZ",
+ "regulator": "Ministry of Health, through the Analytical Expertise Center (Analitik Ekspertiza Mərkəzi) – https://sehiyye.gov.az",
+ "checked": "2026-10",
+ "facts": [
+  {"topic": "Route", "applies": "all", "match": null, "title": "Regulator and legal basis",
+   "body": "Medicines are registered by the Ministry of Health acting through the Analytical Expertise Center, under the Law on Medicines and the Rules of State Registration approved by Cabinet of Ministers Resolution 345 of 18 July 2024 (in force from 20 July 2024, replacing the 2007 rules). Only registered medicines may be imported, produced, sold or used; the state register is published as open data (about 11,300 entries).",
+   "source": "https://www.legal500.com/intelligence/azerbaijan/food-drugs-healthcare-life-sciences/new-rules-for-state-registration-of-medications", "confidence": "high"},
+  {"topic": "Timeline", "applies": "all", "match": null, "title": "Primary review in 15 working days, expertise in 90 calendar days",
+   "body": "The 2023 amendments to the Law on Medicines set a primary examination of 15 working days and a specialised examination of 90 calendar days for new registrations and re-registrations. The Ministry issues the certificate within seven business days of a positive expert report. Deficiencies are notified within five business days and corrected within ten; the clock pauses meanwhile.",
+   "source": "https://cratia.com/en/news/changes-in-regulation-of-medicines-in-azerbaijan/", "confidence": "medium"},
+  {"topic": "Route", "applies": "all", "match": null, "title": "Simplified recognition for reference-country approvals",
+   "body": "Medicines registered by the authorities of a list of reference countries (stringent regulators) are registered through a recognition procedure of nine working days including the examination, on the strength of the foreign assessment.",
+   "source": "https://cratia.com/en/news/changes-in-regulation-of-medicines-in-azerbaijan/", "confidence": "medium"},
+  {"topic": "Labelling", "applies": "all", "match": null, "title": "Instructions in Azerbaijani, notarised",
+   "body": "The patient information and summary of product characteristics are translated into Azerbaijani and the translation notarised; the Center checks it and the Ministry approves it. Approved instructions for every registered medicine are published as PDFs on the Center's site.",
+   "source": "https://www.legal500.com/intelligence/azerbaijan/food-drugs-healthcare-life-sciences/new-rules-for-state-registration-of-medications", "confidence": "high"},
+  {"topic": "After approval", "applies": "all", "match": null, "title": "Five-year certificate, re-registration 90 days before expiry",
+   "body": "Each product gets its own certificate, valid five years; re-registration is filed at least 90 days before expiry and the new certificate takes effect the day after the old one ends. Registration can be cancelled for poor pharmacovigilance, a negative benefit-risk assessment, GMP failures or quality failures in three batches.",
+   "source": "https://www.legal500.com/intelligence/azerbaijan/food-drugs-healthcare-life-sciences/new-rules-for-state-registration-of-medications", "confidence": "high"},
+  {"topic": "Pricing", "applies": "all", "match": null, "title": "State-regulated prices through the Tariff Council",
+   "body": "Registered medicines are on the list of goods with state-regulated prices: the Tariff Council sets the maximum wholesale and retail prices of each registered medicine, and medicines may only be sold at or below them. Budget for price registration after marketing authorisation.",
+   "source": "https://www.azernews.az/business/88006.html", "confidence": "medium"},
+  {"topic": "Fees", "applies": "all", "match": null, "title": "Examination fees",
+   "body": "The Center charges examination fees per product; service providers quote about AZN 1,000 to 1,300 including VAT per product for the full examination (around USD 600 to 800). Ask the Center for the current schedule before budgeting.",
+   "source": "https://pharmex.az/reg-affairs-services/registration-fees/", "confidence": "low"},
+  {"topic": "Import", "applies": "all", "match": null, "title": "Import permits and taxes",
+   "body": "Imports of registered medicines need an import permit from the Center. The standard VAT is 18% and the customs tariff on medicines is in the low band; exemptions apply to specific lists set by the Cabinet of Ministers. Check the current treatment of your tariff line with a broker.",
+   "source": "https://taxsummaries.pwc.com/Azerbaijan/Corporate/Other-taxes", "confidence": "low"}
+ ],
+ "routes": [
+  {"key": "full", "label": "Full review (national)",
+   "description": "Dossier to the Analytical Expertise Center with notarised Azerbaijani instructions: 15 working days of primary review and 90 calendar days of expertise, then the certificate within seven business days. Five-year registration, then price registration with the Tariff Council.",
+   "months_low": 5, "months_high": 10, "fee_usd_low": 600, "fee_usd_high": 800,
+   "source": "https://cratia.com/en/news/changes-in-regulation-of-medicines-in-azerbaijan/", "confidence": "medium"},
+  {"key": "reliance", "label": "Recognition of a reference-country approval",
+   "description": "For medicines approved by a listed reference authority: registration in nine working days including the examination, on the foreign assessment.",
+   "months_low": 1, "months_high": 3, "fee_usd_low": 600, "fee_usd_high": 800,
+   "source": "https://cratia.com/en/news/changes-in-regulation-of-medicines-in-azerbaijan/", "confidence": "low"}
+ ],
+ "documents": [
+  {"name": "Application to the Ministry of Health through the Analytical Expertise Center", "applies": "all", "match": null, "note": null, "source": "https://www.legal500.com/intelligence/azerbaijan/food-drugs-healthcare-life-sciences/new-rules-for-state-registration-of-medications"},
+  {"name": "Registration dossier (CTD modules 1 to 5)", "applies": "all", "match": null, "note": null, "source": "https://cratia.com/en/countries/azerbajdzhan/"},
+  {"name": "Instructions for use in Azerbaijani, notarised translation", "applies": "all", "match": null, "note": "Checked by the Center, approved by the Ministry", "source": "https://www.legal500.com/intelligence/azerbaijan/food-drugs-healthcare-life-sciences/new-rules-for-state-registration-of-medications"},
+  {"name": "GMP certificate of each manufacturing site", "applies": "all", "match": null, "note": null, "source": "https://cratia.com/en/countries/azerbajdzhan/"},
+  {"name": "Certificate of pharmaceutical product and registration in the country of origin", "applies": "all", "match": null, "note": "Reference-country approval opens the nine-day recognition route", "source": "https://cratia.com/en/news/changes-in-regulation-of-medicines-in-azerbaijan/"},
+  {"name": "Samples and reference standards for laboratory examination", "applies": "all", "match": null, "note": null, "source": "https://cratia.com/en/countries/azerbajdzhan/"},
+  {"name": "Proof of payment of the examination fee", "applies": "all", "match": null, "note": null, "source": "https://pharmex.az/reg-affairs-services/registration-fees/"},
+  {"name": "Price registration file for the Tariff Council after approval", "applies": "all", "match": null, "note": null, "source": "https://www.azernews.az/business/88006.html"}
+ ],
+ "news": [
+  {"name": "Ministry of Health news", "url": "https://sehiyye.gov.az/en/media/xeberler-ve-yenilikler/"},
+  {"name": "Cabinet of Ministers decisions on medicines", "url": "https://sehiyye.gov.az/en/huquqi-senedler/nazirler-kabinetinin-qerarlari/"}
+ ]
+}
