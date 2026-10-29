@@ -38,8 +38,6 @@ export default async function Help({ searchParams }: { searchParams: Promise<{ p
       <section className="card stack">
         <h2>Talk to us</h2>
         <p>Email <b>{SUPPORT_EMAIL}</b>{SUPPORT_WHATSAPP && <> or WhatsApp <b>{SUPPORT_WHATSAPP}</b></>}. We will get back to you.</p>
-        {sp.paused && u?.account_type !== 'manufacturer' && <p className="note">The distributor portal is closed for now while we focus on
-          manufacturers. Write to us and we help you directly.</p>}
       </section>
       {QA.map(([q, a]) => (
         <section key={q} className="card stack" style={{ gap: 8 }}>

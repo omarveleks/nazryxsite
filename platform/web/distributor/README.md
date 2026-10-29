@@ -1,8 +1,10 @@
-# Distributor side (not deployed)
+# The old distributor portal (not deployed)
 
-The distributor portal (search, market, competitors, portfolio, sourcing requests, expert questions, company pages and
-exports) is paused: the portal runs the manufacturer side only. Its code is kept here, outside `app/`, so Next.js does
-not build or serve it and it adds nothing to the live app. `tsconfig.json` excludes this folder.
+Distributors are back on the platform as the marketplace: `app/d/*` (free sign-up, needs, the manufacturer directory,
+conversations), `app/m/rfq`, `app/m/threads` and `app/m/marketplace` on the manufacturer side, migration 089. This
+folder is the earlier, data-heavy distributor portal (search, market, competitors, portfolio, sourcing requests, expert
+questions, company pages and exports), kept outside `app/` so Next.js does not build or serve it. `tsconfig.json`
+excludes this folder.
 
 The database side is untouched: tables, functions and data for distributors stay as they are.
 

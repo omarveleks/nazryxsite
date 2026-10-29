@@ -23,6 +23,7 @@ export type User = {
   mfr_markets: string[]; mfr_interval: string;
   mfr_trial: boolean; mfr_trial_until: string | null;   // 14 days of Basic Market Data on one market, before any plan
   seat_role: string | null;       // owner, regulatory, sales or viewer on a manufacturer account
+  dist_company: string | null; dist_verified: boolean;   // the distributor side
   inbox_unread: number;
   viewed_by?: string | null;      // the team member viewing this account, when it is a view
   view_ended?: boolean;           // a view that has ended is still in the browser: changes wait for its exit link
@@ -98,7 +99,7 @@ export const getUser = cache(async (): Promise<User | null> => {
 function loadUser(id: string) {
   return withUser(id, (db) => one<User>(db, `
     select u.id, u.email, u.name, u.role, u.team_owner, u.team_permissions, app_plan() as plan, u.country, u.company_id, u.credits, u.onboarded,
-           u.owner_id, u.language, u.whatsapp, u.notify_email, u.notify_whatsapp, u.seat_role,
+           u.owner_id, u.language, u.whatsapp, u.notify_email, u.notify_whatsapp, u.seat_role, dp.company_name as dist_company, dp.verified_at is not null as dist_verified,
            coalesce(c.display_name, cl.company_name) as company_name, cl.status as claim_status,
            (select count(*)::int from sourcing_list l where l.user_id = u.id) as list_count, u.account_type,
            mp.chosen_plan is not null as mfr_plan_chosen, coalesce(mp.chosen_plan, mp.suggested_plan) as mfr_plan,
@@ -114,18 +115,24 @@ function loadUser(id: string) {
     left join lateral (select * from company_claims k where k.user_id = coalesce(u.owner_id, u.id)
                        order by k.created_at desc limit 1) cl on true
     left join manufacturer_profiles mp on mp.user_id = u.id
+    left join distributor_profiles dp on dp.user_id = u.id
     where u.id = $1`, [id]));
 }
 
-/** Signed-in customer pages: the manufacturer area, and `shared` pages (settings, help). The distributor side is
- *  paused, so a distributor account only reaches the shared pages. The team can open everything. */
-export async function requireUser(opts: { allowOnboarding?: boolean; manufacturer?: boolean; shared?: boolean } = {}): Promise<User> {
+/** Signed-in customer pages: the manufacturer area (`manufacturer`), the distributor area (`distributor`) and `shared`
+ *  pages (settings, help, threads). A customer who opens the other side's page is sent to their own home; the team
+ *  can open everything. */
+export async function requireUser(opts: { allowOnboarding?: boolean; manufacturer?: boolean; distributor?: boolean; shared?: boolean } = {}): Promise<User> {
   const u = await getUser();
   if (!u) redirect('/signup?mode=signin');
+  if (u.role === 'team') return u;
   const mfr = u.account_type === 'manufacturer';
-  if (u.role !== 'team' && !mfr && !opts.shared) redirect('/help?paused=1');
-  if (!u.onboarded && !opts.allowOnboarding && u.role !== 'team' && mfr) redirect('/m/onboarding');
-  if (u.role !== 'team' && !opts.shared && !opts.manufacturer) redirect('/m');
+  const home = mfr ? '/m' : '/d';
+  if (!u.onboarded && !opts.allowOnboarding) redirect(mfr ? '/m/onboarding' : '/d/onboarding');
+  if (opts.shared) return u;
+  if (opts.manufacturer && !mfr) redirect(home);
+  if (opts.distributor && mfr) redirect(home);
+  if (!opts.manufacturer && !opts.distributor) redirect(home);
   return u;
 }
 

@@ -26,7 +26,7 @@ async function page(width = 1280) {
 }
 async function signin(p, email, pw, secret) {
   await p.goto(B + '/signup?mode=signin'); await p.fill('#email', email); await p.fill('#password', pw);
-  await Promise.all([p.waitForURL(/\/m|\/help|verify|onboarding/), p.click('button[type=submit]')]);
+  await Promise.all([p.waitForURL(/\/m|\/d|\/help|verify|onboarding/), p.click('button[type=submit]')]);
   if (p.url().includes('/signin/verify')) {
     await p.fill('#code', totp(secret));
     await Promise.all([p.waitForURL(/\/m/), p.click('button[type=submit]')]);
@@ -37,15 +37,15 @@ async function signin(p, email, pw, secret) {
 const c = await page();
 await c.goto(B + '/signup');
 const su = (await c.locator('body').innerText()).toLowerCase();
-check((await c.locator('a.tile').count()) === 0 && su.includes('take your products further') && !su.includes('distributor'), 'sign-up is for manufacturers only');
+check(su.includes('take your products further') && su.includes('distributor or importer'), 'sign-up offers a manufacturer or a distributor account');
 for (const path of ['/home', '/search', '/market', '/competitors', '/portfolio', '/requests', '/expert', '/molecule/1', '/export/open']) {
   check((await c.goto(B + path)).status() === 404, `distributor page ${path} is not deployed`);
 }
-// an existing distributor account is told the distributor portal is closed, and stays out of the manufacturer area
+// an existing distributor account lands on the distributor side, and stays out of the manufacturer area
 const d = await page();
 await signin(d, 'demo-free@nazryx.test', process.env.DEMO_PASSWORD);
-check(d.url().includes('/help') && (await d.locator('body').innerText()).includes('distributor portal is closed'), 'a distributor account is told the distributor portal is closed');
-await d.goto(B + '/m'); check(d.url().includes('/help'), 'and cannot open the manufacturer area');
+check(d.url().includes('/d'), 'a distributor account lands on the distributor side');
+await d.goto(B + '/m'); check(d.url().includes('/d'), 'and cannot open the manufacturer area');
 check((await d.goto(B + '/admin')).status() === 404, 'admin is hidden from customers');
 
 // 3. the team account must set up two-step sign-in before Admin opens, then works the admin pages

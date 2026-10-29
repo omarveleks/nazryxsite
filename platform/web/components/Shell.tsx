@@ -20,7 +20,7 @@ export default function Shell({ user, title, sub, crumb, actions, children }: {
       <a className="skip" href="#main">{t('Skip to content')}</a>
       <aside className="side">
         <Brand />
-        <NavLinks team={user.role === 'team'} unread={user.inbox_unread ?? 0} lang={curLang()} />
+        <NavLinks team={user.role === 'team'} unread={user.inbox_unread ?? 0} lang={curLang()} side={user.account_type === 'distributor' && user.role !== 'team' ? 'd' : 'm'} />
         {user.account_type === 'manufacturer' && user.role !== 'team' ? (
           <div className="plan-box">
             <b>{user.mfr_active ? t(MFR_PLANS[user.mfr_active as keyof typeof MFR_PLANS]?.name) : t('No plan yet')}</b>
@@ -29,7 +29,14 @@ export default function Shell({ user, title, sub, crumb, actions, children }: {
             <Link className="btn-link hide-m" href="/m/plan">{user.mfr_active ? t('Your plan') : t('See plans')}</Link>
             {user.mfr_verified && <span className="pill blue hide-m" style={{ alignSelf: 'flex-start' }}><VerifiedIcon /> {t('Verified manufacturer')}</span>}
           </div>
-        ) : user.role === 'team' ? <div className="plan-box"><b>{t('Nazryx team')}</b></div> : null}
+        ) : user.role === 'team' ? <div className="plan-box"><b>{t('Nazryx team')}</b></div>
+        : user.account_type === 'distributor' ? (
+          <div className="plan-box">
+            <b>{user.dist_company ?? t('Distributor')}</b>
+            <span className="hide-m">{t('Free account')}</span>
+            {user.dist_verified ? <span className="pill blue hide-m" style={{ alignSelf: 'flex-start' }}><VerifiedIcon /> {t('Verified distributor')}</span>
+              : <Link className="btn-link hide-m" href="/d/onboarding">{t('Get verified')}</Link>}
+          </div>) : null}
         <div className="side-foot">
           <Link href="/help">{t('Help and contact')}</Link>
           <span>{user.email}</span>

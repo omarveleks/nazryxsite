@@ -113,7 +113,7 @@ export default async function Project({ params, searchParams }: { params: Promis
             </>) : <Link className="pill lav" href={`/m/plan?want=${NEEDS_PLAN.requirements}`}>{t('Checklist opens with Complete Market Access')}</Link>}
           </section>
           <section className="card stack">
-            <div className="card-h"><h2>{t('Nazryx on this project')}</h2><Link className="btn-link" href="/m/services">{t('Services')}</Link></div>
+            <div className="card-h"><h2>{t('Nazryx on this project')}</h2><Link className="btn-link" href={`/m/marketplace?project=${id}`}>{t('Book a service')}</Link></div>
             {d.engagements.length === 0 ? <p className="note">{t('Nothing asked of us yet.')}</p> : d.engagements.map((e) => (
               <Link key={e.id} href={`/m/engagements/${e.id}`} className="between small"><span>{t(SERVICES[e.kind]?.label ?? e.kind)}<span className="sub2"> · {ago(e.updated_at)}</span></span><StagePill stage={e.stage} /></Link>))}
             {service && (canUse(u.mfr_tier, service) || service === 'partner_intro') && (

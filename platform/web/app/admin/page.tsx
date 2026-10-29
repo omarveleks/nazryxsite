@@ -189,18 +189,19 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
   const pages: Record<string, string> = {
     data: 'Sources and uploads', review: `Review queue${n(c.suggestions + c.dups)}`, manufacturers: `Manufacturers${n(c.mfr_open)}`,
     accounts: `Accounts${n(c.plan_requests)}`, usage: 'Usage', calls: 'Calls', billing: 'Invoices', documents: 'Documents', regulatory: 'Regulatory',
-    content: 'Content and prices', team: 'Team', activity: 'Activity',
+    content: 'Content and prices', team: 'Team', activity: 'Activity', marketplace: 'Marketplace',
   };
   const areas = [
     { key: 'data', label: `Data${n(c.suggestions + c.dups)}`, pages: ['data', 'review'] },
     { key: 'customers', label: `Customers${n(c.mfr_open + c.plan_requests)}`, pages: ['manufacturers', 'accounts', 'usage', 'calls'] },
+    { key: 'marketplace', label: 'Marketplace', pages: ['marketplace'] },
     { key: 'billing', label: 'Billing', pages: ['billing'] },
     { key: 'documents', label: `Documents${n(c.expiring)}`, pages: ['documents'] },
     { key: 'regulatory', label: 'Regulatory', pages: ['regulatory'] },
     { key: 'settings', label: 'Settings', pages: ['content', 'team', 'activity'] },
   ].map((a) => ({ ...a, pages: a.pages.filter((k) => allowedTabs.includes(k)) })).filter((a) => a.pages.length);
   const area = areas.find((a) => a.pages.includes(tab));
-  const tabs = areas.map((a) => ({ key: a.key, label: a.label, href: `/admin?tab=${a.pages[0]}` }));
+  const tabs = areas.map((a) => ({ key: a.key, label: a.label, href: a.key === 'marketplace' ? '/admin/marketplace' : `/admin?tab=${a.pages[0]}` }));
   const subTabs = (area?.pages ?? []).map((k) => ({ key: k, label: pages[k], href: `/admin?tab=${k}` }));
   return (
     <Shell user={u} title="Admin" sub="Nazryx team only. Not visible to customers."

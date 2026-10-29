@@ -8,10 +8,16 @@ import { signIn, signUp } from '@/app/actions/auth';
 
 export const metadata = { title: 'Sign up' };
 
-// The portal is for manufacturers (the distributor side is paused: see distributor/README.md).
-const S = {
-  head: 'You make medicines. We open the markets.', sub: 'Market data, partners and registration in Tanzania, Kenya, Kazakhstan, Kyrgyzstan and Uzbekistan.',
-  steps: ['Tell us your company, markets and catalogue.', 'See which products to register first, and why.', 'We find the partner and take you through registration.'],
+// Two kinds of account: manufacturers (the paid portal) and distributors (free: post needs, meet verified manufacturers).
+const SIDES = {
+  manufacturer: {
+    head: 'You make medicines. We open the markets.', sub: 'Market data, partners and registration in Tanzania, Kenya, Kazakhstan, Kyrgyzstan and Uzbekistan.',
+    steps: ['Tell us your company, markets and catalogue.', 'See which products to register first, and why.', 'We find the partner and take you through registration.'],
+  },
+  distributor: {
+    head: 'You know your market. Meet the manufacturers.', sub: 'Post what you need, browse verified manufacturers and talk to them here. Free for distributors.',
+    steps: ['Tell us your company and the markets you serve.', 'Post a need: the molecule, the quantity, the deadline.', 'Manufacturers who can supply it raise a hand; you talk here, with Nazryx on call.'],
+  },
 };
 
 export default async function SignUp({ searchParams }: { searchParams: Promise<{ mode?: string; error?: string; as?: string }> }) {
@@ -19,6 +25,8 @@ export default async function SignUp({ searchParams }: { searchParams: Promise<{
   if (await getUser()) redirect('/');
   const t = setLang(await cookieLang());
   const signin = sp.mode === 'signin';
+  const as = sp.as === 'distributor' ? 'distributor' : 'manufacturer';
+  const S = SIDES[as];
   return (
     <div className="auth">
       <div className="auth-l">
@@ -32,6 +40,11 @@ export default async function SignUp({ searchParams }: { searchParams: Promise<{
           <Link href="/signup?mode=signin" className={signin ? 'on' : ''}>{t('Sign in')}</Link>
         </div>
         {sp.error && <div className="err" role="alert">{sp.error}</div>}
+        {!signin && (
+          <div className="row" style={{ gap: 6 }} role="radiogroup" aria-label={t('I am a')}>
+            <Link href="/signup" className={`pill ${as === 'manufacturer' ? 'solid' : ''}`} role="radio" aria-checked={as === 'manufacturer'}>{t('Manufacturer')}</Link>
+            <Link href="/signup?as=distributor" className={`pill ${as === 'distributor' ? 'solid' : ''}`} role="radio" aria-checked={as === 'distributor'}>{t('Distributor or importer')}</Link>
+          </div>)}
         {signin ? (
           <form action={signIn} className="stack">
             <input type="hidden" name="account_type" value="manufacturer" />
@@ -43,7 +56,7 @@ export default async function SignUp({ searchParams }: { searchParams: Promise<{
           </form>
         ) : (
           <form action={signUp} className="stack">
-            <input type="hidden" name="account_type" value="manufacturer" />
+            <input type="hidden" name="account_type" value={as} />
             <div className="field"><label htmlFor="name">{t('Full name')}</label>
               <input className="input" id="name" name="name" autoComplete="name" required placeholder={t('Full name')} /></div>
             <div className="field"><label htmlFor="email">{t('Work email')}</label>
@@ -51,7 +64,7 @@ export default async function SignUp({ searchParams }: { searchParams: Promise<{
             <div className="field"><label htmlFor="password">{t('Password')}</label>
               <input className="input" id="password" name="password" type="password" autoComplete="new-password" minLength={10} required placeholder={t('At least 10 characters')} /></div>
             <button className="btn btn-blue" type="submit">{t('Create account')}</button>
-            <p className="note">{t('Next: a few questions about your company, markets and catalogue (about 5 minutes). We then suggest the right plan.')}</p>
+            <p className="note">{as === 'distributor' ? t('Next: your company and the markets you serve (one minute). Then post your first need.') : t('Next: a few questions about your company, markets and catalogue (about 5 minutes). We then suggest the right plan.')}</p>
           </form>
         )}
       </div>

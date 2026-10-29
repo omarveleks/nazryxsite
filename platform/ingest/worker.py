@@ -10,6 +10,7 @@ import billing
 import catalogue
 import digest
 import ingest_job
+import marketplace
 import notify
 import reminder
 
@@ -55,6 +56,7 @@ def tick():
         digest.send_weekly(cur)       # the weekly summary for manufacturers (email and WhatsApp)
         digest.send_monthly(cur)      # what the account got this month, for those on a plan
         billing.offer_checkins(cur)   # the 30-day check-in, once, when a plan goes live
+        marketplace.run(cur)          # open tenders onto the request board, hourly
         digest.call_reminders(cur)    # the day before a booked call
         notify.deliver_queued(cur)
         for (code,) in cur.execute("select code from countries where enabled").fetchall():

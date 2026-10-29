@@ -8,7 +8,7 @@ import { hashPassword, verifyPassword } from '@/lib/password';
 import { back, isEmail, str } from '@/lib/forms';
 
 export async function signUp(f: FormData) {
-  const as = 'manufacturer';   // the portal is for manufacturers (the distributor side is paused)
+  const as = str(f, 'account_type', 20) === 'distributor' ? 'distributor' : 'manufacturer';
   const name = str(f, 'name', 120), email = str(f, 'email', 200).toLowerCase(), pw = String(f.get('password') ?? '');
   if (!name || !isEmail(email)) back('/signup', { as, error: 'Enter your name and a work email.' });
   if (pw.length < 10) back('/signup', { as, error: 'Use a password of at least 10 characters.' });
@@ -20,9 +20,9 @@ export async function signUp(f: FormData) {
   const exists = await pool.query('select id from auth_find_user($1)', [email]);
   if (exists.rowCount) back('/signup', { as, mode: 'signin', error: 'That email already has an account. Sign in.' });
   const r = await pool.query('select auth_create_user($1, $2, $3) as id', [email, name, hashPassword(pw)]);
-  await withUser(r.rows[0].id, (db) => db.query("update users set account_type = 'manufacturer' where id = $1", [r.rows[0].id]));
+  await withUser(r.rows[0].id, (db) => db.query('update users set account_type = $2 where id = $1', [r.rows[0].id, as]));
   await createSession(r.rows[0].id);
-  redirect('/m/onboarding');
+  redirect(as === 'distributor' ? '/d/onboarding' : '/m/onboarding');
 }
 
 export async function signIn(f: FormData) {
