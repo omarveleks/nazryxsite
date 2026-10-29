@@ -4,7 +4,7 @@ import PlanChooser, { loadPlanPrices } from '@/components/PlanChooser';
 import MfrWizard from '@/components/MfrWizard';
 import { saveMfrStep } from '@/app/actions/mfr';
 import { requireUser } from '@/lib/auth';
-import { one, withUser } from '@/lib/db';
+import { one, rows, withUser } from '@/lib/db';
 import { APPROACHES, CERTIFICATIONS, GOALS, LAUNCH_SCOPES, COMPANY_SIZES, CONTACT_ROLES, CORE_MARKETS, DOSAGE_FORMS, MFR_COUNTRIES, MFR_STEPS, OTHER_MARKETS, NEEDS, THERAPEUTIC_AREAS, TIMELINES, WIZARD, type WizardStep } from '@/lib/mfr';
 
 export const metadata = { title: 'Your company' };
@@ -19,6 +19,7 @@ export default async function MfrOnboarding({ searchParams }: { searchParams: Pr
     products: Number((await one(db, 'select count(*)::int as n from mfr_products where user_id = $1', [u.id]))?.n ?? 0),
     whatsapp: (await one(db, 'select whatsapp from users where id = $1', [u.id]))?.whatsapp as string | null,
     prices: await loadPlanPrices(db),
+    found: await rows(db, 'select * from mfr_find_registrations($1)', [(await one(db, 'select company_name from manufacturer_profiles where user_id = $1', [u.id]))?.company_name ?? '']),
   }));
   const p = d.p;
   const editing = u.onboarded;
@@ -27,8 +28,7 @@ export default async function MfrOnboarding({ searchParams }: { searchParams: Pr
     const reachedQ = p ? Math.min(p.step, WIZARD.length) : 1;
     const asked = WIZARD.indexOf(sp.q as WizardStep);
     const q = WIZARD[asked >= 0 && asked < reachedQ ? asked : reachedQ - 1];
-    return <MfrWizard q={q} p={p} products={d.products} prices={d.prices} error={sp.error} note={sp.note}
-      interval={sp.billing === 'year' ? 'year' : 'month'} market={sp.market} />;
+    return <MfrWizard q={q} p={p} products={d.products} error={sp.error} note={sp.note} found={p?.company_ids?.length ? [] : d.found} />;
   }
   const reached = p ? (editing ? 6 : Math.min(p.step, 6)) : 1;
   const step = Math.min(Math.max(Number(sp.step) || reached, 1), reached);

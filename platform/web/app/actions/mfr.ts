@@ -5,7 +5,7 @@ import { teamCan } from '@/lib/team';
 import { headers } from 'next/headers';
 import { checkoutUrl, portalUrl, stripeReady } from '@/lib/stripe';
 import { requireUser } from '@/lib/auth';
-import { dbMessage, one, withUser } from '@/lib/db';
+import { dbMessage, one, rows, withUser } from '@/lib/db';
 import { back, int, str } from '@/lib/forms';
 import { findMolecule } from '@/lib/match';
 import { AGENCY_KINDS, APPROACHES, GOALS, LAUNCH_SCOPES, CERTIFICATIONS, COMPANY_SIZES, CONTACT_ROLES, DOSAGE_FORMS, MFR_COUNTRIES, MFR_PLANS, NEEDS,
@@ -132,7 +132,7 @@ export async function saveWizard(f: FormData) {
   const u = await requireUser({ allowOnboarding: true, manufacturer: true });
   const q = str(f, 'q', 20) as WizardStep;
   const i = WIZARD.indexOf(q);
-  if (i < 0 || q === 'plan') redirect(ONB);
+  if (i < 0) redirect(ONB);
   const here = `${ONB}?q=${q}`;
   let note = '';
   try {
@@ -149,14 +149,12 @@ export async function saveWizard(f: FormData) {
         const targets = pick(f, 'target_countries', codes);
         if (!targets.length) throw new Error('Pick at least one market.');
         await db.query('update manufacturer_profiles set target_countries = $2 where user_id = $1', [u.id, targets]);
-      } else if (q === 'goals') {
-        await db.query('update manufacturer_profiles set goals = $2 where user_id = $1', [u.id, opts(f, 'goals', GOALS)]);
-      } else if (q === 'help') {
-        await db.query('update manufacturer_profiles set services = $2 where user_id = $1', [u.id, opts(f, 'services', NEEDS)]);
-      } else if (q === 'timeline') {
-        await db.query('update manufacturer_profiles set timeline = $2 where user_id = $1', [u.id, oneOf(str(f, 'choice', 20), TIMELINES)]);
-      } else if (q === 'scope') {
-        await db.query('update manufacturer_profiles set launch_scope = $2 where user_id = $1', [u.id, oneOf(str(f, 'choice', 20), LAUNCH_SCOPES)]);
+        // the registrations they ticked as theirs: their products fill in from the register
+        const claim = f.getAll('claim').map(Number).filter((x) => Number.isInteger(x) && x > 0);
+        if (claim.length) {
+          const added = (await one<{ n: number }>(db, 'select mfr_claim_registrations($1::int[]) as n', [claim]))?.n ?? 0;
+          if (added) note = `${added} products added from your registrations.`;
+        }
       } else if (q === 'products') {
         const r = await insertProducts(db, u.id, str(f, 'list', 20000));
         if (r.added) note = `${r.added} products added, ${r.matched} matched to the market.`;
@@ -170,6 +168,22 @@ export async function saveWizard(f: FormData) {
   } catch (e) {
     if (isRedirect(e)) throw e;
     back(here, { error: errText(e) });
+  }
+  if (i + 1 >= WIZARD.length) {
+    // the last screen: sign-up is done; the trial of Basic Market Data starts on the first market with data; Home shows the portfolio
+    await withUser(u.id, async (db) => {
+      const p = await one(db, 'select target_countries, primary_market, trial_until from manufacturer_profiles where user_id = $1', [u.id]);
+      const targets: string[] = p?.target_countries ?? [];
+      const live = (await rows(db, 'select distinct country from registrations where country = any($1)', [targets])).map((r: { country: string }) => r.country);
+      const first = live.includes(p?.primary_market) ? p.primary_market : live[0] ?? null;
+      if (first && !p?.trial_until) await db.query('select mfr_start_trial($1)', [first]);
+      await db.query('update users set onboarded = true where id = $1', [u.id]);
+      await db.query(`update manufacturer_profiles set tour_step = -1, completed_at = coalesce(completed_at, now()),
+                      primary_market = coalesce(primary_market, $2) where user_id = $1`, [u.id, first]);
+      const name = (await one(db, 'select company_name from manufacturer_profiles where user_id = $1', [u.id]))?.company_name;
+      await teamNote(db, 'New manufacturer', `${name} (${u.email}) finished sign-up. Markets: ${targets.map(countryName).join(', ') || 'none'}.`);
+    });
+    redirect('/m?welcome=1');
   }
   back(ONB, { q: WIZARD[i + 1], ...(note ? { note } : {}) });
 }
@@ -581,7 +595,7 @@ export async function addMarket(f: FormData) {
   const market = str(f, 'market', 2);
   const to = safeNext(str(f, 'return', 200), `/m/market?market=${market}`);
   if (!codes.includes(market)) back(to, { error: 'Pick a market.' });
-  if (!u.mfr_active) redirect(`/m/plan?want=data&market=${market}`);
+  if (!u.mfr_active || u.mfr_trial) redirect(`/m/plan?want=data&market=${market}`);
   if (covers(u, market)) redirect(to);
   const d = await withUser(u.id, async (db) => ({
     price: await one(db, 'select amount_usd from plan_prices where key = $1', [`mfr_market_${u.mfr_active}`]),
@@ -663,4 +677,19 @@ export async function setKind(f: FormData) {
   await withUser(u.id, (db) => db.query('update mfr_products set kind = $3 where id = $1 and user_id = $2',
     [product, u.id, k === 'device' || k === 'medicine' ? k : null]));
   redirect(`/m/products/${product}?market=${market}`);
+}
+
+/** Watch a word in tender titles across your markets (Inbox). */
+export async function addTenderWatch(f: FormData) {
+  const u = await requireUser({ manufacturer: true });
+  const term = str(f, 'term', 60).toLowerCase();
+  if (term.length < 3) back('/m/inbox', { error: 'Use a word of three letters or more.' });
+  await withUser(u.id, (db) => db.query('insert into tender_watches (user_id, term) values ($1, $2) on conflict do nothing', [u.id, term]));
+  back('/m/inbox', { saved: '1' });
+}
+
+export async function removeTenderWatch(f: FormData) {
+  const u = await requireUser({ manufacturer: true });
+  await withUser(u.id, (db) => db.query('delete from tender_watches where user_id = $1 and term = $2', [u.id, str(f, 'term', 60)]));
+  back('/m/inbox', { saved: '1' });
 }

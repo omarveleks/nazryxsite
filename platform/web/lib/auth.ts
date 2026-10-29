@@ -20,6 +20,8 @@ export type User = {
   mfr_plan: string | null; mfr_plan_chosen: boolean; mfr_active: string | null; mfr_tier: number;
   team_owner: boolean; team_permissions: string[]; tour_step: number | null; mfr_verified: boolean;
   mfr_markets: string[]; mfr_interval: string;
+  mfr_trial: boolean; mfr_trial_until: string | null;   // 14 days of Basic Market Data on one market, before any plan
+  inbox_unread: number;
   viewed_by?: string | null;      // the team member viewing this account, when it is a view
   view_ended?: boolean;           // a view that has ended is still in the browser: changes wait for its exit link
 };
@@ -85,8 +87,14 @@ function loadUser(id: string) {
            u.owner_id, u.language, u.whatsapp, u.notify_email, u.notify_whatsapp,
            coalesce(c.display_name, cl.company_name) as company_name, cl.status as claim_status,
            (select count(*)::int from sourcing_list l where l.user_id = u.id) as list_count, u.account_type,
-           mp.chosen_plan is not null as mfr_plan_chosen, coalesce(mp.chosen_plan, mp.suggested_plan) as mfr_plan, mp.active_plan as mfr_active, mp.tour_step, mp.verified_at is not null as mfr_verified, coalesce(mp.paid_markets, '{}') as mfr_markets, coalesce(mp.billing_interval, 'month') as mfr_interval,
-           case when u.role = 'team' then 3 else coalesce(case mp.active_plan when 'data' then 1 when 'access' then 2 when 'entry' then 3 end, 0) end as mfr_tier
+           mp.chosen_plan is not null as mfr_plan_chosen, coalesce(mp.chosen_plan, mp.suggested_plan) as mfr_plan,
+           coalesce(mp.active_plan, case when mp.trial_until > now() then 'data' end) as mfr_active, mp.tour_step, mp.verified_at is not null as mfr_verified,
+           case when mp.active_plan is null and mp.trial_until > now() then array[mp.trial_market] else coalesce(mp.paid_markets, '{}') end as mfr_markets,
+           coalesce(mp.billing_interval, 'month') as mfr_interval,
+           mp.active_plan is null and mp.trial_until > now() as mfr_trial, mp.trial_until as mfr_trial_until,
+           (select count(*)::int from inbox_items i where i.user_id = u.id and i.read_at is null) as inbox_unread,
+           case when u.role = 'team' then 3 when mp.active_plan = 'data' then 1 when mp.active_plan = 'access' then 2 when mp.active_plan = 'entry' then 3
+                when mp.active_plan is null and mp.trial_until > now() then 1 else 0 end as mfr_tier
     from users u
     left join companies c on c.id = u.company_id
     left join lateral (select * from company_claims k where k.user_id = coalesce(u.owner_id, u.id)

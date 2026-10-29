@@ -33,7 +33,8 @@ export default async function Tenders({ searchParams }: { searchParams: Promise<
   const m = d.market;
   const full = canUse(tierIn(u, m), 'market');
   return (
-    <Shell user={u} title="Tenders" sub={`Public medicine tenders in ${countryName(m)}, collected daily from the official portals`}>
+    <Shell user={u} title="Tenders" sub={`Public medicine tenders in ${countryName(m)}, collected daily from the official portals`}
+      actions={full && hasData(m) ? <a className="btn btn-ghost btn-sm" href={`/m/export?what=tenders&market=${m}`}>Excel (CSV)</a> : undefined}>
       <MarketPicker u={u} targets={d.targets} current={m} path="/m/tenders" />
       {!hasData(m) ? <AgencyMarket code={m} /> : (<>
         <div className="row" style={{ gap: 6 }} aria-label="Show">

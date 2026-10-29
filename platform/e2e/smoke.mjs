@@ -122,26 +122,23 @@ await k.goto(B + '/signup');
 await k.fill('#name', 'Maker Test'); await k.fill('#email', kmail); await k.fill('#password', 'smoke-password-123');
 await Promise.all([k.waitForURL(/\/m\/onboarding/), k.click('button[type=submit]')]);
 await k.fill('#company_name', 'Smoke Generics'); await k.fill('#hq_country', 'India');
-check((await k.locator('body').innerText()).includes('Step 1 of 8'), 'sign-up asks one question per screen');
+check((await k.locator('body').innerText()).includes('Step 1 of 3'), 'sign-up is three screens');
 await Promise.all([k.waitForURL(/q=markets/), k.click('button:has-text("Continue")')]);
 await k.locator('input[name=target_countries][value=KE]').check();
-await Promise.all([k.waitForURL(/q=goals/), k.click('button:has-text("Continue")')]);
-await k.locator('input[name=goals][value=launch]').check();
-await Promise.all([k.waitForURL(/q=help/), k.click('button:has-text("Continue")')]);
-await k.locator('input[name=services][value=register]').check(); await k.locator('input[name=services][value=sales]').check();
-await Promise.all([k.waitForURL(/q=timeline/), k.click('button:has-text("Continue")')]);
-await Promise.all([k.waitForURL(/q=scope/), k.click('button[name=choice][value=now]')]);
-await Promise.all([k.waitForURL(/q=products/), k.click('button[name=choice][value="1_3"]')]);
+await Promise.all([k.waitForURL(/q=products/), k.click('button:has-text("Continue")')]);
 await k.fill('textarea[name=list]', 'Doxycycline 100mg capsules\nAmoxicillin 500mg capsules\nNot A Real Product');
 await k.setInputFiles('input[name=catalogue]', { name: 'catalogue.csv', mimeType: 'text/csv', buffer: Buffer.from('Product name,Strength\nDoxycycline,100mg capsules\nCiprofloxacin,250mg tablets') });
-await Promise.all([k.waitForURL(/q=plan/), k.click('button:has-text("Continue")')]);
-const planText = await k.locator('body').innerText();
-check(planText.includes('3 products added, 2 matched') && planText.includes('1 product added from catalogue.csv'), 'pasted list and catalogue file are both added during sign-up');
-check(planText.includes('Suggested') && planText.includes('Complete Market Entry') && planText.includes('you want registration and sales handled for you'), 'sign-up ends with a suggested plan');
-await Promise.all([k.waitForURL(/\/m\?welcome/), k.locator('form:has(.pill:has-text("Suggested")) button[type=submit]').click()]);
-await k.locator('button:has-text("Take the tour")').waitFor({ timeout: 15000 });   // offered after a short pause
+await Promise.all([k.waitForURL(/\/m\?welcome/), k.click('button:has-text("Continue")')]);
+const homeText = await k.locator('body').innerText();
+check(/Basic Market Data is open for you on .* until .*, free/.test(homeText), 'sign-up ends on Home with a 14-day trial of Basic on one market');
+await k.goto(B + '/m/products?tab=grid');
+check((await k.locator('main').innerText()).includes('Your portfolio across your markets'), 'the portfolio grid shows every product against every market');
+await k.goto(B + '/m/plan');
+check((await k.locator('main').innerText()).includes('Your trial of Basic Market Data'), 'the plan page shows the trial');
+await k.goto(B + '/m?welcome=1');
+await k.locator('button.btn-blue:has-text("Take the tour")').waitFor({ timeout: 15000 });   // offered after a short pause
 check(true, 'after sign-up, Home offers the tour or skip');
-await Promise.all([k.waitForURL(/\/m\/products/), k.click('button:has-text("Take the tour")')]);
+await Promise.all([k.waitForURL(/\/m\/products/), k.click('button.btn-blue:has-text("Take the tour")')]);
 await k.locator('[role=dialog]:has-text("Tour · 1 of 8")').waitFor({ state: 'attached', timeout: 15000 });
 const tour = await k.locator('[role=dialog]').innerText();
 check(tour.includes('Add your products') && (await k.locator('[data-tour="add-products"]').count()) === 1, 'the guided tour starts after sign-up, spotlighting the feature');
@@ -167,7 +164,10 @@ check(/Distributor [0-9A-F]{8}/.test(free) && !free.includes('Reaches EML') && !
   && (await k.locator('.nm').count()) <= 5, 'partners opens on every distributor, five free, introductions locked');
 await k.goto(B + '/m/products');
 const prodFree = await k.locator('main').innerText();
-check(prodFree.includes('In high demand') && prodFree.includes('Your portfolio analysis'), 'products dashboard with the analysis locked');
+check(prodFree.includes('In high demand') && !prodFree.includes('Unlock with Basic Market Data'), 'products dashboard: the analysis is open on the trial market');
+await k.goto(B + '/m/products?market=KE');
+check((await k.locator('main').innerText()).includes('Managed by Nazryx'), 'products dashboard: a market without data is managed by Nazryx, trial or not');
+await k.goto(B + '/m/products');
 await k.fill('#med-q', 'amlodip');
 await k.locator('#med-hits button', { hasText: /amlodipine/i }).first().click();
 await k.fill('input[name=strength]', '5 mg'); await k.selectOption('select[name=form]', 'Tablets');
@@ -192,14 +192,14 @@ const yearText = await k.locator('main').innerText();
 check(yearText.includes('$4,990') && yearText.includes('$19,990') && yearText.includes('/ year') && /included · each extra market \$2,990 a year/.test(yearText)
   && /4 markets included/.test(yearText) && /each extra market \$4,990 a year/.test(yearText),
   'plans: yearly billing at ten months; Basic one market, Access four; each plan prices its extra markets');
-check((await k.goto(B + '/m/tenders')).status() === 200 && (await k.locator('nav').innerText()).includes('Tenders')
-  && (await k.locator('main').innerText()).includes('Unlock with Basic Market Data'), 'tenders page in the menu, locked without a plan');
+check((await k.goto(B + '/m/tenders?market=KE')).status() === 200 && (await k.locator('nav').innerText()).includes('Tenders')
+  && (await k.locator('main').innerText()).includes('Managed by Nazryx'), 'tenders page in the menu; a market without data is managed by Nazryx');
 await k.goto(B + '/m/regulatory');
 const regFree = await k.locator('main').innerText();
 check(regFree.includes('Routes to registration') && regFree.includes('Local representative') && regFree.includes('Unlock with Complete Market Access'),
   'regulatory page: routes, every requirement for the market, per-product requirements locked');
 await k.goto(B + '/m/products?tab=watch');
-check((await k.locator('main').innerText()).includes('Unlock with Basic Market Data'), 'competitor watch is locked without a plan');
+check(!(await k.locator('main').innerText()).includes('Unlock with Basic Market Data'), 'competitor watch is open on the trial');
 await k.goto(B + '/m/products'); await k.waitForLoadState('networkidle');
 await k.setInputFiles('#add input[name=file]', { name: 'our-catalogue.pdf', mimeType: 'application/pdf', buffer: Buffer.from('%PDF-1.4 cat') });
 await Promise.all([k.waitForURL(/reading=1/), k.click('#add button:has-text("Upload")')]);
@@ -217,9 +217,9 @@ check((await k.locator('main').innerText()).includes('We are checking your GMP c
 // the team approves the company and switches the plan on; everything opens
 await t.goto(B + '/admin?tab=manufacturers'); await t.waitForLoadState('networkidle');
 await Promise.all([t.waitForURL(/saved=1/), t.locator(`tr:has-text("${kmail}") button:has-text("Approve")`).click()]);
-await t.locator('a:has-text("Smoke Generics")').first().click(); await t.waitForURL(/admin\/accounts\//);
+await t.locator(`tr:has-text("${kmail}") a`).first().click(); await t.waitForURL(/admin\/accounts\//);
 const acct = await t.locator('main').innerText();
-check(acct.includes('Launch in new markets') && acct.includes('chose Complete Market Entry') && acct.includes('catalogue.csv'), 'team sees every onboarding answer');
+check(acct.includes('catalogue.csv'), 'team sees the catalogue uploaded at sign-up');
 await t.selectOption('#plan select[name=plan]', 'entry');
 await Promise.all([t.waitForURL(/saved=1/), t.click('#plan button:has-text("Save")')]);
 const acctUrl = t.url().split('?')[0];
@@ -294,7 +294,7 @@ check((await k.locator('main').innerText()).includes('Kenya'), 'the chosen marke
 await k.click('form[aria-label=Market] button:has-text("Tanzania")'); await k.waitForLoadState('networkidle');
 await k.goto(B + '/m/partners?class=' + encodeURIComponent('Anti-infective Medicines'));
 const kpart = await k.locator('main').innerText();
-check(/Distributor [0-9A-F]{8}/.test(kpart) && /Open to \d+ of your \d+ molecules/.test(kpart) && !kpart.includes('Alpha Pharma'), 'partners show codes and how open each is to you');
+check(/[0-9A-F]{8}/.test(kpart) && /Open to \d+ of your \d+ molecules/.test(kpart) && /alpha pharma/i.test(kpart), 'partners on a plan show names with their codes and how open each is to you');
 await Promise.all([k.waitForURL(/\/m\/partners\/intro\?code=/), k.locator('a:has-text("Request introduction")').first().click()]);
 await k.locator('input[name=scope][value=all]').check(); await k.selectOption('#partner', 'exclusive');
 await Promise.all([k.waitForURL(/\/m\/engagements\/\d+\?new=1/), k.click('button:has-text("Send to our team")')]);

@@ -16,7 +16,7 @@ export default function Shell({ user, title, sub, crumb, actions, children }: {
     <div className="shell">
       <aside className="side">
         <Brand />
-        <NavLinks team={user.role === 'team'} />
+        <NavLinks team={user.role === 'team'} unread={user.inbox_unread ?? 0} />
         {user.account_type === 'manufacturer' && user.role !== 'team' ? (
           <div className="plan-box">
             <b>{user.mfr_active ? MFR_PLANS[user.mfr_active as keyof typeof MFR_PLANS]?.name : 'No plan yet'}</b>

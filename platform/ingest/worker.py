@@ -43,6 +43,15 @@ def tick():
             cur.execute("rollback to savepoint rematch")
             log.exception("re-matching products failed")
         billing.process(cur)          # plans switched on or off, invoices and order confirmations
+        cur.execute("savepoint inbox")
+        try:
+            import inbox
+            inbox.run(cur)                # what moved in each manufacturer's markets, as inbox items
+            inbox.mail_daily(cur)         # the unread ones, once a day, by email
+            cur.execute("release savepoint inbox")
+        except Exception:
+            cur.execute("rollback to savepoint inbox")
+            log.exception("inbox failed")
         digest.send_weekly(cur)       # the weekly summary for manufacturers (email and WhatsApp)
         digest.call_reminders(cur)    # the day before a booked call
         notify.deliver_queued(cur)

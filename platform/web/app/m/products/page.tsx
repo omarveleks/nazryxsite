@@ -4,6 +4,7 @@ import MarketPicker, { AgencyMarket, dataMarkets, hasData, loadLive, pickMarket,
 import MedicineSearch from '@/components/MedicineSearch';
 import AutoRefresh from '@/components/AutoRefresh';
 import { Bar, Empty, Flash, LockIcon, PlanLock, Tabs } from '@/components/ui';
+import PortfolioGrid from '@/components/PortfolioGrid';
 import { DemandIcon } from '@/components/Icons';
 import { addMfrProducts, deleteAllMfrProducts, deleteMfrFile, saveLaunch, unwatchMolecule, uploadMfrFile, watchMolecule } from '@/app/actions/mfr';
 import { requireUser } from '@/lib/auth';
@@ -53,6 +54,9 @@ export default async function MfrProducts({ searchParams }: { searchParams: Prom
         coalesce(cm.rankable, false) as rankable, g.score, g.demand from country_molecules cm
         left join visible_gap_scores g on g.molecule_id = cm.molecule_id and g.country = cm.country
         where cm.molecule_id = any($1) and cm.country = any($2)`, [ids, dataMarkets(MFR_COUNTRIES.map((x) => x.code))]) as Fact[] : [];
+    // registrations under this account's own companies (claimed at sign-up): "registered by you" in the grid
+    const mine = await rows(db, `select distinct r.molecule_id, r.country from registrations r join manufacturer_profiles mp on mp.user_id = $1
+        where r.active and r.molecule_id is not null and r.manufacturer_id = any(mp.company_ids)`, [u.id]);
     const launches = await rows(db, `select l.id, l.country, l.stage, l.updated_at, coalesce(m.inn, p.name) as name, p.id as product_id
         from launches l join mfr_products p on p.id = l.product_id left join molecules m on m.id = p.molecule_id
         where l.user_id = $1 order by l.updated_at desc`, [u.id]);
@@ -88,7 +92,7 @@ export default async function MfrProducts({ searchParams }: { searchParams: Prom
     }
     const otherPrices = ids.length ? await rows(db, `${PRICE_SQL} where molecule_id = any($1) and country <> $2`, [ids, market]) as MoleculePrice[] : [];
     const local = curOf[market] ?? null;
-    return { targets, market, products, facts, launches, files, watched, watchCount, prices, groupFacts, groupPrices, otherPrices, fx, local, order, gaps };
+    return { targets, market, products, facts, mine, launches, files, watched, watchCount, prices, groupFacts, groupPrices, otherPrices, fx, local, order, gaps };
   });
   const market = d.market;
   const analysis = canUse(tierIn(u, market), 'portfolio');
@@ -158,7 +162,8 @@ export default async function MfrProducts({ searchParams }: { searchParams: Prom
 
   return (
     <Shell user={u} title="My products" sub={`Your catalogue against ${countryName(market)}`}
-      actions={<a className="btn btn-blue btn-sm" href="/m/products#add">Add a product</a>}>
+      actions={<>{analysis && <a className="btn btn-ghost btn-sm" href={`/m/export?what=${sp.tab === 'grid' ? 'grid' : 'products'}&market=${market}`}>Excel (CSV)</a>}
+        <a className="btn btn-blue btn-sm" href="/m/products#add">Add a product</a></>}>
       <Flash sp={sp} />
       {sp.cleared && <div className="ok" role="status">All products removed.</div>}
       {reading.length > 0 && (<div className="ok row" role="status" style={{ gap: 10 }}><AutoRefresh />
@@ -169,11 +174,15 @@ export default async function MfrProducts({ searchParams }: { searchParams: Prom
       {sp.uploaded && <div className="ok" role="status">{sp.uploaded === 'gmp' ? 'GMP certificate received. Our team checks it for your Verified badge.' : 'Document received.'}</div>}
       {sp.added && <div className="ok" role="status">Added {sp.added} products; {sp.matched} matched to a molecule we track.
         {Number(sp.added) > Number(sp.matched) ? ' Our team matches the rest.' : ''}</div>}
-      <Tabs current={sp.tab === 'launches' || sp.tab === 'watch' ? sp.tab : 'portfolio'} items={[
+      <Tabs current={sp.tab === 'launches' || sp.tab === 'watch' || sp.tab === 'grid' ? sp.tab : 'portfolio'} items={[
         { key: 'portfolio', label: 'Portfolio', href: '/m/products' },
+        { key: 'grid', label: 'All markets', href: '/m/products?tab=grid' },
         { key: 'watch', label: `Competitor watch${d.watchCount ? ` (${d.watchCount})` : ''}`, href: '/m/products?tab=watch' },
         { key: 'launches', label: `Launch tracker${d.launches.length ? ` (${d.launches.length})` : ''}`, href: '/m/products?tab=launches' }]} />
-      {sp.tab === 'watch' ? (
+      {sp.tab === 'grid' ? (
+        mols.length === 0 ? <Empty>Add your products to see them against every market.</Empty>
+          : <PortfolioGrid rows={mols} markets={d.targets} facts={d.facts} mine={d.mine} launches={d.launches} hasData={hasData} market={market} />
+      ) : sp.tab === 'watch' ? (
         !canUse(u.mfr_tier, 'competitors') ? (
           <PlanLock need="data" title="Competitor watch">Follow any molecule. See every new competitor in your markets, where their product is made,
             and get an alert by email or WhatsApp the week it is registered.</PlanLock>
@@ -294,7 +303,7 @@ export default async function MfrProducts({ searchParams }: { searchParams: Prom
       </section>
 
       </>)}
-      {sp.tab !== 'watch' && sp.tab !== 'launches' && (<>
+      {sp.tab !== 'watch' && sp.tab !== 'launches' && sp.tab !== 'grid' && (<>
       <section className="card stack" id="add" data-tour="add-products">
         <h2>Add a product</h2>
         <p className="note">Search by name. Not there? Add it as written and our team takes care of it.</p>

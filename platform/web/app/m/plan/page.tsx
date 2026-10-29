@@ -4,7 +4,8 @@ import { Flash } from '@/components/ui';
 import { requireUser } from '@/lib/auth';
 import { one, withUser } from '@/lib/db';
 import Link from 'next/link';
-import { MFR_PLANS, tierOf, type PlanKey } from '@/lib/mfr';
+import { MFR_PLANS, countryName, tierOf, type PlanKey } from '@/lib/mfr';
+import { fmtDate } from '@/lib/format';
 
 export const metadata = { title: 'Your plan' };
 
@@ -22,6 +23,9 @@ export default async function MfrPlan({ searchParams }: { searchParams: Promise<
       <Flash sp={sp} />
       {sp.paid && <div className="ok" role="status">Payment received. Your plan switches on within a minute; your order confirmation and invoice follow in Settings, Documents.</div>}
       {sp.requested && <div className="ok" role="status">Thanks. Our team will get in touch within one working day.</div>}
+      {u.mfr_trial && u.mfr_trial_until && <div className="ok" role="status">Your trial of Basic Market Data on {countryName(u.mfr_markets[0])} runs until {fmtDate(u.mfr_trial_until)}.
+        Pick a plan any time to keep it, add markets or open the tools.</div>}
+      {d.p && !d.p.active_plan && d.p.trial_until && new Date(d.p.trial_until) < new Date() && <div className="note">Your trial has ended. Your data stays; a plan opens the market pages again.</div>}
       {d.p ? <PlanChooser p={d.p} prices={d.prices} products={d.products} from="plan" interval={sp.billing === 'year' ? 'year' : 'month'} market={sp.market}
         want={sp.want && sp.want in MFR_PLANS && (d.p.active_plan ? tierOf(d.p.active_plan) < tierOf(sp.want) : true) ? sp.want as PlanKey : null} /> : <p>Tell us about your company first. <Link href="/m/onboarding">Start</Link></p>}
     </Shell>

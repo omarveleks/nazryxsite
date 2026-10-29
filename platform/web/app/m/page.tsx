@@ -52,7 +52,9 @@ export default async function MfrHome({ searchParams }: { searchParams: Promise<
     const zone = (await one(db, 'select timezone from call_settings where id = 1'))?.timezone ?? 'UTC';
     const products = profile?.sample_product_id ? [] : await rows(db, `select p.id, coalesce(m.inn, p.name) as name from mfr_products p
         left join molecules m on m.id = p.molecule_id where p.user_id = $1 and p.molecule_id is not null order by 2 limit 200`, [u.id]);
-    return { profile, targets, focus, full, counts, first, watch, engagements, deadlines, products, call, zone };
+    const own = await one(db, `select count(*)::int as n, array_agg(distinct r.country) as markets from registrations r
+        join manufacturer_profiles mp on mp.user_id = $1 where r.active and r.manufacturer_id = any(mp.company_ids)`, [u.id]);
+    return { profile, targets, focus, full, counts, first, watch, engagements, deadlines, products, call, zone, mine: own?.n ?? 0, mineMarkets: (own?.markets ?? []) as string[] };
   });
   const p = d.profile;
   const full = d.full;
@@ -73,7 +75,10 @@ export default async function MfrHome({ searchParams }: { searchParams: Promise<
       actions={<><Link className="btn btn-ghost btn-sm" href="/m/products#add">Add a product</Link><Link className="btn btn-blue btn-sm" href="/m/services">Get help</Link></>}>
       <Flash sp={sp} />
       {p?.status === 'pending' && <div className="note">Our team is reviewing your company. Everything is open to explore; introductions start once you are approved.</div>}
-      {sp.welcome && <div className="ok">{d.counts?.products ? `Welcome. Your ${d.counts.products} products are matched to your markets below.` : 'Welcome. Add your products and we match them to your markets in seconds.'}</div>}
+      {sp.welcome && <div className="ok">{d.mine ? `Welcome. We found ${d.mine} ${d.mine === 1 ? 'registration' : 'registrations'} under your company in ${d.mineMarkets.map(countryName).join(', ')}; they are in your portfolio, marked as yours. `
+        : 'Welcome. '}{d.counts?.products ? `Your ${d.counts.products} products are matched to your markets below.` : 'Add your products and we match them to your markets in seconds.'}
+        {u.mfr_trial && u.mfr_trial_until ? ` Basic Market Data is open for you on ${countryName(u.mfr_markets[0])} until ${fmtDate(u.mfr_trial_until)}, free.` : ''}</div>}
+      {!sp.welcome && u.mfr_trial && u.mfr_trial_until && <div className="note">Trial: Basic Market Data on {countryName(u.mfr_markets[0])} until {fmtDate(u.mfr_trial_until)}. <Link href="/m/plan">See the plans</Link></div>}
 
       {doneN < setup.length && (
         <section className="card stack" style={{ gap: 10 }}>

@@ -52,7 +52,8 @@ export default async function Partners({ searchParams }: { searchParams: Promise
     <Shell user={u} title="Partners" sub={`Who could carry your products in ${countryName(d.market)}`}
       actions={u.role === 'team'
         ? <Link className="btn btn-blue btn-sm" href={`/m/partners?market=${d.market}${sp.names === '1' ? '' : '&names=1'}`}>{sp.names === '1' ? 'Hide names' : 'Show names'}</Link>
-        : intro ? <Link className="btn btn-blue btn-sm" href="/m/partners/intro">Ask us to find distributors</Link> : undefined}>
+        : <>{lists && <a className="btn btn-ghost btn-sm" href={`/m/export?what=partners&market=${d.market}`}>Excel (CSV)</a>}
+            {intro && <Link className="btn btn-blue btn-sm" href="/m/partners/intro">Ask us to find distributors</Link>}</>}>
       <Flash sp={sp} />
       <MarketPicker u={u} targets={d.targets} current={d.market} path="/m/partners" />
       {!hasData(d.market) ? <AgencyMarket code={d.market} /> : (<>

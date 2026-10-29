@@ -248,7 +248,9 @@ export const LAUNCH_STAGES: [string, string][] = [
 ];
 
 /** The first-time manufacturer sign-up: one question per screen. The rest of the profile is filled in later (Home checklist). */
-export const WIZARD = ['company', 'markets', 'goals', 'help', 'timeline', 'scope', 'products', 'plan'] as const;
+// three screens: who you are, where you are going, what you make; goals and plan come later, once there is something to see
+export const WIZARD = ['company', 'markets', 'products'] as const;
+export const TRIAL_DAYS = 14;
 export type WizardStep = (typeof WIZARD)[number];
 
 // ---------------------------------------------------------------- one row per molecule
