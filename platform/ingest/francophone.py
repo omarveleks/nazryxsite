@@ -21,7 +21,11 @@ TODAY = dt.date.today()
 SALTS = {"chlorure": "chloride", "sulfate": "sulfate", "gluconate": "gluconate", "bicarbonate": "bicarbonate", "carbonate": "carbonate",
          "permanganate": "permanganate", "hydroxyde": "hydroxide", "phosphate": "phosphate", "lactate": "lactate", "citrate": "citrate",
          "acetate": "acetate", "fumarate": "fumarate", "oxyde": "oxide", "nitrate": "nitrate", "iodure": "iodide", "bromure": "bromide",
-         "fluorure": "fluoride", "benzoate": "benzoate", "salicylate": "salicylate", "valproate": "valproate", "folinate": "folinate"}
+         "fluorure": "fluoride", "benzoate": "benzoate", "salicylate": "salicylate", "valproate": "valproate", "folinate": "folinate",
+         "chlorhydrate": "hydrochloride", "bromhydrate": "hydrobromide", "mesilate": "mesilate", "mesylate": "mesylate", "maleate": "maleate",
+         "tartrate": "tartrate", "besilate": "besilate", "succinate": "succinate", "dipropionate": "dipropionate", "propionate": "propionate",
+         "trihydrate": "trihydrate", "palmitate": "palmitate", "stearate": "stearate", "pamoate": "pamoate", "embonate": "embonate",
+         "decanoate": "decanoate", "enantate": "enantate", "caproate": "caproate"}
 METALS = {"sodium": "sodium", "potassium": "potassium", "calcium": "calcium", "magnesium": "magnesium", "zinc": "zinc", "fer": "iron",
           "aluminium": "aluminium", "lithium": "lithium", "argent": "silver", "cuivre": "copper", "ferreux": "ferrous", "ferrique": "ferric",
           "ammonium": "ammonium", "bismuth": "bismuth"}
@@ -32,10 +36,14 @@ WORDS = {"acide": "acid", "fer": "iron", "vitamine": "vitamin", "insuline": "ins
          "glyceryl trinitrate": "glyceryl trinitrate", "trinitrine": "glyceryl trinitrate", "paracetamol": "paracetamol", "adrenaline": "epinephrine",
          "noradrenaline": "norepinephrine", "cotrimoxazole": "sulfamethoxazole + trimethoprim", "ethinylestradiol": "ethinylestradiol",
          "ethinyl estradiol": "ethinylestradiol", "levonorgestrel": "levonorgestrel", "chlorhexidine": "chlorhexidine", "trimethoprime": "trimethoprim",
-         "pyrimethamine": "pyrimethamine", "sulfadoxine": "sulfadoxine", "a": "a", "b": "b", "c": "c", "d": "d", "e": "e", "k": "k"}
+         "pyrimethamine": "pyrimethamine", "sulfadoxine": "sulfadoxine", "a": "a", "b": "b", "c": "c", "d": "d", "e": "e", "k": "k",
+         "cafeine": "caffeine", "charbon active": "activated charcoal", "charbon actif": "activated charcoal", "ocytocine": "oxytocin",
+         "iode": "iodine", "iodee": "iodine", "povidone iodee": "povidone iodine", "eau oxygenee": "hydrogen peroxide", "alcool": "alcohol",
+         "glycerine": "glycerol", "codeine": "codeine", "theophylline": "theophylline", "guaifenesine": "guaifenesin", "ambroxol": "ambroxol"}
 # endings where English drops the final e (amoxicilline -> amoxicillin); the rest keep it (morphine, chloroquine, lamivudine)
 DROP_E = ("cilline", "mycine", "micine", "statine", "formine", "parine", "suline", "goxine", "farine", "tocine", "fulvine", "toxine", "zoline",
-          "sporine", "mectine", "ampine", "kacine", "lamine_keep")
+          "sporine", "mectine", "ampine", "kacine", "floxacine", "gliptine", "gabaline", "pentine", "flozine", "picine", "listine", "myxine",
+          "tracine", "toine", "pressine", "rubicine", "platine", "bumine", "buline", "nesine", "cocine", "mifepristone_keep")
 
 
 def strip_accents(s):
@@ -77,9 +85,9 @@ def fr_inn(name):
             continue
         # 'chlorure de sodium' -> 'sodium chloride'; 'sulfate ferreux' -> 'ferrous sulfate'; 'acide folique' -> 'folic acid'
         m = re.match(r"^(\w+)\s+(?:de\s+|d')(\w+)(?:\s+(.*))?$", phrase)
-        if m and m.group(1) in SALTS and m.group(2) in METALS:
-            phrase = f"{METALS[m.group(2)]} {SALTS[m.group(1)]}" + (f" {m.group(3)}" if m.group(3) else "")
-            parts.append(phrase)
+        if m and m.group(1) in SALTS:
+            base = METALS.get(m.group(2)) or _word(m.group(2))          # 'chlorure de sodium', 'chlorhydrate d'ambroxol'
+            parts.append(f"{base} {SALTS[m.group(1)]}" + (f" {m.group(3)}" if m.group(3) else ""))
             continue
         if len(words) == 2 and words[0] in SALTS and words[1] in METALS:
             parts.append(f"{METALS[words[1]]} {SALTS[words[0]]}")

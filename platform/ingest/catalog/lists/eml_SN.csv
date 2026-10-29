@@ -12,7 +12,7 @@ cefazolin,Céfazoline,,3
 cefixime,Céfixime,,3
 cefotaxime,Céfotaxime,,3
 ceftriaxone,Ceftriaxone,,2
-ciprofloxacine,Ciprofloxacine,,2
+ciprofloxacin,Ciprofloxacine,,2
 doxycycline,Doxycycline,,2
 erythromycin,Erythromycine,,2
 gentamicin,Gentamicine,,3
@@ -32,19 +32,19 @@ ethambutol,Ethambutol,,2
 ethionamide,Ethionamide,,2
 isoniazide,Isoniazide,,2
 kanamycin,Kanamycine,,2
-levofloxacine,Lévofloxacine,,2
+levofloxacin,Lévofloxacine,,2
 pyrazinamide,Pyrazinamide,,2
-rifampicine + isoniazide,Rifampicine + Isoniazide,,2
-rifampicine + isoniazide + pyrazinamide,Rifampicine + Isoniazide + Pyrazinamide,,
+rifampicin + isoniazide,Rifampicine + Isoniazide,,2
+rifampicin + isoniazide + pyrazinamide,Rifampicine + Isoniazide + Pyrazinamide,,
 butol,butol,,
 clofazimine,Clofazimine,,
 prothionamide,Prothionamide,,
-moxifloxacine,Moxifloxacine,,
+moxifloxacin,Moxifloxacine,,
 bedaquiline,Bédaquiline,,
 capreomycin,Capréomycine,,
 linezolide,Linézolide,,
 dapsone,Dapsone,,2
-rifampicine,Rifampicine,,2
+rifampicin,Rifampicine,,2
 artesunate + amodiaquine,Artésunate + Amodiaquine,,1
 artemether + lumefantrine,Artéméther + Luméfantrine,,
 dihydroartemisinine + piperaquine,DihydroArtémisinine + Pipéraquine,,
@@ -151,7 +151,7 @@ pralidoxime,Pralidoxime,,3
 edta disodic calcic,EDTA disodique calcique,,
 deferoxamine,Déferoxamine,,
 glucagon,Glucagon,,
-sulfate protamine,Sulfate de Protamine,,
+protamine sulfate,Sulfate de Protamine,,
 succimer,Succimer,,
 magnesium sulfate,Sulfate de magnésium,,2
 valproic acid,Acide valproïque,,4
@@ -163,7 +163,7 @@ chlorpromazine,Chlorpromazine,,4
 clonazepam,Clonazépam,,4
 clonazepam,Clonazepam,,4
 diazepam,Diazepam,,4
-phenytoine,phénytoïne,,3
+phenytoin,phénytoïne,,3
 fluphenazine,Fluphénazine,,4
 haloperidol,Halopéridol,,4
 levomepromazine,Lévomépromazine,,5
@@ -192,13 +192,13 @@ allupurinol,allupurinol,,3
 gelatine fluide modifiee,Gélatine fluide modifiée,,4
 concentre facteur viii,Concentré de facteur VIII,,4
 concentre facteur ix,Concentré de facteur IX,,4
-immunoglobuline anti d,Immunoglobuline anti-D,,4
-immunoglobuline polyvalent,Immunoglobuline polyvalent,,
+immunoglobulin anti d,Immunoglobuline anti-D,,4
+immunoglobulin polyvalent,Immunoglobuline polyvalent,,
 facteurs antihemophilliques a + b,Facteurs antihémophilliques A et B,,4
 hydroxyethylamidon,Hydroxyéthylamidon,,4
 diltiazem,Diltiazem,,4
 dinitrate d'isosorbide,Dinitrate d’isosorbide,,4
-trinitrate glycerine,Trinitrate de glycérine,,4
+trinitrate glycerol,Trinitrate de glycérine,,4
 altizide + spironolactone,Altizide + spironolactone,,4
 amlodipine,Amlodipine,,3
 atenolol,Aténolol,,4
@@ -227,20 +227,20 @@ griseofulvin,Griseofulvine,,2
 bethametasone,Béthamétasone,,2
 clobetasone,Clobétasone,,2
 mupirocine,Mupirocine,,2
-alcool,Alcool,,3
-alcool iode,Alcool iodé,,2
-eau oxygenee,Eau oxygénée,,3
+alcohol,Alcool,,3
+alcohol iodine,Alcool iodé,,2
+hydrogen peroxide,Eau oxygénée,,3
 eosine aqueuse,Eosine aqueuse,,1
 formaldehyde,Formaldéhyde,,4
 hypochlorite sodium,Hypochlorite de sodium,,1
-polyvidone iode,Polyvidone iodé,,2
+polyvidone iodine,Polyvidone iodé,,2
 violet gentiane,Violet de gentiane,,3
 talc,Talc,,2
 vaseline,Vaseline,,2
-benzoate benzyle,Benzoate de benzyle,,1
+benzyle benzoate,Benzoate de benzyle,,1
 vaseline salicylee,Vaseline salicylée,,3
 thiocolchicoside,Thiocolchicoside,,3
-ocytocin,Ocytocine,,2
+oxytocin,Ocytocine,,2
 salbutamol,Salbutamol,,3
 betamethasone,betamethasone,,3
 cimetidine,Cimétidine,,2
@@ -251,7 +251,7 @@ ondasetron,Ondasétron,,
 metopimazine,Métopimazine,,2
 anti infl + astrigent + anest local,Anti-infl. + Astrigent + Anest local,,2
 diosmine,Diosmine,,3
-bromide n butyl hyoscine,Bromure de N-butyl-Hyoscine,,2
+n bromide butyl hyoscine,Bromure de N-butyl-Hyoscine,,2
 phloroglucinol + trimethylphloroglucinol,Phloroglucinol + trimethylphloroglucinol,,3
 paraffine liquide,Paraffine liquide,,2
 lactulose,Lactulose,,2
@@ -261,9 +261,9 @@ resomal,ReSoMal,,1
 zinc,Zinc (sulfate),,
 carbocysteine,Carbocystéine,,2
 terpine + codeine,Terpine + codéine,,2
-oxomemazine + guaifenesine,Oxomémazine + guaïfénésine,,
+oxomemazine + guaifenesin,Oxomémazine + guaïfénésine,,
 terbutaline,Terbutaline,,2
-citrate cafeine,Citrate de cafeine,,2
+caffeine citrate,Citrate de cafeine,,2
 lidocaine adrenalinee,Lidocaïne adrénalinée,,3
 zinc oxide leger,Oxyde de zinc leger,,3
 pulperyl,Pulpéryl,,3
@@ -294,17 +294,17 @@ magnesium chloride,Chlorure de magnésium,,2
 calcium gluconate,Gluconate de calcium,,2
 glucose,Glucose,,2
 glycocolle,Glycocolle,,4
-lactate ringer,Lactate de Ringer,,2
+ringer lactate,Lactate de Ringer,,2
 mannitol,Mannitol,,4
-albumine human,Albumine humaine,,5
+albumin human,Albumine humaine,,5
 potassium sulfate,Sulfate de potassium,,4
 acyclovir,Acyclovir,,
 cetoxonium,Cétoxonium,,2
 chloramphenicol + dexamethasone,Chloramphénicol + Dexaméthasone,,3
 chlortetracycline + tetracycline,Chlortétracycline ou Tétracycline,,
 fluoresceine,Fluorescéine,,4
-neomycin + polymyxine,Néomycine + Polymyxine,,5
-norfloxacine,Norfloxacine,,3
+neomycin + polymyxin,Néomycine + Polymyxine,,5
+norfloxacin,Norfloxacine,,3
 oxybuprocaine,Oxybuprocaïne,,3
 tetracaine,Tétracaïne,,4
 acetazolamide,Acétazolamide,,4
@@ -341,12 +341,12 @@ gosereline,Goséréline,,
 levothyroxine,Lévothyroxine,,4
 tetracosactide,Tétracosactide,,4
 bleomycin,Bléomycine,,4
-carboplatine,Carboplatine,,
+carboplatin,Carboplatine,,
 chlormetine,Chlormétine,,5
-cisplatine,Cisplatine,,
+cisplatin,Cisplatine,,
 cyclophosphamide,Cyclophosphamide,,5
-doxorubicine,Doxorubicine,,4
-epirubicine,Epirubicine,,4
+doxorubicin,Doxorubicine,,4
+epirubicin,Epirubicine,,4
 etoposide,Etoposide,,4
 fluorouracil,Fluorouracil,,5
 hydroxycarbamide,Hydroxycarbamide,,5
