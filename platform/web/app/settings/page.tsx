@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { removeSeat, setSeatRole } from '@/app/actions/collab';
 import Shell from '@/components/Shell';
 import { Flash } from '@/components/ui';
 import { addSeat, changePassword, updateSettings, setPublicProfile } from '@/app/actions/app';
@@ -16,7 +17,7 @@ export default async function Settings({ searchParams }: { searchParams: Promise
   const t = setLang(langOf(u));
   const paid = u.plan === 'paid';   // team seats come with the paid account plan
   const d = await withUser(u.id, async (db) => ({
-    seats: await rows(db, 'select email, name from users where owner_id = $1 order by created_at', [u.id]),
+    seats: await rows(db, 'select id, email, name, seat_role from users where owner_id = $1 and not disabled order by created_at', [u.id]),
     docs: await rows(db, 'select id, kind, title, file_name, created_at from account_documents where user_id = $1 order by created_at desc', [u.id]),
     twoStep: Boolean((await rows(db, 'select enabled from user_totp where user_id = $1 and enabled', [u.id])).length),
     pub: u.account_type === 'manufacturer' ? await one(db, 'select public_profile, public_slug, status, company_name, verified_at, audited_at from manufacturer_profiles where user_id = $1', [u.owner_id ?? u.id]) : null,
@@ -58,7 +59,13 @@ export default async function Settings({ searchParams }: { searchParams: Promise
         <section className="card stack" id="team">
           <h2>{t('Team seats')}</h2>
           {paid && !u.owner_id ? (<>
-            {d.seats.map((s) => <div key={s.email} className="between"><span>{s.name || s.email}</span><span className="small muted">{s.email}</span></div>)}
+            {d.seats.map((s) => <div key={s.email} className="between" style={{ gap: 8, flexWrap: 'wrap' }}><span>{s.name || s.email}<span className="sub2" style={{ display: 'block' }}>{s.email}</span></span>
+              <form action={setSeatRole} className="row" style={{ gap: 4 }}><input type="hidden" name="seat" value={s.id} />
+                <select className="input" name="role" defaultValue={s.seat_role ?? 'regulatory'} aria-label={t('Role for {name}', { name: s.name || s.email })} style={{ minHeight: 32, fontSize: 13 }}>
+                  <option value="regulatory">{t('Regulatory')}</option><option value="sales">{t('Sales')}</option><option value="viewer">{t('Viewer (read only)')}</option></select>
+                <button className="btn btn-ghost btn-sm" type="submit">{t('Set')}</button></form>
+              <form action={removeSeat}><input type="hidden" name="seat" value={s.id} /><button className="btn-link small" type="submit">{t('Remove')}</button></form></div>)}
+            <p className="note">{t('Regulatory and sales seats work on projects, dossiers and comments; viewers read. Mention a colleague with @ in any comment and it lands in their inbox.')}</p>
             <form action={addSeat} className="stack">
               <div className="form-grid">
                 <input className="input" name="name" placeholder={t('Name')} aria-label={t('Teammate name')} />

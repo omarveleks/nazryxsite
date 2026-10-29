@@ -4,6 +4,8 @@ import Shell from '@/components/Shell';
 import { Empty, Flash, StagePill } from '@/components/ui';
 import { addTask, deleteProject, deleteTask, moveProject, toggleTask, updateProject } from '@/app/actions/projects';
 import { toggleChecklist } from '@/app/actions/mfr';
+import { createShareLink, revokeShareLink } from '@/app/actions/collab';
+import Comments, { loadComments } from '@/components/Comments';
 import { requireUser } from '@/lib/auth';
 import { langOf, setLang } from '@/lib/i18n';
 import { one, rows, withUser } from '@/lib/db';
@@ -16,7 +18,7 @@ export const metadata = { title: 'Project' };
 
 // One market entry project: where it stands, the tasks of this stage, the dossier checklist for this market, the deadlines
 // we track, the Nazryx services attached, and the people on it.
-export default async function Project({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ saved?: string; error?: string }> }) {
+export default async function Project({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ saved?: string; error?: string; shared?: string }> }) {
   const id = Number((await params).id);
   const sp = await searchParams;
   if (!Number.isInteger(id)) notFound();
@@ -40,7 +42,9 @@ export default async function Project({ params, searchParams }: { params: Promis
     const facts = await one(db, `select cm.registrants, cm.on_national_list, g.demand from country_molecules cm left join visible_gap_scores g on g.molecule_id = cm.molecule_id and g.country = cm.country
         where cm.molecule_id = $1 and cm.country = $2`, [pr.molecule_id, pr.country]);
     const route = await one(db, `select label, months_low, months_high, fee_usd_low, fee_usd_high from country_routes where country = $1 and scope = 'medicine' order by sort limit 1`, [pr.country]);
-    return { pr, tasks, seats, obligations, engagements, entries, checklist, ready, facts, route, tier };
+    const comments = await loadComments(db, 'project', String(id));
+    const links = await rows(db, 'select token, created_at, expires_at from share_links where kind = $1 and target_id = $2 and revoked_at is null and expires_at > now() order by created_at desc', ['project', String(id)]);
+    return { pr, tasks, seats, obligations, engagements, entries, checklist, ready, facts, route, tier, comments, links };
   });
   if (!d) notFound();
   const { pr } = d, name = t(countryName(pr.country)), here = `/m/projects/${id}`;
@@ -118,6 +122,7 @@ export default async function Project({ params, searchParams }: { params: Promis
                 {t({ dossier_review: 'Ask us to review the dossier', market_entry: 'Ask us to file and follow it', post_registration: 'Ask us to keep it registered', partner_intro: 'Find the distributor' }[service] ?? 'Ask us')}</Link>)}
             {service && !canUse(u.mfr_tier, service) && service !== 'partner_intro' && <Link className="pill lav" href={`/m/plan?want=${NEEDS_PLAN[service]}`}>{t('{service} opens with {plan}', { service: t(SERVICES[service].label), plan: t({ data: 'Basic Market Data', access: 'Complete Market Access', entry: 'Complete Market Entry' }[NEEDS_PLAN[service]]) })}</Link>}
           </section>
+          <Comments kind="project" target={String(id)} list={d.comments} here={here} me={u.id} seats={d.seats} canWrite={u.seat_role !== 'viewer'} />
         </div>
         <div className="stack">
           <section className="card stack">
@@ -144,6 +149,14 @@ export default async function Project({ params, searchParams }: { params: Promis
               {d.tasks.filter((k) => k.due_date && !k.done_at).map((k) => <div key={`k${k.id}`} className="between small"><span>{k.title}</span><span className="num">{fmtDate(k.due_date)}</span></div>)}
               {d.entries.map((e) => <div key={`e${e.id}`} className="between small"><span>{e.title}</span><span className="num">{fmtDate(e.on_date)}</span></div>)}
             </>)}
+          </section>
+          <section className="card stack">
+            <h2>{t('Share read-only')}</h2>
+            <p className="note">{t('A link for the person who signs or the distributor: the stages, tasks and dossier state, nothing else, for 30 days.')}</p>
+            {sp.shared && <div className="ok small"><code style={{ userSelect: 'all', wordBreak: 'break-all' }}>{`${process.env.NEXT_PUBLIC_BASE_URL ?? ''}/s/${sp.shared}`}</code></div>}
+            {d.links.map((l) => <div key={l.token} className="between small"><a href={`/s/${l.token}`}>/s/{l.token.slice(0, 8)}…</a><span className="row" style={{ gap: 8 }}><span className="muted">{t('until')} {fmtDate(l.expires_at)}</span>
+              <form action={revokeShareLink}><input type="hidden" name="token" value={l.token} /><input type="hidden" name="project_id" value={id} /><button className="btn-link small" type="submit">{t('Revoke')}</button></form></span></div>)}
+            <form action={createShareLink}><input type="hidden" name="project_id" value={id} /><button className="btn btn-ghost btn-sm" type="submit">{t('Create a link')}</button></form>
           </section>
           <form action={deleteProject} className="small muted"><input type="hidden" name="id" value={id} />{t('Not pursuing it?')} <button className="btn-link small" type="submit">{t('Delete this project')}</button></form>
         </div>

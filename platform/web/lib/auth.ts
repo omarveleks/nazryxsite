@@ -22,6 +22,7 @@ export type User = {
   team_owner: boolean; team_permissions: string[]; tour_step: number | null; mfr_verified: boolean;
   mfr_markets: string[]; mfr_interval: string;
   mfr_trial: boolean; mfr_trial_until: string | null;   // 14 days of Basic Market Data on one market, before any plan
+  seat_role: string | null;       // owner, regulatory, sales or viewer on a manufacturer account
   inbox_unread: number;
   viewed_by?: string | null;      // the team member viewing this account, when it is a view
   view_ended?: boolean;           // a view that has ended is still in the browser: changes wait for its exit link
@@ -97,7 +98,7 @@ export const getUser = cache(async (): Promise<User | null> => {
 function loadUser(id: string) {
   return withUser(id, (db) => one<User>(db, `
     select u.id, u.email, u.name, u.role, u.team_owner, u.team_permissions, app_plan() as plan, u.country, u.company_id, u.credits, u.onboarded,
-           u.owner_id, u.language, u.whatsapp, u.notify_email, u.notify_whatsapp,
+           u.owner_id, u.language, u.whatsapp, u.notify_email, u.notify_whatsapp, u.seat_role,
            coalesce(c.display_name, cl.company_name) as company_name, cl.status as claim_status,
            (select count(*)::int from sourcing_list l where l.user_id = u.id) as list_count, u.account_type,
            mp.chosen_plan is not null as mfr_plan_chosen, coalesce(mp.chosen_plan, mp.suggested_plan) as mfr_plan,

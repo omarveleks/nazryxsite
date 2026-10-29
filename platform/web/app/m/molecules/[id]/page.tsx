@@ -6,6 +6,7 @@ import { ConfidenceChip, Empty, Flash, PlanLock } from '@/components/ui';
 import PriceHistory from '@/components/PriceHistory';
 import { addMfrProduct, unwatchMolecule, watchMolecule } from '@/app/actions/mfr';
 import { addToPipeline } from '@/app/actions/finder';
+import Comments, { loadComments } from '@/components/Comments';
 import { requireUser } from '@/lib/auth';
 import { langOf, setLang } from '@/lib/i18n';
 import { one, rows, withUser } from '@/lib/db';
@@ -36,7 +37,7 @@ export default async function MoleculePage({ params, searchParams }: { params: P
     const across = await rows(db, `select cm.country, cm.registrants, cm.registrations, cm.on_national_list, g.demand from country_molecules cm
         left join visible_gap_scores g on g.molecule_id = cm.molecule_id and g.country = cm.country where cm.molecule_id = $1 and cm.country = any($2) order by cm.country`, [id, targets]);
     const base = { targets, market, mol, t, open, lists, mine, watched, across, f: null as any, regs: [] as any[], origins: [] as any[], price: null as MoleculePrice | null,
-      history: [] as any[], tenders: [] as any[], partners: [] as any[], names: {} as Record<string, string>, inPipe: new Set<string>(), routes: [] as any[] };
+      history: [] as any[], tenders: [] as any[], partners: [] as any[], names: {} as Record<string, string>, inPipe: new Set<string>(), routes: [] as any[], comments: [] as any[], seats: [] as any[] };
     if (!hasData(market)) return base;
     const f = await one(db, `select cm.*, g.demand, g.score from country_molecules cm left join visible_gap_scores g on g.molecule_id = cm.molecule_id and g.country = cm.country
         where cm.molecule_id = $1 and cm.country = $2`, [id, market]);
@@ -52,7 +53,9 @@ export default async function MoleculePage({ params, searchParams }: { params: P
     const names = lists || u.role === 'team' ? Object.fromEntries((await rows(db, 'select code, name from partner_names($1)', [market])).map((r) => [r.code, r.name])) : {};
     const inPipe = new Set((await rows(db, 'select code from my_pipeline($1)', [market])).map((r) => r.code));
     const routes = canUse(t, 'pathway') ? await rows(db, `select label, months_low, months_high, fee_usd_low, fee_usd_high from country_routes where country = $1 and scope = 'medicine' order by sort limit 3`, [market]) : [];
-    return { ...base, f, regs, origins, price, history, tenders, partners, names, inPipe, routes };
+    const comments = await loadComments(db, 'molecule', String(id));
+    const seats = await rows(db, 'select id, name, email from users where id = $1 or owner_id = $1', [u.owner_id ?? u.id]);
+    return { ...base, f, regs, origins, price, history, tenders, partners, names, inPipe, routes, comments, seats };
   });
   if (!d) notFound();
   const { mol, market: m } = d, name = countryName(m);
@@ -157,6 +160,7 @@ export default async function MoleculePage({ params, searchParams }: { params: P
                 : <PlanLock compact need="access" title={t('Routes, time and fees')} u={u} market={m} />}
               <Link className="btn-link small" href={`/m/regulatory?market=${m}`}>Requirements in {name}</Link>
             </section>
+            <Comments kind="molecule" target={String(id)} list={d.comments} here={here} me={u.id} seats={d.seats} canWrite={u.seat_role !== 'viewer'} />
           </div>
         </div>
       </>)}

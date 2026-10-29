@@ -17,6 +17,7 @@ export default function Shell({ user, title, sub, crumb, actions, children }: {
   const initials = (user.name || user.email).split(/[\s@.]+/).filter(Boolean).slice(0, 2).map((s) => s[0]!.toUpperCase()).join('');
   return (
     <div className="shell">
+      <a className="skip" href="#main">{t('Skip to content')}</a>
       <aside className="side">
         <Brand />
         <NavLinks team={user.role === 'team'} unread={user.inbox_unread ?? 0} lang={curLang()} />
@@ -35,7 +36,7 @@ export default function Shell({ user, title, sub, crumb, actions, children }: {
           <form action={signOut}><button className="btn-link" type="submit">{t('Sign out')}</button></form>
         </div>
       </aside>
-      <main className="main">
+      <main className="main" id="main" tabIndex={-1}>
         {(user.viewed_by || user.view_ended) && (
           <div className={user.viewed_by ? 'ok' : 'err'} role="status" style={{ display: 'flex', gap: 12, justifyContent: 'space-between', flexWrap: 'wrap' }}>
             <span>{user.viewed_by

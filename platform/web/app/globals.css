@@ -1,7 +1,7 @@
 /* Nazryx Intelligence: tokens from nazryx.com (site/assets/nzx.css). Flat: no shadows, gradients, glows or blur. */
 :root {
   --blue: #0066FF; --blue-hover: #0052D6; --blue-txt: #0052D6; --blue-dark: #0B4BC7; --blue-deep: #0D3082;
-  --ground: #F7F6F2; --card: #FFFFFF; --ink: #0A0A0A; --ink-2: #3A3A38; --ink-3: #5E5E58; --muted: #8C8C86;
+  --ground: #F7F6F2; --card: #FFFFFF; --ink: #0A0A0A; --ink-2: #3A3A38; --ink-3: #5E5E58; --muted: #6F6F69;
   --line: #E2E0D9; --line-2: #CFCCC3; --track: #ECEAE3;
   --pastel-blue: #DCEAFF; --pastel-blue-ink: #0052D6;
   --pastel-mint: #DAF2E4; --pastel-mint-ink: #0E6B3F;
@@ -29,6 +29,10 @@ p { margin: 0; }
 a { color: inherit; }
 img, svg { max-width: 100%; }
 :focus-visible { outline: 3px solid var(--blue); outline-offset: 2px; border-radius: 6px; }
+.skip { position: absolute; left: 8px; top: -48px; z-index: 100; background: var(--blue); color: #fff; padding: 8px 12px; border-radius: 8px; font-weight: 600; }
+.skip:focus { top: 8px; }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+.pill:focus-visible, .btn:focus-visible, a:focus-visible { outline: 3px solid var(--blue); outline-offset: 2px; }
 .muted { color: var(--ink-3); }
 .small { font-size: 13px; }
 .tiny { font-size: 12px; }
@@ -235,6 +239,11 @@ textarea.input { min-height: 96px; resize: vertical; }
   .tile .v { font-size: 26px; }
   .score b { font-size: 36px; }
   .hide-s { display: none; }
+  .tbl th, .tbl td { padding: 8px 8px 8px 0; font-size: 13.5px; }
+  .between { flex-wrap: wrap; }
+  .topbar h1 { font-size: 26px; }
+  .btn, .input { min-height: 44px; }
+  .btn-sm { min-height: 40px; }
 }
 .locked-row td { color: var(--muted); }
 details.dd { position: relative; }

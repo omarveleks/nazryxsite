@@ -43,7 +43,7 @@ export default async function Projects({ searchParams }: { searchParams: Promise
     </Link>);
   return (
     <Shell user={u} title={t('Projects')} sub={t('One project per product and market, from assessment to the shelf')}
-      actions={<Link className="btn btn-ghost btn-sm" href="/m/calendar">{t('Calendar')}</Link>}>
+      actions={<><Link className="btn btn-ghost btn-sm" href="/m/activity">{t('Activity')}</Link><Link className="btn btn-ghost btn-sm" href="/m/calendar">{t('Calendar')}</Link></>}>
       <Flash sp={sp} />
       <div className="between" style={{ flexWrap: 'wrap', gap: 10 }}>
         <Tabs current={view} items={[{ key: 'board', label: t('Board'), href: '/m/projects' }, { key: 'list', label: t('List'), href: '/m/projects?view=list' }]} />
