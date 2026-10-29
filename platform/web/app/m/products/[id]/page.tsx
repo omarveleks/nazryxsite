@@ -111,7 +111,7 @@ export default async function MfrProduct({ params, searchParams }: { params: Pro
   return (
     <Shell user={u} title={p.inn ?? p.name} crumb={<><Link href="/m/products">{t('My products')}</Link> / {p.inn ?? p.name}</>}
       sub={[p.inn ? p.name : null, cls].filter(Boolean).join(' · ') || 'Product'}
-      actions={<>{p.molecule_id && hasData(market) && <Link className="btn btn-ghost btn-sm" href={`/m/molecules/${p.molecule_id}?market=${market}`}>All on {p.inn ?? 'this molecule'} in {countryName(market)}</Link>}
+      actions={<>{p.molecule_id && hasData(market) && <Link className="btn btn-ghost btn-sm" href={`/m/molecules/${p.molecule_id}?market=${market}`}>{t('All on {name} in {market}', { name: p.inn ?? t('this molecule'), market: t(countryName(market)) })}</Link>}
         <Link className="btn btn-blue btn-sm" href={`/m/services?product=${id}`}>{t('Get help with this product')}</Link></>}>
       <Flash sp={sp} />
       {d.sampled && <div className="ok" role="status">{t('Your free full read: every section of this product is open.')}</div>}
@@ -122,18 +122,18 @@ export default async function MfrProduct({ params, searchParams }: { params: Pro
           {d.comp && <Competitors c={{ ...d.comp, kind: d.kind }} id={id} market={market} u={u} open={canUse(d.t, 'market')} />}
           {d.kind === 'device' ? (hasData(market) ? (<>
             <section className="card stack" data-tour="product">
-              <div className="card-h"><h2>Medical device in {countryName(market)}</h2><span className="pill blue">{g ? GROUP_LABEL[g] : 'Medical device'}</span></div>
+              <div className="card-h"><h2>{t('Medical device in {market}', { market: t(countryName(market)) })}</h2><span className="pill blue">{g ? t(GROUP_LABEL[g]) : t('Medical device')}</span></div>
               {'inGroupN' in d && d.inGroupN ? (
                 <p>{d.inGroupN.devices + d.inGroupN.medicines > 0
                   ? <><b className="num">{d.inGroupN.devices}</b> {t('registered as devices and')} <b className="num">{d.inGroupN.medicines}</b> as medicines in this group in {countryName(market)}. Brands and prices are below.</>
-                  : <>Nothing in this group is registered in {countryName(market)} yet: an opening.</>}</p>) : null}
+                  : <>{t('Nothing in this group is registered in {market} yet: an opening.', { market: t(countryName(market)) })}</>}</p>) : null}
               <p className="small muted">Registered with {market === 'KE' ? 'the Pharmacy and Poisons Board' : market === 'TZ' ? 'TMDA' : market === 'NG' ? 'NAFDAC' : 'the regulator'} as a medical device, under device rules (risk class, conformity evidence, a local representative).
 </p>
               <form action={setKind} className="small"><input type="hidden" name="product_id" value={id} /><input type="hidden" name="market" value={market} /><input type="hidden" name="kind" value="medicine" />
                 {t('Not a device?')} <button className="btn-link" type="submit">{t('Treat it as a medicine')}</button></form>
             </section>
             <section className="card stack">
-              <h2>Distributors who import {g ? GROUP_LABEL[g].toLowerCase() : 'devices like it'}</h2>
+              <h2>{t('Distributors who import {what}', { what: g ? t(GROUP_LABEL[g]).toLowerCase() : t('devices like it') })}</h2>
               {'importers' in d && d.importers != null ? (<>
                 <p><b className="num">{d.importers}</b> distributors in {countryName(market)} already import products in this group (devices and medicines together).</p>
                 {g && <Link className="btn btn-ghost btn-sm" href={`/m/partners?market=${market}&group=${g}`} style={{ alignSelf: 'flex-start' }}>{t('See them')}</Link>}</>)
@@ -147,7 +147,7 @@ export default async function MfrProduct({ params, searchParams }: { params: Pro
                   {r.fee_usd_low != null ? <>, official fees <b>${Number(r.fee_usd_low).toLocaleString('en')}{r.fee_usd_high && r.fee_usd_high !== r.fee_usd_low ? `–${Number(r.fee_usd_high).toLocaleString('en')}` : ''}</b></> : null}.
                   {r.description && <span className="muted"> {r.description}</span>}</p>)}
                 {!(p.who_pq || p.sra_approved) && <p className="small muted">{t('CE-marked or FDA-cleared? Tick “Approved by a strict regulator” below and reliance routes open up.')}</p>}
-              </>) : canUse(d.t, 'pathway') ? <p className="small muted">Device routes for {countryName(market)} are being checked by our team.</p>
+              </>) : canUse(d.t, 'pathway') ? <p className="small muted">{t('Device routes for {market} are being checked by our team.', { market: t(countryName(market)) })}</p>
                 : <PlanLock need="access" title={t('Device route, timeline and fees')} u={u} market={market}>How this device registers in {countryName(market)}, how long it takes and the official fees.</PlanLock>}
             </section></>) : <AgencyMarket code={market} />)
           : !p.molecule_id ? (
@@ -157,15 +157,15 @@ export default async function MfrProduct({ params, searchParams }: { params: Pro
                 <button className="btn btn-ghost btn-sm" type="submit">{t('It is a medical device')}</button></form></section>
           ) : !hasData(market) ? <AgencyMarket code={market} /> : (<>
             <section className="card stack" data-tour="product">
-              <div className="card-h"><h2>Why {countryName(market)}</h2>{p.registrants != null && <Badges m={p} />}</div>
-              {p.registrants == null ? <Empty>Not registered in {countryName(market)} and not on its official lists yet.</Empty> : (
+              <div className="card-h"><h2>{t('Why {market}', { market: t(countryName(market)) })}</h2>{p.registrants != null && <Badges m={p} />}</div>
+              {p.registrants == null ? <Empty>{t('Not registered in {market} and not on its official lists yet.', { market: t(countryName(market)) })}</Empty> : (
                 <table className="tbl"><tbody>
                   <tr><td>{t('Official list')}</td><td className="r">{p.on_national_list ? (p.facility_level ? `Level ${p.facility_level}: ${levelLabel(p.facility_level)}` : 'Yes') : 'No'}</td></tr>
                   <tr><td>{t('WHO essential list')}</td><td className="r">{p.on_who_eml ? 'Yes' : 'No'}</td></tr>
                   <tr><td>{t('Competition')}</td><td className="r">{registeredLine(p.registrants, p.registrations)}</td></tr>
                   {'origin' in d && d.origin ? (<>
                     <tr><td>{t('Registered products made in')}</td><td className="r">{d.origin.length ? d.origin.map((o) => `${o.country} ${o.n}`).join(', ') : 'Nowhere yet'}</td></tr>
-                    <tr><td>Made by factories in {countryName(market)}</td><td className="r">{Number(p.local_made) > 0 ? `${p.local_made} products` : 'None'}</td></tr>
+                    <tr><td>{t('Made by factories in {market}', { market: t(countryName(market)) })}</td><td className="r">{Number(p.local_made) > 0 ? `${p.local_made} ${t('products')}` : t('None')}</td></tr>
                     <tr><td>{t('Registrations lapsed or cancelled')}</td><td className="r">{d.lapsed}</td></tr>
                   </>) : <tr><td colSpan={2}><PlanLock compact need="data" title={t('Where competitors make it, and lapsed registrations')} u={u} market={market} /></td></tr>}
                 </tbody></table>)}
@@ -194,8 +194,8 @@ export default async function MfrProduct({ params, searchParams }: { params: Pro
           </>)}
           {'checklist' in d && d.checklist && d.checklist.length > 0 && (
             <section className="card stack" id="documents">
-              <div className="card-h"><div><h2>Documents for {countryName(market)}</h2>
-                <p className="note">What {countryName(market)} asks for with this product. Tick what you have ready.</p></div>
+              <div className="card-h"><div><h2>{t('Documents for {market}', { market: t(countryName(market)) })}</h2>
+                <p className="note">{t('What {market} asks for with this product. Tick what you have ready.', { market: t(countryName(market)) })}</p></div>
                 <span className="pill mint">{d.ready.filter((x) => d.checklist!.some((c) => c.name === x)).length} of {d.checklist.length} ready</span></div>
               <div className="stack" style={{ gap: 4 }}>{d.checklist.map((c) => {
                 const done = d.ready.includes(c.name);
@@ -203,7 +203,7 @@ export default async function MfrProduct({ params, searchParams }: { params: Pro
                   <form key={c.id} action={toggleChecklist} style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
                     <input type="hidden" name="product_id" value={id} /><input type="hidden" name="country" value={market} />
                     <input type="hidden" name="item" value={c.name} /><input type="hidden" name="done" value={done ? '0' : '1'} />
-                    <button type="submit" aria-label={done ? 'Mark as not ready' : 'Mark as ready'}
+                    <button type="submit" aria-label={done ? t('Mark as not ready') : t('Mark as ready')}
                       style={{ flex: '0 0 20px', width: 20, height: 20, marginTop: 1, borderRadius: 6, cursor: 'pointer', padding: 0, lineHeight: '18px',
                         fontSize: 13, color: '#fff', border: `1.5px solid ${done ? 'var(--blue)' : 'var(--line)'}`, background: done ? 'var(--blue)' : '#fff' }}>{done ? '✓' : ''}</button>
                     <span className="small" style={{ textDecoration: done ? 'line-through' : undefined, opacity: done ? 0.6 : 1 }}>{c.name}
@@ -213,9 +213,9 @@ export default async function MfrProduct({ params, searchParams }: { params: Pro
             </section>)}
           {'avg' in d && (d.avg ? (
             <section className="card stack">
-              <div className="card-h"><h2>Price in {countryName(market)}</h2>
+              <div className="card-h"><h2>{t('Price in {market}', { market: t(countryName(market)) })}</h2>
                 <span className="row" style={{ gap: 6 }}><ConfidenceChip level={d.avg.confidence} />
-                  <Link className="btn-link small" href={`/m/coverage?market=${market}`}>How we read {countryName(market)}</Link></span></div>
+                  <Link className="btn-link small" href={`/m/coverage?market=${market}`}>{t('How we read {market}', { market: t(countryName(market)) })}</Link></span></div>
               {/* low, average and high; one average when they are all the same price */}
               {(() => {
                 const p = d.avg!, k = packOf(p), avg = Number(p.unit_price) * k;
@@ -237,7 +237,7 @@ export default async function MfrProduct({ params, searchParams }: { params: Pro
                   <tbody>{d.avg.by_strength.map((x) => <tr key={x.strength}><td>{x.strength}</td><td className="r num">{fmtMoney(x.unit)}</td><td className="r num">{fmtMoney(x.pack)}</td><td className="r num">{x.n}</td></tr>)}</tbody></table></div>)}
             </section>) : (
             <section className="card between" style={{ flexWrap: 'wrap', gap: 12 }}>
-              <span><b>Price in {countryName(market)}</b>
+              <span><b>{t('Price in {market}', { market: t(countryName(market)) })}</b>
                 <div className="small muted">{t('No public price for this medicine yet. We check it for you within 24 hours.')}</div></span>
               <Link className="btn btn-ghost btn-sm" href="/m/call?topic=market_entry">{t('Ask for a price')}</Link>
             </section>))}
@@ -326,10 +326,11 @@ const DEVICE_CLASS: Record<string, string> = { eye_drops: 'b', nasal: 'ab', eye_
 const amt = (cur: string, v: number) => `${cur} ${Math.round(v).toLocaleString('en')}`;
 /** Made in the market, or imported (and from where); nothing when the register does not say. */
 function Origin({ made, market }: { made: string | null; market: string }) {
+  const t = tt();
   if (!made) return <span className="muted">—</span>;
   const home = countryName(market).toLowerCase();
   const local = made.toLowerCase().split(/,\s*/).some((c) => c === home);
-  return <><span className={`pill ${local ? 'mint' : ''}`} style={{ fontSize: 12 }}>{local ? 'Made locally' : 'Imported'}</span>
+  return <><span className={`pill ${local ? 'mint' : ''}`} style={{ fontSize: 12 }}>{t(local ? 'Made locally' : 'Imported')}</span>
     {!local && <div className="sub2">{made}</div>}</>;
 }
 
@@ -338,7 +339,7 @@ function Competitors({ c, id, market, u, open }: { c: { group: string | null; ki
   const range = (ps: number[], cur: string) => ps.length ? (Math.min(...ps) === Math.max(...ps) ? amt(cur, ps[0]) : `${amt(cur, Math.min(...ps))}–${Math.round(Math.max(...ps)).toLocaleString('en')}`) : '—';
   return (
     <section className="card stack" id="competitors">
-      <div className="card-h"><div><h2>Competitor brands in {countryName(market)}</h2>
+      <div className="card-h"><div><h2>{t('Competitor brands in {market}', { market: t(countryName(market)) })}</h2>
         <p className="note">{t('Registered as a medicine or a medical device, and what they sell for in pharmacies. Wholesale and distributor prices are worked back from the shelf price with this market’s margins.')}</p></div></div>
       <form action={setUseGroup} className="row" style={{ gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
         <input type="hidden" name="product_id" value={id} /><input type="hidden" name="market" value={market} />
@@ -379,7 +380,7 @@ function Competitors({ c, id, market, u, open }: { c: { group: string | null; ki
         <button className="btn btn-blue btn-sm" type="submit">{t('Add')}</button>
       </form>
       {c.group && open && (c.others.length > 0 ? (<>
-        <h3>Also in {countryName(market)}: {GROUP_LABEL[c.group].toLowerCase()}</h3>
+        <h3>{t('Also in {market}', { market: t(countryName(market)) })}: {t(GROUP_LABEL[c.group]).toLowerCase()}</h3>
         <div className="tbl-wrap"><table className="tbl"><thead><tr><th>{t('Brand')}</th><th>{t('Registered')}</th><th>{t('Made')}</th><th className="r">{t('Shelf price')}</th><th className="r">{t('Wholesale (est.)')}</th></tr></thead>
           <tbody>{c.others.map((o) => {
             const mid = o.prices.length ? [...o.prices].sort((x: number, y: number) => x - y)[Math.floor(o.prices.length / 2)] : null;
@@ -390,7 +391,7 @@ function Competitors({ c, id, market, u, open }: { c: { group: string | null; ki
                 <td className="r num">{range(o.prices, o.currency)}{o.per10 != null && <div className="sub2">≈ {amt(o.currency, o.per10)} per 10 ml</div>}</td>
                 <td className="r num">{mid != null ? amt(o.currency, trade(mid, c.costs).wholesale) : '—'}</td></tr>);
           })}</tbody></table></div></>)
-        : <p className="small muted">No other {GROUP_LABEL[c.group].toLowerCase()} found in {countryName(market)}&rsquo;s registers or pharmacy listings yet.</p>)}
+        : <p className="small muted">{t('No other {what} found in the registers or pharmacy listings of {market} yet.', { what: t(GROUP_LABEL[c.group]).toLowerCase(), market: t(countryName(market)) })}</p>)}
       <p className="note">Prices are pharmacy shelf prices found online, per pack, with a per-10 ml figure so bottle sizes compare fairly. Hospital products such as viscoelastics and joint injections are rarely sold in pharmacies; ask us and we check them for you.</p>
     </section>);
 }
@@ -417,7 +418,7 @@ function MarginCheck({ p, c, id, market, exw, units }: { p: MoleculePrice; c: Re
         <input type="hidden" name="market" value={market} />
         <label className="small" style={{ flex: '1 1 140px' }}>{t('Your ex-works price (USD per pack)')}
           <input className="input" name="exw" type="number" step="any" min="0" defaultValue={exw ?? ''} placeholder={target.toFixed(2)} /></label>
-        <label className="small" style={{ flex: '1 1 110px' }}>{liquid ? `Pack size (${p.unit})` : 'Units per pack'}
+        <label className="small" style={{ flex: '1 1 110px' }}>{liquid ? `${t('Pack size')} (${p.unit})` : t('Units per pack')}
           <input className="input" name="units" type="number" step="any" min="0" defaultValue={units ?? String(pack)} /></label>
         <button className="btn btn-blue btn-sm" type="submit">{t('Check')}</button>
       </form>
@@ -425,7 +426,7 @@ function MarginCheck({ p, c, id, market, exw, units }: { p: MoleculePrice; c: Re
         <div className="grid g3">
           <div className="tile t-blue"><span className="k">{t('Your shelf price')}</span><span className="v num" style={{ fontSize: 22 }}>{p.currency} {fmtMoney(shelf * (liquid ? pack : 1))}</span>
             <span className="small">per {liquid ? word : unitShort(p)}</span></div>
-          <div className={`tile t-${where[0]}`}><span className="k">{t('Position')}</span><span className="v" style={{ fontSize: 20 }}>{where[1]}</span>
+          <div className={`tile t-${where[0]}`}><span className="k">{t('Position')}</span><span className="v" style={{ fontSize: 20 }}>{t(where[1])}</span>
             <span className="small">market {p.currency} {fmtMoney(lo * (liquid ? pack : 1))}–{fmtMoney(hi * (liquid ? pack : 1))}</span></div>
           <div className="tile t-lav"><span className="k">{t('Headroom')}</span><span className="v num" style={{ fontSize: 22 }}>{Math.round(((target - mine) / mine) * 100)}%</span>
             <span className="small">{target >= mine ? 'room to raise your price or margins' : 'cut needed to reach the average'}</span></div>

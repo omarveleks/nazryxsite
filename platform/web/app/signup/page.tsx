@@ -4,14 +4,14 @@ import Brand from '@/components/Brand';
 import { getUser } from '@/lib/auth';
 import { setLang } from '@/lib/i18n';
 import { cookieLang } from '@/lib/i18n-server';
-import { signIn, signUp } from '@/app/actions/auth';
+import { sendLoginLink, signIn, signUp } from '@/app/actions/auth';
 
 export const metadata = { title: 'Sign up' };
 
 // Two kinds of account: manufacturers (the paid portal) and distributors (free: post needs, meet verified manufacturers).
 const SIDES = {
   manufacturer: {
-    head: 'You make medicines. We open the markets.', sub: 'Market data, partners and registration in Tanzania, Kenya, Kazakhstan, Kyrgyzstan and Uzbekistan.',
+    head: 'You make medicines. We open the markets.', sub: 'Market data, partners and registration in nine markets across Africa and Central Asia, from Tanzania and Nigeria to Kazakhstan and Senegal.',
     steps: ['Tell us your company, markets and catalogue.', 'See which products to register first, and why.', 'We find the partner and take you through registration.'],
   },
   distributor: {
@@ -20,7 +20,7 @@ const SIDES = {
   },
 };
 
-export default async function SignUp({ searchParams }: { searchParams: Promise<{ mode?: string; error?: string; as?: string }> }) {
+export default async function SignUp({ searchParams }: { searchParams: Promise<{ mode?: string; error?: string; as?: string; sent?: string }> }) {
   const sp = await searchParams;
   if (await getUser()) redirect('/');
   const t = setLang(await cookieLang());
@@ -40,6 +40,7 @@ export default async function SignUp({ searchParams }: { searchParams: Promise<{
           <Link href="/signup?mode=signin" className={signin ? 'on' : ''}>{t('Sign in')}</Link>
         </div>
         {sp.error && <div className="err" role="alert">{sp.error}</div>}
+        {sp.sent && <div className="ok" role="status">{t('If that email has an account, a sign-in link is on its way. It works once, for 15 minutes.')}</div>}
         {!signin && (
           <div className="row" style={{ gap: 6 }} role="radiogroup" aria-label={t('I am a')}>
             <Link href="/signup" className={`pill ${as === 'manufacturer' ? 'solid' : ''}`} role="radio" aria-checked={as === 'manufacturer'}>{t('Manufacturer')}</Link>
@@ -53,6 +54,7 @@ export default async function SignUp({ searchParams }: { searchParams: Promise<{
             <div className="field"><label htmlFor="password">{t('Password')}</label>
               <input className="input" id="password" name="password" type="password" autoComplete="current-password" required /></div>
             <button className="btn btn-blue" type="submit">{t('Sign in')}</button>
+            <button className="btn-link" type="submit" formAction={sendLoginLink} formNoValidate>{t('Email me a sign-in link instead')}</button>
           </form>
         ) : (
           <form action={signUp} className="stack">

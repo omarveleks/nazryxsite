@@ -5,6 +5,8 @@ import { cookies, headers } from 'next/headers';
 import { CHALLENGE_COOKIE, createChallenge, createSession, destroySession, sha } from '@/lib/auth';
 import { verifyCode } from '@/lib/totp';
 import { hashPassword, verifyPassword } from '@/lib/password';
+import { randomBytes } from 'node:crypto';
+import { LANG_COOKIE, isLang } from '@/lib/i18n';
 import { back, isEmail, str } from '@/lib/forms';
 
 export async function signUp(f: FormData) {
@@ -44,6 +46,23 @@ export async function signIn(f: FormData) {
   }
   await createSession(u.id);
   redirect('/');
+}
+
+/** Sign in by email: a one-time link, 15 minutes, mailed through the outbox. The form answers the same whether or not the
+ *  email has an account. */
+export async function sendLoginLink(f: FormData) {
+  const email = str(f, 'email', 200).toLowerCase();
+  if (!isEmail(email)) back('/signup', { mode: 'signin', error: 'Enter your work email first.' });
+  const h = await headers();
+  const ip = (h.get('x-forwarded-for') ?? '').split(',')[0].trim() || h.get('x-real-ip') || 'unknown';
+  const allowed = (await pool.query("select rate_allow('login_link', $1, 5, interval '1 hour') and rate_allow('login_link', $2, 3, interval '15 minutes') as ok", [ip, email])).rows[0].ok;
+  if (allowed) {
+    const token = randomBytes(32).toString('base64url');
+    const origin = process.env.APP_URL || `${h.get('x-forwarded-proto') ?? 'https'}://${h.get('x-forwarded-host') ?? h.get('host')}`;
+    const lang = (await cookies()).get(LANG_COOKIE)?.value;
+    await pool.query('select auth_request_login_link($1, $2, $3, $4)', [email, sha(token), `${origin}/signin/link?t=${token}`, isLang(lang) ? lang : 'en']);
+  }
+  redirect('/signup?mode=signin&sent=1');
 }
 
 export async function verifyTwoStep(f: FormData) {

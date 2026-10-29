@@ -23,7 +23,11 @@ const Step = ({ step, label, cls, onGo }: { step: number; label: string; cls: st
   <form action={tourGo} onSubmit={onGo}><input type="hidden" name="step" value={step} /><button className={cls} type="submit">{label}</button></form>);
 
 /** Right after sign-up, on Home: a pause, then the offer to take the tour or skip it. */
-export function TourIntro({ company }: { company?: string | null }) {
+export type TourLabels = { welcome: string; ask: string; intro: string; take: string; skip: string; end: string; tour: string; of: string; back: string; finish: string; next: string };
+const EN: TourLabels = { welcome: 'Welcome', ask: 'Take a two-minute tour?', intro: 'We show you each part of Nazryx where it lives: your products, the market, distributors, our services and your plan. You can take it any time from Home.',
+  take: 'Take the tour', skip: 'Skip for now', end: 'End tour', tour: 'Tour', of: 'of', back: '← Back', finish: 'Finish the tour', next: 'Next' };
+
+export function TourIntro({ company, labels = EN }: { company?: string | null; labels?: TourLabels }) {
   const [shown, hide, mounted] = useFade(1000);
   if (!mounted) return null;
   return createPortal(
@@ -31,13 +35,12 @@ export function TourIntro({ company }: { company?: string | null }) {
       <div style={{ ...veilBase, inset: 0 }} />
       <div className="card stack" style={{ position: 'fixed', zIndex: 62, left: '50%', top: '50%', width: 'min(440px, calc(100vw - 24px))', gap: 10,
         transform: `translate(-50%, ${shown ? '-50%' : '-46%'})`, transition: `transform .45s ${EASE}`, borderColor: 'var(--blue)', borderWidth: 2 }}>
-        <span className="lbl">Welcome{company ? `, ${company}` : ''}</span>
-        <h2 style={{ fontSize: 24 }}>Take a two-minute tour?</h2>
-        <p className="muted">We show you each part of Nazryx where it lives: your products, the market, distributors, our services and your plan.
-          You can take it any time from Home.</p>
+        <span className="lbl">{labels.welcome}{company ? `, ${company}` : ''}</span>
+        <h2 style={{ fontSize: 24 }}>{labels.ask}</h2>
+        <p className="muted">{labels.intro}</p>
         <div className="row">
-          <Step step={1} label="Take the tour" cls="btn btn-blue" onGo={hide} />
-          <Step step={0} label="Skip for now" cls="btn btn-ghost" onGo={hide} />
+          <Step step={1} label={labels.take} cls="btn btn-blue" onGo={hide} />
+          <Step step={0} label={labels.skip} cls="btn btn-ghost" onGo={hide} />
         </div>
       </div>
     </div>,
@@ -47,8 +50,8 @@ export function TourIntro({ company }: { company?: string | null }) {
 
 /** The guided tour: everything but the feature being explained is dimmed and blurred; a card next to it explains it,
  *  with Back, Next and End. The highlighted feature stays usable (for example, adding products). */
-export default function TourSpotlight({ step, total, target, title, text, tip, nextTitle, fallback, fallbackText }: {
-  step: number; total: number; target: string; title: string; text: string; tip?: string; nextTitle?: string; fallback?: string; fallbackText?: string;
+export default function TourSpotlight({ step, total, target, title, text, tip, nextTitle, fallback, fallbackText, labels = EN }: {
+  step: number; total: number; target: string; title: string; text: string; tip?: string; nextTitle?: string; fallback?: string; fallbackText?: string; labels?: TourLabels;
 }) {
   const [rect, setRect] = useState<Rect | null>(null);
   const [usedFallback, setUsedFallback] = useState(false);
@@ -100,15 +103,15 @@ export default function TourSpotlight({ step, total, target, title, text, tip, n
       <div className="card stack" style={{ position: 'fixed', zIndex: 62, gap: 8, borderColor: 'var(--blue)', borderWidth: 2, ...cardStyle,
         transform: shown ? 'none' : 'translateY(8px)', transition: `transform .45s ${EASE}, top .45s ${EASE}, left .45s ${EASE}, bottom .45s ${EASE}` }}>
         <div className="between small">
-          <span className="lbl">Tour · {step} of {total}</span>
-          <Step step={0} label="End tour" cls="btn-link small" onGo={hide} />
+          <span className="lbl">{labels.tour} · {step} {labels.of} {total}</span>
+          <Step step={0} label={labels.end} cls="btn-link small" onGo={hide} />
         </div>
         <div className="meter"><i style={{ width: `${(100 * step) / total}%`, transition: `width .6s ${EASE}` }} /></div>
         <h2>{title}</h2>
         <p className="muted">{usedFallback && fallbackText ? fallbackText : <>{text}{tip ? <> <b>{tip}</b></> : null}</>}</p>
         <div className="row">
-          {step > 1 && <Step step={step - 1} label="← Back" cls="btn btn-ghost btn-sm" onGo={hide} />}
-          <Step step={step === total ? 0 : step + 1} label={step === total ? 'Finish the tour' : `Next: ${nextTitle} →`} cls="btn btn-blue btn-sm" onGo={hide} />
+          {step > 1 && <Step step={step - 1} label={labels.back} cls="btn btn-ghost btn-sm" onGo={hide} />}
+          <Step step={step === total ? 0 : step + 1} label={step === total ? labels.finish : `${labels.next}: ${nextTitle} →`} cls="btn btn-blue btn-sm" onGo={hide} />
         </div>
       </div>
     </div>,
