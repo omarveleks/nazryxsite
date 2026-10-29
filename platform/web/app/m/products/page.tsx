@@ -8,6 +8,7 @@ import PortfolioGrid from '@/components/PortfolioGrid';
 import { DemandIcon } from '@/components/Icons';
 import { addMfrProducts, deleteAllMfrProducts, deleteMfrFile, saveLaunch, unwatchMolecule, uploadMfrFile, watchMolecule } from '@/app/actions/mfr';
 import { requireUser } from '@/lib/auth';
+import { langOf, setLang } from '@/lib/i18n';
 import { one, rows, withUser } from '@/lib/db';
 import { HIGH_DEMAND, LAUNCH_STAGES, MFR_COUNTRIES, MFR_FILE_KINDS, canUse, countryName, covers, displayClass, productClass, tierIn, byMolecule } from '@/lib/mfr';
 import { fmtDate } from '@/lib/format';
@@ -43,6 +44,7 @@ const GROUP_TYPE: Record<string, string> = { eye_drops: 'eye', contact_lens: 'ey
 export default async function MfrProducts({ searchParams }: { searchParams: Promise<{ added?: string; matched?: string; error?: string; market?: string; tab?: string; saved?: string; uploaded?: string; removed?: string; reading?: string; cleared?: string }> }) {
   const sp = await searchParams;
   const u = await requireUser({ manufacturer: true });
+  const t = setLang(langOf(u));
   const d = await withUser(u.id, async (db) => {
     await loadLive(db);
     const prof = await one(db, 'select target_countries, primary_market from manufacturer_profiles where user_id = $1', [u.id]);
@@ -161,11 +163,11 @@ export default async function MfrProducts({ searchParams }: { searchParams: Prom
   const visible = (i: number) => analysis || i < 3;
 
   return (
-    <Shell user={u} title="My products" sub={`Your catalogue against ${countryName(market)}`}
-      actions={<>{analysis && <a className="btn btn-ghost btn-sm" href={`/m/export?what=${sp.tab === 'grid' ? 'grid' : 'products'}&market=${market}`}>Excel (CSV)</a>}
-        <a className="btn btn-blue btn-sm" href="/m/products#add">Add a product</a></>}>
+    <Shell user={u} title={t('My products')} sub={t('Your catalogue against {market}', { market: t(countryName(market)) })}
+      actions={<>{analysis && <a className="btn btn-ghost btn-sm" href={`/m/export?what=${sp.tab === 'grid' ? 'grid' : 'products'}&market=${market}`}>{t('Excel (CSV)')}</a>}
+        <a className="btn btn-blue btn-sm" href="/m/products#add">{t('Add a product')}</a></>}>
       <Flash sp={sp} />
-      {sp.cleared && <div className="ok" role="status">All products removed.</div>}
+      {sp.cleared && <div className="ok" role="status">{t('All products removed.')}</div>}
       {reading.length > 0 && (<div className="ok row" role="status" style={{ gap: 10 }}><AutoRefresh />
         <span className="spin" aria-hidden="true" />Reading {reading.map((x) => x.file_name).join(', ')}. Your products appear here in a minute; no need to wait on this page.</div>)}
       {sp.reading && reading.length === 0 && lastCat?.status === 'done' && <div className="ok" role="status">Added {lastCat.added} products from {lastCat.file_name}; {lastCat.matched} matched to a molecule we track.
@@ -175,27 +177,26 @@ export default async function MfrProducts({ searchParams }: { searchParams: Prom
       {sp.added && <div className="ok" role="status">Added {sp.added} products; {sp.matched} matched to a molecule we track.
         {Number(sp.added) > Number(sp.matched) ? ' Our team matches the rest.' : ''}</div>}
       <Tabs current={sp.tab === 'launches' || sp.tab === 'watch' || sp.tab === 'grid' ? sp.tab : 'portfolio'} items={[
-        { key: 'portfolio', label: 'Portfolio', href: '/m/products' },
+        { key: 'portfolio', label: t('Portfolio'), href: '/m/products' },
         { key: 'grid', label: 'All markets', href: '/m/products?tab=grid' },
         { key: 'watch', label: `Competitor watch${d.watchCount ? ` (${d.watchCount})` : ''}`, href: '/m/products?tab=watch' },
         { key: 'launches', label: `Launch tracker${d.launches.length ? ` (${d.launches.length})` : ''}`, href: '/m/products?tab=launches' }]} />
       {sp.tab === 'grid' ? (
-        mols.length === 0 ? <Empty>Add your products to see them against every market.</Empty>
+        mols.length === 0 ? <Empty>{t('Add your products to see them against every market.')}</Empty>
           : <PortfolioGrid rows={mols} markets={d.targets} facts={d.facts} mine={d.mine} launches={d.launches} hasData={hasData} market={market} />
       ) : sp.tab === 'watch' ? (
         !canUse(u.mfr_tier, 'competitors') ? (
-          <PlanLock need="data" title="Competitor watch">Follow any molecule. See every new competitor in your markets, where their product is made,
-            and get an alert by email or WhatsApp the week it is registered.</PlanLock>
+          <PlanLock need="data" title={t('Competitor watch')}>{t('Follow any molecule. See every new competitor in your markets, where their product is made, and get an alert by email or WhatsApp the week it is registered.')}</PlanLock>
         ) : (<>
           <MarketPicker u={u} targets={d.targets} current={market} path="/m/products?tab=watch" />
           <section className="card stack">
-            <div className="card-h"><div><h2>Molecules you watch</h2><p className="note">Who sells each molecule in {countryName(market)} today, and what changed in the last 90 days.
+            <div className="card-h"><div><h2>{t('Molecules you watch')}</h2><p className="note">{t('Who sells each molecule in {market} today, and what changed in the last 90 days.', { market: t(countryName(market)) })}
               We alert you by email or WhatsApp when a new competitor is registered.</p></div>
               {d.products.some((p) => p.molecule_id) && <form action={watchMolecule}><input type="hidden" name="all" value="1" />
-                <button className="btn btn-ghost btn-sm" type="submit">Watch all my products</button></form>}</div>
-            {!hasData(market) ? <AgencyMarket code={market} /> : !covers(u, market) ? <PlanLock need="data" title={`Competitors in ${countryName(market)}`} u={u} market={market} /> : d.watched.length === 0 ? <Empty>You are not watching any molecule yet. Watch all your products, or add one below.</Empty> : (
+                <button className="btn btn-ghost btn-sm" type="submit">{t('Watch all my products')}</button></form>}</div>
+            {!hasData(market) ? <AgencyMarket code={market} /> : !covers(u, market) ? <PlanLock need="data" title={t('Competitors in {market}', { market: t(countryName(market)) })} u={u} market={market} /> : d.watched.length === 0 ? <Empty>{t('You are not watching any molecule yet. Watch all your products, or add one below.')}</Empty> : (
               <div className="tbl-wrap"><table className="tbl">
-                <thead><tr><th>Molecule</th><th className="r">Companies</th><th className="r">Products</th><th>Last 90 days</th><th className="hide-m">Made in</th><th /></tr></thead>
+                <thead><tr><th>{t('Molecule')}</th><th className="r">{t('Companies')}</th><th className="r">{t('Products')}</th><th>{t('Last 90 days')}</th><th className="hide-m">{t('Made in')}</th><th /></tr></thead>
                 <tbody>{d.watched.map((w) => (
                   <tr key={w.molecule_id}><td><b>{w.molecule}</b><div className="sub2">{w.category ?? ''}</div></td>
                     <td className="r num">{w.competitors}</td>
@@ -203,22 +204,22 @@ export default async function MfrProducts({ searchParams }: { searchParams: Prom
                     <td className="small">{w.new_90 || w.gone_90 ? <>
                       {w.new_90 > 0 && <span className="pill peach num">+{w.new_90} new</span>}{' '}
                       {w.gone_90 > 0 && <span className="pill num">{w.gone_90} gone</span>}
-                      <div className="sub2">latest {fmtDate(w.last_move)}</div></> : <span className="muted">No change</span>}</td>
+                      <div className="sub2">latest {fmtDate(w.last_move)}</div></> : <span className="muted">{t('No change')}</span>}</td>
                     <td className="small hide-m">{w.made_in ?? '—'}</td>
                     <td className="r"><form action={unwatchMolecule}><input type="hidden" name="molecule_id" value={w.molecule_id} />
                       <input type="hidden" name="return" value={`/m/products?tab=watch&market=${market}`} />
-                      <button className="btn-link small" type="submit">Stop watching</button></form></td></tr>))}</tbody></table></div>)}
+                      <button className="btn-link small" type="submit">{t('Stop watching')}</button></form></td></tr>))}</tbody></table></div>)}
             <form action={watchMolecule} className="row" style={{ maxWidth: 560 }}>
               <input type="hidden" name="return" value={`/m/products?tab=watch&market=${market}`} />
-              <input className="input" name="name" placeholder="Watch another molecule, e.g. by its generic name" aria-label="Molecule to watch" required style={{ flex: '1 1 220px' }} />
-              <button className="btn btn-blue btn-sm" type="submit">Watch</button>
+              <input className="input" name="name" placeholder="Watch another molecule, e.g. by its generic name" aria-label={t('Molecule to watch')} required style={{ flex: '1 1 220px' }} />
+              <button className="btn btn-blue btn-sm" type="submit">{t('Watch')}</button>
             </form>
           </section>
         </>)
       ) : sp.tab === 'launches' ? (
         <section className="card">
-          <div className="card-h"><div><h2>Launch tracker</h2><p className="note">Each product in each market, from chosen to on the shelf. Add products from their page.</p></div></div>
-          {d.launches.length === 0 ? <Empty>Nothing on the tracker yet. Open a product and add it for a market.</Empty> : (
+          <div className="card-h"><div><h2>{t('Launch tracker')}</h2><p className="note">{t('Each product in each market, from chosen to on the shelf. Add products from their page.')}</p></div></div>
+          {d.launches.length === 0 ? <Empty>{t('Nothing on the tracker yet. Open a product and add it for a market.')}</Empty> : (
             <div className="board b5">{LAUNCH_STAGES.map(([k, label]) => (
               <div key={k} className="col"><div className="between small"><b>{label}</b><span className="muted num">{d.launches.filter((l) => l.stage === k).length}</span></div>
                 {d.launches.filter((l) => l.stage === k).map((l) => (
@@ -229,7 +230,7 @@ export default async function MfrProducts({ searchParams }: { searchParams: Prom
                       <input type="hidden" name="product_id" value={l.product_id} /><input type="hidden" name="country" value={l.country} />
                       <select className="input" name="stage" defaultValue={l.stage} aria-label={`Stage for ${l.name}`} style={{ minHeight: 34, fontSize: 13 }}>
                         {LAUNCH_STAGES.map(([s, sl]) => <option key={s} value={s}>{sl}</option>)}</select>
-                      <button className="btn btn-ghost btn-sm" type="submit">Move</button>
+                      <button className="btn btn-ghost btn-sm" type="submit">{t('Move')}</button>
                     </form>
                   </div>))}
               </div>))}</div>)}
@@ -239,52 +240,52 @@ export default async function MfrProducts({ searchParams }: { searchParams: Prom
 
       {!hasData(market) ? <AgencyMarket code={market} /> : n > 0 && (<>
         <div className="grid g4" data-tour="portfolio">
-          <div className="tile t-white"><span className="k">Medicines</span><span className="v num">{n}</span><span className="small">{packs} products{packs > matched ? `, ${packs - matched} not matched yet` : ''}</span></div>
-          <div className="tile t-peach"><span className="k"><DemandIcon /> In high demand</span>
+          <div className="tile t-white"><span className="k">{t('Medicines')}</span><span className="v num">{n}</span><span className="small">{packs} products{packs > matched ? `, ${packs - matched} not matched yet` : ''}</span></div>
+          <div className="tile t-peach"><span className="k"><DemandIcon /> {t('In high demand')}</span>
             <span className="v num">{mols.filter((p) => Number(p.f?.demand ?? 0) >= HIGH_DEMAND).length}</span>
             <span className="small">{by('open') + by('absent')} of your medicines have no competitors here</span></div>
           {analysis ? (<>
-            <div className="tile t-blue"><span className="k">Average competitors</span><span className="v num">{avg}</span><span className="small">per medicine already on the market</span></div>
-            <div className="tile t-mint"><span className="k">Top class</span><span className="v" style={{ fontSize: 20, lineHeight: 1.2 }}>{top?.cls ?? '—'}</span>
+            <div className="tile t-blue"><span className="k">{t('Average competitors')}</span><span className="v num">{avg}</span><span className="small">{t('per medicine already on the market')}</span></div>
+            <div className="tile t-mint"><span className="k">{t('Top class')}</span><span className="v" style={{ fontSize: 20, lineHeight: 1.2 }}>{top?.cls ?? '—'}</span>
               <span className="small">{top ? `${top.n} of your medicines` : ''}</span></div>
-          </>) : <div style={{ gridColumn: 'span 2' }}><PlanLock need="data" title="Your portfolio analysis" u={u} market={market}>Competition and depth for every product, your strongest classes, and where you are open.</PlanLock></div>}
+          </>) : <div style={{ gridColumn: 'span 2' }}><PlanLock need="data" title={t('Your portfolio analysis')} u={u} market={market}>{t('Competition and depth for every product, your strongest classes, and where you are open.')}</PlanLock></div>}
         </div>
         {analysis && (
           <div className="grid g2">
             <section className="card">
-              <div className="card-h"><h2>Competition across your portfolio</h2>{focus && <span className="note">{countryName(focus)}</span>}</div>
+              <div className="card-h"><h2>{t('Competition across your portfolio')}</h2>{focus && <span className="note">{countryName(focus)}</span>}</div>
               {['open', 'few', 'some', 'crowded', 'absent'].map((k) => <Bar key={k} label={COMP[k][0]} value={by(k)} max={n} right={by(k)} />)}
             </section>
             <section className="card">
-              <div className="card-h"><h2>By therapeutic class</h2></div>
-              <div className="tbl-wrap"><table className="tbl"><thead><tr><th>Class</th><th className="r">Yours</th><th className="r">Avg competitors</th><th className="r">Open</th></tr></thead>
+              <div className="card-h"><h2>{t('By therapeutic class')}</h2></div>
+              <div className="tbl-wrap"><table className="tbl"><thead><tr><th>{t('Class')}</th><th className="r">{t('Yours')}</th><th className="r">{t('Avg competitors')}</th><th className="r">{t('Open')}</th></tr></thead>
                 <tbody>{classes.slice(0, 8).map((c) => <tr key={c.cls}><td>{c.cls}</td><td className="r num">{c.n}</td><td className="r num">{c.avg}</td><td className="r num">{c.open}</td></tr>)}</tbody></table></div>
             </section>
           </div>)}
       </>)}
 
       <section className="card">
-        <div className="card-h"><h2>All medicines</h2>
-          <span className="row" style={{ gap: 10 }}><span className="note">{analysis ? 'Clearest openings first' : 'Your top 3 shown in full'}</span>
-            {n > 0 && <details style={{ position: 'relative' }}><summary className="btn-link small" style={{ cursor: 'pointer', listStyle: 'none' }}>Remove all</summary>
+        <div className="card-h"><h2>{t('All medicines')}</h2>
+          <span className="row" style={{ gap: 10 }}><span className="note">{analysis ? t('Clearest openings first') : t('Your top 3 shown in full')}</span>
+            {n > 0 && <details style={{ position: 'relative' }}><summary className="btn-link small" style={{ cursor: 'pointer', listStyle: 'none' }}>{t('Remove all')}</summary>
               <form action={deleteAllMfrProducts} className="card stack small" style={{ position: 'absolute', right: 0, zIndex: 5, width: 240, marginTop: 6 }}>
                 <span>Remove all {packs} {packs === 1 ? "product" : "products"} from your portfolio? This cannot be undone.</span>
-                <button className="btn btn-sm" type="submit">Yes, remove all</button>
+                <button className="btn btn-sm" type="submit">{t('Yes, remove all')}</button>
               </form></details>}</span></div>
-        {n === 0 ? <Empty>No products yet. Search for your first one below.</Empty> : (
+        {n === 0 ? <Empty>{t('No products yet. Search for your first one below.')}</Empty> : (
           <div className="tbl-wrap"><table className="tbl">
-            <thead><tr><th>Product</th><th className="hide-m">Class</th>
-              <th className="r">Competition in {countryName(market)}</th><th className="r hide-m">Average price</th></tr></thead>
+            <thead><tr><th>{t('Product')}</th><th className="hide-m">{t('Class')}</th>
+              <th className="r">Competition in {countryName(market)}</th><th className="r hide-m">{t('Average price')}</th></tr></thead>
             <tbody>{mols.map((p, i) => (
               <tr key={p.id}>
                 <td><Link href={`/m/products/${p.id}`}><b>{p.inn ?? p.name}</b></Link>
-                  {Number(p.f?.demand ?? 0) >= HIGH_DEMAND && visible(i) && <span style={{ marginLeft: 6, color: 'var(--pastel-peach-ink)' }}><DemandIcon size={11} title="High demand" /></span>}
+                  {Number(p.f?.demand ?? 0) >= HIGH_DEMAND && visible(i) && <span style={{ marginLeft: 6, color: 'var(--pastel-peach-ink)' }}><DemandIcon size={11} title={t('High demand')} /></span>}
                   <div className="sub2">{[p.packs > 1 ? `${p.packs} products` : p.inn ? p.name : null, p.variants || null, p.device ? 'Medical device' : p.molecule_id ? null : 'Not matched yet'].filter(Boolean).join(' · ')}</div></td>
                 <td className="small hide-m">{p.cls ?? '—'}</td>
                 {[market].map((c) => {
                   const f = p.f;
-                  return <td key={c} className="r">{!hasData(c) ? <span className="pill blue">Managed by Nazryx</span>
-                    : !visible(i) ? <span className="note row" style={{ justifyContent: 'flex-end', gap: 4 }}><LockIcon /> Locked</span>
+                  return <td key={c} className="r">{!hasData(c) ? <span className="pill blue">{t('Managed by Nazryx')}</span>
+                    : !visible(i) ? <span className="note row" style={{ justifyContent: 'flex-end', gap: 4 }}><LockIcon /> {t('Locked')}</span>
                     : <><span className={`pill ${COMP[competition(f)][1]}`}>{competition(f) === 'some' || competition(f) === 'crowded' ? `${f!.registrants} competitors` : competition(f) === 'few' ? `${f!.registrants} ${f!.registrants === 1 ? 'competitor' : 'competitors'}` : COMP[competition(f)][0]}</span>
                       {(competition(f) === 'absent' || competition(f) === 'open') && (() => {   // where it sells among the other markets with data
                         const o = (p.group ? d.groupFacts.filter((x) => x.use_group === p.group && x.country !== c)
@@ -305,39 +306,38 @@ export default async function MfrProducts({ searchParams }: { searchParams: Prom
       </>)}
       {sp.tab !== 'watch' && sp.tab !== 'launches' && sp.tab !== 'grid' && (<>
       <section className="card stack" id="add" data-tour="add-products">
-        <h2>Add a product</h2>
-        <p className="note">Search by name. Not there? Add it as written and our team takes care of it.</p>
-        <div style={{ maxWidth: 560 }}><MedicineSearch /></div>
+        <h2>{t('Add a product')}</h2>
+        <p className="note">{t('Search by name. Not there? Add it as written and our team takes care of it.')}</p>
+        <div style={{ maxWidth: 560 }}><MedicineSearch lang={langOf(u)} /></div>
         <form action={uploadMfrFile} className="row" style={{ maxWidth: 560, padding: '10px 12px', border: '1px dashed var(--line)', borderRadius: 12 }}>
           <input type="hidden" name="kind" value="catalogue" /><input type="hidden" name="return" value="/m/products#add" />
-          <span className="small" style={{ flex: '1 1 100%' }}><b>Or upload your catalogue</b> as PDF, Excel, Word or CSV. Every product is added for you in a minute.</span>
-          <input name="file" type="file" required aria-label="Catalogue file" accept=".pdf,.xls,.xlsx,.csv,.doc,.docx,.txt" style={{ flex: '1 1 200px', minWidth: 0 }} />
-          <button className="btn btn-ghost btn-sm" type="submit">Upload</button>
+          <span className="small" style={{ flex: '1 1 100%' }}><b>{t('Or upload your catalogue')}</b> {t('as PDF, Excel, Word or CSV. Every product is added for you in a minute.')}</span>
+          <input name="file" type="file" required aria-label={t('Catalogue file')} accept=".pdf,.xls,.xlsx,.csv,.doc,.docx,.txt" style={{ flex: '1 1 200px', minWidth: 0 }} />
+          <button className="btn btn-ghost btn-sm" type="submit">{t('Upload')}</button>
         </form>
         <details>
-          <summary className="btn-link">Add many at once</summary>
+          <summary className="btn-link">{t('Add many at once')}</summary>
           <form action={addMfrProducts} className="stack" style={{ marginTop: 10, maxWidth: 560 }}>
-            <label className="lbl" htmlFor="list">Paste your product list, one product per line</label>
+            <label className="lbl" htmlFor="list">{t('Paste your product list, one product per line')}</label>
             <textarea className="input" id="list" name="list" rows={8} required placeholder={'Amoxicillin 500 mg capsules\nCeftriaxone 1 g injection\nMetformin 500 mg tablets'} />
-            <button className="btn btn-ghost btn-sm" type="submit" style={{ alignSelf: 'flex-start' }}>Add and match</button>
+            <button className="btn btn-ghost btn-sm" type="submit" style={{ alignSelf: 'flex-start' }}>{t('Add and match')}</button>
           </form>
         </details>
       </section>
       <section className="card stack" id="files">
-        <div className="card-h"><div><h2>Your documents</h2><p className="note">Catalogues, and the small starter pack we check first: GMP certificate, CPP,
-          certificate of analysis, labels. Full dossiers only when we review one for you. A checked GMP certificate earns your Verified badge.</p></div></div>
+        <div className="card-h"><div><h2>{t('Your documents')}</h2><p className="note">{t('Catalogues, and the small starter pack we check first: GMP certificate, CPP, certificate of analysis, labels. Full dossiers only when we review one for you. A checked GMP certificate earns your Verified badge.')}</p></div></div>
         {d.files.length > 0 && (
           <div className="tbl-wrap"><table className="tbl"><tbody>{d.files.map((x) => (
             <tr key={x.id}><td><a href={`/files/mfile/${x.id}`}><b>{x.file_name}</b></a><div className="sub2">{MFR_FILE_KINDS[x.kind]} · {fmtDate(x.created_at)}{x.kind === 'catalogue' ? ` · ${
                 x.status === 'done' ? `${x.added} products added` : x.status === 'queued' || x.status === 'reading' ? 'reading now' : x.status ? 'our team is adding the products' : ''}` : ''}</div></td>
               <td className="r"><form action={deleteMfrFile}><input type="hidden" name="file_id" value={x.id} />
-                <button className="btn-link small" type="submit">Remove</button></form></td></tr>))}</tbody></table></div>)}
+                <button className="btn-link small" type="submit">{t('Remove')}</button></form></td></tr>))}</tbody></table></div>)}
         <form action={uploadMfrFile} className="row" style={{ maxWidth: 640 }}>
           <input type="hidden" name="return" value="/m/products#files" />
-          <select className="input" name="kind" aria-label="What the file is" defaultValue="gmp" style={{ flex: '1 1 180px' }}>
+          <select className="input" name="kind" aria-label={t('What the file is')} defaultValue="gmp" style={{ flex: '1 1 180px' }}>
             {Object.entries(MFR_FILE_KINDS).map(([k, l]) => <option key={k} value={k}>{l}</option>)}</select>
-          <input name="file" type="file" required aria-label="File" accept=".pdf,.png,.jpg,.jpeg,.xls,.xlsx,.csv,.doc,.docx,.txt" style={{ flex: '1 1 200px', minWidth: 0 }} />
-          <button className="btn btn-blue btn-sm" type="submit">Upload</button>
+          <input name="file" type="file" required aria-label={t('File')} accept=".pdf,.png,.jpg,.jpeg,.xls,.xlsx,.csv,.doc,.docx,.txt" style={{ flex: '1 1 200px', minWidth: 0 }} />
+          <button className="btn btn-blue btn-sm" type="submit">{t('Upload')}</button>
         </form>
       </section>
       </>)}

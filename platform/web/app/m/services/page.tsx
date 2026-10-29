@@ -4,6 +4,7 @@ import { targetMarkets } from '@/components/MarketPicker';
 import { Flash, LockIcon, StagePill } from '@/components/ui';
 import { startCheckout } from '@/app/actions/mfr';
 import { requireUser } from '@/lib/auth';
+import { langOf, setLang } from '@/lib/i18n';
 import { one, rows, withUser } from '@/lib/db';
 import { fmtDate } from '@/lib/format';
 import { AGENCY_KINDS, MFR_COUNTRIES, MFR_PLANS, NEEDS_PLAN, SERVICES, canUse, countryName, recommendServices, tierOf, type PlanKey } from '@/lib/mfr';
@@ -25,6 +26,7 @@ const DEPTH: [string, string, PlanKey][] = [
 export default async function Services({ searchParams }: { searchParams: Promise<{ goal?: string; market?: string; depth?: string; error?: string }> }) {
   const sp = await searchParams;
   const u = await requireUser({ manufacturer: true });
+  const t = setLang(langOf(u));
   const d = await withUser(u.id, async (db) => ({
     p: await one(db, 'select * from manufacturer_profiles where user_id = $1', [u.id]),
     engagements: await rows(db, `select e.id, e.kind, e.country, e.stage, e.status, e.created_at, coalesce(m.inn, p.name) as product
@@ -54,19 +56,19 @@ export default async function Services({ searchParams }: { searchParams: Promise
     <Link href={href} className={`choice ${on ? 'on' : ''}`} style={{ textDecoration: 'none', color: 'inherit', borderColor: on ? 'var(--blue)' : undefined }}>{children}</Link>);
 
   return (
-    <Shell user={u} title="Services" sub="Tell us what you want. We point you to the right help."
-      actions={<Link className="btn btn-ghost btn-sm" href="/m/call">Book a call</Link>}>
+    <Shell user={u} title={t('Services')} sub={t('Tell us what you want. We point you to the right help.')}
+      actions={<Link className="btn btn-ghost btn-sm" href="/m/call">{t('Book a call')}</Link>}>
       <Flash sp={sp} />
       <section className="card stack" id="want" data-tour="services">
-        <div className="between"><h2>What do you want?</h2>{goal && <Link className="btn-link small" href="/m/services#want">Start again</Link>}</div>
+        <div className="between"><h2>{t('What do you want?')}</h2>{goal && <Link className="btn-link small" href="/m/services#want">{t('Start again')}</Link>}</div>
         <div className="grid g2">{GOALS.map(([k, l]) => <Choice key={k} href={`/m/services?goal=${k}#want`} on={goal === k}>{l}</Choice>)}</div>
         {step >= 2 && (<>
-          <span className="lbl">Where?</span>
+          <span className="lbl">{t('Where?')}</span>
           <div className="row" style={{ gap: 6 }}>{markets.map((c) => (
             <Link key={c.code} href={q({ market: c.code })} className={`pill ${market === c.code ? 'solid' : ''}`} style={{ textDecoration: 'none' }}>{c.name}</Link>))}</div>
         </>)}
         {step >= 3 && (goal === 'enter' || goal === 'grow') && (<>
-          <span className="lbl">How much should we do?</span>
+          <span className="lbl">{t('How much should we do?')}</span>
           <div className="stack" style={{ gap: 8 }}>{DEPTH.map(([k, l]) => <Choice key={k} href={q({ depth: k })} on={depth === k}>{l}</Choice>)}</div>
         </>)}
         {result && (
@@ -79,17 +81,17 @@ export default async function Services({ searchParams }: { searchParams: Promise
               {has(result.plan) ? (result.kind
                 ? <Link className="btn btn-blue" href={`/m/services/${result.kind}?country=${market}`}>{open.has(result.kind) ? 'Add to it' : 'Start'}</Link>
                 : <Link className="btn btn-blue" href={`/m/market?market=${market}`}>Open {countryName(market)}</Link>)
-                : result.plan === 'entry' ? <Link className="btn btn-blue" href="/m/plan?want=entry">Get in touch</Link>
+                : result.plan === 'entry' ? <Link className="btn btn-blue" href="/m/plan?want=entry">{t('Get in touch')}</Link>
                 : (<form action={startCheckout}><input type="hidden" name="plan" value={result.plan!} />
                     <button className="btn btn-blue" type="submit">Get {MFR_PLANS[result.plan!].name}</button></form>)}
-              <Link className="btn btn-ghost" href={`/m/plan?want=${result.plan ?? 'data'}`}>Compare plans</Link>
+              <Link className="btn btn-ghost" href={`/m/plan?want=${result.plan ?? 'data'}`}>{t('Compare plans')}</Link>
             </div>
           </div>)}
       </section>
 
       {d.engagements.length > 0 && (
         <section className="card">
-          <div className="card-h"><h2>In progress</h2></div>
+          <div className="card-h"><h2>{t('In progress')}</h2></div>
           <div className="stack" style={{ gap: 10 }}>{d.engagements.map((e) => (
             <Link key={e.id} href={`/m/engagements/${e.id}`} className="between">
               <span><b>{SERVICES[e.kind].label}</b>{e.product ? ` · ${e.product}` : ''}{e.country ? ` · ${countryName(e.country)}` : ''}
@@ -97,20 +99,20 @@ export default async function Services({ searchParams }: { searchParams: Promise
               <StagePill stage={e.stage} /></Link>))}</div>
         </section>)}
 
-      <h2>Our services</h2>
+      <h2>{t('Our services')}</h2>
       <div className="grid g3">{AGENCY_KINDS.map((k) => {
         const ok = canUse(u.mfr_tier, k), why = recs.get(k);
         return (
           <Link key={k} href={ok ? `/m/services/${k}` : `/m/plan?want=${NEEDS_PLAN[k]}`} className="card stack" style={{ gap: 8, textDecoration: 'none', color: 'inherit' }}>
             <h2>{SERVICES[k].label}</h2>
             {!ok ? <span className="pill lav" style={{ alignSelf: 'flex-start' }}><LockIcon /> In {MFR_PLANS[NEEDS_PLAN[k]].name}</span>
-              : open.has(k) ? <span className="pill blue" style={{ alignSelf: 'flex-start' }}>In progress</span> : null}
+              : open.has(k) ? <span className="pill blue" style={{ alignSelf: 'flex-start' }}>{t('In progress')}</span> : null}
             <p className="muted">{SERVICES[k].what}</p>
             {why && <p className="note">Fits because {why}.</p>}
             <span className="btn-link small" style={{ marginTop: 'auto' }}>{ok ? 'Open →' : 'See what unlocks it →'}</span>
           </Link>);
       })}</div>
-      <p className="note">A quick question instead? <Link href="/expert">Ask our team</Link>.</p>
+      <p className="note">{t('A quick question instead?')} <Link href="/expert">{t('Ask our team')}</Link>.</p>
     </Shell>
   );
 }

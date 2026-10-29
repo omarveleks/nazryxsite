@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { curLang, tt } from '@/lib/i18n';
 import TourBar from './TourBar';
 import { MFR_PLANS } from '@/lib/mfr';
 import { VerifiedIcon } from './Icons';
@@ -11,34 +12,35 @@ import { signOut } from '@/app/actions/auth';
 export default function Shell({ user, title, sub, crumb, actions, children }: {
   user: User; title: ReactNode; sub?: ReactNode; crumb?: ReactNode; actions?: ReactNode; children: ReactNode;
 }) {
+  const t = tt();
   const initials = (user.name || user.email).split(/[\s@.]+/).filter(Boolean).slice(0, 2).map((s) => s[0]!.toUpperCase()).join('');
   return (
     <div className="shell">
       <aside className="side">
         <Brand />
-        <NavLinks team={user.role === 'team'} unread={user.inbox_unread ?? 0} />
+        <NavLinks team={user.role === 'team'} unread={user.inbox_unread ?? 0} lang={curLang()} />
         {user.account_type === 'manufacturer' && user.role !== 'team' ? (
           <div className="plan-box">
-            <b>{user.mfr_active ? MFR_PLANS[user.mfr_active as keyof typeof MFR_PLANS]?.name : 'No plan yet'}</b>
-            <span className="hide-m">{user.mfr_active ? 'Active' : user.mfr_plan_chosen
-              ? `${MFR_PLANS[user.mfr_plan as keyof typeof MFR_PLANS]?.name} requested` : 'Some screens are locked'}</span>
-            <Link className="btn-link hide-m" href="/m/plan">{user.mfr_active ? 'Your plan' : 'See plans'}</Link>
-            {user.mfr_verified && <span className="pill blue hide-m" style={{ alignSelf: 'flex-start' }}><VerifiedIcon /> Verified manufacturer</span>}
+            <b>{user.mfr_active ? t(MFR_PLANS[user.mfr_active as keyof typeof MFR_PLANS]?.name) : t('No plan yet')}</b>
+            <span className="hide-m">{user.mfr_active ? t('Active') : user.mfr_plan_chosen
+              ? t('{plan} requested', { plan: t(MFR_PLANS[user.mfr_plan as keyof typeof MFR_PLANS]?.name) }) : t('Some screens are locked')}</span>
+            <Link className="btn-link hide-m" href="/m/plan">{user.mfr_active ? t('Your plan') : t('See plans')}</Link>
+            {user.mfr_verified && <span className="pill blue hide-m" style={{ alignSelf: 'flex-start' }}><VerifiedIcon /> {t('Verified manufacturer')}</span>}
           </div>
-        ) : user.role === 'team' ? <div className="plan-box"><b>Nazryx team</b></div> : null}
+        ) : user.role === 'team' ? <div className="plan-box"><b>{t('Nazryx team')}</b></div> : null}
         <div className="side-foot">
-          <Link href="/help">Help and contact</Link>
+          <Link href="/help">{t('Help and contact')}</Link>
           <span>{user.email}</span>
-          <form action={signOut}><button className="btn-link" type="submit">Sign out</button></form>
+          <form action={signOut}><button className="btn-link" type="submit">{t('Sign out')}</button></form>
         </div>
       </aside>
       <main className="main">
         {(user.viewed_by || user.view_ended) && (
           <div className={user.viewed_by ? 'ok' : 'err'} role="status" style={{ display: 'flex', gap: 12, justifyContent: 'space-between', flexWrap: 'wrap' }}>
             <span>{user.viewed_by
-              ? <>Viewing <b>{user.email}</b> as they see it. Read-only: nothing here can be changed.</>
-              : <>Your view of an account has ended. Exit it to make changes again.</>}</span>
-            <a className="btn-link" href="/view-as/exit">Exit view</a>
+              ? <>{t('Viewing')} <b>{user.email}</b> {t('as they see it. Read-only: nothing here can be changed.')}</>
+              : <>{t('Your view of an account has ended. Exit it to make changes again.')}</>}</span>
+            <a className="btn-link" href="/view-as/exit">{t('Exit view')}</a>
           </div>)}
         <div className="topbar">
           <div>
@@ -48,7 +50,7 @@ export default function Shell({ user, title, sub, crumb, actions, children }: {
           </div>
           <div className="top-right">
             {actions}
-            <Link className="avatar" href="/settings" title="Settings">{initials || 'You'}</Link>
+            <Link className="avatar" href="/settings" title={t('Settings')}>{initials || t('You')}</Link>
           </div>
         </div>
         {user.account_type === 'manufacturer' && user.role !== 'team' && user.tour_step ? <TourBar step={user.tour_step} /> : null}

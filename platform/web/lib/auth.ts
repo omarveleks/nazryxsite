@@ -4,6 +4,7 @@ import { cache } from 'react';
 import { cookies, headers } from 'next/headers';
 import { redirect, notFound } from 'next/navigation';
 import { createHash, randomBytes } from 'node:crypto';
+import { LANG_COOKIE, isLang } from './i18n';
 import { pool, withUser, one } from './db';
 import { setViewing } from './viewing';
 
@@ -36,6 +37,18 @@ export async function createSession(userId: string) {
     httpOnly: true, sameSite: 'lax', path: '/', expires,
     secure: process.env.NODE_ENV === 'production' && process.env.INSECURE_COOKIES !== '1',
   });
+  // the interface follows the account's language from the first page after sign-in; a language picked while signed out
+  // (the cookie) becomes the account's language when the account still has the default
+  const picked = (await cookies()).get(LANG_COOKIE)?.value;
+  const lang = await withUser(userId, async (db) => {
+    const cur = (await db.query('select language from users where id = $1', [userId])).rows[0]?.language;
+    if (isLang(picked) && picked !== cur && (cur === 'en' || !isLang(cur))) {
+      await db.query('update users set language = $2 where id = $1', [userId, picked]);
+      return picked;
+    }
+    return cur;
+  }).catch(() => null);
+  if (isLang(lang)) (await cookies()).set(LANG_COOKIE, lang, { path: '/', maxAge: 365 * 86400, sameSite: 'lax' });
 }
 
 /** After a correct password on an account with two-step sign-in: a 10-minute challenge, not a session. */

@@ -1,5 +1,7 @@
+import { tt } from '@/lib/i18n';
 /** How a market's price moved: one reading a day, per unit, brand blue, with a table view (as YearChart). */
 export default function PriceHistory({ rows, currency, unit, pack }: { rows: { day: string | Date; unit_price: number; confidence: string }[]; currency: string; unit: string; pack: number }) {
+  const t = tt();
   const pts = rows.map((r) => ({ day: new Date(r.day), v: r.unit_price * pack, c: r.confidence }));
   if (pts.length < 2) return null;
   const W = 640, H = 160, padL = 48, padB = 22, padT = 10;
@@ -15,9 +17,9 @@ export default function PriceHistory({ rows, currency, unit, pack }: { rows: { d
   const first = pts[0].v, last = pts[pts.length - 1].v, change = first ? (last - first) / first : 0;
   return (
     <figure style={{ margin: 0 }} className="stack">
-      <div className="between"><span className="lbl">Price over time</span>
+      <div className="between"><span className="lbl">{t('Price over time')}</span>
         <span className="small">{date(pts[0].day)} to {date(pts[pts.length - 1].day)} · {change === 0 ? 'unchanged' : `${change > 0 ? '+' : ''}${Math.round(change * 100)}%`}</span></div>
-      <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label="Price over time" style={{ width: '100%', height: 'auto', display: 'block' }}>
+      <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={t('Price over time')} style={{ width: '100%', height: 'auto', display: 'block' }}>
         {ticks.map((t, i) => (<g key={i}><line x1={padL} x2={W} y1={y(t)} y2={y(t)} stroke="#ECEAE3" strokeWidth="1" />
           <text x={padL - 6} y={y(t) + 4} textAnchor="end" fontSize="10" fill="#5E5E58">{fmt(t)}</text></g>))}
         <path d={path} fill="none" stroke="#0066FF" strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" />
@@ -27,8 +29,8 @@ export default function PriceHistory({ rows, currency, unit, pack }: { rows: { d
         <text x={padL} y={H - 6} fontSize="10" fill="#5E5E58">{date(pts[0].day)}</text>
         <text x={W - 4} y={H - 6} fontSize="10" fill="#5E5E58" textAnchor="end">{date(pts[pts.length - 1].day)}</text>
       </svg>
-      <details><summary className="note" style={{ cursor: 'pointer' }}>Show as table</summary>
-        <table className="tbl small"><thead><tr><th>Day</th><th className="r">Per {unit}</th><th>Basis</th></tr></thead>
+      <details><summary className="note" style={{ cursor: 'pointer' }}>{t('Show as table')}</summary>
+        <table className="tbl small"><thead><tr><th>{t('Day')}</th><th className="r">Per {unit}</th><th>{t('Basis')}</th></tr></thead>
           <tbody>{[...pts].reverse().map((p, i) => <tr key={i}><td>{p.day.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</td><td className="r num">{currency} {fmt(p.v)}</td><td>{p.c}</td></tr>)}</tbody></table></details>
     </figure>
   );

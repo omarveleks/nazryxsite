@@ -5,6 +5,7 @@ import { targetMarkets } from '@/components/MarketPicker';
 import { Flash, PlanLock } from '@/components/ui';
 import { requestService } from '@/app/actions/mfr';
 import { requireUser } from '@/lib/auth';
+import { langOf, setLang } from '@/lib/i18n';
 import { one, rows, withUser } from '@/lib/db';
 import { AGENCY_KINDS, MFR_COUNTRIES, NEEDS_PLAN, SERVICES, SERVICE_NEEDS, canUse } from '@/lib/mfr';
 
@@ -16,6 +17,7 @@ export default async function Service({ params, searchParams }: { params: Promis
   const sp = await searchParams;
   if (!(AGENCY_KINDS as readonly string[]).includes(kind)) notFound();
   const u = await requireUser({ manufacturer: true });
+  const t = setLang(langOf(u));
   const s = SERVICES[kind];
   const d = await withUser(u.id, async (db) => ({
     targets: targetMarkets((await one(db, 'select target_countries from manufacturer_profiles where user_id = $1', [u.id]))?.target_countries, u.mfr_markets),
@@ -26,34 +28,34 @@ export default async function Service({ params, searchParams }: { params: Promis
   const country = sp.country && MFR_COUNTRIES.some((c) => c.code === sp.country) ? sp.country : d.targets[0];
   const countries = [...MFR_COUNTRIES.filter((c) => d.targets.includes(c.code)), ...MFR_COUNTRIES.filter((c) => c.core && !d.targets.includes(c.code))];
   return (
-    <Shell user={u} title={s.label} crumb={<><Link href="/m/services">Services</Link> / {s.label}</>} sub={s.what}>
+    <Shell user={u} title={s.label} crumb={<><Link href="/m/services">{t('Services')}</Link> / {s.label}</>} sub={s.what}>
       <Flash sp={sp} />
       <div className="split">
         <section className="card stack">
           {!ok ? <PlanLock need={NEEDS_PLAN[kind]} title={s.label}>{s.what}</PlanLock> : (
             <form action={requestService} className="stack">
-              <h2>Tell us where to start</h2>
+              <h2>{t('Tell us where to start')}</h2>
               <input type="hidden" name="kind" value={kind} /><input type="hidden" name="return" value={`/m/services/${kind}`} />
               <div className="form-grid">
-                <div className="field"><label htmlFor="country">Market</label>
+                <div className="field"><label htmlFor="country">{t('Market')}</label>
                   <select className="input" id="country" name="country" defaultValue={country}>{countries.map((c) => <option key={c.code} value={c.code}>{c.name}</option>)}</select></div>
-                <div className="field"><label htmlFor="product_id">Product</label>
+                <div className="field"><label htmlFor="product_id">{t('Product')}</label>
                   <select className="input" id="product_id" name="product_id" defaultValue={sp.product ?? ''}>
-                    <option value="">Several or all products</option>{d.products.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}</select></div>
-                <div className="field full"><label htmlFor="detail">Anything we should know? <span className="note">(optional)</span></label>
+                    <option value="">{t('Several or all products')}</option>{d.products.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}</select></div>
+                <div className="field full"><label htmlFor="detail">{t('Anything we should know?')} <span className="note">{t('(optional)')}</span></label>
                   <textarea className="input" id="detail" name="detail" rows={3} /></div>
               </div>
-              <button className="btn btn-blue" type="submit" style={{ alignSelf: 'flex-start' }}>Send to our team</button>
-              <p className="note">We reply within one working day with the scope.</p>
+              <button className="btn btn-blue" type="submit" style={{ alignSelf: 'flex-start' }}>{t('Send to our team')}</button>
+              <p className="note">{t('We reply within one working day with the scope.')}</p>
             </form>)}
         </section>
         <div className="stack">
           <section className="card stack">
-            <h2>How it runs</h2>
+            <h2>{t('How it runs')}</h2>
             <ol className="steps">{s.milestones.slice(1).map((m, i) => <li key={m}><em>{String(i + 1).padStart(2, '0')}</em><span>{m}</span></li>)}</ol>
           </section>
           <section className="card stack">
-            <h2>What we need from you</h2>
+            <h2>{t('What we need from you')}</h2>
             <ul className="small" style={{ margin: 0, paddingLeft: 18 }}>{SERVICE_NEEDS[kind].map((n) => <li key={n}>{n}</li>)}</ul>
           </section>
         </div>

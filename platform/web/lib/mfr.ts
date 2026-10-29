@@ -1,3 +1,4 @@
+import { tt } from './i18n';
 import { GROUP_LABEL, productGroup } from './segments';
 // Manufacturer side: countries, agency services and their milestones, report types.
 
@@ -54,13 +55,14 @@ export function reasons(p: {
   on_national_list?: boolean | null; facility_level?: string | null; on_who_eml?: boolean | null;
   registrants?: number | null; who_pq?: boolean | null; sra_approved?: boolean | null; local_made?: number | null;
 }) {
+  const t = tt();
   const out: string[] = [];
   const n = Number(p.registrants ?? 0);
-  if (p.on_national_list) out.push(`on the official TMDA list${p.facility_level ? `, level ${p.facility_level}` : ''}`);
-  if (p.on_who_eml) out.push('on the WHO essential list');
-  out.push(n === 0 ? 'nobody has registered it' : n <= 3 ? `only ${n} ${n === 1 ? 'company has' : 'companies have'} registered it` : `${n} companies registered`);
-  if (Number(p.local_made ?? 0) > 0) out.push('also made locally');
-  if (p.who_pq || p.sra_approved) out.push('your approval allows the abridged route');
+  if (p.on_national_list) out.push(p.facility_level ? t('on the official TMDA list, level {level}', { level: p.facility_level }) : t('on the official TMDA list'));
+  if (p.on_who_eml) out.push(t('on the WHO essential list'));
+  out.push(n === 0 ? t('nobody has registered it') : n === 1 ? t('only 1 company has registered it') : n <= 3 ? t('only {n} companies have registered it', { n }) : t('{n} companies registered', { n }));
+  if (Number(p.local_made ?? 0) > 0) out.push(t('also made locally'));
+  if (p.who_pq || p.sra_approved) out.push(t('your approval allows the abridged route'));
   return out;
 }
 

@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { tt } from '@/lib/i18n';
 import { setPrimaryMarket } from '@/app/actions/mfr';
 import { LockIcon, VerifiedIcon } from './Icons';
 import { MFR_COUNTRIES, countryName, covers } from '@/lib/mfr';
@@ -34,50 +35,53 @@ export const dataMarkets = (targets: string[]) => targets.filter(hasData);
 /** Switch the market shown across the portal. Only there for manufacturers with more than one market. */
 export default function MarketPicker({ targets, current, path, u }: { targets: string[]; current: string; path: string;
   u?: { role: string; mfr_active: string | null; mfr_markets?: string[] } }) {
+  const t = tt();
   if (targets.length < 2) return null;
   // with a plan, markets outside it carry a lock: opening one offers to add it
   const outside = (m: string) => Boolean(u?.mfr_active) && hasData(m) && !covers(u!, m);
   return (
-    <form action={setPrimaryMarket} className="row" aria-label="Market" style={{ gap: 6 }}>
+    <form action={setPrimaryMarket} className="row" aria-label={t('Market')} style={{ gap: 6 }}>
       <input type="hidden" name="return" value={path} />
-      <span className="lbl" style={{ marginRight: 4 }}>Market</span>
+      <span className="lbl" style={{ marginRight: 4 }}>{t('Market')}</span>
       {targets.map((m) => (
         <button key={m} type="submit" name="market" value={m} className={`pill ${m === current ? 'solid' : ''}`} aria-pressed={m === current}
           style={{ cursor: 'pointer', font: 'inherit', fontSize: 12 }} title={outside(m) ? 'Not in your plan yet' : undefined}>
-          {outside(m) && <LockIcon />}{outside(m) ? ' ' : ''}{countryName(m)}</button>))}
+          {outside(m) && <LockIcon />}{outside(m) ? ' ' : ''}{t(countryName(m))}</button>))}
     </form>
   );
 }
 
 /** "Managed by Nazryx", with the trust badge. */
-export const ManagedBadge = () => <span className="pill blue" style={{ alignSelf: 'flex-start' }}><VerifiedIcon /> Managed by Nazryx</span>;
+export const ManagedBadge = () => { const t = tt(); return <span className="pill blue" style={{ alignSelf: 'flex-start' }}><VerifiedIcon /> {t('Managed by Nazryx')}</span>; };
 
 /** A market our team runs for the manufacturer on the ground. */
 export function AgencyMarket({ code }: { code: string }) {
+  const t = tt();
   return (
     <section className="card stack" style={{ gap: 10 }}>
       <ManagedBadge />
-      <h2 style={{ fontSize: 26 }}>{countryName(code)}</h2>
+      <h2 style={{ fontSize: 26 }}>{t(countryName(code))}</h2>
       <div className="grid g3">
         {[['Market read', 'What is open, what is crowded and what it is worth, for your products.'],
           ['Distributor and registration', 'The right partner, the dossier and the filing, handled in the country.'],
-          ['Weekly reports', 'One contact and a written update on how your products are doing.']].map(([t, x]) => (
-          <div key={t} className="tile t-white"><span className="k">{t}</span><span className="small">{x}</span></div>))}
+          ['Weekly reports', 'One contact and a written update on how your products are doing.']].map(([k, x]) => (
+          <div key={k} className="tile t-white"><span className="k">{t(k)}</span><span className="small">{t(x)}</span></div>))}
       </div>
-      <Link className="btn btn-blue btn-sm" href="/m/services" style={{ alignSelf: 'flex-start' }}>Talk to our team about {countryName(code)}</Link>
+      <Link className="btn btn-blue btn-sm" href="/m/services" style={{ alignSelf: 'flex-start' }}>{t('Talk to our team about {market}', { market: t(countryName(code)) })}</Link>
     </section>
   );
 }
 
 /** The manufacturer's other markets that our team runs for them, as a row of badged tiles. */
 export function ManagedShowcase({ codes }: { codes: string[] }) {
+  const t = tt();
   if (!codes.length) return null;
   return (
     <section className="stack" style={{ gap: 8 }}>
-      <span className="lbl">Also in your plan</span>
+      <span className="lbl">{t('Also in your plan')}</span>
       <div className="grid g3">{codes.map((c) => (
         <Link key={c} href="/m/services" className="tile t-white" style={{ gap: 8 }}>
-          <span className="v" style={{ fontSize: 20 }}>{countryName(c)}</span><ManagedBadge />
+          <span className="v" style={{ fontSize: 20 }}>{t(countryName(c))}</span><ManagedBadge />
         </Link>))}</div>
     </section>
   );

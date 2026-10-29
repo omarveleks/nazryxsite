@@ -1,4 +1,6 @@
 'use server';
+import { cookies } from 'next/headers';
+import { LANG_COOKIE } from '@/lib/i18n';
 import { teamCan } from '@/lib/team';
 import { revalidatePath } from 'next/cache';
 import { notFound, redirect } from 'next/navigation';
@@ -331,6 +333,7 @@ export async function updateSettings(f: FormData) {
   await withUser(u.id, (db) => db.query(
     `update users set name = $2, whatsapp = $3, notify_email = $4, notify_whatsapp = $5, language = $6 where id = $1`,
     [u.id, str(f, 'name', 120) || u.name, whatsapp || null, channel === 'email' || channel === 'both', channel === 'whatsapp' || channel === 'both', language]));
+  (await cookies()).set(LANG_COOKIE, language, { path: '/', maxAge: 365 * 86400, sameSite: 'lax' });
   redirect('/settings?saved=1');
 }
 

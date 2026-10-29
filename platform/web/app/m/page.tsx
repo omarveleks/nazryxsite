@@ -6,6 +6,7 @@ import { DemandIcon, VerifiedIcon } from '@/components/Icons';
 import { Badges, Empty, Flash, PlanLock, StagePill } from '@/components/ui';
 import { chooseSample, tourGo } from '@/app/actions/mfr';
 import { requireUser } from '@/lib/auth';
+import { langOf, setLang } from '@/lib/i18n';
 import { one, rows, withUser } from '@/lib/db';
 import { fmtDate } from '@/lib/format';
 import { HIGH_DEMAND, MFR_PLANS, OBLIGATION_KINDS, SERVICES, canUse, covers, tierIn, countryName, mfrProductsSql, reasons, byMolecule } from '@/lib/mfr';
@@ -20,6 +21,7 @@ const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 export default async function MfrHome({ searchParams }: { searchParams: Promise<{ welcome?: string; error?: string }> }) {
   const sp = await searchParams;
   const u = await requireUser({ manufacturer: true });
+  const t = setLang(langOf(u));
   const watchAll = canUse(u.mfr_tier, 'watch');
   const d = await withUser(u.id, async (db) => {
     await loadLive(db);
@@ -70,45 +72,45 @@ export default async function MfrHome({ searchParams }: { searchParams: Promise<
   ];
   const doneN = setup.filter(([ok]) => ok).length;
   return (
-    <Shell user={u} title={<>{p?.company_name ? p.company_name : 'Welcome'}{p?.verified_at && <span className="pill blue" style={{ marginLeft: 12, verticalAlign: 'middle', fontSize: 13, letterSpacing: 'normal', fontFamily: 'Inter, sans-serif', fontWeight: 600 }}><VerifiedIcon /> Verified manufacturer</span>}</>}
-      sub={`Your products in ${d.targets.map(countryName).join(', ')}`}
-      actions={<><Link className="btn btn-ghost btn-sm" href="/m/products#add">Add a product</Link><Link className="btn btn-blue btn-sm" href="/m/services">Get help</Link></>}>
+    <Shell user={u} title={<>{p?.company_name ? p.company_name : 'Welcome'}{p?.verified_at && <span className="pill blue" style={{ marginLeft: 12, verticalAlign: 'middle', fontSize: 13, letterSpacing: 'normal', fontFamily: 'Inter, sans-serif', fontWeight: 600 }}><VerifiedIcon /> {t('Verified manufacturer')}</span>}</>}
+      sub={t('Your products in {markets}', { markets: d.targets.map((c) => t(countryName(c))).join(', ') })}
+      actions={<><Link className="btn btn-ghost btn-sm" href="/m/products#add">{t('Add a product')}</Link><Link className="btn btn-blue btn-sm" href="/m/services">{t('Get help')}</Link></>}>
       <Flash sp={sp} />
       {p?.status === 'pending' && <div className="note">Our team is reviewing your company. Everything is open to explore; introductions start once you are approved.</div>}
       {sp.welcome && <div className="ok">{d.mine ? `Welcome. We found ${d.mine} ${d.mine === 1 ? 'registration' : 'registrations'} under your company in ${d.mineMarkets.map(countryName).join(', ')}; they are in your portfolio, marked as yours. `
         : 'Welcome. '}{d.counts?.products ? `Your ${d.counts.products} products are matched to your markets below.` : 'Add your products and we match them to your markets in seconds.'}
         {u.mfr_trial && u.mfr_trial_until ? ` Basic Market Data is open for you on ${countryName(u.mfr_markets[0])} until ${fmtDate(u.mfr_trial_until)}, free.` : ''}</div>}
-      {!sp.welcome && u.mfr_trial && u.mfr_trial_until && <div className="note">Trial: Basic Market Data on {countryName(u.mfr_markets[0])} until {fmtDate(u.mfr_trial_until)}. <Link href="/m/plan">See the plans</Link></div>}
+      {!sp.welcome && u.mfr_trial && u.mfr_trial_until && <div className="note">{t('Trial: Basic Market Data on {market} until {date}.', { market: t(countryName(u.mfr_markets[0])), date: fmtDate(u.mfr_trial_until) })} <Link href="/m/plan">{t('See the plans')}</Link></div>}
 
       {doneN < setup.length && (
         <section className="card stack" style={{ gap: 10 }}>
-          <div className="between"><h2>Get set up · {doneN} of {setup.length}</h2>
-            <form action={tourGo}><input type="hidden" name="step" value="1" /><button className="btn btn-ghost btn-sm" type="submit">Take the tour</button></form></div>
+          <div className="between"><h2>{t('Get set up')} · {t('{n} of {total}', { n: doneN, total: setup.length })}</h2>
+            <form action={tourGo}><input type="hidden" name="step" value="1" /><button className="btn btn-ghost btn-sm" type="submit">{t('Take the tour')}</button></form></div>
           <div className="meter"><i style={{ width: `${(100 * doneN) / setup.length}%` }} /></div>
           <div className="grid g3" style={{ gap: 8 }}>{setup.map(([ok, label, href]) => ok
-            ? <span key={label} className="small muted">✓ {label}</span>
-            : <Link key={label} href={href} className="small">{label} →</Link>)}</div>
+            ? <span key={label} className="small muted">✓ {t(label)}</span>
+            : <Link key={label} href={href} className="small">{t(label)} →</Link>)}</div>
         </section>)}
       <div className="grid g4">
-        <Link className="tile t-white" href="/m/products"><span className="k">Your products</span><span className="v num">{d.counts?.products}</span>
-          <span className="small">{d.counts?.matched} matched</span></Link>
-        <Link className="tile t-peach" href="/m/products"><span className="k"><DemandIcon /> In high demand</span><span className="v num">{d.counts?.high}</span>
-          <span className="small">in {countryName(d.focus)}</span></Link>
-        <Link className="tile t-mint" href="/m/products"><span className="k">Little or no competition</span><span className="v num">{d.counts?.few}</span>
-          <span className="small">3 competitors or fewer</span></Link>
-        <Link className="tile t-blue" href="/m/products?tab=launches"><span className="k">On your launch tracker</span><span className="v num">{d.counts?.launches}</span>
-          <span className="small">products and markets</span></Link>
+        <Link className="tile t-white" href="/m/products"><span className="k">{t('Your products')}</span><span className="v num">{d.counts?.products}</span>
+          <span className="small">{t('{n} matched', { n: d.counts?.matched ?? 0 })}</span></Link>
+        <Link className="tile t-peach" href="/m/products"><span className="k"><DemandIcon /> {t('In high demand')}</span><span className="v num">{d.counts?.high}</span>
+          <span className="small">{t('in {market}', { market: t(countryName(d.focus)) })}</span></Link>
+        <Link className="tile t-mint" href="/m/products"><span className="k">{t('Little or no competition')}</span><span className="v num">{d.counts?.few}</span>
+          <span className="small">{t('3 competitors or fewer')}</span></Link>
+        <Link className="tile t-blue" href="/m/products?tab=launches"><span className="k">{t('On your launch tracker')}</span><span className="v num">{d.counts?.launches}</span>
+          <span className="small">{t('products and markets')}</span></Link>
       </div>
 
       <div className="split">
         <div className="stack">
           <section className="card" data-tour="home">
-            <div className="card-h"><div><h2>Register these first</h2><p className="note">The clearest openings for your products in {countryName(d.focus)}.</p></div>
-              <Link className="btn-link" href="/m/products">All products</Link></div>
+            <div className="card-h"><div><h2>{t('Register these first')}</h2><p className="note">{t('The clearest openings for your products in {market}.', { market: t(countryName(d.focus)) })}</p></div>
+              <Link className="btn-link" href="/m/products">{t('All products')}</Link></div>
             {d.counts?.products === 0 ? (
-              <div className="between" style={{ flexWrap: 'wrap' }}><span className="muted">Add your products and we rank them against the market.</span>
-                <Link className="btn btn-blue btn-sm" href="/m/products#add">Add products</Link></div>
-            ) : d.first.length === 0 ? <Empty>None of your matched products is on the official essential list yet.</Empty> : (
+              <div className="between" style={{ flexWrap: 'wrap' }}><span className="muted">{t('Add your products and we rank them against the market.')}</span>
+                <Link className="btn btn-blue btn-sm" href="/m/products#add">{t('Add products')}</Link></div>
+            ) : d.first.length === 0 ? <Empty>{t('None of your matched products is on the official essential list yet.')}</Empty> : (
               <div>{d.first.map((x, i) => (
                 <Link key={x.id} href={`/m/products/${x.id}?market=${d.focus}`} className="between"
                   style={{ alignItems: 'flex-start', flexWrap: 'wrap', padding: '10px 0', borderTop: i ? '1px solid var(--line)' : undefined, textDecoration: 'none', color: 'inherit' }}>
@@ -118,75 +120,75 @@ export default async function MfrHome({ searchParams }: { searchParams: Promise<
                     <div className="sub2">{cap(reasons(x).join(' · '))}</div>
                     <div style={{ marginTop: 6 }}><Badges m={x} /></div>
                   </div>
-                  <span className="small">Open →</span>
+                  <span className="small">{t('Open →')}</span>
                 </Link>))}</div>)}
-            {!full && d.first.length > 0 && <div style={{ marginTop: 12 }}><PlanLock compact need="data" title="See your full ranking" /></div>}
+            {!full && d.first.length > 0 && <div style={{ marginTop: 12 }}><PlanLock compact need="data" title={t('See your full ranking')} /></div>}
           </section>
 
           <section className="card">
-            <div className="card-h"><div><h2>Market watch</h2><p className="note">What moved in your molecules in the last 90 days.</p></div></div>
-            {d.watch.length === 0 ? <Empty>Quiet: no changes in your molecules in the last 90 days.</Empty> : (
+            <div className="card-h"><div><h2>{t('Market watch')}</h2><p className="note">{t('What moved in your molecules in the last 90 days.')}</p></div></div>
+            {d.watch.length === 0 ? <Empty>{t('Quiet: no changes in your molecules in the last 90 days.')}</Empty> : (
               <div>{shownWatch.map((w, i) => (
                 <div key={i} className="between small" style={{ padding: '10px 0', borderTop: i ? '1px solid var(--line)' : undefined, gap: 12 }}>
-                  <span><b>{WATCH[w.change] ?? cap(w.change)}</b> · {w.molecule} · {countryName(w.country)}{w.made_in ? <span className="muted"> · made in {w.made_in}</span> : null}</span>
+                  <span><b>{t(WATCH[w.change] ?? cap(w.change))}</b> · {w.molecule} · {t(countryName(w.country))}{w.made_in ? <span className="muted"> · {t('made in')} {w.made_in}</span> : null}</span>
                   <span className="muted num" style={{ whiteSpace: 'nowrap' }}>{fmtDate(w.at)}</span>
                 </div>))}</div>)}
             {!watchAll && d.watch.length > shownWatch.length && (
-              <div style={{ marginTop: 12 }}><PlanLock need="data" title={`${d.watch.length - shownWatch.length} more changes in your molecules`}>
-                Every new competitor, exit and lapsed registration in your molecules, in all your markets.</PlanLock></div>)}
+              <div style={{ marginTop: 12 }}><PlanLock need="data" title={t('{n} more changes in your molecules', { n: d.watch.length - shownWatch.length })}>
+                {t('Every new competitor, exit and lapsed registration in your molecules, in all your markets.')}</PlanLock></div>)}
           </section>
         </div>
 
         <div className="stack">
           <section className="card stack">
-            <div className="between"><h2>Your plan</h2><Link className="btn-link" href="/m/plan">Plans</Link></div>
-            {p?.active_plan ? <p><b>{MFR_PLANS[p.active_plan as keyof typeof MFR_PLANS]?.name}</b> <span className="pill solid">Active</span></p>
-              : p?.chosen_plan ? <p><b>{MFR_PLANS[p.chosen_plan as keyof typeof MFR_PLANS]?.name}</b> <span className="pill blue">Requested</span></p>
-              : <><p>Suggested for you: <b>{MFR_PLANS[(p?.suggested_plan ?? 'data') as keyof typeof MFR_PLANS]?.name}</b></p>
-                <Link className="btn btn-blue btn-sm" href="/m/plan" style={{ alignSelf: 'flex-start' }}>See plans</Link></>}
+            <div className="between"><h2>{t('Your plan')}</h2><Link className="btn-link" href="/m/plan">{t('Plans')}</Link></div>
+            {p?.active_plan ? <p><b>{t(MFR_PLANS[p.active_plan as keyof typeof MFR_PLANS]?.name)}</b> <span className="pill solid">{t('Active')}</span></p>
+              : p?.chosen_plan ? <p><b>{t(MFR_PLANS[p.chosen_plan as keyof typeof MFR_PLANS]?.name)}</b> <span className="pill blue">{t('Requested')}</span></p>
+              : <><p>{t('Suggested for you:')} <b>{t(MFR_PLANS[(p?.suggested_plan ?? 'data') as keyof typeof MFR_PLANS]?.name)}</b></p>
+                <Link className="btn btn-blue btn-sm" href="/m/plan" style={{ alignSelf: 'flex-start' }}>{t('See plans')}</Link></>}
           </section>
 
           <section className="card stack" style={{ gap: 8 }}>
-            <h2>Talk to our team</h2>
+            <h2>{t('Talk to our team')}</h2>
             {d.call ? (<p className="small">Your call: <b><LocalTime iso={new Date(d.call.starts_at).toISOString()} zone={d.zone} /></b>
-                {d.call.meeting_link ? <> · <a href={d.call.meeting_link} target="_blank" rel="noopener noreferrer">Join</a></> : null}</p>)
-              : <p className="small muted">A short call about your markets, products or plan, at a time that suits you.</p>}
-            <Link className="btn btn-ghost btn-sm" href="/m/call" style={{ alignSelf: 'flex-start' }}>{d.call ? 'See or change' : 'Book a call'}</Link>
+                {d.call.meeting_link ? <> · <a href={d.call.meeting_link} target="_blank" rel="noopener noreferrer">{t('Join')}</a></> : null}</p>)
+              : <p className="small muted">{t('A short call about your markets, products or plan, at a time that suits you.')}</p>}
+            <Link className="btn btn-ghost btn-sm" href="/m/call" style={{ alignSelf: 'flex-start' }}>{d.call ? t('See or change') : t('Book a call')}</Link>
           </section>
           {!u.whatsapp && (
             <section className="card stack" style={{ gap: 8 }}>
-              <h2>Updates on WhatsApp</h2>
-              <p className="small muted">A short weekly summary, new competitors in the molecules you watch, and news on your projects.</p>
-              <Link className="btn btn-ghost btn-sm" href="/settings" style={{ alignSelf: 'flex-start' }}>Add your WhatsApp number</Link>
+              <h2>{t('Updates on WhatsApp')}</h2>
+              <p className="small muted">{t('A short weekly summary, new competitors in the molecules you watch, and news on your projects.')}</p>
+              <Link className="btn btn-ghost btn-sm" href="/settings" style={{ alignSelf: 'flex-start' }}>{t('Add your WhatsApp number')}</Link>
             </section>)}
           {!p?.verified_at && Number(d.counts?.gmp) > 0 && (
             <section className="card stack" style={{ gap: 6 }}>
-              <span className="pill lav" style={{ alignSelf: 'flex-start' }}><VerifiedIcon /> Verified badge</span>
-              <p className="small muted">We are checking your GMP certificate. Once checked, the Verified manufacturer badge shows on your account and your market reads.</p>
+              <span className="pill lav" style={{ alignSelf: 'flex-start' }}><VerifiedIcon /> {t('Verified badge')}</span>
+              <p className="small muted">{t('We are checking your GMP certificate. Once checked, the Verified manufacturer badge shows on your account and your market reads.')}</p>
             </section>)}
           {!p?.sample_product_id && u.mfr_tier < 2 && d.products.length > 0 && (
             <section className="card stack" id="free-read">
-              <h2>One product, fully open</h2>
-              <p className="muted">Pick one product and see everything we have on it, free: competition, distributors, route and price.</p>
+              <h2>{t('One product, fully open')}</h2>
+              <p className="muted">{t('Pick one product and see everything we have on it, free: competition, distributors, route and price.')}</p>
               <form action={chooseSample} className="row">
-                <select className="input" name="product_id" aria-label="Product" style={{ flex: '1 1 160px' }}>
+                <select className="input" name="product_id" aria-label={t('Product')} style={{ flex: '1 1 160px' }}>
                   {d.products.map((x) => <option key={x.id} value={x.id}>{x.name}</option>)}</select>
-                <button className="btn btn-blue btn-sm" type="submit">Open it</button>
+                <button className="btn btn-blue btn-sm" type="submit">{t('Open it')}</button>
               </form>
-              <span className="note">One product, once.</span>
+              <span className="note">{t('One product, once.')}</span>
             </section>)}
 
           <section className="card stack">
-            <div className="between"><h2>Your markets</h2><Link className="btn-link" href="/m/onboarding?step=3">Edit</Link></div>
+            <div className="between"><h2>{t('Your markets')}</h2><Link className="btn-link" href="/m/onboarding?step=3">{t('Edit')}</Link></div>
             {d.targets.map((c) => (
-              <div key={c} className="between"><span>{countryName(c)}</span>
-                {hasData(c) ? <Link className="small" href={`/m/market?market=${c}`}>Open →</Link> : <ManagedBadge />}</div>))}
-            {canUse(u.mfr_tier, 'market_read') && <Link className="btn btn-ghost btn-sm" href={`/m/report?market=${d.focus}`} style={{ alignSelf: 'flex-start' }}>Download a market read</Link>}
+              <div key={c} className="between"><span>{t(countryName(c))}</span>
+                {hasData(c) ? <Link className="small" href={`/m/market?market=${c}`}>{t('Open →')}</Link> : <ManagedBadge />}</div>))}
+            {canUse(u.mfr_tier, 'market_read') && <Link className="btn btn-ghost btn-sm" href={`/m/report?market=${d.focus}`} style={{ alignSelf: 'flex-start' }}>{t('Download a market read')}</Link>}
           </section>
 
           {(d.engagements.length > 0 || d.deadlines.length > 0) && (
             <section className="card stack">
-              <h2>In progress</h2>
+              <h2>{t('In progress')}</h2>
               {d.engagements.map((e) => (
                 <Link key={e.id} href={`/m/engagements/${e.id}`} className="between small"><span>{SERVICES[e.kind].label}{e.country ? ` · ${countryName(e.country)}` : ''}</span>
                   <StagePill stage={e.stage} /></Link>))}
@@ -194,7 +196,7 @@ export default async function MfrHome({ searchParams }: { searchParams: Promise<
                 <div key={i} className="between small"><span>{OBLIGATION_KINDS[o.kind]}{o.name ? ` · ${o.name}` : ''} · {countryName(o.country)}</span>
                   <span className="num">{fmtDate(o.due_date)}</span></div>))}
             </section>)}
-          <p className="note">A question? <Link href="/expert">Ask our team</Link>.</p>
+          <p className="note">{t('A question?')} <Link href="/expert">{t('Ask our team')}</Link>.</p>
         </div>
       </div>
     </Shell>

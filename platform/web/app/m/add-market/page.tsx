@@ -4,6 +4,7 @@ import Shell from '@/components/Shell';
 import { Flash } from '@/components/ui';
 import { addMarket } from '@/app/actions/mfr';
 import { requireUser } from '@/lib/auth';
+import { langOf, setLang } from '@/lib/i18n';
 import { one, withUser } from '@/lib/db';
 import { EXTRA_MARKET, INCLUDED_TAKEN_SQL, MFR_COUNTRIES, MFR_PLANS, PLAN_MARKETS, countryName, covers, yearly } from '@/lib/mfr';
 import { stripeReady } from '@/lib/stripe';
@@ -14,6 +15,7 @@ export const metadata = { title: 'Add a market' };
 export default async function AddMarket({ searchParams }: { searchParams: Promise<{ market?: string; saved?: string; error?: string }> }) {
   const sp = await searchParams;
   const u = await requireUser({ manufacturer: true });
+  const t = setLang(langOf(u));
   const market = MFR_COUNTRIES.some((c) => c.code === sp.market) ? sp.market! : null;
   if (!market) redirect('/m/market');
   if (!u.mfr_active) redirect(`/m/plan?want=data&market=${market}`);
@@ -31,17 +33,17 @@ export default async function AddMarket({ searchParams }: { searchParams: Promis
   const plan = MFR_PLANS[u.mfr_active as keyof typeof MFR_PLANS];
   const name = countryName(market);
   return (
-    <Shell user={u} title={`Add ${name}`} sub="One more market in your plan" crumb={<><Link href="/m/plan">Your plan</Link> / Add a market</>}>
+    <Shell user={u} title={`Add ${name}`} sub={t('One more market in your plan')} crumb={<><Link href="/m/plan">{t('Your plan')}</Link> {t('/ Add a market')}</>}>
       <Flash sp={sp} />
       {sp.saved === 'market' || d.asked ? (
-        <section className="card stack"><h2>Asked</h2>
+        <section className="card stack"><h2>{t('Asked')}</h2>
           <p className="muted">Our team adds {name} to your plan and sends the invoice, usually within one working day.</p>
-          <Link className="btn btn-ghost btn-sm" href="/m" style={{ alignSelf: 'flex-start' }}>Back to Home</Link></section>
+          <Link className="btn btn-ghost btn-sm" href="/m" style={{ alignSelf: 'flex-start' }}>{t('Back to Home')}</Link></section>
       ) : (
         <section className="card stack" style={{ maxWidth: 560 }}>
           <span className="lbl">{plan?.name}</span>
           <h2 style={{ fontSize: 26 }}>{name}</h2>
-          {free ? <p><b>Included in your plan</b>: it covers {PLAN_MARKETS[u.mfr_active]} markets, and {free} {free === 1 ? 'is' : 'are'} still free to choose.</p>
+          {free ? <p><b>{t('Included in your plan')}</b>: it covers {PLAN_MARKETS[u.mfr_active]} markets, and {free} {free === 1 ? 'is' : 'are'} still free to choose.</p>
             : <p><b className="num">${year ? yearly(monthly).toLocaleString('en') : monthly}</b> {year ? 'a year (two months free)' : 'a month'}, on top of your plan.
               Cancel the market any time; your plan stays.</p>}
           <ul className="small" style={{ margin: 0, paddingLeft: 18 }}>

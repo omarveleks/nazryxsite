@@ -4,6 +4,7 @@ import { pickMarket, targetMarkets } from '@/components/MarketPicker';
 import { Flash, PlanLock } from '@/components/ui';
 import { requestIntro } from '@/app/actions/mfr';
 import { requireUser } from '@/lib/auth';
+import { langOf, setLang } from '@/lib/i18n';
 import { one, rows, withUser } from '@/lib/db';
 import { canUse, MFR_COUNTRIES } from '@/lib/mfr';
 
@@ -22,6 +23,7 @@ const INTRO_START: [string, string][] = [['now', 'As soon as possible'], ['3m', 
 export default async function IntroRequest({ searchParams }: { searchParams: Promise<{ code?: string; error?: string }> }) {
   const sp = await searchParams;
   const u = await requireUser({ manufacturer: true });
+  const t = setLang(langOf(u));
   const code = /^[0-9A-F]{8}$/.test((sp.code ?? '').toUpperCase()) ? sp.code!.toUpperCase() : null;
   const d = await withUser(u.id, async (db) => {
     const p = await one(db, 'select target_countries, primary_market, status from manufacturer_profiles where user_id = $1', [u.id]);
@@ -35,15 +37,15 @@ export default async function IntroRequest({ searchParams }: { searchParams: Pro
   const market = pickMarket(undefined, d.targets, d.p?.primary_market);
   const countries = [...MFR_COUNTRIES.filter((c) => d.targets.includes(c.code)), ...MFR_COUNTRIES.filter((c) => c.core && !d.targets.includes(c.code))];
   return (
-    <Shell user={u} title="Request an introduction" crumb={<><Link href="/m/partners">Distributors</Link> / Introduction</>}
+    <Shell user={u} title={t('Request an introduction')} crumb={<><Link href="/m/partners">{t('Distributors')}</Link> {t('/ Introduction')}</>}
       sub={code ? `To distributor ${code}` : 'We find the right distributors and make the introductions'}>
       <Flash sp={sp} />
-      {!canUse(u.mfr_tier, 'partner_intro') ? <PlanLock need="entry" title="Introductions">We contact the distributor, present your products and help agree terms.</PlanLock>
-        : d.p?.status !== 'approved' ? <section className="card"><p className="muted">Introductions open once our team approves your company. We will let you know.</p></section> : (
+      {!canUse(u.mfr_tier, 'partner_intro') ? <PlanLock need="entry" title={t('Introductions')}>{t('We contact the distributor, present your products and help agree terms.')}</PlanLock>
+        : d.p?.status !== 'approved' ? <section className="card"><p className="muted">{t('Introductions open once our team approves your company. We will let you know.')}</p></section> : (
         <form action={requestIntro} className="stack">
           {code && <input type="hidden" name="code" value={code} />}
           <section className="card stack">
-            <h2>Which products?</h2>
+            <h2>{t('Which products?')}</h2>
             <div className="stack" style={{ gap: 8 }}>{INTRO_SCOPES.map(([k, l, x], i) => (
               <label key={k} className="choice"><input type="radio" name="scope" value={k} defaultChecked={i === 1} />
                 <span><b>{l}</b><br /><span className="note">{x}</span></span></label>))}</div>
@@ -53,28 +55,28 @@ export default async function IntroRequest({ searchParams }: { searchParams: Pro
                 <div className="grid g3" style={{ marginTop: 10, gap: 6 }}>{d.products.map((x) => (
                   <label key={x.id} className="row small" style={{ gap: 6 }}><input type="checkbox" name="products" value={x.id} />
                     {x.name}{x.strength ? ` ${x.strength}` : ''}</label>))}</div>
-                <p className="note" style={{ marginTop: 8 }}>Ticking products picks &ldquo;Specific products&rdquo; for you.</p>
+                <p className="note" style={{ marginTop: 8 }}>{t('Ticking products picks “Specific products” for you.')}</p>
               </details>)}
           </section>
           <section className="card stack">
-            <h2>The basics</h2>
+            <h2>{t('The basics')}</h2>
             <div className="form-grid">
-              <div className="field"><label htmlFor="market">Market</label>
+              <div className="field"><label htmlFor="market">{t('Market')}</label>
                 <select className="input" id="market" name="market" defaultValue={market}>{countries.map((c) => <option key={c.code} value={c.code}>{c.name}</option>)}</select></div>
-              <div className="field"><label htmlFor="partner">What kind of partner?</label>
+              <div className="field"><label htmlFor="partner">{t('What kind of partner?')}</label>
                 <select className="input" id="partner" name="partner" defaultValue="unsure">{INTRO_PARTNER.map(([k, l]) => <option key={k} value={k}>{l}</option>)}</select></div>
-              <div className="field"><label htmlFor="start">When do you want to start?</label>
+              <div className="field"><label htmlFor="start">{t('When do you want to start?')}</label>
                 <select className="input" id="start" name="start" defaultValue="3m">{INTRO_START.map(([k, l]) => <option key={k} value={k}>{l}</option>)}</select></div>
-              <div className="field"><label htmlFor="contact">Who should we talk to? <span className="note">(name and phone)</span></label>
+              <div className="field"><label htmlFor="contact">{t('Who should we talk to?')} <span className="note">{t('(name and phone)')}</span></label>
                 <input className="input" id="contact" name="contact" defaultValue={[u.name, d.phone].filter(Boolean).join(', ')} /></div>
-              <div className="field full"><label htmlFor="detail">Anything else? <span className="note">(prices, volumes, distributors to avoid)</span></label>
+              <div className="field full"><label htmlFor="detail">{t('Anything else?')} <span className="note">{t('(prices, volumes, distributors to avoid)')}</span></label>
                 <textarea className="input" id="detail" name="detail" rows={3} /></div>
             </div>
           </section>
-          <div className="row"><button className="btn btn-blue" type="submit">Send to our team</button>
+          <div className="row"><button className="btn btn-blue" type="submit">{t('Send to our team')}</button>
             <span className="note">{code ? `We start with distributor ${code}` : 'We shortlist the best distributors for you'} and reply within one working day.</span></div>
         </form>)}
-      {!code && canUse(u.mfr_tier, 'partner_intro') && <p className="note">Have one in mind? <Link href="/m/partners">Pick a distributor first</Link>.</p>}
+      {!code && canUse(u.mfr_tier, 'partner_intro') && <p className="note">{t('Have one in mind?')} <Link href="/m/partners">{t('Pick a distributor first')}</Link>.</p>}
     </Shell>
   );
 }
