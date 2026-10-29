@@ -7,6 +7,7 @@ import type { ReactNode } from 'react';
 import type { User } from '@/lib/auth';
 import Brand from './Brand';
 import NavLinks from './NavLinks';
+import SearchBox from './SearchBox';
 import { signOut } from '@/app/actions/auth';
 
 export default function Shell({ user, title, sub, crumb, actions, children }: {
@@ -49,6 +50,7 @@ export default function Shell({ user, title, sub, crumb, actions, children }: {
             {sub && <div className="sub">{sub}</div>}
           </div>
           <div className="top-right">
+            {(user.account_type === 'manufacturer' || user.role === 'team') && <SearchBox lang={curLang()} />}
             {actions}
             <Link className="avatar" href="/settings" title={t('Settings')}>{initials || t('You')}</Link>
           </div>

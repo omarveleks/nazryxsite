@@ -6,11 +6,11 @@ import AutoRefresh from '@/components/AutoRefresh';
 import { Bar, Empty, Flash, LockIcon, PlanLock, Tabs } from '@/components/ui';
 import PortfolioGrid from '@/components/PortfolioGrid';
 import { DemandIcon } from '@/components/Icons';
-import { addMfrProducts, deleteAllMfrProducts, deleteMfrFile, saveLaunch, unwatchMolecule, uploadMfrFile, watchMolecule } from '@/app/actions/mfr';
+import { addMfrProducts, deleteAllMfrProducts, deleteMfrFile, unwatchMolecule, uploadMfrFile, watchMolecule } from '@/app/actions/mfr';
 import { requireUser } from '@/lib/auth';
 import { langOf, setLang } from '@/lib/i18n';
 import { one, rows, withUser } from '@/lib/db';
-import { HIGH_DEMAND, LAUNCH_STAGES, MFR_COUNTRIES, MFR_FILE_KINDS, canUse, countryName, covers, displayClass, productClass, tierIn, byMolecule } from '@/lib/mfr';
+import { HIGH_DEMAND, MFR_COUNTRIES, MFR_FILE_KINDS, canUse, countryName, covers, displayClass, productClass, tierIn, byMolecule } from '@/lib/mfr';
 import { fmtDate } from '@/lib/format';
 import { CONFIDENCE, PRICE_SQL, formUnit, median, packOf, priceFor as fittingPrice, unitShort, type Confidence, type MoleculePrice } from '@/lib/prices';
 import { isDevice, productGroup } from '@/lib/segments';
@@ -60,7 +60,7 @@ export default async function MfrProducts({ searchParams }: { searchParams: Prom
     const mine = await rows(db, `select distinct r.molecule_id, r.country from registrations r join manufacturer_profiles mp on mp.user_id = $1
         where r.active and r.molecule_id is not null and r.manufacturer_id = any(mp.company_ids)`, [u.id]);
     const launches = await rows(db, `select l.id, l.country, l.stage, l.updated_at, coalesce(m.inn, p.name) as name, p.id as product_id
-        from launches l join mfr_products p on p.id = l.product_id left join molecules m on m.id = p.molecule_id
+        from projects l join mfr_products p on p.id = l.product_id left join molecules m on m.id = p.molecule_id
         where l.user_id = $1 order by l.updated_at desc`, [u.id]);
     const files = await rows(db, 'select id, kind, file_name, created_at, status, added, matched, error from mfr_files where user_id = $1 order by created_at desc', [u.id]);
     const market = pickMarket(sp.market, targets, prof?.primary_market);
@@ -180,7 +180,7 @@ export default async function MfrProducts({ searchParams }: { searchParams: Prom
         { key: 'portfolio', label: t('Portfolio'), href: '/m/products' },
         { key: 'grid', label: 'All markets', href: '/m/products?tab=grid' },
         { key: 'watch', label: `Competitor watch${d.watchCount ? ` (${d.watchCount})` : ''}`, href: '/m/products?tab=watch' },
-        { key: 'launches', label: `Launch tracker${d.launches.length ? ` (${d.launches.length})` : ''}`, href: '/m/products?tab=launches' }]} />
+        { key: 'launches', label: `${t('Projects')}${d.launches.length ? ` (${d.launches.length})` : ''}`, href: '/m/projects' }]} />
       {sp.tab === 'grid' ? (
         mols.length === 0 ? <Empty>{t('Add your products to see them against every market.')}</Empty>
           : <PortfolioGrid rows={mols} markets={d.targets} facts={d.facts} mine={d.mine} launches={d.launches} hasData={hasData} market={market} />
@@ -216,25 +216,6 @@ export default async function MfrProducts({ searchParams }: { searchParams: Prom
             </form>
           </section>
         </>)
-      ) : sp.tab === 'launches' ? (
-        <section className="card">
-          <div className="card-h"><div><h2>{t('Launch tracker')}</h2><p className="note">{t('Each product in each market, from chosen to on the shelf. Add products from their page.')}</p></div></div>
-          {d.launches.length === 0 ? <Empty>{t('Nothing on the tracker yet. Open a product and add it for a market.')}</Empty> : (
-            <div className="board b5">{LAUNCH_STAGES.map(([k, label]) => (
-              <div key={k} className="col"><div className="between small"><b>{label}</b><span className="muted num">{d.launches.filter((l) => l.stage === k).length}</span></div>
-                {d.launches.filter((l) => l.stage === k).map((l) => (
-                  <div key={l.id} className="rcard stack" style={{ gap: 6 }}>
-                    <Link href={`/m/products/${l.product_id}?market=${l.country}`}><b>{l.name}</b></Link>
-                    <span className="sub2">{countryName(l.country)} · {fmtDate(l.updated_at)}</span>
-                    <form action={saveLaunch} className="stack" style={{ gap: 6 }}>
-                      <input type="hidden" name="product_id" value={l.product_id} /><input type="hidden" name="country" value={l.country} />
-                      <select className="input" name="stage" defaultValue={l.stage} aria-label={`Stage for ${l.name}`} style={{ minHeight: 34, fontSize: 13 }}>
-                        {LAUNCH_STAGES.map(([s, sl]) => <option key={s} value={s}>{sl}</option>)}</select>
-                      <button className="btn btn-ghost btn-sm" type="submit">{t('Move')}</button>
-                    </form>
-                  </div>))}
-              </div>))}</div>)}
-        </section>
       ) : (<>
       <MarketPicker u={u} targets={d.targets} current={market} path="/m/products" />
 

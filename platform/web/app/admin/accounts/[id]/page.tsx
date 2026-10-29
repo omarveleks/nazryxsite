@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation';
 import Shell from '@/components/Shell';
 import { Empty, Flash, StagePill } from '@/components/ui';
 import { deleteAccountDoc, setMfrPlan, setVerified, uploadAccountDoc } from '@/app/actions/docs';
-import { deleteAccount, matchProduct, setAccountSuspended, viewAs, uploadPortfolioFor } from '@/app/actions/admin';
+import { deleteAccount, matchProduct, setAccountSuspended, viewAs, uploadPortfolioFor, setAudited } from '@/app/actions/admin';
 import { brandOf } from '@/lib/match';
 import { requireTeam } from '@/lib/auth';
 import { one, rows, withUser } from '@/lib/db';
@@ -145,6 +145,12 @@ export default async function AdminAccount({ params, searchParams }: { params: P
               <p className="note">Card subscriptions switch on by themselves. Use this for invoiced plans and Complete Market Entry. Leave the price
                 empty to use the list price.</p>
               {p.active_since && <span className="note">Active since {fmtDate(p.active_since)}{p.stripe_subscription ? ', paid by card' : ''}.</span>}
+              <form action={setAudited} className="row">
+                <input type="hidden" name="user_id" value={id} /><input type="hidden" name="on" value={p.audited_at ? '' : '1'} />
+                <span className="small" style={{ flex: 1 }}>{p.audited_at ? `Audited since ${fmtDate(p.audited_at)}${p.audit_note ? `: ${p.audit_note}` : ''}` : 'Not audited (site visit or recognised inspection)'}</span>
+                {!p.audited_at && <input className="input" name="note" placeholder="Inspection or visit" aria-label="Audit note" style={{ flex: '1 1 160px', minHeight: 34, fontSize: 13 }} />}
+                <button className="btn btn-ghost btn-sm" type="submit">{p.audited_at ? 'Remove' : 'Mark audited'}</button>
+              </form>
               <form action={setVerified} className="row">
                 <input type="hidden" name="user_id" value={id} /><input type="hidden" name="on" value={p.verified_at ? '' : '1'} />
                 <span className="small" style={{ flex: 1 }}>{p.verified_at ? `Verified manufacturer since ${fmtDate(p.verified_at)}` : 'Not verified yet'}</span>

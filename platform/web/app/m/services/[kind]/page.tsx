@@ -12,7 +12,7 @@ import { AGENCY_KINDS, MFR_COUNTRIES, NEEDS_PLAN, SERVICES, SERVICE_NEEDS, canUs
 export const metadata = { title: 'Service' };
 
 // One service: what it is, how it runs, what we need, then the form (or the plan that unlocks it).
-export default async function Service({ params, searchParams }: { params: Promise<{ kind: string }>; searchParams: Promise<{ product?: string; country?: string; error?: string }> }) {
+export default async function Service({ params, searchParams }: { params: Promise<{ kind: string }>; searchParams: Promise<{ product?: string; country?: string; error?: string; project?: string }> }) {
   const { kind } = await params;
   const sp = await searchParams;
   if (!(AGENCY_KINDS as readonly string[]).includes(kind)) notFound();
@@ -35,7 +35,7 @@ export default async function Service({ params, searchParams }: { params: Promis
           {!ok ? <PlanLock need={NEEDS_PLAN[kind]} title={s.label}>{s.what}</PlanLock> : (
             <form action={requestService} className="stack">
               <h2>{t('Tell us where to start')}</h2>
-              <input type="hidden" name="kind" value={kind} /><input type="hidden" name="return" value={`/m/services/${kind}`} />
+              <input type="hidden" name="kind" value={kind} /><input type="hidden" name="return" value={`/m/services/${kind}`} />{sp.project && <input type="hidden" name="project_id" value={sp.project} />}
               <div className="form-grid">
                 <div className="field"><label htmlFor="country">{t('Market')}</label>
                   <select className="input" id="country" name="country" defaultValue={country}>{countries.map((c) => <option key={c.code} value={c.code}>{c.name}</option>)}</select></div>

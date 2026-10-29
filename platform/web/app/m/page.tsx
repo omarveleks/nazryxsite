@@ -38,7 +38,7 @@ export default async function MfrHome({ searchParams }: { searchParams: Promise<
     const counts = await one(db, `select count(*)::int as products, count(p.molecule_id)::int as matched,
         count(*) filter (where g.demand >= ${HIGH_DEMAND})::int as high,
         count(*) filter (where cm.registrants <= 3 and (cm.registrations > 0 or cm.on_national_list))::int as few,
-        (select count(*)::int from launches l where l.user_id = $1) as launches,
+        (select count(*)::int from projects l where l.user_id = $1) as launches,
         (select count(*)::int from mfr_files f where f.user_id = $1 and f.kind = 'gmp') as gmp
         from mfr_products p left join country_molecules cm on cm.molecule_id = p.molecule_id and cm.country = $2
         left join visible_gap_scores g on g.molecule_id = p.molecule_id and g.country = $2 where p.user_id = $1`, [u.id, focus]);
@@ -56,7 +56,17 @@ export default async function MfrHome({ searchParams }: { searchParams: Promise<
         left join molecules m on m.id = p.molecule_id where p.user_id = $1 and p.molecule_id is not null order by 2 limit 200`, [u.id]);
     const own = await one(db, `select count(*)::int as n, array_agg(distinct r.country) as markets from registrations r
         join manufacturer_profiles mp on mp.user_id = $1 where r.active and r.manufacturer_id = any(mp.company_ids)`, [u.id]);
-    return { profile, targets, focus, full, counts, first, watch, engagements, deadlines, products, call, zone, mine: own?.n ?? 0, mineMarkets: (own?.markets ?? []) as string[] };
+    // the outcome line: what is moving for them right now
+    const outcome = await one(db, `select
+        (select count(*)::int from engagements e where e.user_id = $1 and e.status = 'open' and e.kind in ('market_entry', 'partner_intro')) as intros,
+        (select count(*)::int from engagements e where e.user_id = $1 and e.status = 'open' and e.kind = 'dossier_review') as reviews,
+        (select count(*)::int from tenders t where t.stage = 'open' and t.closing between current_date and current_date + 30 and t.country = any($2)
+           and exists (select 1 from mfr_products p where p.user_id = $1 and p.molecule_id = any(t.molecule_ids))) as closing,
+        (select count(*)::int from projects pr where pr.user_id = $1 and pr.stage not in ('launched', 'parked')) as projects,
+        (select count(distinct r.id)::int from registration_history h join registrations r on r.id = h.registration_id
+           where h.created_at > now() - interval '30 days' and r.country = any($2) and r.molecule_id in (select molecule_id from mfr_products where user_id = $1 and molecule_id is not null)) as moved`,
+      [u.owner_id ?? u.id, targets]);
+    return { profile, targets, focus, full, counts, first, watch, engagements, deadlines, products, call, zone, mine: own?.n ?? 0, mineMarkets: (own?.markets ?? []) as string[], outcome };
   });
   const p = d.profile;
   const full = d.full;
@@ -66,7 +76,7 @@ export default async function MfrHome({ searchParams }: { searchParams: Promise<
     [Number(d.counts?.products) > 0, 'Add your products', '/m/products#add'],
     [Number(p?.profile_bits) > 0, 'Add your certifications and dosage forms', '/m/onboarding?step=2'],
     [Boolean(p?.sample_product_id) || u.mfr_tier >= 2, 'Open one product in full, free', '#free-read'],
-    [Number(d.counts?.launches) > 0, 'Put a product on your launch tracker', '/m/products'],
+    [Number(d.counts?.launches) > 0, 'Start a market entry project', '/m/projects'],
     [Boolean(p?.chosen_plan || p?.active_plan), 'Pick your plan', '/m/plan'],
     [Boolean(p?.verified_at) || Number(d.counts?.gmp) > 0, 'Upload your GMP certificate for the Verified badge', '/m/products#files'],
   ];
@@ -82,6 +92,17 @@ export default async function MfrHome({ searchParams }: { searchParams: Promise<
         {u.mfr_trial && u.mfr_trial_until ? ` Basic Market Data is open for you on ${countryName(u.mfr_markets[0])} until ${fmtDate(u.mfr_trial_until)}, free.` : ''}</div>}
       {!sp.welcome && u.mfr_trial && u.mfr_trial_until && <div className="note">{t('Trial: Basic Market Data on {market} until {date}.', { market: t(countryName(u.mfr_markets[0])), date: fmtDate(u.mfr_trial_until) })} <Link href="/m/plan">{t('See the plans')}</Link></div>}
 
+      {d.outcome && (d.outcome.intros + d.outcome.reviews + d.outcome.closing + d.outcome.projects + d.outcome.moved > 0) && (
+        <section className="card between" style={{ flexWrap: 'wrap', gap: 10 }}>
+          <span className="row" style={{ gap: 14, flexWrap: 'wrap' }}>
+            {d.outcome.projects > 0 && <Link href="/m/projects"><b className="num">{d.outcome.projects}</b> {t(d.outcome.projects === 1 ? 'project in progress' : 'projects in progress')}</Link>}
+            {d.outcome.intros > 0 && <Link href="/m/engagements"><b className="num">{d.outcome.intros}</b> {t(d.outcome.intros === 1 ? 'introduction in progress' : 'introductions in progress')}</Link>}
+            {d.outcome.reviews > 0 && <Link href="/m/engagements"><b className="num">{d.outcome.reviews}</b> {t(d.outcome.reviews === 1 ? 'dossier under review' : 'dossiers under review')}</Link>}
+            {d.outcome.closing > 0 && <Link href="/m/tenders?show=desk"><b className="num">{d.outcome.closing}</b> {t(d.outcome.closing === 1 ? 'tender closing this month' : 'tenders closing this month')}</Link>}
+            {d.outcome.moved > 0 && <Link href="/m/inbox"><b className="num">{d.outcome.moved}</b> {t(d.outcome.moved === 1 ? 'registration moved on your molecules' : 'registrations moved on your molecules')}</Link>}
+          </span>
+          <Link className="btn-link small" href="/m/calendar">{t('Calendar')}</Link>
+        </section>)}
       {doneN < setup.length && (
         <section className="card stack" style={{ gap: 10 }}>
           <div className="between"><h2>{t('Get set up')} · {t('{n} of {total}', { n: doneN, total: setup.length })}</h2>
@@ -98,7 +119,7 @@ export default async function MfrHome({ searchParams }: { searchParams: Promise<
           <span className="small">{t('in {market}', { market: t(countryName(d.focus)) })}</span></Link>
         <Link className="tile t-mint" href="/m/products"><span className="k">{t('Little or no competition')}</span><span className="v num">{d.counts?.few}</span>
           <span className="small">{t('3 competitors or fewer')}</span></Link>
-        <Link className="tile t-blue" href="/m/products?tab=launches"><span className="k">{t('On your launch tracker')}</span><span className="v num">{d.counts?.launches}</span>
+        <Link className="tile t-blue" href="/m/projects"><span className="k">{t('Projects')}</span><span className="v num">{d.counts?.launches}</span>
           <span className="small">{t('products and markets')}</span></Link>
       </div>
 

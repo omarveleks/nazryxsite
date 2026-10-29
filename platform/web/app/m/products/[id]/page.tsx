@@ -4,14 +4,16 @@ import Shell from '@/components/Shell';
 import MarketPicker, { AgencyMarket, hasData, loadLive, pickMarket, targetMarkets } from '@/components/MarketPicker';
 import { Badges, ConfidenceChip, Empty, Flash, LockIcon, PlanLock } from '@/components/ui';
 import PriceHistory from '@/components/PriceHistory';
-import { addCompetitors, deleteMfrProduct, removeCompetitor, setKind, setUseGroup, saveLaunch, toggleChecklist, unwatchMolecule, updateProductChecks, watchMolecule } from '@/app/actions/mfr';
+import { addCompetitors, deleteMfrProduct, removeCompetitor, setKind, setUseGroup, toggleChecklist, unwatchMolecule, updateProductChecks, watchMolecule } from '@/app/actions/mfr';
+import { createProject } from '@/app/actions/projects';
+import { STAGE_TONE, stageLabel } from '@/lib/projects';
 import { requireUser } from '@/lib/auth';
 import { langOf, setLang, tt } from '@/lib/i18n';
 import { one, rows, withUser } from '@/lib/db';
 import { BE_STATUS, beSuggestion, fmtDate, fmtMoney, levelLabel, registeredLine } from '@/lib/format';
 import { DEVICE_REQ_SQL, REQ_SQL, appliesTo, forProduct, type Requirement } from '@/lib/regulatory';
 import { PRICE_SQL, packOf, priceBasis, priceFor, unitShort, unitWord, usd, type MoleculePrice } from '@/lib/prices';
-import { AGENCY_KINDS, LAUNCH_STAGES, MFR_PLANS, NEEDS_PLAN, SERVICES, canUse, tierIn, countryName, displayClass, mfrProductsSql, productClass, reasons } from '@/lib/mfr';
+import { AGENCY_KINDS, MFR_PLANS, NEEDS_PLAN, SERVICES, canUse, tierIn, countryName, displayClass, mfrProductsSql, productClass, reasons } from '@/lib/mfr';
 import { brandPresence, segmentBrands, type BrandRow } from '@/lib/competitors';
 import { GROUP_LABEL, isDevice, productGroup } from '@/lib/segments';
 
@@ -35,7 +37,7 @@ export default async function MfrProduct({ params, searchParams }: { params: Pro
     const focus = hasData(market) ? market : targets.find(hasData) ?? 'TZ';
     const p = await one(db, `${mfrProductsSql(focus)} where p.id = $1 and p.user_id = $2`, [id, u.id]);
     if (!p) return null;
-    const launches = await rows(db, 'select id, country, stage from launches where product_id = $1 and user_id = $2', [id, u.id]);
+    const launches = await rows(db, 'select id, country, stage from projects where product_id = $1', [id]);
     // a medical device (viscoelastic, joint injection, nasal saline, a lubricant registered as a device) follows device rules
     const kind: 'medicine' | 'device' = isDevice(p) ? 'device' : 'medicine';
     const reqs = forProduct(await rows(db, kind === 'device' ? DEVICE_REQ_SQL : REQ_SQL, [market]) as Requirement[], { ...p, category: productClass(p) });
@@ -292,19 +294,16 @@ export default async function MfrProduct({ params, searchParams }: { params: Pro
                 </form>}
             </section>)}
           <section className="card stack">
-            <h2>{t('Launch tracker')}</h2>
+            <div className="card-h"><h2>{t('Projects')}</h2><Link className="btn-link" href="/m/projects">{t('All projects')}</Link></div>
             {d.launches.length > 0 && <div className="stack" style={{ gap: 6 }}>{d.launches.map((l) => (
-              <div key={l.id} className="between small"><span>{countryName(l.country)}</span><span className="pill blue">{LAUNCH_STAGES.find(([k]) => k === l.stage)?.[1]}</span></div>))}</div>}
-            <form action={saveLaunch} className="stack" style={{ gap: 8 }}>
+              <Link key={l.id} href={`/m/projects/${l.id}`} className="between small" style={{ textDecoration: 'none', color: 'inherit' }}><span>{t(countryName(l.country))}</span><span className={`pill ${STAGE_TONE[l.stage] ?? 'blue'}`}>{t(stageLabel(l.stage))}</span></Link>))}</div>}
+            <form action={createProject} className="row" style={{ gap: 8 }}>
               <input type="hidden" name="product_id" value={id} /><input type="hidden" name="return" value={`/m/products/${id}`} />
-              <div className="row">
-                <select className="input" name="country" aria-label={t('Market')} defaultValue={market} style={{ flex: '1 1 120px' }}>
-                  {d.targets.map((c) => <option key={c} value={c}>{countryName(c)}</option>)}</select>
-                <select className="input" name="stage" aria-label={t('Stage')} defaultValue="selected" style={{ flex: '1 1 140px' }}>
-                  {LAUNCH_STAGES.map(([k, l]) => <option key={k} value={k}>{l}</option>)}</select>
-              </div>
-              <button className="btn btn-ghost btn-sm" type="submit" style={{ alignSelf: 'flex-start' }}>{d.launches.length ? 'Update' : 'Add to the tracker'}</button>
+              <select className="input" name="country" aria-label={t('Market')} defaultValue={market} style={{ flex: '1 1 120px', minHeight: 34, fontSize: 13 }}>
+                {d.targets.filter((c) => !d.launches.some((l) => l.country === c)).map((c) => <option key={c} value={c}>{t(countryName(c))}</option>)}</select>
+              <button className="btn btn-ghost btn-sm" type="submit">{t('Start a project')}</button>
             </form>
+            <p className="note">{t('A project carries this product into one market: stages, tasks, the dossier checklist, deadlines, and what you ask us to do.')}</p>
           </section>
           <form action={deleteMfrProduct}><input type="hidden" name="product_id" value={id} />
             <button className="btn-link small" type="submit">{t('Remove this product')}</button></form>

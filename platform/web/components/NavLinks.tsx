@@ -5,7 +5,7 @@ import { tr, type Lang } from '@/lib/i18n';
 
 // The manufacturer area (the distributor side is paused: see distributor/README.md). The team also gets Admin.
 const NAV = [
-  ['/m', 'Home'], ['/m/inbox', 'Inbox'], ['/m/market', 'Market'], ['/m/finder', 'Opportunities'], ['/m/simulator', 'Pricing'], ['/m/products', 'My products'], ['/m/regulatory', 'Regulatory'], ['/m/partners', 'Partners'],
+  ['/m', 'Home'], ['/m/inbox', 'Inbox'], ['/m/projects', 'Projects'], ['/m/calendar', 'Calendar'], ['/m/market', 'Market'], ['/m/finder', 'Opportunities'], ['/m/simulator', 'Pricing'], ['/m/products', 'My products'], ['/m/regulatory', 'Regulatory'], ['/m/partners', 'Partners'],
   ['/m/tenders', 'Tenders'], ['/m/services', 'Services'], ['/m/plan', 'Plan'], ['/settings', 'Settings'],
 ] as const;
 

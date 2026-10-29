@@ -91,3 +91,46 @@ def call_reminders(cur):
                               (null, 'email', 'Call within 24 hours', %s)""",
                     (user_id, body, user_id, body, f"Call on {when}{'' if link else ': add the meeting link in Admin > Calls'}."))
     return len(calls)
+
+MONTH = "30 days"
+
+
+def outcomes(cur, user_id, countries):
+    """What the account got out of the last month: introductions, reviews, tenders matched, registrations moved, prices read."""
+    intros, reviews = cur.execute("""select count(*) filter (where kind in ('market_entry', 'partner_intro')), count(*) filter (where kind = 'dossier_review')
+                                     from engagements where user_id = %s and created_at > now() - interval '30 days'""", (user_id,)).fetchone()
+    tenders = cur.execute("""select count(*) from tenders t where t.updated_at > now() - interval '30 days' and t.country = any(%s)
+                             and exists (select 1 from mfr_products p where p.user_id = %s and p.molecule_id = any(t.molecule_ids))""", (countries, user_id)).fetchone()[0]
+    moved = cur.execute("""select count(distinct r.id) from registration_history h join registrations r on r.id = h.registration_id
+                           where h.created_at > now() - interval '30 days' and r.country = any(%s)
+                             and r.molecule_id in (select molecule_id from mfr_products where user_id = %s and molecule_id is not null)""", (countries, user_id)).fetchone()[0]
+    opened = cur.execute("select count(*) from usage_events where user_id = %s and at > now() - interval '30 days'", (user_id,)).fetchone()[0] if \
+        cur.execute("select to_regclass('usage_events')").fetchone()[0] else 0
+    lines = []
+    if intros:
+        lines.append(f"{intros} introduction{'s' if intros != 1 else ''} started.")
+    if reviews:
+        lines.append(f"{reviews} dossier review{'s' if reviews != 1 else ''}.")
+    if tenders:
+        lines.append(f"{tenders} tender{'s' if tenders != 1 else ''} matched to your molecules.")
+    if moved:
+        lines.append(f"{moved} registration{'s' if moved != 1 else ''} moved on your molecules.")
+    if opened:
+        lines.append(f"You opened the portal {opened} times.")
+    return lines
+
+
+def send_monthly(cur, limit=200):
+    """Once a month, what the account got: for manufacturers on a plan whose last outcomes email is a month old."""
+    due = cur.execute(f"""select p.user_id, coalesce(p.paid_markets, p.target_countries) from manufacturer_profiles p join users u on u.id = p.user_id
+                          where p.active_plan is not null and coalesce(u.disabled, false) = false
+                            and coalesce(p.outcomes_sent_at, p.active_since) < now() - interval '{MONTH}' order by p.outcomes_sent_at nulls first limit %s""", (limit,)).fetchall()
+    sent = 0
+    for user_id, countries in due:
+        lines = outcomes(cur, user_id, list(countries or []))
+        if lines:
+            cur.execute("""insert into notifications (user_id, channel, subject, body) values (%s, 'email', %s, %s)""",
+                        (user_id, "What you got from Nazryx this month", " ".join(lines) + " Your renewal keeps all of it moving."))
+            sent += 1
+        cur.execute("update manufacturer_profiles set outcomes_sent_at = now() where user_id = %s", (user_id,))
+    return sent

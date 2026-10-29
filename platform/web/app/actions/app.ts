@@ -325,6 +325,24 @@ export async function requestUpgrade(f: FormData) {
   redirect('/settings?upgrade=1#plan');
 }
 
+/** The public manufacturer page: on or off; the address comes from the company name. */
+export async function setPublicProfile(f: FormData) {
+  const u = await requireUser({ manufacturer: true });
+  const on = str(f, 'on', 1) === '1';
+  await withUser(u.id, async (db) => {
+    const p = await one(db, 'select company_name, public_slug, status from manufacturer_profiles where user_id = $1', [u.owner_id ?? u.id]);
+    if (!p || p.status !== 'approved') return;
+    let slug = p.public_slug as string | null;
+    if (!slug) {
+      const base = ((await one(db, 'select mfr_slug($1) as s', [p.company_name]))?.s as string) || 'manufacturer';
+      slug = base;
+      for (let i = 2; await one(db, 'select 1 as x from manufacturer_profiles where public_slug = $1 and user_id <> $2', [slug, u.owner_id ?? u.id]); i++) slug = `${base}-${i}`;
+    }
+    await db.query('update manufacturer_profiles set public_profile = $2, public_slug = $3 where user_id = $1', [u.owner_id ?? u.id, on, slug]);
+  });
+  redirect('/settings?saved=1#public');
+}
+
 export async function updateSettings(f: FormData) {
   const u = await requireUser({ shared: true });
   const channel = str(f, 'channel', 20);

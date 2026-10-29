@@ -251,6 +251,13 @@ export async function reviewClaim(f: FormData) {
   redirect('/admin?tab=claims');
 }
 
+/** Audited: a site visit or a recognised inspection confirmed by the team. The public page shows it. */
+export async function setAudited(f: FormData) {
+  const id = str(f, 'user_id', 40), on = str(f, 'on', 1) === '1';
+  await team((db) => db.query('update manufacturer_profiles set audited_at = case when $2 then now() end, audit_note = nullif($3, \'\') where user_id = $1', [id, on, str(f, 'note', 300)]), `/admin/accounts/${id}`);
+  redirect(`/admin/accounts/${id}?saved=1`);
+}
+
 export async function setPlan(f: FormData) {
   await requireTeam('accounts');
   await team((db) => db.query('select admin_set_plan($1, $2)', [str(f, 'user_id', 40), str(f, 'plan', 10) === 'paid' ? 'paid' : 'free']), '/admin?tab=accounts');

@@ -279,3 +279,18 @@ def process(cur):
         cur.execute("rollback to savepoint rec")
         log.exception("recurring invoices failed")
     return len(events)
+
+def offer_checkins(cur):
+    """A 30-day check-in for every account whose plan went live in the last days and has not been offered one: a date on
+    the calendar, an inbox item and an email, once. Returns how many."""
+    n = 0
+    for user_id, plan in cur.execute("""select user_id, active_plan from manufacturer_profiles
+                                        where active_plan is not null and active_since > now() - interval '3 days' and checkin_offered_at is null""").fetchall():
+        cur.execute("""insert into calendar_entries (user_id, title, on_date, kind) values (%s, '30-day check-in with Nazryx', current_date + 30, 'meeting')""", (user_id,))
+        cur.execute("""insert into inbox_items (user_id, kind, title, body, link, key) values (%s, 'system', 'Your 30-day check-in',
+                       'A short call a month in: what you found, what is missing, what we should read next. Pick a time that suits you.', '/m/call?topic=checkin', %s)
+                       on conflict (user_id, key) do nothing""", (user_id, f"checkin:{plan}"))
+        notify(cur, user_id, "Your 30-day check-in", "A month into your plan we sit down for 20 minutes: what you found, what is missing, what we should read next. Book it from Home or /m/call.")
+        cur.execute("update manufacturer_profiles set checkin_offered_at = now() where user_id = %s", (user_id,))
+        n += 1
+    return n

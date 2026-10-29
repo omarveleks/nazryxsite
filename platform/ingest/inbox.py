@@ -101,6 +101,29 @@ def build(cur, user_id, since):
                 f"{inns}.", f"/m/finder?market={country}&" + "&".join(f"{k}={1 if v is True else v}" for k, v in p.items() if v is not None and v is not False and v != ""), country)
         cur.execute("update saved_searches set seen_ids = %s, checked_at = now() where id = %s", (sorted(found), sid))
 
+    # dates a week away: renewals and obligations, task due dates, target launches, their own calendar entries
+    for key, kind_label, title, when, country, link in cur.execute("""
+        select 'ob' || o.id, o.kind, coalesce(m.inn, p.name), o.due_date, o.country, '/m/calendar' from obligations o
+          left join mfr_products p on p.id = o.product_id left join molecules m on m.id = p.molecule_id where o.user_id = %(u)s and not o.done
+        union all
+        select 'tk' || k.id, 'task', k.title, k.due_date, pr.country, '/m/projects/' || pr.id from project_tasks k join projects pr on pr.id = k.project_id
+          where pr.user_id = %(u)s and k.done_at is null and k.due_date is not null
+        union all
+        select 'tg' || pr.id, 'target launch', coalesce(m.inn, p.name), pr.target_date, pr.country, '/m/projects/' || pr.id from projects pr
+          join mfr_products p on p.id = pr.product_id left join molecules m on m.id = p.molecule_id where pr.user_id = %(u)s and pr.target_date is not null and pr.stage <> 'launched'
+        union all
+        select 'ce' || e.id, replace(e.kind, '_', ' '), e.title, e.on_date, e.country, '/m/calendar' from calendar_entries e where e.user_id = %(u)s""",
+            dict(u=user_id)).fetchall():
+        if when is None:
+            continue
+        days = (when - cur.execute("select current_date").fetchone()[0]).days
+        if days < 0 or days > 7:
+            continue
+        label = {"renewal": "Renewal", "variation": "Variation", "safety_report": "Safety report", "other": "Obligation", "task": "Task", "own": "Your date",
+                 "gmp expiry": "GMP certificate expires", "registration expiry": "Registration expires", "meeting": "Meeting", "target launch": "Target launch date"}.get(kind_label, kind_label.capitalize())
+        put("deadline", f"due:{key}:{when}", f"{label}: {title[:80]} {'today' if days == 0 else 'tomorrow' if days == 1 else f'in {days} days'}",
+            f"Due {when:%d %b %Y}.", link, country)
+
     # regulator notices naming their products
     cur.execute("savepoint inbox_news")
     try:

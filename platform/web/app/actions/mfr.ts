@@ -354,8 +354,8 @@ export async function requestService(f: FormData) {
   let id = 0;
   try {
     id = await withUser(u.id, async (db) => {
-      const r = await one(db, `insert into engagements (user_id, kind, country, product_id, detail) values ($1, $2, $3, $4, $5) returning id`,
-        [u.id, kind, country || null, product, str(f, 'detail', 2000) || null]);
+      const r = await one(db, `insert into engagements (user_id, kind, country, product_id, detail, project_id) values ($1, $2, $3, $4, $5, $6) returning id`,
+        [u.id, kind, country || null, product, str(f, 'detail', 2000) || null, int(f, 'project_id')]);
       await teamNote(db, `New ${SERVICES[kind].label} request`, `${u.email} asked for ${SERVICES[kind].label}${country ? ` in ${country}` : ''}. Engagement #${r!.id}.`);
       return r!.id as number;
     });
@@ -635,11 +635,17 @@ export async function addMarket(f: FormData) {
 export async function toggleChecklist(f: FormData) {
   const u = await requireUser({ manufacturer: true });
   const product = int(f, 'product_id'), country = str(f, 'country', 2), item = str(f, 'item', 200);
-  await withUser(u.id, (db) => str(f, 'done', 1) === '1'
-    ? db.query(`insert into product_checklist (product_id, country, item, user_id) select id, $2, $3, $4 from mfr_products
-        where id = $1 and user_id = $4 on conflict do nothing`, [product, country, item, u.id])
-    : db.query('delete from product_checklist where product_id = $1 and country = $2 and item = $3 and user_id = $4', [product, country, item, u.id]));
-  redirect(`/m/products/${product}?market=${country}#documents`);
+  const acct = u.owner_id ?? u.id;
+  await withUser(u.id, async (db) => {
+    // "done" says which way; without it the tick flips
+    const has = Boolean(await one(db, 'select 1 as x from product_checklist where product_id = $1 and country = $2 and item = $3', [product, country, item]));
+    const want = f.has('done') ? str(f, 'done', 1) === '1' : !has;
+    if (want && !has) await db.query(`insert into product_checklist (product_id, country, item, user_id) select id, $2, $3, $4 from mfr_products
+        where id = $1 and user_id = $4 on conflict do nothing`, [product, country, item, acct]);
+    if (!want && has) await db.query('delete from product_checklist where product_id = $1 and country = $2 and item = $3', [product, country, item]);
+  });
+  const ret = str(f, 'return', 200);
+  redirect(ret.startsWith('/') && !ret.startsWith('//') ? ret : `/m/products/${product}?market=${country}#documents`);
 }
 
 /** The competitor brands a manufacturer meets for one product (comma or line separated). */

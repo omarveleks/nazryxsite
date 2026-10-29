@@ -52,15 +52,9 @@ def tick():
         except Exception:
             cur.execute("rollback to savepoint inbox")
             log.exception("inbox failed")
-        cur.execute("savepoint trade")
-        try:
-            import trade
-            trade.run(cur)                # medicine imports from UN Comtrade, one market a tick, each monthly
-            cur.execute("release savepoint trade")
-        except Exception:
-            cur.execute("rollback to savepoint trade")
-            log.exception("trade read failed")
         digest.send_weekly(cur)       # the weekly summary for manufacturers (email and WhatsApp)
+        digest.send_monthly(cur)      # what the account got this month, for those on a plan
+        billing.offer_checkins(cur)   # the 30-day check-in, once, when a plan goes live
         digest.call_reminders(cur)    # the day before a booked call
         notify.deliver_queued(cur)
         for (code,) in cur.execute("select code from countries where enabled").fetchall():
@@ -72,6 +66,10 @@ def tick():
             import collect
             with connect() as conn:
                 collect.run(conn)         # the next due source: registers weekly, tenders daily, prices every 3 days
+            with connect() as conn:
+                import trade
+                trade.run(conn.cursor())  # medicine imports from UN Comtrade: one call a tick, each market monthly
+                conn.commit()
         except Exception:
             log.exception("collector failed")
     if os.environ.get("ANTHROPIC_API_KEY"):

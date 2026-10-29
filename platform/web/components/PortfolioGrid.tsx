@@ -1,11 +1,12 @@
 import Link from 'next/link';
 import { tt } from '@/lib/i18n';
 import { countryName } from '@/lib/mfr';
+import { stageLabel } from '@/lib/projects';
 
 export type GridRow = { id: number; name: string; inn: string | null; molecule_id: number | null; group: string | null; packs: number; variants: string };
 export type GridFact = { molecule_id: number; country: string; registrants: number; registrations: number; on_national_list: boolean };
 export type Mine = { molecule_id: number; country: string };
-export type Launch = { product_id: number; country: string; stage: string };
+export type Launch = { id?: number; product_id: number; country: string; stage: string };
 
 /** Every product against every market in one grid: registered by you, in progress, how many others sell it, or open. */
 export default function PortfolioGrid({ rows, markets, facts, mine, launches, hasData, market }: {
@@ -16,7 +17,7 @@ export default function PortfolioGrid({ rows, markets, facts, mine, launches, ha
     if (!hasData(c)) return <span className="muted">—</span>;
     if (r.molecule_id && mine.some((m) => m.molecule_id === r.molecule_id && m.country === c)) return <span className="pill mint" title={t('A registration under your company holds this here')}>{t('Yours')}</span>;
     const l = launches.find((x) => x.product_id === r.id && x.country === c);
-    if (l) return <Link className="pill blue" href="/m/products?tab=launches" title={t('On your launch tracker')}>{l.stage}</Link>;
+    if (l) return <Link className="pill blue" href={`/m/projects/${l.id}`} title={t('In a project')}>{t(stageLabel(l.stage))}</Link>;
     const f = r.molecule_id ? facts.find((x) => x.molecule_id === r.molecule_id && x.country === c) : null;
     if (!f) return <span className="muted">—</span>;
     if (f.registrants === 0) return <Link className="pill peach" href={`/m/products/${r.id}?market=${c}`} title={f.on_national_list ? 'On the essential list, nobody registered' : 'Nobody registered'}>{f.on_national_list ? 'Open · essential' : 'Open'}</Link>;

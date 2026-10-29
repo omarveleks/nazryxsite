@@ -5,7 +5,6 @@ tick, with the public preview API (no key; a few hundred rows a call, politely p
 import json
 import logging
 import os
-import time
 from datetime import date
 
 import requests
@@ -16,7 +15,6 @@ HS6 = ["300410", "300420", "300431", "300432", "300439", "300441", "300442", "30
 REPORTERS = {"TZ": 834, "KE": 404, "KZ": 398, "KG": 417, "UZ": 860, "NG": 566, "UG": 800, "SN": 686, "CI": 384, "CM": 120, "HT": 332}
 EVERY_DAYS = 30
 YEARS_BACK = 3            # the latest years a country may have reported; Comtrade lags one to two years
-PAUSE = 8                 # seconds between calls: the preview API allows a handful a minute, one period a call
 HERE = os.path.dirname(os.path.abspath(__file__))
 _partners = None
 
@@ -69,38 +67,50 @@ def write(cur, rows):
 
 
 def due(cur):
-    """The enabled market longest since its last read, if any is older than a month (or never read)."""
+    """The enabled market with a (year, line) still unread this month, if any: one call per tick keeps the worker quick."""
     for code, in cur.execute("select code from countries where enabled order by code").fetchall():
-        if code not in REPORTERS:
-            continue
-        last = cur.execute("select max(read_at) from trade_flows where country = %s", (code,)).fetchone()[0]
-        if last is None or (date.today() - last.date()).days >= EVERY_DAYS:
+        if code in REPORTERS and next_call(cur, code):
             return code
     return None
 
 
-def read_country(cur, country, session=None):
-    """Totals by origin for 3004 and 3003, and the World total by HS6 line, for the latest years. Returns rows written."""
-    session = session or requests.Session()
+# the three calls per year, and the World row each one leaves behind (its marker; a null value marks "nothing reported")
+CALLS = (("3004", None, "3004"), ("3003", 0, "3003"), (",".join(HS6), 0, "300490"))
+
+
+def next_call(cur, country):
+    """The first (year, cmd, partner, marker) not read in the last month for a market, or None when the month is done."""
     years = list(range(date.today().year - YEARS_BACK, date.today().year))
-    reporter = REPORTERS[country]
-    n = 0
     for year in years:
-        for cmd, partner in (("3004", None), ("3003", 0), (",".join(HS6), 0)):   # doses by origin; bulk and the HS6 lines for the world
-            data = fetch(session, reporter, year, cmd, partner)
-            if data is None:
-                break
-            n += write(cur, rows_from(country, data))
-            time.sleep(PAUSE)
-    if n == 0:   # nothing reported: still mark the read so the next market gets its turn, and we try again in a month
-        cur.execute("""insert into trade_flows (country, year, hs, partner, partner_name, value_usd) values (%s, %s, '3004', '0', 'World', null)
-                       on conflict (country, year, hs, partner) do update set read_at = now()""", (country, years[-1]))
-    log.info("trade %s: %s rows", country, n)
+        for cmd, partner, marker in CALLS:
+            fresh = cur.execute("""select 1 from trade_flows where country = %s and year = %s and hs = %s and partner = '0'
+                                   and read_at > now() - make_interval(days => %s)""", (country, year, marker, EVERY_DAYS)).fetchone()
+            if not fresh:
+                return year, cmd, partner, marker
+    return None
+
+
+def read_country(cur, country, session=None):
+    """One call for the market: the next (year, line) due. Returns rows written (0 when nothing was reported, which is
+    recorded so the next call moves on)."""
+    session = session or requests.Session()
+    nxt = next_call(cur, country)
+    if not nxt:
+        return 0
+    year, cmd, partner, marker = nxt
+    data = fetch(session, REPORTERS[country], year, cmd, partner)
+    if data is None:                      # the call failed: try again next tick
+        return 0
+    n = write(cur, rows_from(country, data))
+    if not any(r[2] == marker and r[3] == "0" for r in rows_from(country, data)):
+        cur.execute("""insert into trade_flows (country, year, hs, partner, partner_name, value_usd, read_at) values (%s, %s, %s, '0', 'World', null, now())
+                       on conflict (country, year, hs, partner) do update set read_at = now()""", (country, year, marker))
+    log.info("trade %s %s %s: %s rows", country, year, marker, n)
     return n
 
 
 def run(cur, session=None):
-    """Read the one market that is due. Off when COMTRADE=0."""
+    """Read the next due call for the next due market. Off when COMTRADE=0."""
     if os.environ.get("COMTRADE", "1") == "0":
         return 0
     country = due(cur)
