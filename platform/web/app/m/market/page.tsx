@@ -8,6 +8,7 @@ import { requireUser } from '@/lib/auth';
 import { one, rows, withUser } from '@/lib/db';
 import { HIGH_DEMAND, canUse, countryName, tierIn } from '@/lib/mfr';
 import { REQ_SQL, type Requirement } from '@/lib/regulatory';
+import { coverage, readLine } from '@/lib/coverage';
 import { fmtDate, fmtMoney } from '@/lib/format';
 
 export const metadata = { title: 'Market' };
@@ -40,9 +41,10 @@ export default async function MfrMarket({ searchParams }: { searchParams: Promis
     const market = pickMarket(sp.market, targets, p?.primary_market);
     const reqs = (await rows(db, REQ_SQL, [market]) as Requirement[]).filter((r) => r.applies === 'all');
     if (!hasData(market)) return { targets, market, reqs };
+    const cov = await coverage(db, market);
     const h = await headline(db, market, u.id);
     const full = canUse(tierIn(u, market), 'market');
-    if (!full) return { targets, market, reqs, h };
+    if (!full) return { targets, market, reqs, h, cov };
     const cats = await rows(db, `
       select m.category, count(*)::int as molecules, sum(cm.registrations)::int as products, round(avg(cm.registrants), 1)::float as per_molecule,
              count(*) filter (where cm.registrants = 0 and cm.rankable)::int as open,
@@ -63,7 +65,7 @@ export default async function MfrMarket({ searchParams }: { searchParams: Promis
         from tenders t where t.country = $1 order by mine desc, coalesce(t.awarded, t.closing, t.published) desc nulls last limit 8`, [market, u.id]);
     const tcount = await one(db, `select count(*) filter (where stage = 'open')::int as open,
         count(*) filter (where coalesce(awarded, closing, published) > now() - interval '90 days')::int as recent from tenders where country = $1`, [market]);
-    return { targets, market, reqs, h, cats, origin, years, routes, tenders, tcount };
+    return { targets, market, reqs, h, cov, cats, origin, years, routes, tenders, tcount };
   });
   const m = d.market;
   const full = canUse(tierIn(u, m), 'market');
@@ -72,6 +74,7 @@ export default async function MfrMarket({ searchParams }: { searchParams: Promis
       actions={hasData(m) ? (canUse(tierIn(u, m), 'market_read') ? <Link className="btn btn-ghost btn-sm" href={`/m/report?market=${m}`}>Download market read</Link>
         : <PlanLock compact need="data" title="Market read (PDF)" u={u} market={m} />) : undefined}>
       <MarketPicker u={u} targets={d.targets} current={m} path="/m/market" />
+      {hasData(m) && d.cov && <p className="note">{readLine(d.cov)} · <Link className="btn-link" href={`/m/coverage?market=${m}`}>How we read {countryName(m)}</Link></p>}
 
       {!hasData(m) && <AgencyMarket code={m} />}
 

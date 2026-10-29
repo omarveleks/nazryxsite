@@ -11,10 +11,16 @@ export type MoleculePrice = {
   // the other forms it comes in (drops beside the usual capsules), per unit of that form
   forms?: Record<string, { basis: 'listings' | 'estimate'; strength: string | null; unit_price: number; unit_usd: number;
     lo: number; hi: number; n: number; pack_size: number | null }> | null;
+  // where it comes from and how sure we are: the sources behind it (a shop key, a register, or 'market:KE' for a
+  // neighbour an estimate rests on), the newest reading, and measured / thin / estimated
+  sources?: { source: string; n: number }[] | null; read_at?: string | null; confidence?: Confidence;
 };
+export type Confidence = 'measured' | 'thin' | 'estimated';
 
 export const PRICE_SQL = `select molecule_id, country, basis, kinds, currency, unit, strength, unit_price, unit_usd, lo, hi, n,
-  from_country, factor, overlap, by_strength, pack_size, generic_price, brand_price, to_jsonb(molecule_prices) -> 'forms' as forms
+  from_country, factor, overlap, by_strength, pack_size, generic_price, brand_price, to_jsonb(molecule_prices) -> 'forms' as forms,
+  to_jsonb(molecule_prices) -> 'sources' as sources, (to_jsonb(molecule_prices) ->> 'read_at') as read_at,
+  coalesce(to_jsonb(molecule_prices) ->> 'confidence', case when basis = 'listings' then 'thin' else 'estimated' end) as confidence
   from molecule_prices`;
 
 const UNIT_SHORT: Record<string, string> = { 'tablet or capsule': 'tablet', 'ampoule or vial': 'vial', inhaler: 'inhaler', pack: 'pack', ml: 'ml', g: 'g' };
@@ -28,10 +34,35 @@ export const unitWord = (p: MoleculePrice) => packOf(p) > 1 || p.unit === 'ml' |
 export const perUnit = (p: MoleculePrice) => `${p.currency} ${fmtMoney(Number(p.unit_price) * packOf(p))} / ${packOf(p) > 1 ? `${fmtMoney(packOf(p))} ${p.unit}` : unitShort(p)}`;
 export const usd = (v: string | number) => `$${Number(v) < 1 ? Number(v).toFixed(3) : fmtMoney(v)}`;
 
-// One plain line under the prices; sources stay with Nazryx.
+/** What kind of source a reader is, for the basis line; shop names stay with Nazryx, public registers are named. */
+export const SOURCE_KIND: Record<string, string> = {
+  mydawa: 'pharmacy', pharmaplus: 'pharmacy', goodlife: 'pharmacy', afyadepo: 'pharmacy', dawazetu: 'pharmacy', europharma: 'pharmacy',
+  biosfera: 'pharmacy', bimed: 'pharmacy', liki: 'pharmacy', bonamour: 'pharmacy', asset: 'pharmacy', mariamgrey: 'pharmacy', drugstore: 'pharmacy',
+  healthplus: 'pharmacy', precious: 'pharmacy', medplus: 'pharmacy', medex: 'pharmacy', '1mg': 'pharmacy', dawaai: 'pharmacy',
+  ppra: 'the national price survey', 'prices_KZ (NDDA)': 'the national maximum-price list', dlsmi: 'the national maximum-price list',
+  reference: 'the national reference-price list', tender: 'public tender awards',
+};
+const readOn = (d?: string | null) => (d ? ` Read ${new Date(d).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}.` : '');
+
+/** One plain line under the prices: what it rests on and when it was read. */
 export function priceBasis(p: MoleculePrice) {
-  return p.basis === 'listings' ? `Based on ${p.n} ${p.n === 1 ? 'price' : 'prices'} in ${countryName(p.country)}.` : 'Estimated.';
+  const src = p.sources ?? [];
+  if (p.basis === 'listings') {
+    const shops = src.filter((s) => SOURCE_KIND[s.source] === 'pharmacy').length;
+    const official = src.filter((s) => SOURCE_KIND[s.source] && SOURCE_KIND[s.source] !== 'pharmacy').map((s) => SOURCE_KIND[s.source]);
+    const parts = [shops ? `${shops} ${shops === 1 ? 'pharmacy' : 'pharmacies'}` : '', ...[...new Set(official)]].filter(Boolean);
+    return `Median of ${p.n} ${p.n === 1 ? 'price' : 'prices'} in ${countryName(p.country)}${parts.length ? ` from ${parts.join(' and ')}` : ''}.${readOn(p.read_at)}`;
+  }
+  const from = src.filter((s) => s.source.startsWith('market:')).map((s) => countryName(s.source.slice(7)));
+  return `Estimated from ${from.length ? `${from.length === 1 ? 'one neighbouring market' : `${from.length} neighbouring markets`}` : 'neighbouring markets'}, adjusted for ${countryName(p.country)}'s price level. No shelf price read here yet.${readOn(p.read_at)}`;
 }
+
+/** The confidence word and its meaning, for the chip and its title. */
+export const CONFIDENCE: Record<Confidence, { label: string; tone: string; title: string }> = {
+  measured: { label: 'Measured', tone: 'mint', title: 'Three or more products from two or more sources, read in this market' },
+  thin: { label: 'Thin', tone: 'peach', title: 'Read in this market, but from one source or fewer than three products' },
+  estimated: { label: 'Estimated', tone: 'lav', title: 'No shelf price read here: carried over from neighbouring markets' },
+};
 
 /** The unit a product is sold by, from its form; null when the form does not say. */
 export function formUnit(form?: string | null) {
@@ -58,7 +89,8 @@ export function priceFor(p: MoleculePrice | null | undefined, form?: string | nu
   const u = formUnit(form);
   const f = u ? (u === 'ml' ? p.forms?.ml ?? p.forms?.g : p.forms?.[u]) : null;
   if (!f) return null;
-  return { ...p, basis: f.basis, unit: u === 'ml' && !p.forms?.ml ? 'g' : u!, strength: null, unit_price: String(f.unit_price),
+  return { ...p, basis: f.basis, confidence: f.basis === 'listings' ? (f.n >= 3 ? 'measured' : 'thin') : 'estimated',
+    unit: u === 'ml' && !p.forms?.ml ? 'g' : u!, strength: null, unit_price: String(f.unit_price),
     unit_usd: String(f.unit_usd), lo: String(f.lo), hi: String(f.hi), n: f.n, pack_size: f.pack_size == null ? null : String(f.pack_size),
     by_strength: [], generic_price: null, brand_price: null };
 }

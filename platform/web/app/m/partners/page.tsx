@@ -36,9 +36,10 @@ export default async function Partners({ searchParams }: { searchParams: Promise
       : await rows(db, 'select * from partner_search($1, $2, $3, $4, $5, $6)', [market, cls, molecule?.id ?? null, false, Number(sp.min) || 0, sort]);
     const products = await rows(db, `select p.id, coalesce(m.inn, p.name) as name from mfr_products p left join molecules m on m.id = p.molecule_id
                                      where p.user_id = $1 order by 2 limit 300`, [u.id]);
-    // the team sees the names behind the codes, one click away (customers never do)
-    const names: Record<string, string> = u.role === 'team' && sp.names === '1'
-      ? Object.fromEntries((await rows(db, 'select code, name from team_partner_names($1)', [market])).map((r) => [r.code, r.name])) : {};
+    // names open on Complete Market Access in this market (the database checks the plan); the team sees them on request
+    const named = u.role === 'team' ? sp.names === '1' : tierIn(u, market) >= 2;
+    const names: Record<string, string> = named
+      ? Object.fromEntries((await rows(db, 'select code, name from partner_names($1)', [market])).map((r) => [r.code, r.name])) : {};
     return { targets, market, cats, mine, cls, molecule, sort, list, products, byHolder, names, status: prof?.status, group };
   });
   const t = tierIn(u, d.market);
@@ -87,6 +88,7 @@ export default async function Partners({ searchParams }: { searchParams: Promise
                 <div style={{ minWidth: 0, flex: '1 1 320px' }}>
                   <span className="nm">{d.names[p.code] ?? `${d.byHolder ? 'Company' : 'Distributor'} ${p.code}`}</span>
                   {d.names[p.code] && <span className="sub2"> · {p.code}</span>}
+                  {!d.names[p.code] && u.role !== 'team' && i === 0 && <span className="sub2"> · names open on Complete Market Access</span>}
                   {d.byHolder && p.local_maker && <span className="pill mint" style={{ marginLeft: 8, fontSize: 12 }}>Local</span>}
                   {d.group ? (<>
                     {p.local_maker && <span className="pill mint" style={{ marginLeft: 8, fontSize: 12 }}>Local</span>}

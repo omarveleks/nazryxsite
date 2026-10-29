@@ -244,15 +244,15 @@ def ingredients(name, singles):
 def observations(cur):
     """(country, molecule, kind, text, units, pack price, currency, brand, source) from every source. brand: True for an
     originator or international brand, False for a generic, None when the source does not say (worked out in rebuild)."""
-    rows = cur.execute("""select country, molecule_id, kind, coalesce(pack, name), units, pack_price, currency, originator, source
+    rows = cur.execute("""select country, molecule_id, kind, coalesce(pack, name), units, pack_price, currency, originator, source, seen
                           from price_listings where molecule_id is not null and pack_price > 0""").fetchall()
-    for c, m, text, price, ccy in cur.execute("""select country, molecule_id, coalesce(pack, name), max_retail, currency
-                                                  from reference_prices where molecule_id is not null and max_retail > 0"""):
-        rows.append((c, m, "cap", text, units_in(text), price, ccy, None, "reference"))
+    for c, m, text, price, ccy, seen in cur.execute("""select country, molecule_id, coalesce(pack, name), max_retail, currency, updated_at::date
+                                                        from reference_prices where molecule_id is not null and max_retail > 0"""):
+        rows.append((c, m, "cap", text, units_in(text), price, ccy, None, "reference", seen))
     for c, m, title, price, ccy in cur.execute("""select country, molecule_ids[1], coalesce(title_en, title), unit_price, currency
                                                    from tenders where cardinality(molecule_ids) = 1 and unit_price > 0
                                                    and coalesce(awarded, closing, published) > current_date - 730"""):
-        rows.append((c, m, "tender", title, 1, price, ccy, False, "tender"))        # tenders buy generics
+        rows.append((c, m, "tender", title, 1, price, ccy, False, "tender", None))        # tenders buy generics
     return rows
 
 
@@ -356,9 +356,9 @@ def rebuild(cur):
     inn_words = {w for (inn,) in cur.execute("select inn from molecules where inn is not null") for w in re.findall(r"[a-z]{4,}", inn.lower())}
     from country_load import load_ru
     inn_words |= {w for ru in load_ru() for w in re.findall(r"[а-яё]{4,}", ru)}
-    brand_words = {w.group(0) for (*_, text, _u, _p, _c, b, _s) in obs_all if b and (w := re.match(r"[a-z][a-z\-]{3,}", (text or "").lower()))
+    brand_words = {w.group(0) for (*_, text, _u, _p, _c, b, _s, _d) in obs_all if b and (w := re.match(r"[a-z][a-z\-]{3,}", (text or "").lower()))
                    and w.group(0) not in inn_words}
-    for c, m, kind, text, units, price, ccy, brand, source in obs_all:
+    for c, m, kind, text, units, price, ccy, brand, source, seen in obs_all:
         if c not in sources or ccy not in fx:
             continue
         text = BOX.sub(" ", text or "")
@@ -378,7 +378,7 @@ def rebuild(cur):
             st = None
         raw.append(dict(c=c, m=fam.get(m, m), kind=kind, unit=unit, strength=st, units=float(units), brand=brand, text=text,
                         product=product_key(text, inn_words, len(raw)),
-                        price=float(price), usd_rate=float(fx[ccy]), volume=volume, mixed=source in MIXED_BASIS, countable=bool(COUNTED.search(text or "")
+                        price=float(price), usd_rate=float(fx[ccy]), volume=volume, mixed=source in MIXED_BASIS, source=source, seen=seen, countable=bool(COUNTED.search(text or "")
                                                                                              and not NOT_COUNTED.search(text or ""))))
     # 'ЦЕФТРИАКСОН 1г №1' names no form: a counted item takes the form the medicine usually comes in (a vial here)
     forms = {}
@@ -405,7 +405,7 @@ def rebuild(cur):
         local = float(fx[CURRENCY[o["c"]]])               # into the market's own currency
         groups.setdefault((o["c"], o["m"]), []).append((RANK[o["kind"]], o["kind"], o["unit"], o["strength"],
                                                          o["usd"] * o["usd_rate"], o["price"], o["usd_rate"] / local, o.get("volume"),
-                                                         form_type(o["unit"], o["text"]), o["product"]))
+                                                         form_type(o["unit"], o["text"]), o["product"], o["source"], o["seen"]))
     # every market's headline is the molecule's usual form and strength across all countries (paracetamol 500 mg tablet),
     # so markets compare like for like; tablets count double when choosing it
     usual_form = {}
@@ -464,9 +464,16 @@ def rebuild(cur):
         avg = statistics.median(local)               # one premium brand or promotion cannot pull it
         vols = [o[7] for o in obs if (o[2], o[3]) == (unit, usual) and o[7]]
         types = [o[8] for o in obs if (o[2], o[3]) == (unit, usual)]
+        srcs = {}
+        for o in mine:
+            srcs[o[10]] = srcs.get(o[10], 0) + 1
+        seen = [o[11] for o in mine if o[11]]
         out[(c, m)] = dict(basis="listings", kinds=sorted({o[1] for o in obs}), unit=unit, strength=usual, unit_price=avg,
                            unit_usd=avg / float(fx[CURRENCY[c]]), lo=pct(local, 0.1), hi=pct(local, 0.9), n=len(mine), by=by,
-                           products=len(local),
+                           products=len(local), sources=[{"source": s, "n": k} for s, k in sorted(srcs.items(), key=lambda x: -x[1])],
+                           read_at=max(seen) if seen else None,
+                           # measured: three or more products from two or more sources; one source or few products: thin
+                           confidence="measured" if len(local) >= 3 and len(srcs) >= 2 else "thin",
                            pack_size=statistics.median_low(vols) if vols else None, ftype=max(sorted(set(types), key=str), key=types.count))
     # where a market only publishes official maximums, the shelf price is the maximum times how shelf prices compare with
     # maximums where both are known (measured on our data)
@@ -577,7 +584,12 @@ def rebuild(cur):
                     n=sum(x[6] for x in cands), by=[], from_country=main[7], factor=main[9], overlap=len(cands),
                     pack_size=statistics.median_low([x[11] for x in cands if x[11]] or [0]) or None,
                     ftype=main[12] or next((x[12] for x in cands if x[12]), None),
-                    voices=len({x[7] for x in cands}), gap_tiers=sorted({gap(c, x[7], x[12] or "all")[2] for x in cands if x[7] != c}))
+                    voices=len({x[7] for x in cands}), gap_tiers=sorted({gap(c, x[7], x[12] or "all")[2] for x in cands if x[7] != c}),
+                    # which countries' prices it rests on, and the newest reading among them
+                    sources=[{"source": f"market:{n_}", "n": k_} for n_, k_ in sorted(((n_, sum(x[6] for x in cands if x[7] == n_))
+                                                                                        for n_ in {x[7] for x in cands}), key=lambda x: -x[1])],
+                    read_at=max([d_ for n_, v_ in priced if n_ in NEIGHBOURS[c] and (d_ := v_.get("read_at"))] or [None]),
+                    confidence="estimated")
 
     for c in markets:
         for m in by_mol.keys() | {m for (cc, m) in weak if cc == c}:
@@ -703,7 +715,8 @@ def rebuild(cur):
     import json
     cur.execute("delete from molecule_prices")
     with cur.copy("""copy molecule_prices (country, molecule_id, basis, kinds, currency, unit, strength, unit_price, unit_usd, lo, hi, n,
-                     from_country, factor, overlap, by_strength, pack_size, generic_price, brand_price, forms) from stdin""") as cp:
+                     from_country, factor, overlap, by_strength, pack_size, generic_price, brand_price, forms, sources, read_at, confidence)
+                     from stdin""") as cp:
         written = set()                                 # a molecule in two families keeps the first (best) price
         for (c, k), v in out.items():
             if c not in MARKETS:
@@ -716,7 +729,13 @@ def rebuild(cur):
                               round(v["lo"], 4), round(v["hi"], 4), v["n"], v.get("from_country"), v.get("factor"), v.get("overlap"),
                               json.dumps(v["by"], ensure_ascii=False), v.get("pack_size"),
                               round(v["generic"], 4) if v.get("generic") else None, round(v["brand"], 4) if v.get("brand") else None,
-                              json.dumps(v["forms"]) if v.get("forms") else None))
+                              json.dumps(v["forms"]) if v.get("forms") else None,
+                              json.dumps(v.get("sources") or []), v.get("read_at"), v.get("confidence") or "estimated"))
+    # today's price for every molecule and market, kept for the price history (one row a day)
+    cur.execute("""insert into price_history (country, molecule_id, day, basis, confidence, unit, strength, unit_price, unit_usd, n)
+                   select country, molecule_id, current_date, basis, confidence, unit, strength, unit_price, unit_usd, n from molecule_prices
+                   on conflict (country, molecule_id, day) do update set basis = excluded.basis, confidence = excluded.confidence,
+                   unit = excluded.unit, strength = excluded.strength, unit_price = excluded.unit_price, unit_usd = excluded.unit_usd, n = excluded.n""")
     log.info("molecule prices: %s", len(written))
     return len(written)
 

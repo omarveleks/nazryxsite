@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 import { GLOBAL_LIST, LEVELS, OFFICIAL_SHORT, PIPELINE, STAGE_INFO } from '@/lib/format';
 import { toggleList } from '@/app/actions/app';
 import { TIER, countryName, covers } from '@/lib/mfr';
+import { CONFIDENCE, type Confidence } from '@/lib/prices';
 
 export function Locked({ title, children, cta = 'Upgrade' }: { title: string; children?: ReactNode; cta?: string }) {
   return (
@@ -138,6 +139,12 @@ export function Flash({ sp }: { sp: { error?: string; saved?: string } }) {
   if (sp.error) return <div className="err" role="alert">{sp.error}</div>;
   if (sp.saved) return <div className="ok" role="status">Saved.</div>;
   return null;
+}
+
+/** How sure a price is, as a chip: Measured, Thin or Estimated, with the meaning on hover. */
+export function ConfidenceChip({ level }: { level?: Confidence | null }) {
+  const c = CONFIDENCE[level ?? 'estimated'];
+  return <span className={`pill ${c.tone}`} title={c.title}>{c.label}</span>;
 }
 
 export function Empty({ children }: { children: ReactNode }) {

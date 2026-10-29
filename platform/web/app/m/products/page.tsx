@@ -10,7 +10,7 @@ import { requireUser } from '@/lib/auth';
 import { one, rows, withUser } from '@/lib/db';
 import { HIGH_DEMAND, LAUNCH_STAGES, MFR_COUNTRIES, MFR_FILE_KINDS, canUse, countryName, covers, displayClass, productClass, tierIn, byMolecule } from '@/lib/mfr';
 import { fmtDate } from '@/lib/format';
-import { PRICE_SQL, formUnit, median, packOf, priceFor as fittingPrice, unitShort, type MoleculePrice } from '@/lib/prices';
+import { CONFIDENCE, PRICE_SQL, formUnit, median, packOf, priceFor as fittingPrice, unitShort, type Confidence, type MoleculePrice } from '@/lib/prices';
 import { isDevice, productGroup } from '@/lib/segments';
 import { segmentBrands } from '@/lib/competitors';
 
@@ -130,12 +130,12 @@ export default async function MfrProducts({ searchParams }: { searchParams: Prom
   };
   const typeOf = (form?: string | null) => { const u = formUnit(form);
     return u === 'tablet or capsule' ? 'tablet' : u === 'ampoule or vial' ? 'injection' : /eye|ophth/i.test(form ?? '') ? 'eye' : /nasal|nose/i.test(form ?? '') ? 'nasal' : 'all'; };
-  const priceFor = (p: (typeof mols)[number]): { price: number; per: string; currency: string } | null => {
+  const priceFor = (p: (typeof mols)[number]): { price: number; per: string; currency: string; confidence?: Confidence } | null => {
     // a price from another country: converted at today's rate and carried over by the price gap for this product type
-    const out = (v: number | null, cur: string, per: string, from = market, type = 'all') => {
+    const out = (v: number | null, cur: string, per: string, from = market, type = 'all', confidence?: Confidence) => {
       if (v == null) return null;
       const x = cur === d.local ? v : conv(v, cur);
-      return x == null ? null : { price: from === market ? x : x * gap(from, type), per, currency: d.local! };
+      return x == null ? null : { price: from === market ? x : x * gap(from, type), per, currency: d.local!, confidence: from === market ? confidence : 'estimated' };
     };
     if (p.group) {
       const gp = d.groupPrices[p.group];
@@ -147,7 +147,7 @@ export default async function MfrProducts({ searchParams }: { searchParams: Prom
       if (pr) {
         const per = packOf(pr) > 1 ? `${packOf(pr)} ${pr.unit}` : unitShort(pr);
         // the generic's price: what a generic sells for
-        const r = out(Number(pr.unit_price) * packOf(pr), pr.currency, per, c, typeOf(p.dosage_form));
+        const r = out(Number(pr.unit_price) * packOf(pr), pr.currency, per, c, typeOf(p.dosage_form), pr.confidence);
         if (r) return r;
       }
       // never a median of raw pharmacy packs: their sizes differ (10 tablets or 100), so it says nothing per unit
@@ -288,7 +288,7 @@ export default async function MfrProducts({ searchParams }: { searchParams: Prom
                   if (!visible(i)) return '—';
                   const q = priceFor(p);
                   const fmt = (v: number) => `${q!.currency} ${Math.round(v).toLocaleString('en')}`;
-                  return q ? <>{fmt(q.price)} / {q.per}<div className="sub2">Est. avg</div></> : '—';
+                  return q ? <>{fmt(q.price)} / {q.per}<div className="sub2">{CONFIDENCE[q.confidence ?? 'estimated'].label}</div></> : '—';
                 })()}</td>
               </tr>))}</tbody></table></div>)}
       </section>

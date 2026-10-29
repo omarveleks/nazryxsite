@@ -2,7 +2,8 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import Shell from '@/components/Shell';
 import MarketPicker, { AgencyMarket, hasData, loadLive, pickMarket, targetMarkets } from '@/components/MarketPicker';
-import { Badges, Empty, Flash, LockIcon, PlanLock } from '@/components/ui';
+import { Badges, ConfidenceChip, Empty, Flash, LockIcon, PlanLock } from '@/components/ui';
+import PriceHistory from '@/components/PriceHistory';
 import { addCompetitors, deleteMfrProduct, removeCompetitor, setKind, setUseGroup, saveLaunch, toggleChecklist, unwatchMolecule, updateProductChecks, watchMolecule } from '@/app/actions/mfr';
 import { requireUser } from '@/lib/auth';
 import { one, rows, withUser } from '@/lib/db';
@@ -89,11 +90,14 @@ export default async function MfrProduct({ params, searchParams }: { params: Pro
     // the molecule's average price in this market: listings, or an estimate from a neighbouring market
     const price = canUse(t, 'market') ? await one(db, `${PRICE_SQL} where molecule_id = $1 and country = $2`, [p.molecule_id, market]) as MoleculePrice | null : null;
     const avg = priceFor(price, p.dosage_form);     // the product's own form: a vial price says nothing about a capsule
+    // how the market's price moved, one reading a day (kept from the sources migration on)
+    const history = avg && p.molecule_id ? await rows(db, `select day, unit_price::float as unit_price, confidence from price_history
+        where molecule_id = $1 and country = $2 and unit = $3 order by day`, [p.molecule_id, market, avg.unit]) : [];
     // a market with only one or two products prices the brand; a generic usually enters lower (measured on lists that say which is which)
     const costs = avg ? await one(db, 'select freight, duty, distributor, pharmacy, vat from market_costs where country = $1', [market]) : null;
     const brands = avg ? await one(db, `select (select registrants from country_molecules where molecule_id = $1 and country = $2) as registrants,
         (select value from price_factors where key = 'generic_vs_originator') as generic`, [p.molecule_id, market]) : null;
-    return { ...base, origin, lapsed, route, routes, checklist, ready, open, tenders, brands, costs, ...(canUse(t, 'market') ? { avg } : {}) };
+    return { ...base, origin, lapsed, route, routes, checklist, ready, open, tenders, brands, costs, ...(canUse(t, 'market') ? { avg, history } : {}) };
   });
   if (!d) notFound();
   const { p, market } = d;
@@ -205,7 +209,8 @@ export default async function MfrProduct({ params, searchParams }: { params: Pro
           {'avg' in d && (d.avg ? (
             <section className="card stack">
               <div className="card-h"><h2>Price in {countryName(market)}</h2>
-                <span className="pill peach">Est. avg</span></div>
+                <span className="row" style={{ gap: 6 }}><ConfidenceChip level={d.avg.confidence} />
+                  <Link className="btn-link small" href={`/m/coverage?market=${market}`}>How we read {countryName(market)}</Link></span></div>
               {/* low, average and high; one average when they are all the same price */}
               {(() => {
                 const p = d.avg!, k = packOf(p), avg = Number(p.unit_price) * k;
@@ -219,6 +224,7 @@ export default async function MfrProduct({ params, searchParams }: { params: Pro
                     <span className="small">per {unitWord(p)}{label === 'Average' ? ` · ${usd(v * Number(p.unit_usd) / Number(p.unit_price))}` : ''}</span></div>))}</div>;
               })()}
               <p className="small muted">{priceBasis(d.avg)}</p>
+              {'history' in d && (d.history ?? []).length > 1 && <PriceHistory rows={d.history ?? []} currency={d.avg.currency} unit={unitWord(d.avg)} pack={packOf(d.avg)} />}
               {!d.avg.generic_price && d.brands?.registrants != null && Number(d.brands.registrants) <= 2 && Number(d.brands.generic) < 1 && (
                 <p className="small"><span className="pill peach">Few products</span> Only {d.brands.registrants} {Number(d.brands.registrants) === 1 ? 'product is' : 'products are'} registered here, so these prices are mostly the brand&rsquo;s. A generic usually enters about {Math.round((1 - Number(d.brands.generic)) * 100)}% lower: around <b>{d.avg.currency} {fmtMoney(Number(d.avg.unit_price) * packOf(d.avg) * Number(d.brands.generic))}</b> per {unitWord(d.avg)}.</p>)}
               {d.avg.by_strength.length > 1 && (
