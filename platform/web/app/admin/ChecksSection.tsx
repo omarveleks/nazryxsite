@@ -50,7 +50,7 @@ export default function ChecksSection({ checks }: { checks: Check[] | null }) {
         shelf price is known (3 or more prices), what we would have estimated from its neighbours alone. Typical error is the middle
         of the errors; bias above 100% means estimates run high.</p></div></div>
       {acc.length === 0 ? <Empty>No checks yet: they appear after the next price rebuild.</Empty> : (
-        <div className="tbl-wrap"><table className="tbl"><thead><tr><th>Market</th><th>Product type</th><th className="r">Medicines tested</th>
+        <div className="tbl-wrap" tabIndex={0}><table className="tbl"><thead><tr><th>Market</th><th>Product type</th><th className="r">Medicines tested</th>
           <th className="r">Typical error</th><th className="r">Within 50%</th><th className="r">Bias</th></tr></thead>
           <tbody>{acc.map((x, i) => (
             <tr key={i}><td>{x.form_type === 'all' ? <b>{countryName(x.country!)}</b> : ''}</td><td>{x.form_type === 'all' ? <b>All</b> : x.form_type}</td>

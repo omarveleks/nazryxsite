@@ -60,7 +60,7 @@ export default async function Company({ params, searchParams }: { params: Promis
             <div className="card-h"><div><h2>{t('Portfolio in {market}', { market: name })}</h2><p className="note">{t('Every active registration this company holds, distributes or makes here. Yours are marked.')}</p></div>
               {shownClass && <Link className="btn-link" href={`/m/companies/${code}?market=${m}`}>{t('All classes')}</Link>}</div>
             <div className="row" style={{ gap: 6 }}>{byClass.slice(0, 10).map(([k, ps]) => <Link key={k} className={`pill ${shownClass === k ? 'solid' : ''}`} href={`/m/companies/${code}?market=${m}&cls=${encodeURIComponent(k)}`}>{t(k)} · {ps.length}</Link>)}</div>
-            <div className="tbl-wrap"><table className="tbl">
+            <div className="tbl-wrap" tabIndex={0}><table className="tbl">
               <thead><tr><th>{t('Brand')}</th><th>{t('Molecule')}</th><th className="hide-m">{t('Form')}</th><th className="hide-m">{t('Made in')}</th><th className="r">{t('Year')}</th><th className="r hide-m">{t('Shelf price')}</th></tr></thead>
               <tbody>{list.slice(0, 200).map((p) => (
                 <tr key={p.id}><td><b>{p.brand || p.inn}</b>{p.role !== 'holder' && <div className="sub2">{t(p.role === 'maker' ? 'made by this company' : 'distributed by this company')}</div>}</td>

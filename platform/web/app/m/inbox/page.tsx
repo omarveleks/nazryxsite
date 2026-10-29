@@ -69,7 +69,7 @@ export default async function Inbox({ searchParams }: { searchParams: Promise<{ 
             <div><span className="lbl">{t('Tender keywords')}</span>
               <div className="row" style={{ gap: 6, marginTop: 6 }}>{d.terms.map((t) => (
                 <form key={t.term} action={removeTenderWatch} className="row" style={{ gap: 2 }}><input type="hidden" name="term" value={t.term} />
-                  <span className="pill">{t.term}</span><button className="btn-link small" type="submit" aria-label={`Stop watching ${t.term}`}>×</button></form>))}</div>
+                  <span className="pill">{t.term}</span><button className="btn-link x" type="submit" aria-label={`Stop watching ${t.term}`}>×</button></form>))}</div>
               <form action={addTenderWatch} className="row" style={{ marginTop: 8 }}>
                 <input className="input" name="term" placeholder="e.g. insulin, oncology, ARV" aria-label={t('Tender keyword')} maxLength={60} required style={{ flex: '1 1 160px' }} />
                 <button className="btn btn-ghost btn-sm" type="submit">{t('Watch')}</button></form>

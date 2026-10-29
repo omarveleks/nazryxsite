@@ -112,7 +112,7 @@ export default async function MoleculePage({ params, searchParams }: { params: P
               {!d.open ? <PlanLock need="data" title={`Every ${mol.inn} registered in ${name}`} u={u} market={m}>{t('Brand, strength, form, year, where it is made and who holds it.')}</PlanLock>
                 : d.regs.length === 0 ? <Empty>{t('Nothing registered: whoever files first is alone on the shelf.')}</Empty> : (<>
                   {d.origins.length > 0 && <p className="small muted">Made in {d.origins.map((o) => `${o.country} (${o.n})`).join(', ')}.</p>}
-                  <div className="tbl-wrap"><table className="tbl">
+                  <div className="tbl-wrap" tabIndex={0}><table className="tbl">
                     <thead><tr><th>{t('Brand')}</th><th className="hide-m">{t('Strength')}</th><th className="hide-m">{t('Form')}</th><th>{t('Holder')}</th><th className="r">{t('Year')}</th></tr></thead>
                     <tbody>{d.regs.map((r) => (
                       <tr key={r.id} style={r.lapsed ? { opacity: 0.55 } : undefined}>

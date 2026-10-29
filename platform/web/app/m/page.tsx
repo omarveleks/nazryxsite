@@ -14,6 +14,18 @@ import { HIGH_DEMAND, MFR_PLANS, OBLIGATION_KINDS, SERVICES, canUse, covers, tie
 export const metadata = { title: 'Home' };
 
 const WATCH: Record<string, string> = { added: 'New competitor', removed: 'Competitor left', status: 'Registration lapsed', reactivated: 'Back on the market' };
+const WATCH_MANY: Record<string, string> = { added: '{n} new competitors', removed: '{n} competitors left', status: '{n} registrations lapsed', reactivated: '{n} back on the market' };
+/** The same change on the same molecule, market and day reads as one line with a count, not eight. */
+function groupWatch(rows: any[]) {
+  const out = new Map<string, any>();
+  for (const w of rows) {
+    const k = `${w.change}|${w.molecule}|${w.country}|${String(w.at).slice(0, 10)}`;
+    const g = out.get(k);
+    if (g) { g.n += 1; if (w.made_in && !g.made.includes(w.made_in)) g.made.push(w.made_in); }
+    else out.set(k, { ...w, n: 1, made: w.made_in ? [w.made_in] : [] });
+  }
+  return [...out.values()];
+}
 const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
 // Manufacturer Home: what to register first and what moved in your markets on the left; your plan, markets and
@@ -35,27 +47,29 @@ export default async function MfrHome({ searchParams }: { searchParams: Promise<
     const inPlan = live.filter((c) => covers(u, c));
     const focus = hasData(chosen) && (!u.mfr_active || covers(u, chosen)) ? chosen : inPlan[0] ?? (hasData(chosen) ? chosen : live[0] ?? 'TZ');
     const full = canUse(tierIn(u, focus), 'portfolio');
-    const counts = await one(db, `select count(*)::int as products, count(p.molecule_id)::int as matched,
+    const watchMarkets = u.mfr_active ? inPlan : live;
+    const [counts, first, watch, engagements, deadlines, call, zone, products, own] = await Promise.all([
+      one(db, `select count(*)::int as products, count(p.molecule_id)::int as matched,
         count(*) filter (where g.demand >= ${HIGH_DEMAND})::int as high,
         count(*) filter (where cm.registrants <= 3 and (cm.registrations > 0 or cm.on_national_list))::int as few,
         (select count(*)::int from projects l where l.user_id = $1) as launches,
         (select count(*)::int from mfr_files f where f.user_id = $1 and f.kind = 'gmp') as gmp
         from mfr_products p left join country_molecules cm on cm.molecule_id = p.molecule_id and cm.country = $2
-        left join visible_gap_scores g on g.molecule_id = p.molecule_id and g.country = $2 where p.user_id = $1`, [u.id, focus]);
-    const first = byMolecule(await rows(db, `${mfrProductsSql(focus)} where p.user_id = $1 and cm.rankable and cm.on_national_list
-        order by g.score desc nulls last, cm.registrants, p.name limit 200`, [u.id])).slice(0, full ? 5 : 3);   // one row per molecule
-    const watchMarkets = u.mfr_active ? inPlan : live;
-    const watch = watchMarkets.length ? await rows(db, 'select * from my_market_watch($1, 90)', [watchMarkets]) : [];
-    const engagements = await rows(db, `select id, kind, country, stage from engagements where user_id = $1 and status = 'open' order by updated_at desc limit 5`, [u.id]);
-    const deadlines = await rows(db, `select o.kind, o.due_date, o.country, p.name from obligations o left join mfr_products p on p.id = o.product_id
-        where o.user_id = $1 and not o.done order by o.due_date limit 5`, [u.id]);
-    const call = await one(db, `select starts_at, meeting_link from call_bookings where user_id = $1 and status = 'booked' and starts_at > now()
-                                order by starts_at limit 1`, [u.id]);
-    const zone = (await one(db, 'select timezone from call_settings where id = 1'))?.timezone ?? 'UTC';
-    const products = profile?.sample_product_id ? [] : await rows(db, `select p.id, coalesce(m.inn, p.name) as name from mfr_products p
-        left join molecules m on m.id = p.molecule_id where p.user_id = $1 and p.molecule_id is not null order by 2 limit 200`, [u.id]);
-    const own = await one(db, `select count(*)::int as n, array_agg(distinct r.country) as markets from registrations r
-        join manufacturer_profiles mp on mp.user_id = $1 where r.active and r.manufacturer_id = any(mp.company_ids)`, [u.id]);
+        left join visible_gap_scores g on g.molecule_id = p.molecule_id and g.country = $2 where p.user_id = $1`, [u.id, focus]),
+      rows(db, `${mfrProductsSql(focus)} where p.user_id = $1 and cm.rankable and cm.on_national_list
+        order by g.score desc nulls last, cm.registrants, p.name limit 200`, [u.id]).then((r) => byMolecule(r).slice(0, full ? 5 : 3)),   // one row per molecule
+      watchMarkets.length ? rows(db, 'select * from my_market_watch($1, 90)', [watchMarkets]) : [],
+      rows(db, `select id, kind, country, stage from engagements where user_id = $1 and status = 'open' order by updated_at desc limit 5`, [u.id]),
+      rows(db, `select o.kind, o.due_date, o.country, p.name from obligations o left join mfr_products p on p.id = o.product_id
+        where o.user_id = $1 and not o.done order by o.due_date limit 5`, [u.id]),
+      one(db, `select starts_at, meeting_link from call_bookings where user_id = $1 and status = 'booked' and starts_at > now()
+                                order by starts_at limit 1`, [u.id]),
+      one(db, 'select timezone from call_settings where id = 1').then((z) => z?.timezone ?? 'UTC'),
+      profile?.sample_product_id ? [] : rows(db, `select p.id, coalesce(m.inn, p.name) as name from mfr_products p
+        left join molecules m on m.id = p.molecule_id where p.user_id = $1 and p.molecule_id is not null order by 2 limit 200`, [u.id]),
+      one(db, `select count(*)::int as n, array_agg(distinct r.country) as markets from registrations r
+        join manufacturer_profiles mp on mp.user_id = $1 where r.active and r.manufacturer_id = any(mp.company_ids)`, [u.id]),
+    ]);
     // the outcome line: what is moving for them right now
     const outcome = await one(db, `select
         (select count(*)::int from engagements e where e.user_id = $1 and e.status = 'open' and e.kind in ('market_entry', 'partner_intro')) as intros,
@@ -70,7 +84,8 @@ export default async function MfrHome({ searchParams }: { searchParams: Promise<
   });
   const p = d.profile;
   const full = d.full;
-  const shownWatch = watchAll ? d.watch.slice(0, 8) : d.watch.slice(0, 2);
+  const watch = groupWatch(d.watch);
+  const shownWatch = watchAll ? watch.slice(0, 8) : watch.slice(0, 2);
   // getting set up: the few things that make the portal useful, ticked off as they are done
   const setup: [boolean, string, string][] = [
     [Number(d.counts?.products) > 0, 'Add your products', '/m/products#add'],
@@ -96,8 +111,8 @@ export default async function MfrHome({ searchParams }: { searchParams: Promise<
         <section className="card between" style={{ flexWrap: 'wrap', gap: 10 }}>
           <span className="row" style={{ gap: 14, flexWrap: 'wrap' }}>
             {d.outcome.projects > 0 && <Link href="/m/projects"><b className="num">{d.outcome.projects}</b> {t(d.outcome.projects === 1 ? 'project in progress' : 'projects in progress')}</Link>}
-            {d.outcome.intros > 0 && <Link href="/m/engagements"><b className="num">{d.outcome.intros}</b> {t(d.outcome.intros === 1 ? 'introduction in progress' : 'introductions in progress')}</Link>}
-            {d.outcome.reviews > 0 && <Link href="/m/engagements"><b className="num">{d.outcome.reviews}</b> {t(d.outcome.reviews === 1 ? 'dossier under review' : 'dossiers under review')}</Link>}
+            {d.outcome.intros > 0 && <Link href="/m/activity"><b className="num">{d.outcome.intros}</b> {t(d.outcome.intros === 1 ? 'introduction in progress' : 'introductions in progress')}</Link>}
+            {d.outcome.reviews > 0 && <Link href="/m/activity"><b className="num">{d.outcome.reviews}</b> {t(d.outcome.reviews === 1 ? 'dossier under review' : 'dossiers under review')}</Link>}
             {d.outcome.closing > 0 && <Link href="/m/tenders?show=desk"><b className="num">{d.outcome.closing}</b> {t(d.outcome.closing === 1 ? 'tender closing this month' : 'tenders closing this month')}</Link>}
             {d.outcome.moved > 0 && <Link href="/m/inbox"><b className="num">{d.outcome.moved}</b> {t(d.outcome.moved === 1 ? 'registration moved on your molecules' : 'registrations moved on your molecules')}</Link>}
           </span>
@@ -151,11 +166,11 @@ export default async function MfrHome({ searchParams }: { searchParams: Promise<
             {d.watch.length === 0 ? <Empty>{t('Quiet: no changes in your molecules in the last 90 days.')}</Empty> : (
               <div>{shownWatch.map((w, i) => (
                 <div key={i} className="between small" style={{ padding: '10px 0', borderTop: i ? '1px solid var(--line)' : undefined, gap: 12 }}>
-                  <span><b>{t(WATCH[w.change] ?? cap(w.change))}</b> · {w.molecule} · {t(countryName(w.country))}{w.made_in ? <span className="muted"> · {t('made in')} {w.made_in}</span> : null}</span>
+                  <span><b>{w.n > 1 ? t(WATCH_MANY[w.change] ?? '{n} changes', { n: w.n }) : t(WATCH[w.change] ?? cap(w.change))}</b> · {w.molecule} · {t(countryName(w.country))}{w.made.length ? <span className="muted"> · {t('made in')} {w.made.slice(0, 3).join(', ')}{w.made.length > 3 ? ` +${w.made.length - 3}` : ''}</span> : null}</span>
                   <span className="muted num" style={{ whiteSpace: 'nowrap' }}>{fmtDate(w.at)}</span>
                 </div>))}</div>)}
-            {!watchAll && d.watch.length > shownWatch.length && (
-              <div style={{ marginTop: 12 }}><PlanLock need="data" title={t('{n} more changes in your molecules', { n: d.watch.length - shownWatch.length })}>
+            {!watchAll && watch.length > shownWatch.length && (
+              <div style={{ marginTop: 12 }}><PlanLock need="data" title={t('{n} more changes in your molecules', { n: watch.length - shownWatch.length })}>
                 {t('Every new competitor, exit and lapsed registration in your molecules, in all your markets.')}</PlanLock></div>)}
           </section>
         </div>

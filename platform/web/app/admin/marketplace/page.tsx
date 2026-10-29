@@ -34,7 +34,7 @@ export default async function AdminMarketplace({ searchParams }: { searchParams:
       <section className="card stack" id="dists">
         <h2>Distributors</h2>
         {d.dists.length === 0 ? <Empty>No distributor signed up yet.</Empty> : (
-          <div className="tbl-wrap"><table className="tbl">
+          <div className="tbl-wrap" tabIndex={0}><table className="tbl">
             <thead><tr><th>Company</th><th>Home</th><th className="hide-m">Markets</th><th className="hide-m">Contact</th><th className="r">Needs</th><th className="hide-m">Last seen</th><th className="r">Verified</th></tr></thead>
             <tbody>{d.dists.map((x) => (
               <tr key={x.user_id}><td><b>{x.company_name}</b>{x.about && <span className="sub2" style={{ display: 'block' }}>{String(x.about).slice(0, 80)}</span>}</td><td>{countryName(x.country)}</td>
@@ -47,7 +47,7 @@ export default async function AdminMarketplace({ searchParams }: { searchParams:
       <section className="card stack" id="needs">
         <h2>Open needs</h2>
         {d.needs.length === 0 ? <Empty>Nothing open.</Empty> : (
-          <div className="tbl-wrap"><table className="tbl">
+          <div className="tbl-wrap" tabIndex={0}><table className="tbl">
             <thead><tr><th>Product</th><th>Market</th><th className="hide-m">From</th><th className="hide-m">Quantity</th><th className="hide-m">By</th><th className="r">Hands up</th><th className="r">Posted</th></tr></thead>
             <tbody>{d.needs.map((n) => (
               <tr key={n.id}><td><b>{n.name}</b> {n.source === 'tender' && <span className="pill lav" style={{ fontSize: 11 }}>tender</span>}</td><td>{countryName(n.country)}</td>
@@ -58,8 +58,8 @@ export default async function AdminMarketplace({ searchParams }: { searchParams:
       <ThreadList list={d.threads.slice(0, 30)} base="/m/threads" />
       <section className="card stack" id="services">
         <h2>Service catalogue</h2>
-        <div className="tbl-wrap"><table className="tbl">
-          <thead><tr><th>Service</th><th>Stage</th><th>Provider</th><th>Price USD</th><th>Days</th><th>Live</th><th></th></tr></thead>
+        <div className="tbl-wrap" tabIndex={0}><table className="tbl">
+          <thead><tr><th>Service</th><th>Stage</th><th>Provider</th><th>Price USD</th><th>Days</th><th>Live</th><th><span className="sr-only">Actions</span></th></tr></thead>
           <tbody>{d.services.map((s) => (
             <tr key={s.code}><td colSpan={7} style={{ padding: 0 }}>
               <form action={saveService} className="row" style={{ gap: 6, padding: '8px 0', flexWrap: 'wrap' }}>

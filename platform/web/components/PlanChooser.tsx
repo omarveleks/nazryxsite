@@ -122,7 +122,7 @@ export default function PlanChooser({ p, prices, products, from, want, interval 
 
       <section className="card">
         <div className="card-h"><h2>{t('Compare the plans')}</h2></div>
-        <div className="tbl-wrap"><table className="tbl">
+        <div className="tbl-wrap" tabIndex={0}><table className="tbl">
           <thead><tr><th>{t('What you get')}</th>{PLAN_ORDER.map((k) => <th key={k} className="r">{MFR_PLANS[k].name}</th>)}</tr></thead>
           <tbody>{COMPARE.map(([label, min]) => (
             <tr key={label}><td>{label}</td>{PLAN_ORDER.map((k) => (

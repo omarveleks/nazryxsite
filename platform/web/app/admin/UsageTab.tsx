@@ -69,7 +69,7 @@ export default async function UsageTab({ userId }: { userId: string }) {
     <section className="card">
       <div className="card-h"><h2>Every customer</h2><span className="note">Last {DAYS} days. A visit ends after {SESSION_GAP_MINUTES} minutes without a page.</span></div>
       {d.accounts.length === 0 ? <Empty>No customer accounts yet.</Empty> : (
-        <div className="tbl-wrap"><table className="tbl"><thead><tr><th>Account</th><th>Last here</th><th className="r">Days here</th><th className="r">Visits</th>
+        <div className="tbl-wrap" tabIndex={0}><table className="tbl"><thead><tr><th>Account</th><th>Last here</th><th className="r">Days here</th><th className="r">Visits</th>
           <th className="r">Time</th><th className="r">Pages</th><th>Most used</th><th>Last thing done</th></tr></thead>
           <tbody>{d.accounts.map((a: any) => { const p = per.get(a.id); const t = lastSeen(a); return (
             <tr key={a.id}><td><Link href={`/admin/accounts/${a.id}#usage`}><b>{a.company}</b></Link>

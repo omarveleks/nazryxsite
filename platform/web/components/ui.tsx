@@ -129,14 +129,14 @@ export function Bar({ label, value, max, right, second }: { label: ReactNode; va
   );
 }
 
-export function Tabs({ items, current }: { items: { key: string; label: string; href: string; locked?: boolean }[]; current: string }) {
+export function Tabs({ items, current, label }: { items: { key: string; label: string; href: string; locked?: boolean }[]; current: string; label?: string }) {
   return (
-    <div className="tabs" role="tablist">
+    <nav className="tabs" aria-label={label ?? tt()('Sections')}>
       {items.map((x) => (
         <Link key={x.key} href={x.href} className={`${x.key === current ? 'on' : ''} ${x.locked ? 'lock' : ''}`}
-          aria-selected={x.key === current} role="tab">{x.label}{x.locked ? ` · ${tt()('Paid')}` : ''}</Link>
+          aria-current={x.key === current ? 'page' : undefined}>{x.label}{x.locked ? ` · ${tt()('Paid')}` : ''}</Link>
       ))}
-    </div>
+    </nav>
   );
 }
 
@@ -155,5 +155,5 @@ export function ConfidenceChip({ level }: { level?: Confidence | null }) {
 }
 
 export function Empty({ children }: { children: ReactNode }) {
-  return <div className="note" style={{ padding: '10px 0' }}>{children}</div>;
+  return <div className="empty">{children}</div>;
 }

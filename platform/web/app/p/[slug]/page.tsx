@@ -30,7 +30,7 @@ export default async function PublicProfile({ params }: { params: Promise<{ slug
   const classes = (p.classes ?? []) as { category: string; n: number }[];
   const max = Math.max(1, ...classes.map((c) => c.n));
   return (
-    <div className="wrap-narrow" style={{ maxWidth: 860, padding: '24px 16px 48px' }}>
+    <main className="wrap-narrow" id="main" style={{ maxWidth: 860, padding: '24px 16px 48px' }}>
       <div className="between" style={{ marginBottom: 20 }}><Brand href="/p" tag="Manufacturers" /><Link className="btn btn-ghost btn-sm" href="/signup">For manufacturers</Link></div>
       <header className="stack" style={{ gap: 6, marginBottom: 18 }}>
         <div className="row" style={{ gap: 8 }}>
@@ -69,6 +69,6 @@ export default async function PublicProfile({ params }: { params: Promise<{ slug
         </div>
       </div>
       <p className="note" style={{ marginTop: 18 }}>Nazryx Intelligence · market data, registration and distributors for medicine exporters to frontier markets. <Link href="/p">All manufacturers</Link></p>
-    </div>
+    </main>
   );
 }

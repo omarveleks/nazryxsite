@@ -89,7 +89,7 @@ export default async function AdminAccount({ params, searchParams }: { params: P
                   <div className="stack" style={{ gap: 8 }}>
                     <p className="small"><b>{open.length} not matched.</b> The worker matches them by ingredient, then by brand (registers, pharmacy
                       shelves, MedEx). What it cannot match waits here: type the ingredient (INN) to match it.</p>
-                    <div className="tbl-wrap"><table className="tbl"><thead><tr><th>Product</th><th>Why</th><th>Ingredient (INN)</th></tr></thead>
+                    <div className="tbl-wrap" tabIndex={0}><table className="tbl"><thead><tr><th>Product</th><th>Why</th><th>Ingredient (INN)</th></tr></thead>
                       <tbody>{open.map((x) => (
                         <tr key={x.id}><td>{x.name}</td><td className="small">{x.note ?? 'Being matched (a few minutes)'}</td>
                           <td><form action={matchProduct} className="row" style={{ gap: 6, flexWrap: 'wrap' }}>

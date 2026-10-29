@@ -38,6 +38,7 @@ export default function Shell({ user, title, sub, crumb, actions, children }: {
               : <Link className="btn-link hide-m" href="/d/onboarding">{t('Get verified')}</Link>}
           </div>) : null}
         <div className="side-foot">
+          {user.account_type !== 'distributor' && <Link href="/settings">{t('Settings')}</Link>}
           <Link href="/help">{t('Help and contact')}</Link>
           <span>{user.email}</span>
           <form action={signOut}><button className="btn-link" type="submit">{t('Sign out')}</button></form>

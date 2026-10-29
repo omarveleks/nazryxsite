@@ -74,8 +74,8 @@ export default async function Partners({ searchParams }: { searchParams: Promise
             <p className="note">{t('Shortlist from the list, compare them side by side, move each one along as talks progress. Asking us for an introduction moves it for you.')}</p></div></div>
           {!pipelineOpen ? <PlanLock need="data" title={t('A pipeline of distributors')} u={u} market={d.market}>{t('Shortlist distributors, compare them, and track every conversation to a signed agreement.')}</PlanLock>
             : d.pipeline.length === 0 ? <Empty>{t('Nobody shortlisted yet. Open')} <Link href={`/m/partners?market=${d.market}`}>{t('the list')}</Link> {t('and press Shortlist on the distributors worth a conversation.')}</Empty> : (
-            <div className="tbl-wrap"><table className="tbl">
-              <thead><tr><th>{t('Distributor')}</th><th>{t('Stage')}</th><th className="r hide-m">{t('Products')}</th><th className="r hide-m">{t('Molecules')}</th><th className="hide-m">{t('Strongest in')}</th><th className="r">{t('Open to yours')}</th><th></th></tr></thead>
+            <div className="tbl-wrap" tabIndex={0}><table className="tbl">
+              <thead><tr><th>{t('Distributor')}</th><th>{t('Stage')}</th><th className="r hide-m">{t('Products')}</th><th className="r hide-m">{t('Molecules')}</th><th className="hide-m">{t('Strongest in')}</th><th className="r">{t('Open to yours')}</th><th><span className="sr-only">Actions</span></th></tr></thead>
               <tbody>{d.pipeline.map((x) => (
                 <tr key={x.id}>
                   <td><span className="nm">{x.name ?? `Distributor ${x.code}`}</span>{x.name && <span className="sub2"> · {x.code}</span>}

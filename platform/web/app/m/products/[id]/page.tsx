@@ -203,9 +203,7 @@ export default async function MfrProduct({ params, searchParams }: { params: Pro
                   <form key={c.id} action={toggleChecklist} style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
                     <input type="hidden" name="product_id" value={id} /><input type="hidden" name="country" value={market} />
                     <input type="hidden" name="item" value={c.name} /><input type="hidden" name="done" value={done ? '0' : '1'} />
-                    <button type="submit" aria-label={done ? t('Mark as not ready') : t('Mark as ready')}
-                      style={{ flex: '0 0 20px', width: 20, height: 20, marginTop: 1, borderRadius: 6, cursor: 'pointer', padding: 0, lineHeight: '18px',
-                        fontSize: 13, color: '#fff', border: `1.5px solid ${done ? 'var(--blue)' : 'var(--line)'}`, background: done ? 'var(--blue)' : '#fff' }}>{done ? '✓' : ''}</button>
+                    <button type="submit" className={`check${done ? ' on' : ''}`} aria-pressed={done} aria-label={done ? t('Mark as not ready') : t('Mark as ready')}>{done ? '✓' : ''}</button>
                     <span className="small" style={{ textDecoration: done ? 'line-through' : undefined, opacity: done ? 0.6 : 1 }}>{c.name}
                       {c.note && <span className="muted"> · {c.note}</span>}</span>
                   </form>);
@@ -233,7 +231,7 @@ export default async function MfrProduct({ params, searchParams }: { params: Pro
               {!d.avg.generic_price && d.brands?.registrants != null && Number(d.brands.registrants) <= 2 && Number(d.brands.generic) < 1 && (
                 <p className="small"><span className="pill peach">{t('Few products')}</span> Only {d.brands.registrants} {Number(d.brands.registrants) === 1 ? 'product is' : 'products are'} registered here, so these prices are mostly the brand&rsquo;s. A generic usually enters about {Math.round((1 - Number(d.brands.generic)) * 100)}% lower: around <b>{d.avg.currency} {fmtMoney(Number(d.avg.unit_price) * packOf(d.avg) * Number(d.brands.generic))}</b> per {unitWord(d.avg)}.</p>)}
               {d.avg.by_strength.length > 1 && (
-                <div className="tbl-wrap"><table className="tbl"><thead><tr><th>{t('Strength')}</th><th className="r">Per {unitShort(d.avg)}</th><th className="r">{t('Per pack')}</th><th className="r">{t('Prices')}</th></tr></thead>
+                <div className="tbl-wrap" tabIndex={0}><table className="tbl"><thead><tr><th>{t('Strength')}</th><th className="r">Per {unitShort(d.avg)}</th><th className="r">{t('Per pack')}</th><th className="r">{t('Prices')}</th></tr></thead>
                   <tbody>{d.avg.by_strength.map((x) => <tr key={x.strength}><td>{x.strength}</td><td className="r num">{fmtMoney(x.unit)}</td><td className="r num">{fmtMoney(x.pack)}</td><td className="r num">{x.n}</td></tr>)}</tbody></table></div>)}
             </section>) : (
             <section className="card between" style={{ flexWrap: 'wrap', gap: 12 }}>
@@ -352,7 +350,7 @@ function Competitors({ c, id, market, u, open }: { c: { group: string | null; ki
         <button className="btn btn-ghost btn-sm" type="submit">{t('Save')}</button>
       </form>
       {c.brands.length > 0 && (open ? (
-        <div className="tbl-wrap"><table className="tbl"><thead><tr><th>{t('Brand')}</th><th>{t('Registered')}</th><th>{t('Made')}</th><th className="r">{t('Shelf price')}</th><th className="r">{t('Wholesale (est.)')}</th><th className="r">{t('Distributor buys at (est.)')}</th><th /></tr></thead>
+        <div className="tbl-wrap" tabIndex={0}><table className="tbl"><thead><tr><th>{t('Brand')}</th><th>{t('Registered')}</th><th>{t('Made')}</th><th className="r">{t('Shelf price')}</th><th className="r">{t('Wholesale (est.)')}</th><th className="r">{t('Distributor buys at (est.)')}</th><th><span className="sr-only">Actions</span></th></tr></thead>
           <tbody>{c.brands.map((b) => {
             const cur = b.prices[0]?.currency ?? '';
             const ps = b.prices.map((x) => x.price);
@@ -381,7 +379,7 @@ function Competitors({ c, id, market, u, open }: { c: { group: string | null; ki
       </form>
       {c.group && open && (c.others.length > 0 ? (<>
         <h3>{t('Also in {market}', { market: t(countryName(market)) })}: {t(GROUP_LABEL[c.group]).toLowerCase()}</h3>
-        <div className="tbl-wrap"><table className="tbl"><thead><tr><th>{t('Brand')}</th><th>{t('Registered')}</th><th>{t('Made')}</th><th className="r">{t('Shelf price')}</th><th className="r">{t('Wholesale (est.)')}</th></tr></thead>
+        <div className="tbl-wrap" tabIndex={0}><table className="tbl"><thead><tr><th>{t('Brand')}</th><th>{t('Registered')}</th><th>{t('Made')}</th><th className="r">{t('Shelf price')}</th><th className="r">{t('Wholesale (est.)')}</th></tr></thead>
           <tbody>{c.others.map((o) => {
             const mid = o.prices.length ? [...o.prices].sort((x: number, y: number) => x - y)[Math.floor(o.prices.length / 2)] : null;
             return (

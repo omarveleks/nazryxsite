@@ -16,7 +16,7 @@ export default async function Directory({ searchParams }: { searchParams: Promis
   const shown = list.filter((p) => (!q || String(p.company_name).toLowerCase().includes(q) || (p.forms ?? []).some((f: string) => f.toLowerCase().includes(q))) && (!sp.market || (p.markets ?? []).includes(sp.market)));
   const markets = [...new Set(list.flatMap((p) => p.markets ?? []))].sort() as string[];
   return (
-    <div className="wrap-narrow" style={{ maxWidth: 960, padding: '24px 16px 48px' }}>
+    <main className="wrap-narrow" id="main" style={{ maxWidth: 960, padding: '24px 16px 48px' }}>
       <div className="between" style={{ marginBottom: 20 }}><Brand href="/p" tag="Manufacturers" /><Link className="btn btn-ghost btn-sm" href="/signup">For manufacturers</Link></div>
       <h1 style={{ fontSize: 32, letterSpacing: '-0.02em', margin: '0 0 6px' }}>Manufacturers on Nazryx</h1>
       <p className="muted" style={{ marginTop: 0 }}>What each one makes, where it is registered, and how far Nazryx has checked it. Audited and verified companies first.</p>
@@ -34,6 +34,6 @@ export default async function Directory({ searchParams }: { searchParams: Promis
             {(p.forms ?? []).length > 0 && <span className="small">{(p.forms as string[]).slice(0, 5).join(' · ')}</span>}
           </Link>))}</div>)}
       <p className="note" style={{ marginTop: 18 }}>A manufacturer appears here once its company is approved and it turns its public page on in Settings.</p>
-    </div>
+    </main>
   );
 }

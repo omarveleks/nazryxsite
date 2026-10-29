@@ -80,12 +80,11 @@ export default async function Project({ params, searchParams }: { params: Promis
               <div key={k.id} className="between" style={{ gap: 8, alignItems: 'flex-start' }}>
                 <form action={toggleTask} className="row" style={{ gap: 8, alignItems: 'flex-start', flex: 1, flexWrap: 'nowrap' }}>
                   <input type="hidden" name="task_id" value={k.id} /><input type="hidden" name="project_id" value={id} />
-                  <button type="submit" aria-label={k.done_at ? t('Mark as not done') : t('Mark as done')} className="btn-ghost"
-                    style={{ flex: '0 0 20px', width: 20, height: 20, marginTop: 1, borderRadius: 6, cursor: 'pointer', padding: 0, lineHeight: '18px', border: '1px solid var(--line-2)', background: k.done_at ? 'var(--blue)' : 'var(--card)', color: '#fff', fontSize: 13 }}>{k.done_at ? '✓' : ''}</button>
+                  <button type="submit" aria-label={k.done_at ? t('Mark as not done') : t('Mark as done')} className={`check${k.done_at ? ' on' : ''}`} aria-pressed={!!k.done_at}>{k.done_at ? '✓' : ''}</button>
                   <span style={{ flex: 1, minWidth: 0, textDecoration: k.done_at ? 'line-through' : undefined, color: k.done_at ? 'var(--ink-3)' : undefined }}>{t(k.title)}
                     <span className="sub2">{[k.due_date ? `${t('due')} ${fmtDate(k.due_date)}` : null, k.assignee, k.source === 'nazryx' ? t('suggested') : null].filter(Boolean).join(' · ')}</span></span>
                 </form>
-                <form action={deleteTask}><input type="hidden" name="task_id" value={k.id} /><input type="hidden" name="project_id" value={id} /><button className="btn-link small" type="submit" aria-label={t('Remove task')}>×</button></form>
+                <form action={deleteTask}><input type="hidden" name="task_id" value={k.id} /><input type="hidden" name="project_id" value={id} /><button className="btn-link x" type="submit" aria-label={t('Remove task')}>×</button></form>
               </div>))}
             <form action={addTask} className="row" style={{ gap: 6, marginTop: 6 }}>
               <input type="hidden" name="project_id" value={id} />
@@ -105,7 +104,7 @@ export default async function Project({ params, searchParams }: { params: Promis
               <div className="stack" style={{ gap: 4 }}>{d.checklist.filter((c) => !d.ready.includes(c.name)).slice(0, 8).map((c) => (
                 <form key={c.id} action={toggleChecklist} className="row small" style={{ gap: 8, alignItems: 'flex-start', flexWrap: 'nowrap' }}>
                   <input type="hidden" name="product_id" value={pr.product_id} /><input type="hidden" name="country" value={pr.country} /><input type="hidden" name="item" value={c.name} /><input type="hidden" name="return" value={here} />
-                  <button type="submit" aria-label={t('Mark as ready')} style={{ flex: '0 0 18px', width: 18, height: 18, marginTop: 2, borderRadius: 5, cursor: 'pointer', padding: 0, border: '1px solid var(--line-2)', background: 'var(--card)' }} />
+                  <button type="submit" className="check" aria-label={t('Mark as ready')} />
                   <span style={{ flex: 1, minWidth: 0 }}>{c.name}{c.note && <span className="sub2"> · {c.note}</span>}</span>
                 </form>))}</div>
               {d.checklist.length - checkedN > 8 && <p className="note">{t('{n} more missing. The dossier builder has the whole list, with uploads and assignments.', { n: d.checklist.length - checkedN - 8 })}</p>}

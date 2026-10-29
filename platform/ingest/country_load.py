@@ -558,19 +558,66 @@ UZ_WORDS = {"natriy": "sodium", "natriya": "sodium", "kaliy": "potassium", "kals
             "peroksid": "peroxide", "vodorod": "hydrogen", "moyi": "oil"}
 
 
+# dosage forms, routes and packaging words on the Uzbek list ("Infuzion eritma tayyorlash uchun kukun" = powder for solution for infusion):
+# dropped before the name is read, so only the molecule is left for the matcher
+UZ_STOP = {"tabletkalar", "tabletka", "tabletkalari", "kapsulalar", "kapsula", "kukun", "kukuni", "eritma", "eritmasi", "tayyorlash", "uchun", "infuzion",
+           "infuziya", "inyeksion", "inyeksiya", "inyektsiya", "ichish", "sirtga", "qo'llash", "qo‘llash", "qo’llash", "qollash", "venaga", "kiritiladigan",
+           "teri", "ostiga", "vena", "ichiga", "va", "suspenziya", "sirop", "siropi", "gel", "malham", "shamchalar", "shamcha", "tomchilar", "tomchi",
+           "ko'z", "ko‘z", "aerozol", "sprey", "flakon", "flakonda", "ampula", "ampulada", "dozalangan", "qoplangan", "qobiqli", "bilan", "mg", "ml",
+           "uzaytirilgan", "ta'siri", "uning", "mahalliy", "yoki", "bo'yicha", "liofillangan", "liofilizat", "kontsentrat", "konsentrat", "kremi", "krem",
+           "pasta", "plastir", "ingalyatsiya", "ingalyatsiyasi", "burun", "quloq", "rektal", "vaginal", "tashqi", "ichki", "yumshoq", "qattiq"}
+UZ_SUFFIX = re.compile(r"(?:lar|lari|si|i)$")
+
+
 def uzbek_latin(name):
-    """Uzbek Latin spellings to English drug spelling: 'Siprofloksatsin' -> 'ciprofloxacin', 'Natriy xloridi' -> 'sodium chloride'."""
+    """Uzbek Latin spellings to English drug spelling: 'Siprofloksatsin' -> 'ciprofloxacin', 'Natriy xloridi' -> 'sodium chloride'.
+    Form, route and pack words go; what is in brackets (the Russian or Latin name) goes too."""
+    s = re.sub(r"\(.*?\)|\[.*?\]|[—–-].*$", " ", str(name or "").lower())
+    s = re.sub(r"\d+(?:[.,]\d+)?\s*(?:mg|ml|mkg|g|%|xb|ta)?", " ", s)
+    s = re.sub(r"[^a-z'‘’ +/]+", " ", s)
+    words = [w for w in s.split() if w not in UZ_STOP and len(w) >= 3]
     out = []
-    for w in str(name or "").lower().split():
+    for w in words:
         if w in UZ_WORDS:
             out.append(UZ_WORDS[w])
             continue
-        w = w.replace("ks", "x").replace("ts", "c").replace("gidro", "hydro")
+        w = w.replace("ks", "x").replace("ts", "c").replace("gidro", "hydro").replace("dj", "g").replace("kv", "qu")
         w = re.sub(r"x(?=[lor])", "ch", w)
-        w = re.sub(r"^s(?=[eiy])", "c", w)
-        w = re.sub(r"(?<=\w)k(?=[oalr])", "c", w)
-        out.append(w)
-    return " ".join(out)
+        out.append(_uz_best(w))
+    return " ".join(out).replace(" / ", " + ")
+
+
+# spelling turns that apply to some names and not others (Sefazolin -> cefazolin but Sertralin -> sertraline): each word tries
+# every combination and keeps the one closest to a catalogue name
+_UZ_TURNS = [(r"^s(?=[eiy])", "c"), (r"(?<=\w)k(?=[oalr])", "c"), (r"^iz", "is"), (r"^f", "ph"), (r"ss", "sc"), (r"(?<=[a-z])in$", "ine"),
+             (r"(?<=[a-z])ol$", "ole"), (r"(?<=[a-z])id$", "ide"), (r"(?<=[a-z])am$", "am"), (r"tsi", "ci"), (r"y", "i"), (r"(?<=[a-z])at$", "ate")]
+_UZ_CAT = None
+
+
+def _uz_best(w):
+    global _UZ_CAT
+    if _UZ_CAT is None:
+        words = set()
+        for names in load_catalog().values():
+            for n in names:
+                for t in re.findall(r"[a-z]{4,}", n.lower()):
+                    words.add(t)
+        _UZ_CAT = sorted(words)
+    from itertools import product
+    best, score = w, 0
+    seen = set()
+    for mask in product((0, 1), repeat=len(_UZ_TURNS)):
+        v = w
+        for on, (pat, rep) in zip(mask, _UZ_TURNS):
+            if on:
+                v = re.sub(pat, rep, v)
+        if v in seen:
+            continue
+        seen.add(v)
+        hit = process.extractOne(v, _UZ_CAT, scorer=fuzz.ratio, score_cutoff=max(score, 86))
+        if hit and hit[1] > score:
+            best, score = hit[0], hit[1]
+    return best if score >= 86 else re.sub(r"^s(?=[eiy])", "c", re.sub(r"(?<=\w)k(?=[oalr])", "c", w))
 
 
 LIST_NAMES = {"KG": latin_inn, "UZ": uzbek_latin}

@@ -116,7 +116,7 @@ export default async function MfrMarket({ searchParams }: { searchParams: Promis
           <div className="split">
             <section className="card">
               <div className="card-h"><div><h2>{t('By therapeutic class')}</h2><p className="note">{t('Classes of the official list. Open means nobody has registered it.')}</p></div></div>
-              <div className="tbl-wrap"><table className="tbl">
+              <div className="tbl-wrap" tabIndex={0}><table className="tbl">
                 <thead><tr><th>{t('Class')}</th><th className="r">{t('Products')}</th><th className="r">{t('Companies per molecule')}</th><th className="r">{t('Open')}</th><th className="r">{t('Yours')}</th></tr></thead>
                 <tbody>{d.cats!.map((c) => (
                   <tr key={c.category}><td>{t(c.category)}</td><td className="r num">{c.products}</td><td className="r num">{c.per_molecule}</td>

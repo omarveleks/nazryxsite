@@ -29,16 +29,16 @@ export default async function SignUp({ searchParams }: { searchParams: Promise<{
   const S = SIDES[as];
   return (
     <div className="auth">
-      <div className="auth-l">
+      <main className="auth-l" id="main">
         <Brand href="/signup" />
         <div>
           <h1>{signin ? 'Welcome back' : 'Take your products further.'}</h1>
           <p className="muted" style={{ marginTop: 10 }}>{t('Bridging the gap in medical trade across frontier markets.')}</p>
         </div>
-        <div className="tabs" role="tablist">
-          <Link href="/signup" className={!signin ? 'on' : ''}>{t('Create account')}</Link>
-          <Link href="/signup?mode=signin" className={signin ? 'on' : ''}>{t('Sign in')}</Link>
-        </div>
+        <nav className="tabs" aria-label={t('Account')}>
+          <Link href="/signup" className={!signin ? 'on' : ''} aria-current={!signin ? 'page' : undefined}>{t('Create account')}</Link>
+          <Link href="/signup?mode=signin" className={signin ? 'on' : ''} aria-current={signin ? 'page' : undefined}>{t('Sign in')}</Link>
+        </nav>
         {sp.error && <div className="err" role="alert">{sp.error}</div>}
         {sp.sent && <div className="ok" role="status">{t('If that email has an account, a sign-in link is on its way. It works once, for 15 minutes.')}</div>}
         {!signin && (
@@ -69,14 +69,14 @@ export default async function SignUp({ searchParams }: { searchParams: Promise<{
             <p className="note">{as === 'distributor' ? t('Next: your company and the markets you serve (one minute). Then post your first need.') : t('Next: a few questions about your company, markets and catalogue (about 5 minutes). We then suggest the right plan.')}</p>
           </form>
         )}
-      </div>
-      <div className="auth-r">
+      </main>
+      <aside className="auth-r">
         <h2>{S.head}</h2>
         <p>{S.sub}</p>
         <ol className="steps">
           {S.steps.map((t, i) => <li key={i}><em>0{i + 1}</em><span>{t}</span></li>)}
         </ol>
-      </div>
+      </aside>
     </div>
   );
 }

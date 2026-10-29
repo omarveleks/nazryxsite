@@ -44,7 +44,7 @@ export default async function Help() {
   );
   if (u && u.onboarded && u.role !== 'team' || u?.role === 'team') return <Shell user={u!} title={t('Help')} sub={t('How Nazryx works, and how to reach us')}>{body}</Shell>;
   return (
-    <div className="wrap-narrow"><Brand href={u ? '/' : '/signup'} /><h1>{t('Help')}</h1>{body}
-      {!u && <Link className="btn btn-blue" href="/signup" style={{ alignSelf: 'flex-start' }}>{t('Create an account')}</Link>}</div>
+    <main className="wrap-narrow" id="main"><Brand href={u ? '/' : '/signup'} /><h1>{t('Help')}</h1>{body}
+      {!u && <Link className="btn btn-blue" href="/signup" style={{ alignSelf: 'flex-start' }}>{t('Create an account')}</Link>}</main>
   );
 }

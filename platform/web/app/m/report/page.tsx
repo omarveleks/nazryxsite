@@ -36,7 +36,7 @@ export default async function MarketRead({ searchParams }: { searchParams: Promi
   const top = byMolecule(d.products.filter((p) => p.molecule_id && p.registrants != null)).slice(0, 10);
   const high = d.products.filter((p) => Number(p.demand ?? 0) >= HIGH_DEMAND).length;
   return (
-    <div className="report">
+    <main className="report" id="main">
       <div className="between no-print"><Link href="/m/market" className="btn-link">← Back</Link><PrintButton /></div>
       <Brand href="/m" />
       <div><span className="lbl">Market read · {fmtDate(new Date())}</span>
@@ -70,6 +70,6 @@ export default async function MarketRead({ searchParams }: { searchParams: Promi
           <li>Shortlist two distributors and let us make the introductions.</li>
         </ol></section>
       <p className="note">Nazryx · contact@nazryx.com</p>
-    </div>
+    </main>
   );
 }

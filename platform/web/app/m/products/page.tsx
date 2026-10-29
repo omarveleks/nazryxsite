@@ -195,8 +195,8 @@ export default async function MfrProducts({ searchParams }: { searchParams: Prom
               {d.products.some((p) => p.molecule_id) && <form action={watchMolecule}><input type="hidden" name="all" value="1" />
                 <button className="btn btn-ghost btn-sm" type="submit">{t('Watch all my products')}</button></form>}</div>
             {!hasData(market) ? <AgencyMarket code={market} /> : !covers(u, market) ? <PlanLock need="data" title={t('Competitors in {market}', { market: t(countryName(market)) })} u={u} market={market} /> : d.watched.length === 0 ? <Empty>{t('You are not watching any molecule yet. Watch all your products, or add one below.')}</Empty> : (
-              <div className="tbl-wrap"><table className="tbl">
-                <thead><tr><th>{t('Molecule')}</th><th className="r">{t('Companies')}</th><th className="r">{t('Products')}</th><th>{t('Last 90 days')}</th><th className="hide-m">{t('Made in')}</th><th /></tr></thead>
+              <div className="tbl-wrap" tabIndex={0}><table className="tbl">
+                <thead><tr><th>{t('Molecule')}</th><th className="r">{t('Companies')}</th><th className="r">{t('Products')}</th><th>{t('Last 90 days')}</th><th className="hide-m">{t('Made in')}</th><th><span className="sr-only">Actions</span></th></tr></thead>
                 <tbody>{d.watched.map((w) => (
                   <tr key={w.molecule_id}><td><b>{w.molecule}</b><div className="sub2">{w.category ?? ''}</div></td>
                     <td className="r num">{w.competitors}</td>
@@ -239,7 +239,7 @@ export default async function MfrProducts({ searchParams }: { searchParams: Prom
             </section>
             <section className="card">
               <div className="card-h"><h2>{t('By therapeutic class')}</h2></div>
-              <div className="tbl-wrap"><table className="tbl"><thead><tr><th>{t('Class')}</th><th className="r">{t('Yours')}</th><th className="r">{t('Avg competitors')}</th><th className="r">{t('Open')}</th></tr></thead>
+              <div className="tbl-wrap" tabIndex={0}><table className="tbl"><thead><tr><th>{t('Class')}</th><th className="r">{t('Yours')}</th><th className="r">{t('Avg competitors')}</th><th className="r">{t('Open')}</th></tr></thead>
                 <tbody>{classes.slice(0, 8).map((c) => <tr key={c.cls}><td>{c.cls}</td><td className="r num">{c.n}</td><td className="r num">{c.avg}</td><td className="r num">{c.open}</td></tr>)}</tbody></table></div>
             </section>
           </div>)}
@@ -254,7 +254,7 @@ export default async function MfrProducts({ searchParams }: { searchParams: Prom
                 <button className="btn btn-sm" type="submit">{t('Yes, remove all')}</button>
               </form></details>}</span></div>
         {n === 0 ? <Empty>{t('No products yet. Search for your first one below.')}</Empty> : (
-          <div className="tbl-wrap"><table className="tbl">
+          <div className="tbl-wrap" tabIndex={0}><table className="tbl">
             <thead><tr><th>{t('Product')}</th><th className="hide-m">{t('Class')}</th>
               <th className="r">Competition in {countryName(market)}</th><th className="r hide-m">{t('Average price')}</th></tr></thead>
             <tbody>{mols.map((p, i) => (
@@ -308,7 +308,7 @@ export default async function MfrProducts({ searchParams }: { searchParams: Prom
       <section className="card stack" id="files">
         <div className="card-h"><div><h2>{t('Your documents')}</h2><p className="note">{t('Catalogues, and the small starter pack we check first: GMP certificate, CPP, certificate of analysis, labels. Full dossiers only when we review one for you. A checked GMP certificate earns your Verified badge.')}</p></div></div>
         {d.files.length > 0 && (
-          <div className="tbl-wrap"><table className="tbl"><tbody>{d.files.map((x) => (
+          <div className="tbl-wrap" tabIndex={0}><table className="tbl"><tbody>{d.files.map((x) => (
             <tr key={x.id}><td><a href={`/files/mfile/${x.id}`}><b>{x.file_name}</b></a><div className="sub2">{MFR_FILE_KINDS[x.kind]} · {fmtDate(x.created_at)}{x.kind === 'catalogue' ? ` · ${
                 x.status === 'done' ? `${x.added} products added` : x.status === 'queued' || x.status === 'reading' ? 'reading now' : x.status ? 'our team is adding the products' : ''}` : ''}</div></td>
               <td className="r"><form action={deleteMfrFile}><input type="hidden" name="file_id" value={x.id} />

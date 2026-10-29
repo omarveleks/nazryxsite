@@ -29,7 +29,7 @@ export default async function Needs({ searchParams }: { searchParams: Promise<{ 
       <div className="split">
         <section className="card stack">
           {d.list.length === 0 ? <Empty>{t('No need yet.')}</Empty> : (
-            <div className="tbl-wrap"><table className="tbl">
+            <div className="tbl-wrap" tabIndex={0}><table className="tbl">
               <thead><tr><th>{t('Product')}</th><th>{t('Market')}</th><th className="hide-m">{t('Quantity')}</th><th className="hide-m">{t('Needed by')}</th><th>{t('Status')}</th><th className="r">{t('Hands up')}</th></tr></thead>
               <tbody>{d.list.map((n) => (
                 <tr key={n.id}><td><Link href={`/d/needs/${n.id}`}><b>{n.name}</b></Link>{n.dosage_form && <span className="sub2" style={{ display: 'block' }}>{n.dosage_form}</span>}</td>

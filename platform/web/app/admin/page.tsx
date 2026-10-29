@@ -97,7 +97,7 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
                                   order by d.expires_on nulls last, s.name limit 200`);
       const q = (sp.dq ?? '').trim();
       out.recent = await rows(db, `select * from (
-          select 'Request #' || f.request_id as place, '/admin/requests/' || f.request_id || '#documents' as place_href, '/files/request/' || f.id as href,
+          select 'Request #' || f.request_id as place, '/admin?tab=requests' as place_href, '/files/request/' || f.id as href,
                  f.file_name, f.kind as what, f.internal, f.from_team, f.created_at, u.email
             from request_files f join requests r on r.id = f.request_id join users u on u.id = r.user_id
           union all
@@ -207,7 +207,7 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
     <Shell user={u} title="Admin" sub="Nazryx team only. Not visible to customers."
       actions={<Link className="btn btn-blue btn-sm" href="/m/partners?names=1">Distributors with names</Link>}>
       <Tabs items={tabs} current={area?.key ?? tab} />
-      {subTabs.length > 1 && <div className="sub-tabs"><Tabs items={subTabs} current={tab} /></div>}
+      {subTabs.length > 1 && <div className="sub-tabs"><Tabs items={subTabs} current={tab} label="Subsections" /></div>}
       <Flash sp={sp} />
       {sp.deleted && <div className="ok" role="status">Account deleted. Its invoices are kept as records.</div>}
       {sp.queued && <div className="ok" role="status">Queued. The ingest job runs in the background; refresh to see the result.</div>}
@@ -222,7 +222,7 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
             const needs = (x: any) => x.kind === 'registry' || !x.enabled || x.held_rows || x.last_error;
             const ok = all.filter((x: any) => x.last_ok && !x.last_error && x.enabled).length;
             const table = (list: any[]) => (
-            <div className="tbl-wrap"><table className="tbl"><thead><tr><th>Source</th><th>Last run</th><th className="r">Rows</th><th>Status</th><th /></tr></thead>
+            <div className="tbl-wrap" tabIndex={0}><table className="tbl"><thead><tr><th>Source</th><th>Last run</th><th className="r">Rows</th><th>Status</th><th><span className="sr-only">Actions</span></th></tr></thead>
             <tbody>{list.map((x: any) => (
               <tr key={x.key}>
                 <td><b>{x.label}</b><div className="sub2">{x.kind} · every {x.every_hours >= 24 ? `${Math.round(x.every_hours / 24)} days` : `${x.every_hours} h`} · <a href={x.url} target="_blank" rel="noopener noreferrer">{x.url.replace('https://', '')}</a></div></td>
@@ -300,7 +300,7 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
         </section>
         <section>
           <div className="card-h"><h2>Upload history</h2></div>
-          <div className="tbl-wrap"><table className="tbl">
+          <div className="tbl-wrap" tabIndex={0}><table className="tbl">
             <thead><tr><th>Date</th><th>Country</th><th>By</th><th>File</th><th className="r">Rows</th><th>Status</th></tr></thead>
             <tbody>{d.history.map((h: any) => (
               <tr key={h.id}><td>{fmtDate(h.uploaded_at)} <span className="tiny muted">{new Date(h.uploaded_at).toISOString().slice(11, 16)} UTC</span></td>
@@ -319,7 +319,7 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
         <section className="card">
           <div className="card-h"><h2>Suggested matches</h2><span className="note">Possible spelling differences between the official list and the register. Accept only if it is the same medicine; nothing changes until you do.</span></div>
           {d.sugg.length === 0 ? <Empty>No open suggestions.</Empty> : (
-            <div className="tbl-wrap"><table className="tbl"><thead><tr><th>Official list</th><th>Registry molecule</th><th>Similarity</th><th className="r"></th></tr></thead>
+            <div className="tbl-wrap" tabIndex={0}><table className="tbl"><thead><tr><th>Official list</th><th>Registry molecule</th><th>Similarity</th><th className="r"><span className="sr-only">Actions</span></th></tr></thead>
               <tbody>{d.sugg.map((s: any) => (
                 <tr key={s.molecule_id}><td><b>{s.inn}</b><div className="sub2">{s.category}</div></td><td>{s.to_inn}</td><td className="num">{Math.round(s.confidence)}%</td>
                   <td className="r"><div className="row" style={{ justifyContent: 'flex-end' }}>
@@ -330,7 +330,7 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
         <section className="card">
           <div className="card-h"><h2>Possible duplicate distributors</h2><span className="note">Two spellings that may be one company. Merge only if they are; branches and units of one group can stay separate.</span></div>
           {d.dups.length === 0 ? <Empty>No open pairs.</Empty> : (
-            <div className="tbl-wrap"><table className="tbl"><thead><tr><th>Company A</th><th>Company B</th><th>Similarity</th><th className="r"></th></tr></thead>
+            <div className="tbl-wrap" tabIndex={0}><table className="tbl"><thead><tr><th>Company A</th><th>Company B</th><th>Similarity</th><th className="r"><span className="sr-only">Actions</span></th></tr></thead>
               <tbody>{d.dups.map((p: any) => (
                 <tr key={p.a_key + p.b_key}><td>{title(p.a_name ?? p.a_key)} <span className="tiny muted">({p.a_n ?? 0})</span></td>
                   <td>{title(p.b_name ?? p.b_key)} <span className="tiny muted">({p.b_n ?? 0})</span></td><td className="num">{Math.round(p.similarity)}%</td>
@@ -344,7 +344,7 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
           <summary style={{ cursor: 'pointer' }}><b>Essential molecules nobody registered ({d.unmatched.length})</b>
             <span className="note"> · openings, nothing to do. Open only to map one the register calls by another name.</span></summary>
           <p className="note" style={{ marginTop: 8 }}>&ldquo;In combinations&rdquo; above 0 means it is sold only inside combination products.</p>
-          <div className="tbl-wrap"><table className="tbl"><thead><tr><th>Molecule</th><th>Class</th><th>In combinations</th><th className="r">Map to registry molecule</th></tr></thead>
+          <div className="tbl-wrap" tabIndex={0}><table className="tbl"><thead><tr><th>Molecule</th><th>Class</th><th>In combinations</th><th className="r">Map to registry molecule</th></tr></thead>
             <tbody>{d.unmatched.map((m: any) => (
               <tr key={m.id}><td>{m.inn}</td><td className="small">{m.category}</td><td className="num">{m.in_combinations}</td>
                 <td className="r"><form action={matchMolecule} className="row" style={{ justifyContent: 'flex-end' }}><input type="hidden" name="from" value={m.id} />
@@ -358,7 +358,7 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
         <section className="card">
           <div className="card-h"><h2>Company claims</h2><span className="note">Check the email domain and the company, then approve. Approval pre-fills the portfolio when asked.</span></div>
           {d.claims.length === 0 ? <Empty>No claims yet.</Empty> : (
-            <div className="tbl-wrap"><table className="tbl"><thead><tr><th>Who</th><th>Company</th><th>Evidence</th><th>Portfolio</th><th className="r">Decision</th></tr></thead>
+            <div className="tbl-wrap" tabIndex={0}><table className="tbl"><thead><tr><th>Who</th><th>Company</th><th>Evidence</th><th>Portfolio</th><th className="r">Decision</th></tr></thead>
               <tbody>{d.claims.map((k: any) => (
                 <tr key={k.id}><td><b>{k.name || k.email}</b><div className="sub2">{k.email} · {fmtDate(k.created_at)}</div></td>
                   <td>{k.cid ? title(k.company) : <>{k.company} <span className="pill">not in list</span></>}</td>
@@ -379,7 +379,7 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
           <h2>Manufacturer accounts</h2>
           <p className="note">Check the company, its certifications and the work email, then approve. Approval opens partner introductions.</p>
           {d.mfrs.length === 0 && <p className="note">No manufacturers yet.</p>}
-          <div className="tbl-wrap"><table className="tbl"><tbody>{d.mfrs.map((m: any) => (
+          <div className="tbl-wrap" tabIndex={0}><table className="tbl"><tbody>{d.mfrs.map((m: any) => (
             <tr key={m.user_id}><td><Link href={`/admin/accounts/${m.user_id}`}><b>{m.company_name}</b></Link>
               <div className="sub2">{m.email} · {m.hq_country || 'country not given'} · {m.products} products
                 {m.completed_at ? '' : ` · sign-up screen ${Math.min(m.step, 8)} of 8`}
@@ -397,7 +397,7 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
         <section className="card stack">
           <h2>Engagements</h2>
           <p className="note">Reports are due 24 hours after ordering; other engagements turn red after 48 hours without an update.</p>
-          <div className="tbl-wrap"><table className="tbl"><tbody>{d.engs.map((e: any) => {
+          <div className="tbl-wrap" tabIndex={0}><table className="tbl"><tbody>{d.engs.map((e: any) => {
             const late = e.status === 'open' && (e.kind === 'report' ? e.stage !== 'Delivered' && e.due_at && new Date(e.due_at).getTime() < Date.now()
               : Date.now() - new Date(e.updated_at).getTime() > H48);
             return (<tr key={e.id}><td><Link href={`/admin/engagements/${e.id}`}><b>#{e.id} {SERVICES[e.kind].label}</b></Link>
@@ -431,9 +431,9 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
           <div className="card-h"><h2>Requests</h2><span className="note">Handled by hand. Move the stage as you work; the customer sees it and gets an update.</span></div>
           <div className="row small" style={{ marginBottom: 10 }}>{STAGES.map((s) => <span key={s} className="pill">{s}: {d.requests.filter((r: any) => r.stage === s).length}</span>)}</div>
           {d.requests.length === 0 ? <Empty>No requests yet.</Empty> : (
-            <div className="tbl-wrap"><table className="tbl"><thead><tr><th>#</th><th>Molecule</th><th>Customer</th><th>Stage</th><th>Updated</th></tr></thead>
+            <div className="tbl-wrap" tabIndex={0}><table className="tbl"><thead><tr><th>#</th><th>Molecule</th><th>Customer</th><th>Stage</th><th>Updated</th></tr></thead>
               <tbody>{d.requests.map((r: any) => (
-                <tr key={r.id}><td><Link href={`/admin/requests/${r.id}`}>#{r.id}</Link></td><td><Link href={`/admin/requests/${r.id}`}><span className="nm">{r.molecule}</span></Link>
+                <tr key={r.id}><td className="num">#{r.id}</td><td><span className="nm">{r.molecule}</span>
                   <div className="sub2">{r.quantity}</div></td><td className="small">{r.email}</td><td><StagePill stage={r.stage} /></td><td className="small">{ago(r.updated_at)}</td></tr>))}
               </tbody></table></div>)}
         </section>
@@ -441,7 +441,7 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
       {tab === 'accounts' && (
         <section className="card">
           <div className="card-h"><h2>Accounts</h2><span className="note">Card plans run by themselves; invoices are in Billing.</span></div>
-          <div className="tbl-wrap"><table className="tbl"><thead><tr><th>Account</th><th>Role</th><th>Plan</th><th className="r">Credits</th><th className="r">Actions</th></tr></thead>
+          <div className="tbl-wrap" tabIndex={0}><table className="tbl"><thead><tr><th>Account</th><th>Role</th><th>Plan</th><th className="r">Credits</th><th className="r">Actions</th></tr></thead>
             <tbody>{d.users.map((x: any) => (
               <tr key={x.id}><td><Link href={`/admin/accounts/${x.id}`}><b>{x.name || x.email}</b></Link><div className="sub2">{x.email}{x.owner_id ? ' · teammate seat' : ''}</div>
                 {x.disabled && x.role !== 'team' && <span className="pill">Suspended</span>}
@@ -503,7 +503,7 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
         <section className="card stack">
           <h2>Supplier files ({d.sdocs.length})</h2>
           {d.sdocs.length === 0 ? <Empty>No supplier documents yet.</Empty> : (
-            <div className="tbl-wrap"><table className="tbl"><tbody>{d.sdocs.map((x: any) => {
+            <div className="tbl-wrap" tabIndex={0}><table className="tbl"><tbody>{d.sdocs.map((x: any) => {
               const left = daysLeft(x.expires_on);
               return (<tr key={x.id}><td><a href={`/files/supplier/${x.id}`}><b>{x.file_name}</b></a>
                 <div className="sub2">{x.supplier}{x.country ? ` (${x.country})` : ''} · {SUPPLIER_DOC_KINDS[x.kind]}{x.product ? ` · ${x.product}` : ''}</div></td>
@@ -518,7 +518,7 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
               <input className="input" name="dq" defaultValue={sp.dq ?? ''} placeholder="File, email or place" aria-label="Search documents" style={{ width: 220 }} />
               <button className="btn btn-ghost btn-sm" type="submit">Search</button></form></div>
           {d.recent.length === 0 ? <Empty>No documents{sp.dq ? ' match' : ' yet'}.</Empty> : (
-            <div className="tbl-wrap"><table className="tbl"><thead><tr><th>File</th><th>Where</th><th>From</th><th className="r">When</th></tr></thead>
+            <div className="tbl-wrap" tabIndex={0}><table className="tbl"><thead><tr><th>File</th><th>Where</th><th>From</th><th className="r">When</th></tr></thead>
               <tbody>{d.recent.map((x: any, i: number) => (
                 <tr key={i}><td><a href={x.href}>{x.file_name}</a><div className="sub2">{x.what.replaceAll('_', ' ')}{x.internal ? ' · internal' : ''}</div></td>
                   <td><Link href={x.place_href}>{x.place}</Link>{x.email && <div className="sub2">{x.email}</div>}</td>
@@ -571,7 +571,7 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
         <section className="card">
           <div className="card-h"><h2>Invoices</h2></div>
           {(d.invoices ?? []).length === 0 ? <Empty>No invoices yet.</Empty> : (
-            <div className="tbl-wrap"><table className="tbl"><thead><tr><th>Number</th><th>Customer</th><th>Issued</th><th className="r">Amount</th><th>Status</th><th /></tr></thead>
+            <div className="tbl-wrap" tabIndex={0}><table className="tbl"><thead><tr><th>Number</th><th>Customer</th><th>Issued</th><th className="r">Amount</th><th>Status</th><th><span className="sr-only">Actions</span></th></tr></thead>
               <tbody>{d.invoices.map((i: any) => (
                 <tr key={i.number}>
                   <td>{i.made ? <a href={`/admin/invoice/${encodeURIComponent(i.number)}`} target="_blank" rel="noopener">{i.number}</a>
@@ -642,7 +642,7 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
             <Link className={`pill ${!sp.who ? 'solid' : ''}`} href="/admin?tab=activity">Everyone</Link>
             {d.who.map((m: any) => <Link key={m.id} className={`pill ${sp.who === m.id ? 'solid' : ''}`} href={`/admin?tab=activity&who=${m.id}`}>{m.name}</Link>)}</div>
           {d.log.length === 0 ? <Empty>No team actions yet.</Empty> : (
-            <div className="tbl-wrap"><table className="tbl"><thead><tr><th>When</th><th>Who</th><th>What</th><th>Details</th></tr></thead>
+            <div className="tbl-wrap" tabIndex={0}><table className="tbl"><thead><tr><th>When</th><th>Who</th><th>What</th><th>Details</th></tr></thead>
               <tbody>{d.log.map((a: any, i: number) => (
                 <tr key={i}><td className="small nowrap">{ago(a.at)}</td><td className="small">{a.email ?? 'system'}</td>
                   <td className="small">{({ insert: 'Added', update: 'Changed', delete: 'Deleted' } as Record<string, string>)[a.action] ?? ({
@@ -747,7 +747,7 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
           <section className="card stack" style={{ gridColumn: '1 / -1' }}>
             <h2>Notification outbox</h2>
             <p className="note">Email and WhatsApp delivery are stubbed: messages are recorded here and logged by the worker.</p>
-            <div className="tbl-wrap"><table className="tbl"><thead><tr><th>When</th><th>Channel</th><th>Subject</th><th>Status</th></tr></thead>
+            <div className="tbl-wrap" tabIndex={0}><table className="tbl"><thead><tr><th>When</th><th>Channel</th><th>Subject</th><th>Status</th></tr></thead>
               <tbody>{d.notifs.map((n: any, i: number) => <tr key={i}><td className="small">{ago(n.created_at)}</td><td>{n.channel}</td>
                 <td className="small">{n.subject ?? n.body.slice(0, 80)}</td><td><span className="pill">{n.status}</span></td></tr>)}</tbody></table></div>
           </section>

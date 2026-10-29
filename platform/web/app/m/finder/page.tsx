@@ -78,8 +78,8 @@ export default async function Finder({ searchParams }: { searchParams: Promise<R
                 </form>)}
             </div>
             {shown.length === 0 ? <Empty>{t('Nothing matches. Loosen a filter.')}</Empty> : (
-              <div className="tbl-wrap"><table className="tbl">
-                <thead><tr><th>{t('Molecule')}</th><th className="r">{t('Companies')}</th><th className="hide-m">{t('Demand')}</th><th className="r hide-m">{t('Price per unit')}</th><th className="hide-m">{t('Forms')}</th><th></th></tr></thead>
+              <div className="tbl-wrap" tabIndex={0}><table className="tbl">
+                <thead><tr><th>{t('Molecule')}</th><th className="r">{t('Companies')}</th><th className="hide-m">{t('Demand')}</th><th className="r hide-m">{t('Price per unit')}</th><th className="hide-m">{t('Forms')}</th><th><span className="sr-only">Actions</span></th></tr></thead>
                 <tbody>{shown.map((r) => (
                   <tr key={r.molecule_id}>
                     <td><Link href={`/m/molecules/${r.molecule_id}?market=${m}`}><span className="nm">{r.inn}</span></Link>

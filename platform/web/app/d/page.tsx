@@ -32,7 +32,7 @@ export default async function DistHome() {
           <section className="card stack">
             <div className="card-h"><h2>{t('Your needs')}</h2><Link className="btn-link" href="/d/needs">{t('All')}</Link></div>
             {d.needs.length === 0 ? <Empty>{t('No need posted yet. Post one and the manufacturers who can supply it raise a hand.')}</Empty> : (
-              <div className="tbl-wrap"><table className="tbl">
+              <div className="tbl-wrap" tabIndex={0}><table className="tbl">
                 <thead><tr><th>{t('Product')}</th><th>{t('Market')}</th><th className="hide-m">{t('Quantity')}</th><th className="r">{t('Hands up')}</th></tr></thead>
                 <tbody>{d.needs.map((n) => <tr key={n.id}><td><Link href={`/d/needs/${n.id}`}><b>{n.name}</b></Link>{n.status !== 'open' && <span className="pill" style={{ marginLeft: 6, fontSize: 11 }}>{t(n.status)}</span>}</td>
                   <td>{t(countryName(n.country))}</td><td className="hide-m small">{n.quantity ?? ''}</td><td className="r num">{n.leads}</td></tr>)}</tbody></table></div>)}

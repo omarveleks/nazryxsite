@@ -64,7 +64,7 @@ export default async function RegulatoryTab({ userId, country }: { userId: strin
     <section className="card stack">
       <h2>{countryName(c)} documents ({d.docs.length})</h2>
       {d.docs.length === 0 ? <Empty>No documents for {countryName(c)} yet.</Empty> : (
-        <div className="tbl-wrap"><table className="tbl"><tbody>{d.docs.map((x) => {
+        <div className="tbl-wrap" tabIndex={0}><table className="tbl"><tbody>{d.docs.map((x) => {
           const [label, tone] = REG_DOC_STATUS[x.status] ?? [x.status, ''];
           return (
             <tr key={x.id}><td><a href={`/files/regdoc/${x.id}`}><b>{x.title}</b></a>

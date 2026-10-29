@@ -24,7 +24,7 @@ export default function Comments({ kind, target, list, here, me, seats, canWrite
       {list.map((c) => (
         <div key={c.id} className="between" style={{ alignItems: 'flex-start', gap: 10, padding: '6px 0', borderTop: '1px solid var(--line)' }}>
           <div style={{ minWidth: 0 }}><span className="small"><b>{c.author ?? t('Someone')}</b> <span className="muted">· {ago(c.created_at)}</span></span><div style={{ whiteSpace: 'pre-wrap' }}>{c.body}</div></div>
-          {c.author_id === me && <form action={deleteComment}><input type="hidden" name="id" value={c.id} /><input type="hidden" name="return" value={here} /><button className="btn-link small" type="submit" aria-label={t('Delete comment')}>×</button></form>}
+          {c.author_id === me && <form action={deleteComment}><input type="hidden" name="id" value={c.id} /><input type="hidden" name="return" value={here} /><button className="btn-link x" type="submit" aria-label={t('Delete comment')}>×</button></form>}
         </div>))}
       {canWrite && (
         <form action={addComment} className="stack" style={{ gap: 6 }}>

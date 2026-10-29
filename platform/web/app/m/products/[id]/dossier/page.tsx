@@ -70,21 +70,22 @@ export default async function DossierBuilder({ params, searchParams }: { params:
             <div className="card-h"><div><h2>{t('Checklist for {market}', { market: name })}</h2><p className="note">{t('Tick what you have, upload it against the line, give it an owner and a date. Items that depend on the product (bioequivalence, biowaiver) show only when they apply.')}</p></div></div>
             <div className="meter"><i style={{ width: `${pct}%` }} /></div>
             <div className="stack" style={{ gap: 0 }}>{d.items.map((c, i) => { const ok = d.ready.has(c.name); const m = metaOf(c.name); const fs = filesOf(c.name); const openItem = sp.item === String(c.id); return (
-              <details key={c.id} open={openItem} style={{ borderTop: i ? '1px solid var(--line)' : undefined, padding: '8px 0' }}>
+              <div key={c.id} className="row" style={{ gap: 8, alignItems: 'flex-start', flexWrap: 'nowrap', borderTop: i ? '1px solid var(--line)' : undefined, padding: '8px 0' }}>
+                <form action={toggleChecklist} style={{ display: 'contents' }}>
+                  <input type="hidden" name="product_id" value={id} /><input type="hidden" name="country" value={market} /><input type="hidden" name="item" value={c.name} /><input type="hidden" name="return" value={here} />
+                  <button type="submit" className={`check${ok ? ' on' : ''}`} aria-label={ok ? t('Mark as missing') : t('Mark as ready')} aria-pressed={ok}>{ok ? '✓' : ''}</button>
+                </form>
+                <details open={openItem} style={{ flex: 1, minWidth: 0 }}>
                 <summary className="between" style={{ cursor: 'pointer', gap: 10, listStyle: 'none' }}>
                   <span className="row" style={{ gap: 8, alignItems: 'flex-start', flexWrap: 'nowrap', minWidth: 0 }}>
-                    <form action={toggleChecklist} style={{ display: 'contents' }}>
-                      <input type="hidden" name="product_id" value={id} /><input type="hidden" name="country" value={market} /><input type="hidden" name="item" value={c.name} /><input type="hidden" name="return" value={here} />
-                      <button type="submit" aria-label={ok ? t('Mark as missing') : t('Mark as ready')} style={{ flex: '0 0 20px', width: 20, height: 20, marginTop: 1, borderRadius: 6, cursor: 'pointer', padding: 0, lineHeight: '18px', border: '1px solid var(--line-2)', background: ok ? 'var(--blue)' : 'var(--card)', color: '#fff', fontSize: 13 }}>{ok ? '✓' : ''}</button>
-                    </form>
                     <span style={{ minWidth: 0 }}><span style={{ color: ok ? 'var(--ink-3)' : undefined }}>{c.name}</span>
                       <span className="sub2" style={{ display: 'block' }}>{[c.note, m?.assignee ? `${t('owner')}: ${m.assignee}` : null, m?.due_date ? `${t('due')} ${fmtDate(m.due_date)}` : null, fs.length ? `${fs.length} ${fs.length === 1 ? t('file') : t('files')}` : null].filter(Boolean).join(' · ')}</span></span>
                   </span>
                   <span className={`pill ${ok ? 'mint' : 'peach'}`} style={{ fontSize: 11, flexShrink: 0 }}>{ok ? t('Ready') : t('Missing')}</span>
                 </summary>
-                <div className="stack" style={{ gap: 8, marginTop: 8, marginLeft: 28 }}>
+                <div className="stack" style={{ gap: 8, marginTop: 8 }}>
                   {fs.map((f) => <div key={f.id} className="between small"><a href={`/files/dossier/${f.id}`}>{f.file_name}</a><span className="row" style={{ gap: 8 }}><span className="sub2">{f.by ?? ''} · {fmtDate(f.created_at)}</span>
-                    <form action={deleteDossierFile}><input type="hidden" name="id" value={f.id} /><input type="hidden" name="product_id" value={id} /><input type="hidden" name="country" value={market} /><button className="btn-link small" type="submit" aria-label={t('Remove file')}>×</button></form></span></div>)}
+                    <form action={deleteDossierFile}><input type="hidden" name="id" value={f.id} /><input type="hidden" name="product_id" value={id} /><input type="hidden" name="country" value={market} /><button className="btn-link x" type="submit" aria-label={t('Remove file')}>×</button></form></span></div>)}
                   <form action={uploadDossierFile} className="row" style={{ gap: 6 }}>
                     <input type="hidden" name="product_id" value={id} /><input type="hidden" name="country" value={market} /><input type="hidden" name="item" value={c.name} />
                     <input className="input" type="file" name="file" aria-label={t('File for {item}', { item: c.name })} style={{ flex: '1 1 200px', minHeight: 34, fontSize: 13 }} required />
@@ -98,12 +99,13 @@ export default async function DossierBuilder({ params, searchParams }: { params:
                     <button className="btn btn-ghost btn-sm" type="submit">{t('Save')}</button>
                   </form>
                 </div>
-              </details>); })}</div>
+              </details>
+              </div>); })}</div>
           </section>
           <div className="stack">
             <section className="card stack">
               <h2>{t('What is missing')}</h2>
-              {missing.length === 0 ? <p className="small">{t('Nothing. Ask us to review the documents before you file.')}</p> : <ol className="small" style={{ margin: 0, paddingLeft: 18 }}>{missing.map((c) => <li key={c.id}><Link href={`${here}&item=${c.id}`}>{c.name}</Link></li>)}</ol>}
+              {missing.length === 0 ? <p className="small">{t('Nothing. Ask us to review the documents before you file.')}</p> : <ol className="small doc-links" style={{ margin: 0, paddingLeft: 18 }}>{missing.map((c) => <li key={c.id}><Link href={`${here}&item=${c.id}`}>{c.name}</Link></li>)}</ol>}
             </section>
             <section className="card stack">
               <h2>{t('Pre-fill from your CTD')}</h2>

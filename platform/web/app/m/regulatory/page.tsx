@@ -76,7 +76,7 @@ export default async function MfrRegulatory({ searchParams }: { searchParams: Pr
               Bioequivalence, sterile products, controlled medicines, biologicals: what each of your products needs in {countryName(m)}.
             </PlanLock>
           ) : (
-            <div className="tbl-wrap"><table className="tbl">
+            <div className="tbl-wrap" tabIndex={0}><table className="tbl">
               <thead><tr><th>{t('Product')}</th><th>{t('Extra requirements')}</th></tr></thead>
               <tbody>{perProduct.map((p) => {
                 const shown = open || p.id === d.sample;
@@ -99,7 +99,7 @@ export default async function MfrRegulatory({ searchParams }: { searchParams: Pr
         {d.routes.length > 0 && (
           <section className="card stack">
             <div className="card-h"><div><h2>{t('Routes to registration')}</h2><p className="note">{t('Realistic time from filing to approval, and the official fees per product.')}</p></div></div>
-            <div className="tbl-wrap"><table className="tbl">
+            <div className="tbl-wrap" tabIndex={0}><table className="tbl">
               <thead><tr><th>{t('Route')}</th><th className="hide-m">{t('Who can use it')}</th><th className="r">{t('Time')}</th><th className="r">{t('Official fees')}</th></tr></thead>
               <tbody>{d.routes.map((r) => (
                 <tr key={r.key}><td><b>{r.label}</b><div className="sub2">{r.description}</div></td>
@@ -113,7 +113,7 @@ export default async function MfrRegulatory({ searchParams }: { searchParams: Pr
             <div className="card-h"><div><h2>Medical devices in {countryName(m)}</h2>
               <p className="note">Eye-surgery viscoelastics, joint injections, nasal saline and lubricants registered as devices follow device rules{hasDevices ? ', which apply to your products marked Medical device above' : ''}.</p></div></div>
             {d.devRoutes.length > 0 && (
-              <div className="tbl-wrap"><table className="tbl">
+              <div className="tbl-wrap" tabIndex={0}><table className="tbl">
                 <thead><tr><th>{t('Route')}</th><th className="hide-m">{t('Who can use it')}</th><th className="r">{t('Time')}</th><th className="r">{t('Official fees')}</th></tr></thead>
                 <tbody>{d.devRoutes.map((r) => (
                   <tr key={r.key}><td><b>{r.label}</b><div className="sub2">{r.description}</div></td>

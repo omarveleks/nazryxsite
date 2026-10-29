@@ -1,8 +1,13 @@
 import type { Metadata, Viewport } from 'next';
+import { Inter, Inter_Tight } from 'next/font/google';
 import { Suspense } from 'react';
 import './globals.css';
 import NavProgress from '@/components/NavProgress';
 import { cookieLang } from '@/lib/i18n-server';
+
+// the two site fonts, served from our own origin with the page: no third-party request before the first paint
+const inter = Inter({ subsets: ['latin', 'latin-ext', 'cyrillic'], weight: ['400', '500', '600', '700'], display: 'swap', variable: '--font-inter' });
+const interTight = Inter_Tight({ subsets: ['latin', 'latin-ext', 'cyrillic'], weight: ['500', '600', '700'], display: 'swap', variable: '--font-inter-tight' });
 
 export const metadata: Metadata = {
   title: { default: 'Nazryx Intelligence', template: '%s · Nazryx' },
@@ -14,13 +19,7 @@ export const viewport: Viewport = { width: 'device-width', initialScale: 1, them
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const lang = await cookieLang();
   return (
-    <html lang={lang}>
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
-        {/* eslint-disable-next-line @next/next/no-page-custom-font */}
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" />
-      </head>
+    <html lang={lang} className={`${inter.variable} ${interTight.variable}`}>
       <body><Suspense fallback={null}><NavProgress /></Suspense>{children}</body>
     </html>
   );

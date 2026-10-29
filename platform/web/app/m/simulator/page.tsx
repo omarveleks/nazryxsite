@@ -87,7 +87,7 @@ export default async function Simulator({ searchParams }: { searchParams: Promis
         <section className="card stack">
           <div className="card-h"><div><h2>{t('{molecule} across your markets', { molecule: mol.inn })}</h2>
             <p className="note">{exw != null ? `At $${money(exw)} ex-works per pack of ${focus?.pack ?? 30}, landed and marked up the way each market does it.` : 'Enter your ex-works price to see where it lands on each shelf. Without it: the most you could charge to match each market’s median.'}</p></div></div>
-          <div className="tbl-wrap"><table className="tbl">
+          <div className="tbl-wrap" tabIndex={0}><table className="tbl">
             <thead><tr><th>{t('Market')}</th><th className="r">{t('Market median')}</th><th className="r hide-m">{t('Range')}</th><th className="r">{t('Max ex-works per pack')}</th>{exw != null && <><th className="r">{t('Your shelf price')}</th><th>{t('Position')}</th></>}<th className="r hide-m">{t('Mark-ups')}</th></tr></thead>
             <tbody>{table.map((r) => (
               <tr key={r.c}>
@@ -116,7 +116,7 @@ export default async function Simulator({ searchParams }: { searchParams: Promis
               if (perPack == null) return <Empty>No shelf price read for {mol.inn} in {countryName(focus.c)} yet; enter an ex-works price to see the chain anyway.</Empty>;
               let running = perPack;
               const steps = STEPS.map(([k, l, note]) => { const before = running; running = running * (1 + focus.shares[k]); return { k, l, note, share: focus.shares[k], before, after: running }; });
-              return (<div className="tbl-wrap"><table className="tbl">
+              return (<div className="tbl-wrap" tabIndex={0}><table className="tbl">
                 <thead><tr><th>{t('Step')}</th><th className="r">{t('Share')}</th><th className="r">{t('USD per pack')}</th>{focus.perUSD && <th className="r hide-m">{focus.p!.currency} per pack</th>}</tr></thead>
                 <tbody>
                   <tr><td><b>{t('Ex-works')}</b><div className="sub2">{t('your price, at the factory gate')}</div></td><td className="r"></td><td className="r num">${money(perPack)}</td>{focus.perUSD && <td className="r hide-m num">{money(perPack * focus.perUSD)}</td>}</tr>

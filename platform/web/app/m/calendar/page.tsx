@@ -74,7 +74,7 @@ export default async function Calendar({ searchParams }: { searchParams: Promise
                     <span style={{ minWidth: 0 }}><span className={`pill ${k[1]}`} style={{ fontSize: 11, marginRight: 8 }}>{t(k[0])}</span>
                       <Link href={x.href}>{x.title}</Link>{x.country && <span className="sub2"> · {t(countryName(x.country))}</span>}</span>
                     <span className="small num" style={{ whiteSpace: 'nowrap' }} title={fmtDate(x.on)}>{fmtDate(x.on)}{!sp.past && <span className={`sub2 ${dd <= 7 ? 'peach' : ''}`}> · {dd === 0 ? t('today') : dd === 1 ? t('tomorrow') : t('in {n} days', { n: dd })}</span>}
-                      {String(x.id).startsWith('ce') && <form action={removeCalendarEntry} style={{ display: 'inline' }}><input type="hidden" name="id" value={String(x.id).slice(2)} /><button className="btn-link small" type="submit" aria-label={t('Remove')} style={{ marginLeft: 6 }}>×</button></form>}</span>
+                      {String(x.id).startsWith('ce') && <form action={removeCalendarEntry} style={{ display: 'inline' }}><input type="hidden" name="id" value={String(x.id).slice(2)} /><button className="btn-link x" type="submit" aria-label={t('Remove')} style={{ marginLeft: 6 }}>×</button></form>}</span>
                   </div>); })}
               </div>))}
         </section>

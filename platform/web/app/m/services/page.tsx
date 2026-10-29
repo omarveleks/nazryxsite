@@ -112,7 +112,7 @@ export default async function Services({ searchParams }: { searchParams: Promise
             <span className="btn-link small" style={{ marginTop: 'auto' }}>{ok ? 'Open →' : 'See what unlocks it →'}</span>
           </Link>);
       })}</div>
-      <p className="note">{t('A quick question instead?')} <Link href="/expert">{t('Ask our team')}</Link>.</p>
+      <p className="note">{t('A quick question instead?')} <Link href="/m/ask">{t('Ask our team')}</Link>.</p>
     </Shell>
   );
 }

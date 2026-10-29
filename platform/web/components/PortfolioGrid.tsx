@@ -34,7 +34,7 @@ export default function PortfolioGrid({ rows, markets, facts, mine, launches, ha
       <div className="row small" style={{ gap: 14 }}>
         {totals.map((t) => <span key={t.c}><b>{countryName(t.c)}</b>: {t.yours ? `${t.yours} registered by you · ` : ''}{t.open} open</span>)}
       </div>
-      <div className="tbl-wrap"><table className="tbl"><thead><tr><th>{t('Medicine')}</th>{markets.map((c) => <th key={c} className={c === market ? '' : 'hide-m'}>{countryName(c)}</th>)}</tr></thead>
+      <div className="tbl-wrap" tabIndex={0}><table className="tbl"><thead><tr><th>{t('Medicine')}</th>{markets.map((c) => <th key={c} className={c === market ? '' : 'hide-m'}>{countryName(c)}</th>)}</tr></thead>
         <tbody>{rows.map((r) => (
           <tr key={r.id}><td><Link href={`/m/products/${r.id}?market=${market}`}><b>{r.inn ?? r.name}</b></Link>{r.variants && <div className="sub2">{r.variants}</div>}</td>
             {markets.map((c) => <td key={c} className={c === market ? '' : 'hide-m'}>{cell(r, c)}</td>)}</tr>))}

@@ -67,7 +67,7 @@ export default async function Projects({ searchParams }: { searchParams: Promise
             {shown.filter((p) => p.stage === k).map((p) => <Card key={p.id} p={p} />)}</div>))}</div>
       ) : (
         <section className="card">
-          <div className="tbl-wrap"><table className="tbl">
+          <div className="tbl-wrap" tabIndex={0}><table className="tbl">
             <thead><tr><th>{t('Product')}</th><th>{t('Market')}</th><th>{t('Stage')}</th><th className="hide-m">{t('Tasks')}</th><th className="hide-m">{t('Next due')}</th><th className="hide-m">{t('Owner')}</th><th className="r">{t('Updated')}</th></tr></thead>
             <tbody>{shown.map((p) => (
               <tr key={p.id}><td><Link href={`/m/projects/${p.id}`}><b>{p.name}</b></Link></td><td>{t(countryName(p.country))}</td>

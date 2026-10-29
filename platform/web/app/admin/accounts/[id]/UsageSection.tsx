@@ -54,7 +54,7 @@ export default async function UsageSection({ teamId, accountId }: { teamId: stri
       </div>
       {list.length === 0 ? <Empty>Nothing in the last {DAYS} days.</Empty> : (<>
         <h3>Day by day</h3>
-        <div className="tbl-wrap"><table className="tbl small"><thead><tr><th>Day</th><th>From – to</th><th className="r">Time</th><th className="r">Visits</th>
+        <div className="tbl-wrap" tabIndex={0}><table className="tbl small"><thead><tr><th>Day</th><th>From – to</th><th className="r">Time</th><th className="r">Visits</th>
           <th className="r">Pages</th><th>Pages used</th><th>Did</th></tr></thead>
           <tbody>{list.map(([k, x]) => (
             <tr key={k}><td><b>{date(k)}</b></td><td className="num">{time(x.first)}{x.last !== x.first ? ` – ${time(x.last)}` : ''}</td>

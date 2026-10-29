@@ -244,8 +244,21 @@ def queue_registry(cur, src, stored, name):
 
 
 # ------------------------------------------------------------------ tenders: molecule matching and storage
-PHARMA = re.compile(r"pharma|medicin|drugs?\b|vaccin|antibiot|tablet|capsul|inject|syrup|infusion|лекарств|препарат|медикамент|фарма|"
+PHARMA = re.compile(r"pharma|medicin|m[ée]dicament|drugs?\b|vaccin|antibiot|tablet|capsul|inject|syrup|infusion|лекарств|препарат|медикамент|фарма|"
                     r"вакцин|таблет|капсул|инъекц|раствор|лиофилизат|суспенз|порошок|мазь|сироп|ампул|dori|vaksin|tibbiy|preparat|дори|дармон|тиббий", re.I)
+# Works and services that only mention a medical buyer ("Construction of a wall fence at the Vaccine Institute"): not a medicine tender
+WORKS = re.compile(r"construct|\bbuild|renovat|rehabilitat|refurbish|\bfenc|\bwall\b|roof|paint|plumb|electrical|road|drainage|borehole|"
+                   r"civil works|\bworks\b|vehicle|motor|tyre|furniture|printing|stationery|software|\bICT\b|computer|laptop|network|website|"
+                   r"consultan|audit|cleaning|security (?:service|guard)|catering|uniform|fuel|generator|air[- ]condition|solar|cctv|insurance|"
+                   r"ujenzi|uzio|ukarabati|jengo|magari|строительств|ремонт|реконструкц|мебел|автомоб|компьютер|программн|охран|travaux|"
+                   r"réhabilitation|construction|véhicule|mobilier|clôture|informatique", re.I)
+
+
+def is_pharma_tender(title, molecules):
+    """A tender is kept when it names one of our molecules, or reads as a medicine tender and not as works or services."""
+    if molecules:
+        return True
+    return bool(PHARMA.search(title or "")) and not WORKS.search(title or "")
 
 
 class MoleculeIndex:
@@ -275,7 +288,7 @@ def save_tenders(cur, rows, index):
     n = 0
     for t in rows:
         mols = index.find(t["title"], t.pop("text", ""))
-        if not mols and not PHARMA.search(t["title"]):
+        if not is_pharma_tender(t["title"], mols):
             continue
         t.setdefault("buyer", None)
         if t["stage"] == "open" and t.get("closing") and t["closing"] < dt.date.today():

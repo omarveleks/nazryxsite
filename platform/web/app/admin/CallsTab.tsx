@@ -22,7 +22,7 @@ export default async function CallsTab({ userId }: { userId: string }) {
     <section className="card stack">
       <h2>Booked calls</h2>
       {d.calls.length === 0 ? <Empty>No calls booked yet.</Empty> : (
-        <div className="tbl-wrap"><table className="tbl"><tbody>{d.calls.map((c) => (
+        <div className="tbl-wrap" tabIndex={0}><table className="tbl"><tbody>{d.calls.map((c) => (
           <tr key={c.id}>
             <td><b>{at(c.starts_at)}</b><div className="sub2">{c.minutes} min · {c.status}</div></td>
             <td><b>{c.company}</b><div className="sub2">{c.email}</div></td>
