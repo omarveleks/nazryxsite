@@ -179,7 +179,8 @@ def sn_registry(s, log=None):
     """Every marketing authorisation on arp.sn, one request a second."""
     first = s.get(ARP, headers={"RSC": "1"}, timeout=120)
     first.raise_for_status()
-    rows, pages = sn_rows(first.text), sn_pages(first.text)
+    text = first.content.decode("utf-8", "replace")      # the flight payload carries no charset header; it is UTF-8
+    rows, pages = sn_rows(text), sn_pages(text)
     for page in range(2, pages + 1):
         time.sleep(PAUSE)
         r = s.get(ARP, params={"page": page}, headers={"RSC": "1"}, timeout=120)
@@ -187,7 +188,7 @@ def sn_registry(s, log=None):
             if log:
                 log.warning("arp.sn page %s: HTTP %s", page, r.status_code)
             continue
-        rows += sn_rows(r.text)
+        rows += sn_rows(r.content.decode("utf-8", "replace"))
     return [sn_row(r) for r in rows if r.get("product_name") or r.get("dci")]
 
 
