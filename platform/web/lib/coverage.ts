@@ -10,6 +10,7 @@ export type Coverage = {
   partners: { distributors: number; companies: number };
   devices: { total: number };
   list: { molecules: number; open: number };
+  trade: { years: number; latest_year: number | null; read_at: string | null };
 };
 
 export const DEPTH = {
@@ -51,6 +52,8 @@ export async function coverage(db: Db, c: string): Promise<Coverage> {
   const dv = await one(db, 'select count(*)::int as total from devices where country = $1 and active', [c]);
   const li = await one(db, `select count(*)::int as molecules, count(*) filter (where registrants = 0 and rankable)::int as open
       from country_molecules where country = $1 and on_national_list`, [c]);
+  const tr = await one(db, `select count(distinct year)::int as years, max(year) filter (where value_usd is not null)::int as latest_year, max(read_at) as read_at
+      from trade_flows where country = $1 and hs = '3004' and partner = '0'`, [c]);
   const iso = (v: any) => (v ? new Date(v).toISOString() : null);
   return {
     registry: { products: reg?.products ?? 0, active: reg?.active ?? 0, molecules: reg?.molecules ?? 0, companies: reg?.companies ?? 0, read_at: iso(regRead?.read_at), source: regRead?.source ?? null },
@@ -61,6 +64,7 @@ export async function coverage(db: Db, c: string): Promise<Coverage> {
     partners: { distributors: pa?.distributors ?? 0, companies: pa?.companies ?? 0 },
     devices: { total: dv?.total ?? 0 },
     list: { molecules: li?.molecules ?? 0, open: li?.open ?? 0 },
+    trade: { years: tr?.years ?? 0, latest_year: tr?.latest_year ?? null, read_at: iso(tr?.read_at) },
   };
 }
 

@@ -52,6 +52,14 @@ def tick():
         except Exception:
             cur.execute("rollback to savepoint inbox")
             log.exception("inbox failed")
+        cur.execute("savepoint trade")
+        try:
+            import trade
+            trade.run(cur)                # medicine imports from UN Comtrade, one market a tick, each monthly
+            cur.execute("release savepoint trade")
+        except Exception:
+            cur.execute("rollback to savepoint trade")
+            log.exception("trade read failed")
         digest.send_weekly(cur)       # the weekly summary for manufacturers (email and WhatsApp)
         digest.call_reminders(cur)    # the day before a booked call
         notify.deliver_queued(cur)

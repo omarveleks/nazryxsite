@@ -77,6 +77,14 @@ export default async function CoveragePage({ searchParams }: { searchParams: Pro
             <p className="small muted">Each profile is built from the products it holds: classes, molecules, origins. Names open on Complete Market Access; the introduction is ours to make.</p>
           </section>
           <section className="card stack">
+            <div className="card-h"><h2>Imports</h2><span className={`pill ${c.trade.years >= 3 ? 'mint' : c.trade.years ? 'blue' : 'peach'}`}>{c.trade.years >= 3 ? 'Deep' : c.trade.years ? 'Fair' : 'Thin'}</span></div>
+            <div className="grid g2" style={{ gap: 8 }}>
+              <div className="tile t-blue"><span className="k">Years reported</span><span className="v num">{n(c.trade.years)}</span><span className="small">{c.trade.latest_year ? `latest ${c.trade.latest_year}` : 'not reported yet'}</span></div>
+              <div className="tile t-lav"><span className="k">Lines</span><span className="v num">{c.trade.years ? 14 : 0}</span><span className="small">HS 3003, 3004 and its HS6 lines, by origin</span></div>
+            </div>
+            <p className="small muted">UN Comtrade, as reported by {name}&rsquo;s customs. Read monthly{c.trade.read_at ? `, last ${date(c.trade.read_at)}` : ''}. Countries report with a lag of one to two years.</p>
+          </section>
+          <section className="card stack">
             <div className="card-h"><h2>Essential medicines</h2></div>
             <div className="grid g2" style={{ gap: 8 }}>
               <div className="tile t-blue"><span className="k">On the national list</span><span className="v num">{n(c.list.molecules)}</span><span className="small">molecules</span></div>

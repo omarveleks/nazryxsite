@@ -408,7 +408,7 @@ function MarginCheck({ p, c, id, market, exw, units }: { p: MoleculePrice; c: Re
   const pct = (k: string) => `${Math.round(Number(c[k]) * 100)}%`;
   return (
     <section className="card stack">
-      <h2>Margin check</h2>
+      <div className="card-h"><h2>Margin check</h2><Link className="btn-link" href={`/m/simulator?molecule=${p.molecule_id}&exw=${exw ?? ''}&units=${units ?? ''}`}>Every market, every margin</Link></div>
       <p>To sell at the market average, your ex-works price can be up to <b>${target < 1 ? target.toFixed(3) : fmtMoney(target)}</b> per {word}.</p>
       <form className="row" style={{ gap: 8, flexWrap: 'wrap', alignItems: 'flex-end' }}>
         <input type="hidden" name="market" value={market} />

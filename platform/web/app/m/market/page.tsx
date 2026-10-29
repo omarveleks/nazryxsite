@@ -10,6 +10,8 @@ import { HIGH_DEMAND, canUse, countryName, tierIn } from '@/lib/mfr';
 import { REQ_SQL, type Requirement } from '@/lib/regulatory';
 import { coverage, readLine } from '@/lib/coverage';
 import { fmtDate, fmtMoney } from '@/lib/format';
+import Imports from '@/components/Imports';
+import { imports } from '@/lib/trade';
 
 export const metadata = { title: 'Market' };
 
@@ -44,7 +46,8 @@ export default async function MfrMarket({ searchParams }: { searchParams: Promis
     const cov = await coverage(db, market);
     const h = await headline(db, market, u.id);
     const full = canUse(tierIn(u, market), 'market');
-    if (!full) return { targets, market, reqs, h, cov };
+    const trade = await imports(db, market);          // what the country reported importing (UN Comtrade), public data
+    if (!full) return { targets, market, reqs, h, cov, trade };
     const cats = await rows(db, `
       select m.category, count(*)::int as molecules, sum(cm.registrations)::int as products, round(avg(cm.registrants), 1)::float as per_molecule,
              count(*) filter (where cm.registrants = 0 and cm.rankable)::int as open,
@@ -65,7 +68,7 @@ export default async function MfrMarket({ searchParams }: { searchParams: Promis
         from tenders t where t.country = $1 order by mine desc, coalesce(t.awarded, t.closing, t.published) desc nulls last limit 8`, [market, u.id]);
     const tcount = await one(db, `select count(*) filter (where stage = 'open')::int as open,
         count(*) filter (where coalesce(awarded, closing, published) > now() - interval '90 days')::int as recent from tenders where country = $1`, [market]);
-    return { targets, market, reqs, h, cov, cats, origin, years, routes, tenders, tcount };
+    return { targets, market, reqs, h, cov, trade, cats, origin, years, routes, tenders, tcount };
   });
   const m = d.market;
   const full = canUse(tierIn(u, m), 'market');
@@ -133,6 +136,7 @@ export default async function MfrMarket({ searchParams }: { searchParams: Promis
               </section>}
             </div>
           </div>
+          {d.trade && <Imports t={d.trade} market={m} />}
           {d.tenders!.length > 0 && (
             <section className="card stack">
               <div className="card-h"><div><h2>Medicine tenders in {countryName(m)}</h2>
