@@ -1,8 +1,10 @@
 import Link from 'next/link';
 import Shell from '@/components/Shell';
 import MarketPicker, { AgencyMarket, hasData, loadLive, pickMarket, targetMarkets } from '@/components/MarketPicker';
-import { Empty, Flash, PlanLock } from '@/components/ui';
-import { requestIntro } from '@/app/actions/mfr';
+import { Empty, Flash, PlanLock, Tabs } from '@/components/ui';
+import { addToPipeline, movePipeline, removeFromPipeline } from '@/app/actions/finder';
+import { PIPELINE_STAGES, PIPELINE_TONE } from '@/lib/finder';
+import { ago } from '@/lib/format';
 import { requireUser } from '@/lib/auth';
 import { one, rows, withUser } from '@/lib/db';
 import { categories } from '@/lib/queries';
@@ -40,14 +42,20 @@ export default async function Partners({ searchParams }: { searchParams: Promise
     const named = u.role === 'team' ? sp.names === '1' : tierIn(u, market) >= 2;
     const names: Record<string, string> = named
       ? Object.fromEntries((await rows(db, 'select code, name from partner_names($1)', [market])).map((r) => [r.code, r.name])) : {};
-    return { targets, market, cats, mine, cls, molecule, sort, list, products, byHolder, names, status: prof?.status, group };
+    // the distributors they are courting in this market, and where each stands
+    const pipeline = hasData(market) ? await rows(db, 'select * from my_pipeline($1)', [market]) : [];
+    return { targets, market, cats, mine, cls, molecule, sort, list, products, byHolder, names, status: prof?.status, group, pipeline };
   });
+  const tab = sp.tab === 'pipeline' ? 'pipeline' : 'list';
   const t = tierIn(u, d.market);
   const lists = canUse(t, 'distributors'), matching = canUse(t, 'matching'), intro = canUse(t, 'partner_intro');
   const shown = d.molecule && sp.gap === '1' ? d.list.filter((p) => !p.carries) : d.list;
   const total = d.list[0]?.total ?? 0, mineN = d.list[0]?.mine ?? d.mine.length;
   const filtered = Boolean(d.cls || d.molecule || Number(sp.min) || d.group);
   const noun = d.byHolder ? 'companies' : 'distributors';
+  const inPipe = new Set(d.pipeline.map((x) => x.code));
+  const pipelineOpen = canUse(t, 'portfolio');
+  const here = `/m/partners?market=${d.market}${d.cls ? `&class=${encodeURIComponent(d.cls)}` : ''}${d.molecule ? `&molecule=${d.molecule.id}` : ''}${d.group ? `&group=${d.group}` : ''}`;
   return (
     <Shell user={u} title="Partners" sub={`Who could carry your products in ${countryName(d.market)}`}
       actions={u.role === 'team'
@@ -56,7 +64,43 @@ export default async function Partners({ searchParams }: { searchParams: Promise
             {intro && <Link className="btn btn-blue btn-sm" href="/m/partners/intro">Ask us to find distributors</Link>}</>}>
       <Flash sp={sp} />
       <MarketPicker u={u} targets={d.targets} current={d.market} path="/m/partners" />
-      {!hasData(d.market) ? <AgencyMarket code={d.market} /> : (<>
+      {hasData(d.market) && <Tabs current={tab} items={[{ key: 'list', label: `All ${noun}`, href: `/m/partners?market=${d.market}` },
+        { key: 'pipeline', label: `Your pipeline${d.pipeline.length ? ` (${d.pipeline.length})` : ''}`, href: `/m/partners?market=${d.market}&tab=pipeline` }]} />}
+      {!hasData(d.market) ? <AgencyMarket code={d.market} /> : tab === 'pipeline' ? (
+        <section className="card stack">
+          <div className="card-h"><div><h2>Your distributor pipeline in {countryName(d.market)}</h2>
+            <p className="note">Shortlist from the list, compare them side by side, move each one along as talks progress. Asking us for an introduction moves it for you.</p></div></div>
+          {!pipelineOpen ? <PlanLock need="data" title="A pipeline of distributors" u={u} market={d.market}>Shortlist distributors, compare them, and track every conversation to a signed agreement.</PlanLock>
+            : d.pipeline.length === 0 ? <Empty>Nobody shortlisted yet. Open <Link href={`/m/partners?market=${d.market}`}>the list</Link> and press Shortlist on the distributors worth a conversation.</Empty> : (
+            <div className="tbl-wrap"><table className="tbl">
+              <thead><tr><th>Distributor</th><th>Stage</th><th className="r hide-m">Products</th><th className="r hide-m">Molecules</th><th className="hide-m">Strongest in</th><th className="r">Open to yours</th><th></th></tr></thead>
+              <tbody>{d.pipeline.map((x) => (
+                <tr key={x.id}>
+                  <td><span className="nm">{x.name ?? `Distributor ${x.code}`}</span>{x.name && <span className="sub2"> · {x.code}</span>}
+                    {x.note && <div className="sub2">{x.note}</div>}<div className="sub2">moved {ago(x.updated_at)}</div></td>
+                  <td>
+                    <form action={movePipeline} className="stack" style={{ gap: 4 }}>
+                      <input type="hidden" name="id" value={x.id} /><input type="hidden" name="market" value={d.market} />
+                      <span className={`pill ${PIPELINE_TONE[x.stage] ?? ''}`} style={{ alignSelf: 'flex-start' }}>{PIPELINE_STAGES.find(([k]) => k === x.stage)?.[1] ?? x.stage}</span>
+                      <div className="row" style={{ gap: 4 }}>
+                        <select className="input" name="stage" defaultValue={x.stage} aria-label={`Stage for ${x.name ?? x.code}`} style={{ minHeight: 32, fontSize: 13 }}>
+                          {PIPELINE_STAGES.map(([k, l]) => <option key={k} value={k}>{l}</option>)}</select>
+                        <input className="input" name="note" defaultValue={x.note ?? ''} placeholder="Note" aria-label={`Note for ${x.name ?? x.code}`} maxLength={600} style={{ minHeight: 32, fontSize: 13, width: 140 }} />
+                        <button className="btn btn-ghost btn-sm" type="submit">Move</button>
+                      </div>
+                    </form>
+                  </td>
+                  <td className="r hide-m num">{x.products ?? 0}</td><td className="r hide-m num">{x.molecules ?? 0}</td>
+                  <td className="hide-m small">{x.top_classes ?? ''}</td>
+                  <td className="r">{matching ? <span className={`pill ${x.open_to > 0 ? 'mint' : ''}`}>{x.open_to} of {mineN}</span> : <PlanLock compact need="access" title="Open to" u={u} market={d.market} />}</td>
+                  <td className="r"><div className="row" style={{ gap: 4, justifyContent: 'flex-end' }}>
+                    {intro && x.stage === 'shortlisted' && <Link className="btn btn-blue btn-sm" href={`/m/partners/intro?code=${x.code}`}>Introduce</Link>}
+                    <form action={removeFromPipeline}><input type="hidden" name="id" value={x.id} /><input type="hidden" name="market" value={d.market} />
+                      <button className="btn-link small" type="submit" aria-label={`Remove ${x.name ?? x.code}`}>Remove</button></form></div></td>
+                </tr>))}</tbody>
+            </table></div>)}
+        </section>
+      ) : (<>
         <form method="get" className="card tight stack" style={{ gap: 10 }}>
           <input type="hidden" name="market" value={d.market} />
           {sp.names === '1' && <input type="hidden" name="names" value="1" />}
@@ -103,8 +147,13 @@ export default async function Partners({ searchParams }: { searchParams: Promise
                     {d.molecule && <span className={`pill ${p.carries ? '' : 'blue'}`}>{p.carries ? `Already carries ${d.molecule.inn}` : `Does not carry ${d.molecule.inn}`}</span>}
                   </div>
                 </div>
-                {!intro ? <PlanLock compact need="entry" title="Introduction" />
-                  : <Link className="btn btn-blue btn-sm" href={`/m/partners/intro?code=${p.code}`}>Request introduction</Link>}
+                <div className="row" style={{ gap: 6 }}>
+                  {pipelineOpen && (inPipe.has(p.code) ? <Link className="pill mint" href={`/m/partners?market=${d.market}&tab=pipeline`}>In your pipeline</Link>
+                    : <form action={addToPipeline}><input type="hidden" name="market" value={d.market} /><input type="hidden" name="code" value={p.code} /><input type="hidden" name="return" value={here} />
+                        <button className="btn btn-ghost btn-sm" type="submit">Shortlist</button></form>)}
+                  {!intro ? <PlanLock compact need="entry" title="Introduction" />
+                    : <Link className="btn btn-blue btn-sm" href={`/m/partners/intro?code=${p.code}`}>Request introduction</Link>}
+                </div>
               </div>))}</div>)}
           {!lists && total > shown.length && (
             <div style={{ marginTop: 12 }}><PlanLock need="access" title={`${total - shown.length} more ${noun}`} u={u} market={d.market}>

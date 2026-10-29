@@ -11,7 +11,7 @@ export const metadata = { title: 'Inbox' };
 
 const KIND: Record<string, [string, string]> = {
   competitor: ['New competitor', 'peach'], registration: ['Registration', 'lav'], tender: ['Tender', 'blue'], price: ['Price moved', 'mint'],
-  regulatory: ['Requirement', 'lav'], notice: ['Regulator notice', 'peach'], system: ['Nazryx', ''],
+  regulatory: ['Requirement', 'lav'], notice: ['Regulator notice', 'peach'], opportunity: ['Opportunity', 'mint'], system: ['Nazryx', ''],
 };
 
 // What moved while you were away: new competitors, tenders, price moves, requirements and notices, on your molecules

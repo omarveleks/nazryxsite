@@ -107,7 +107,8 @@ export default async function MfrProduct({ params, searchParams }: { params: Pro
   return (
     <Shell user={u} title={p.inn ?? p.name} crumb={<><Link href="/m/products">My products</Link> / {p.inn ?? p.name}</>}
       sub={[p.inn ? p.name : null, cls].filter(Boolean).join(' · ') || 'Product'}
-      actions={<Link className="btn btn-blue btn-sm" href={`/m/services?product=${id}`}>Get help with this product</Link>}>
+      actions={<>{p.molecule_id && hasData(market) && <Link className="btn btn-ghost btn-sm" href={`/m/molecules/${p.molecule_id}?market=${market}`}>All on {p.inn ?? 'this molecule'} in {countryName(market)}</Link>}
+        <Link className="btn btn-blue btn-sm" href={`/m/services?product=${id}`}>Get help with this product</Link></>}>
       <Flash sp={sp} />
       {d.sampled && <div className="ok" role="status">Your free full read: every section of this product is open.</div>}
       {sp.added && <div className="ok" role="status">Added. {p.molecule_id ? 'Here is how it fits your markets.' : 'Our team is matching it to the market.'}</div>}

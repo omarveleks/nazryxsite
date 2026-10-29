@@ -393,6 +393,9 @@ export async function requestIntro(f: FormData) {
       const r = await one(db, `insert into engagements (user_id, kind, country, product_id, detail) values ($1, 'market_entry', $2, $3, $4) returning id`,
         [u.id, country, picked.length === 1 ? picked[0] : null, lines]);
       await teamNote(db, 'Introduction requested', `${u.email} asked for an introduction${code ? ` to distributor profile ${code}` : ''} in ${country}. Engagement #${r!.id}.`);
+      if (code) await db.query(`insert into partner_pipeline (user_id, country, company_id, stage) select $1, $2, partner_in_market($2, $3), 'intro_requested'
+                                where partner_in_market($2, $3) is not null on conflict (user_id, country, company_id) do update set stage = 'intro_requested', updated_at = now()
+                                where partner_pipeline.stage in ('shortlisted', 'dropped')`, [u.id, country, code]);
       return r!.id as number;
     });
   } catch (e) {

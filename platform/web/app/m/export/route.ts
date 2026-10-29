@@ -3,6 +3,7 @@ import { getUser } from '@/lib/auth';
 import { rows, withUser } from '@/lib/db';
 import { PRICE_SQL, priceFor, packOf, unitShort, type MoleculePrice } from '@/lib/prices';
 import { canUse, countryName, tierIn } from '@/lib/mfr';
+import { finderParams } from '@/lib/finder';
 
 export const dynamic = 'force-dynamic';
 
@@ -51,6 +52,12 @@ export async function GET(req: NextRequest) {
       const names = Object.fromEntries((await rows(db, 'select code, name from partner_names($1)', [market])).map((r) => [r.code, r.name]));
       return file(`nazryx-distributors-${market}-${day}.csv`, csv(['Code', 'Name', 'Registered products', 'Molecules', 'Classes', 'Strongest in', 'Open to your molecules', 'Local'],
         list.map((r) => [r.code, names[r.code] ?? '', r.products, r.molecules, r.classes, r.top_classes, r.open_to, r.local_maker ? 'yes' : ''])));
+    }
+    if (what === 'finder') {
+      const p = finderParams(Object.fromEntries(sp.entries()));
+      const list = await rows(db, 'select * from find_opportunities($1, $2, $3, $4, $5, $6, $7, false, $8)', [market, p.category, p.demand, p.max, p.essential, p.form, p.price, p.mine]);
+      return file(`nazryx-opportunities-${market}-${day}.csv`, csv(['Molecule', 'Class', 'Companies selling it', 'Registered products', 'On essential list', 'On WHO list', 'Demand', 'Fit score', 'Forms', 'Price USD per unit', 'Unit', 'Price confidence', 'In your catalogue', 'Made locally'],
+        list.map((r) => [r.inn, r.category, r.registrants, r.registrations, r.on_national_list ? 'yes' : '', r.on_who_eml ? 'yes' : '', r.demand, r.score, r.forms, r.unit_usd, r.unit, r.confidence, r.mine ? 'yes' : '', r.local_made])));
     }
     if (what === 'tenders') {
       const list = await rows(db, `select coalesce(t.title_en, t.title) as title, coalesce(t.buyer_en, t.buyer) as buyer, t.stage, t.published, t.closing, t.awarded, t.quantity, t.unit_price, t.value, t.currency, t.bidders, t.url,

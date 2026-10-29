@@ -86,6 +86,21 @@ def build(cur, user_id, since):
             dict(since=since, c=countries)).fetchall():
         put("regulatory", f"req:{rq}", f"{cname}: {title[:90]}", f"A requirement under {topic} was published or updated.", f"/m/regulatory?market={country}", country)
 
+    # saved searches: a molecule that newly matches one
+    for sid, sname, country, params, seen, cname in cur.execute("""
+        select s.id, s.name, s.country, s.params, s.seen_ids, k.name from saved_searches s join countries k on k.code = s.country
+        where s.user_id = %(u)s and (s.checked_at is null or s.checked_at < now() - interval '50 minutes')""", dict(u=user_id)).fetchall():
+        p = params or {}
+        found = {mid: inn for mid, inn in cur.execute("""select molecule_id, inn from find_opportunities(%s, %s, %s, %s, %s, %s, %s, false, false)""",
+                                                     (country, p.get("category"), p.get("demand"), p.get("max"), bool(p.get("essential")), p.get("form"), p.get("price"))).fetchall()}
+        new = sorted(set(found) - set(seen or []))
+        if seen is not None and new:         # the first run only records what is there
+            inns = ", ".join(found[m] for m in new[:6]) + (f" and {len(new) - 6} more" if len(new) > 6 else "")
+            put("opportunity", f"search:{sid}:{cur.execute('select current_date').fetchone()[0]}:{len(new)}",
+                f"{len(new)} new {'molecule matches' if len(new) == 1 else 'molecules match'} \"{sname}\" in {cname}",
+                f"{inns}.", f"/m/finder?market={country}&" + "&".join(f"{k}={1 if v is True else v}" for k, v in p.items() if v is not None and v is not False and v != ""), country)
+        cur.execute("update saved_searches set seen_ids = %s, checked_at = now() where id = %s", (sorted(found), sid))
+
     # regulator notices naming their products
     cur.execute("savepoint inbox_news")
     try:
