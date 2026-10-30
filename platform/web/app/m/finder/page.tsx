@@ -38,7 +38,7 @@ export default async function Finder({ searchParams }: { searchParams: Promise<R
   const filtered = Boolean(p.category || p.demand != null || p.max != null || p.essential || p.form || p.price != null || p.mine);
   const q = finderQuery(m, p);
   return (
-    <Shell user={u} title={t('Opportunities')} sub={t('Which molecules to register next in {market}', { market: t(countryName(m)) })}
+    <Shell user={u} help={t('Use the filters to narrow the molecules, then sort by fit. Fit mixes demand (official list, tenders) with how many already sell it. Save a search and we run it every hour: a new match lands in your inbox.')} title={t('Opportunities')} sub={t('Which molecules to register next in {market}', { market: t(countryName(m)) })}
       actions={full && hasData(m) ? <a className="btn btn-ghost btn-sm" href={`/m/export?what=finder&${q}`}>{t('Excel (CSV)')}</a> : undefined}>
       <Flash sp={sp} />
       <MarketPicker u={u} targets={d.targets} current={m} path="/m/finder" />

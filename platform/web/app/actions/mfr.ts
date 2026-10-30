@@ -333,6 +333,38 @@ export async function deleteMfrProduct(f: FormData) {
   redirect('/m/products');
 }
 
+/** Several products at once: watch their molecules, start a project for each in a market, or remove them. */
+export async function bulkProducts(f: FormData) {
+  const u = await requireUser({ manufacturer: true });
+  const ids = f.getAll('ids').map((x) => parseInt(String(x), 10)).filter((n) => Number.isFinite(n)).slice(0, 300);
+  const act = str(f, 'act', 10);
+  const to = safeNext(str(f, 'return', 200), '/m/products');
+  if (!ids.length) back(to, { error: 'Tick at least one product first.' });
+  if (act === 'watch' && !canUse(u.mfr_tier, 'competitors')) redirect('/m/plan?want=data');
+  let n = 0;
+  try {
+    await withUser(u.id, async (db) => {
+      if (act === 'remove') {
+        n = (await db.query('delete from mfr_products where user_id = $1 and id = any($2)', [u.id, ids])).rowCount ?? 0;
+      } else if (act === 'watch') {
+        n = (await db.query(`insert into watches (user_id, molecule_id) select distinct $1::uuid, molecule_id from mfr_products
+                             where user_id = $1 and id = any($2) and molecule_id is not null on conflict do nothing`, [u.id, ids])).rowCount ?? 0;
+      } else if (act === 'project') {
+        const country = str(f, 'country', 2);
+        if (!MFR_COUNTRIES.some((c) => c.code === country)) throw new Error('Pick a market for the projects.');
+        const owner = u.owner_id ?? u.id;
+        const r = await db.query(`insert into projects (user_id, product_id, country, owner_id) select $1, p.id, $3, $4 from mfr_products p
+                                  where p.user_id = $2 and p.id = any($5) on conflict (product_id, country) do nothing`, [owner, u.id, country, u.id, ids]);
+        n = r.rowCount ?? 0;
+      } else throw new Error('Unknown action.');
+    });
+  } catch (e) {
+    if (isRedirect(e)) throw e;
+    back(to, { error: errText(e) });
+  }
+  back(act === 'project' ? '/m/projects' : to, { saved: '1', bulk: `${act}:${n}` });
+}
+
 /** Empty the portfolio in one go: every product (and its launch tracker rows) and the molecules watched. */
 export async function deleteAllMfrProducts() {
   const u = await requireUser({ manufacturer: true });

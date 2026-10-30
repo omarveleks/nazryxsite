@@ -26,23 +26,33 @@ export default async function Projects({ searchParams }: { searchParams: Promise
         (select count(*)::int from project_tasks k where k.project_id = pr.id and k.done_at is not null) as done,
         (select min(k.due_date) from project_tasks k where k.project_id = pr.id and k.done_at is null and k.due_date is not null) as next_due,
         (select count(*)::int from engagements e where e.project_id = pr.id and e.status = 'open') as services,
+        rt.months_low, rt.months_high,
         o.name as owner
         from projects pr join mfr_products p on p.id = pr.product_id left join molecules m on m.id = p.molecule_id left join users o on o.id = pr.owner_id
+        left join lateral (select months_low, months_high from country_routes where country = pr.country and scope = 'medicine' order by sort limit 1) rt on true
         where pr.user_id = $1 order by pr.updated_at desc`, [u.owner_id ?? u.id]);
     const products = await rows(db, `select p.id, coalesce(m.inn, p.name) as name from mfr_products p left join molecules m on m.id = p.molecule_id where p.user_id = $1 order by 2 limit 300`, [u.owner_id ?? u.id]);
     return { targets, list, products };
   });
   const view = sp.view === 'list' ? 'list' : 'board';
   const shown = sp.market && d.targets.includes(sp.market) ? d.list.filter((p) => p.country === sp.market) : d.list;
+  // when a decision can be expected: counted from the filing for a submitted project, from today for the ones before it
+  const decision = (p: any) => {
+    if (p.months_low == null || ['approved', 'distributor', 'launched', 'parked'].includes(p.stage)) return null;
+    const base = p.stage === 'submitted' ? new Date(p.updated_at) : new Date();
+    const at = (m: number) => { const d = new Date(base); d.setMonth(d.getMonth() + Number(m)); return d.toLocaleDateString('en-GB', { month: 'short', year: 'numeric' }); };
+    return `${at(p.months_low)} – ${at(p.months_high ?? p.months_low)}`;
+  };
   const Card = ({ p }: { p: any }) => (
     <Link href={`/m/projects/${p.id}`} className="rcard stack" style={{ gap: 4, textDecoration: 'none', color: 'inherit' }}>
       <b>{p.name}</b>
       <span className="sub2">{t(countryName(p.country))}{p.owner ? ` · ${p.owner}` : ''}</span>
       <div className="meter" title={`${p.done} of ${p.tasks} tasks done`}><i style={{ width: `${Math.round(readiness(p.stage, Array.from({ length: p.tasks }, (_, i) => ({ done_at: i < p.done ? 'x' : null }))) * 100)}%` }} /></div>
       <span className="sub2">{p.tasks ? `${p.done}/${p.tasks} ${t('tasks')}` : t('no tasks yet')}{p.next_due ? ` · ${t('next')} ${fmtDate(p.next_due)}` : ''}{p.services ? ` · ${p.services} ${t('with Nazryx')}` : ''}</span>
+      {decision(p) && <span className="sub2">{p.stage === 'submitted' ? t('Decision expected') : t('If filed now, decision')} <b className="num">{decision(p)}</b></span>}
     </Link>);
   return (
-    <Shell user={u} title={t('Projects')} sub={t('One project per product and market, from assessment to the shelf')}
+    <Shell user={u} help={t('One project per product and market. Move it across the stages; each stage brings its usual tasks and the documents the market asks for. Book a Nazryx service onto a stage when you want it done for you.')} title={t('Projects')} sub={t('One project per product and market, from assessment to the shelf')}
       actions={<><Link className="btn btn-ghost btn-sm" href="/m/activity">{t('Activity')}</Link><Link className="btn btn-ghost btn-sm" href="/m/calendar">{t('Calendar')}</Link></>}>
       <Flash sp={sp} />
       <div className="between" style={{ flexWrap: 'wrap', gap: 10 }}>
@@ -60,7 +70,7 @@ export default async function Projects({ searchParams }: { searchParams: Promise
         {d.targets.map((c) => <Link key={c} className={`pill ${sp.market === c ? 'solid' : ''}`} href={`/m/projects?${view === 'list' ? 'view=list&' : ''}market=${c}`}>{t(countryName(c))} · {d.list.filter((p) => p.country === c).length}</Link>)}
       </div>}
       {d.list.length === 0 ? (
-        <section className="card"><Empty>{t('No project yet. Pick a product and a market above, or press “Start a project” on any product page. We add the usual tasks for each stage; you tick them off, and ask us when you want a stage done for you.')}</Empty></section>
+        <section className="card"><Empty action={{ href: '/m/products', label: t('Open my products') }}>{t('No project yet. Pick a product and a market above, or press “Start a project” on any product page. We add the usual tasks for each stage; you tick them off, and ask us when you want a stage done for you.')}</Empty></section>
       ) : view === 'board' ? (
         <div className="board">{PROJECT_STAGES.map(([k, label]) => (
           <div key={k} className="col"><div className="between small"><b>{t(label)}</b><span className="muted num">{shown.filter((p) => p.stage === k).length}</span></div>
@@ -68,11 +78,11 @@ export default async function Projects({ searchParams }: { searchParams: Promise
       ) : (
         <section className="card">
           <div className="tbl-wrap" tabIndex={0}><table className="tbl">
-            <thead><tr><th>{t('Product')}</th><th>{t('Market')}</th><th>{t('Stage')}</th><th className="hide-m">{t('Tasks')}</th><th className="hide-m">{t('Next due')}</th><th className="hide-m">{t('Owner')}</th><th className="r">{t('Updated')}</th></tr></thead>
+            <thead><tr><th>{t('Product')}</th><th>{t('Market')}</th><th>{t('Stage')}</th><th className="hide-m">{t('Tasks')}</th><th className="hide-m">{t('Next due')}</th><th className="hide-m">{t('Decision')}</th><th className="hide-m">{t('Owner')}</th><th className="r">{t('Updated')}</th></tr></thead>
             <tbody>{shown.map((p) => (
               <tr key={p.id}><td><Link href={`/m/projects/${p.id}`}><b>{p.name}</b></Link></td><td>{t(countryName(p.country))}</td>
                 <td><span className={`pill ${STAGE_TONE[p.stage] ?? ''}`}>{t(stageLabel(p.stage))}</span></td>
-                <td className="hide-m num">{p.done}/{p.tasks}</td><td className="hide-m small">{p.next_due ? fmtDate(p.next_due) : ''}</td><td className="hide-m small">{p.owner ?? ''}</td>
+                <td className="hide-m num">{p.done}/{p.tasks}</td><td className="hide-m small">{p.next_due ? fmtDate(p.next_due) : ''}</td><td className="hide-m small num">{decision(p) ?? ''}</td><td className="hide-m small">{p.owner ?? ''}</td>
                 <td className="r small muted">{ago(p.updated_at)}</td></tr>))}
               {shown.some((p) => p.stage === 'parked') ? null : null}
             </tbody></table></div>

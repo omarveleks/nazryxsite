@@ -60,7 +60,7 @@ export default async function Simulator({ searchParams }: { searchParams: Promis
   const focus = table.find((r) => r.c === sp.market) ?? table.find((r) => r.open && r.p) ?? table[0];
   const money = (v: number) => (v < 1 ? v.toFixed(3) : fmtMoney(v));
   return (
-    <Shell user={u} title={t('Pricing')} sub={t('Your ex-works price on every shelf, against what the market pays')}>
+    <Shell user={u} help={t('Start from the shelf price in a market and work back through the pharmacy, distributor, duty and freight margins to the price you can sell at. Change any margin to see the effect.')} title={t('Pricing')} sub={t('Your ex-works price on every shelf, against what the market pays')}>
       <form method="get" className="card tight stack" style={{ gap: 10 }} aria-label={t('Pricing inputs')}>
         <div className="row" style={{ alignItems: 'flex-end' }}>
           <label className="small" style={{ flex: '2 1 200px' }}>{t('Molecule')}

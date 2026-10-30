@@ -57,7 +57,7 @@ export default async function Calendar({ searchParams }: { searchParams: Promise
   const days = (v: string) => Math.round((new Date(v).getTime() - new Date(today).getTime()) / 864e5);
   const byMonth = shown.reduce<Record<string, typeof shown>>((acc, x) => { const k = new Date(x.on).toLocaleDateString('en-GB', { month: 'long', year: 'numeric' }); (acc[k] ??= []).push(x); return acc; }, {});
   return (
-    <Shell user={u} title={t('Calendar')} sub={t('Renewals, tenders closing, task due dates, launches and your own dates, in one list')}
+    <Shell user={u} help={t('Dates from your projects, renewals, tenders closing on your molecules and calls with us, in one list. Add your own dates for anything else.')} title={t('Calendar')} sub={t('Renewals, tenders closing, task due dates, launches and your own dates, in one list')}
       actions={<a className="btn btn-ghost btn-sm" href="/m/calendar/ics">{t('Subscribe (.ics)')}</a>}>
       <Flash sp={sp} />
       <div className="row" style={{ gap: 6 }}>
@@ -66,7 +66,7 @@ export default async function Calendar({ searchParams }: { searchParams: Promise
       </div>
       <div className="split">
         <section className="card stack">
-          {shown.length === 0 ? <Empty>{sp.past ? t('Nothing in the past.') : t('Nothing coming up. Dates arrive from your projects, renewals, tenders on your molecules and the entries you add here.')}</Empty>
+          {shown.length === 0 ? <Empty action={sp.past ? undefined : { href: '/m/projects', label: t('Start a project') }}>{sp.past ? t('Nothing in the past.') : t('Nothing coming up. Dates arrive from your projects, renewals, tenders on your molecules and the entries you add here.')}</Empty>
             : Object.entries(byMonth).map(([month, xs]) => (
               <div key={month} className="stack" style={{ gap: 4 }}><span className="lbl">{month}</span>
                 {xs.map((x) => { const k = KINDS[x.kind] ?? [x.kind, '']; const dd = days(x.on); return (

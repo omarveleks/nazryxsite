@@ -5,8 +5,9 @@ import MedicineSearch from '@/components/MedicineSearch';
 import AutoRefresh from '@/components/AutoRefresh';
 import { Bar, Empty, Flash, LockIcon, PlanLock, Tabs } from '@/components/ui';
 import PortfolioGrid from '@/components/PortfolioGrid';
+import TileIcon from '@/components/TileIcon';
 import { DemandIcon } from '@/components/Icons';
-import { addMfrProducts, deleteAllMfrProducts, deleteMfrFile, unwatchMolecule, uploadMfrFile, watchMolecule } from '@/app/actions/mfr';
+import { addMfrProducts, bulkProducts, deleteAllMfrProducts, deleteMfrFile, unwatchMolecule, uploadMfrFile, watchMolecule } from '@/app/actions/mfr';
 import { requireUser } from '@/lib/auth';
 import { langOf, setLang } from '@/lib/i18n';
 import { one, rows, withUser } from '@/lib/db';
@@ -41,7 +42,7 @@ const GROUP_TYPE: Record<string, string> = { eye_drops: 'eye', contact_lens: 'ey
   eye_surgery: 'injection', joint: 'injection', dermal_filler: 'injection' };
 
 // The manufacturer's catalogue against its markets: a portfolio dashboard on top, then every product.
-export default async function MfrProducts({ searchParams }: { searchParams: Promise<{ added?: string; matched?: string; error?: string; market?: string; tab?: string; saved?: string; uploaded?: string; removed?: string; reading?: string; cleared?: string }> }) {
+export default async function MfrProducts({ searchParams }: { searchParams: Promise<{ added?: string; matched?: string; error?: string; market?: string; tab?: string; saved?: string; uploaded?: string; removed?: string; bulk?: string; reading?: string; cleared?: string }> }) {
   const sp = await searchParams;
   const u = await requireUser({ manufacturer: true });
   const t = setLang(langOf(u));
@@ -163,7 +164,7 @@ export default async function MfrProducts({ searchParams }: { searchParams: Prom
   const visible = (i: number) => analysis || i < 3;
 
   return (
-    <Shell user={u} title={t('My products')} sub={t('Your catalogue against {market}', { market: t(countryName(market)) })}
+    <Shell user={u} help={t('Add products by name or upload your catalogue; we match each to its molecule. Tick several products to watch them, start projects or remove them in one go. Open a product for its market read and documents.')} title={t('My products')} sub={t('Your catalogue against {market}', { market: t(countryName(market)) })}
       actions={<>{analysis && <a className="btn btn-ghost btn-sm" href={`/m/export?what=${sp.tab === 'grid' ? 'grid' : 'products'}&market=${market}`}>{t('Excel (CSV)')}</a>}
         <a className="btn btn-blue btn-sm" href="/m/products#add">{t('Add a product')}</a></>}>
       <Flash sp={sp} />
@@ -221,13 +222,13 @@ export default async function MfrProducts({ searchParams }: { searchParams: Prom
 
       {!hasData(market) ? <AgencyMarket code={market} /> : n > 0 && (<>
         <div className="grid g4" data-tour="portfolio">
-          <div className="tile t-white"><span className="k">{t('Medicines')}</span><span className="v num">{n}</span><span className="small">{packs} products{packs > matched ? `, ${packs - matched} not matched yet` : ''}</span></div>
+          <div className="tile t-white"><span className="k"><TileIcon name="My products" /> {t('Medicines')}</span><span className="v num">{n}</span><span className="small">{packs} products{packs > matched ? `, ${packs - matched} not matched yet` : ''}</span></div>
           <div className="tile t-peach"><span className="k"><DemandIcon /> {t('In high demand')}</span>
             <span className="v num">{mols.filter((p) => Number(p.f?.demand ?? 0) >= HIGH_DEMAND).length}</span>
             <span className="small">{by('open') + by('absent')} of your medicines have no competitors here</span></div>
           {analysis ? (<>
-            <div className="tile t-blue"><span className="k">{t('Average competitors')}</span><span className="v num">{avg}</span><span className="small">{t('per medicine already on the market')}</span></div>
-            <div className="tile t-mint"><span className="k">{t('Top class')}</span><span className="v" style={{ fontSize: 20, lineHeight: 1.2 }}>{top?.cls ?? '—'}</span>
+            <div className="tile t-blue"><span className="k"><TileIcon name="Partners" /> {t('Average competitors')}</span><span className="v num">{avg}</span><span className="small">{t('per medicine already on the market')}</span></div>
+            <div className="tile t-mint"><span className="k"><TileIcon name="Regulatory" /> {t('Top class')}</span><span className="v" style={{ fontSize: 20, lineHeight: 1.2 }}>{top?.cls ?? '—'}</span>
               <span className="small">{top ? `${top.n} of your medicines` : ''}</span></div>
           </>) : <div style={{ gridColumn: 'span 2' }}><PlanLock need="data" title={t('Your portfolio analysis')} u={u} market={market}>{t('Competition and depth for every product, your strongest classes, and where you are open.')}</PlanLock></div>}
         </div>
@@ -255,10 +256,11 @@ export default async function MfrProducts({ searchParams }: { searchParams: Prom
               </form></details>}</span></div>
         {n === 0 ? <Empty>{t('No products yet. Search for your first one below.')}</Empty> : (
           <div className="tbl-wrap" tabIndex={0}><table className="tbl">
-            <thead><tr><th>{t('Product')}</th><th className="hide-m">{t('Class')}</th>
+            <thead><tr><th className="sel"><span className="sr-only">{t('Select')}</span></th><th>{t('Product')}</th><th className="hide-m">{t('Class')}</th>
               <th className="r">Competition in {countryName(market)}</th><th className="r hide-m">{t('Average price')}</th></tr></thead>
             <tbody>{mols.map((p, i) => (
               <tr key={p.id}>
+                <td className="sel"><input type="checkbox" name="ids" value={p.id} form="bulk" aria-label={t('Select {name}', { name: p.inn ?? p.name })} /></td>
                 <td><Link href={`/m/products/${p.id}`}><b>{p.inn ?? p.name}</b></Link>
                   {Number(p.f?.demand ?? 0) >= HIGH_DEMAND && visible(i) && <span style={{ marginLeft: 6, color: 'var(--pastel-peach-ink)' }}><DemandIcon size={11} title={t('High demand')} /></span>}
                   <div className="sub2">{[p.packs > 1 ? `${p.packs} products` : p.inn ? p.name : null, p.variants || null, p.device ? 'Medical device' : p.molecule_id ? null : 'Not matched yet'].filter(Boolean).join(' · ')}</div></td>
@@ -282,6 +284,19 @@ export default async function MfrProducts({ searchParams }: { searchParams: Prom
                   return q ? <>{fmt(q.price)} / {q.per}<div className="sub2">{CONFIDENCE[q.confidence ?? 'estimated'].label}</div></> : '—';
                 })()}</td>
               </tr>))}</tbody></table></div>)}
+        {n > 0 && (
+          <form id="bulk" action={bulkProducts} className="bulkbar">
+            <input type="hidden" name="return" value={`/m/products?market=${market}`} />
+            <span className="small muted">{t('With the ticked products:')}</span>
+            <button className="btn btn-ghost btn-sm" type="submit" name="act" value="watch">{t('Watch their molecules')}</button>
+            <span className="row" style={{ gap: 6 }}>
+              <select className="input" name="country" aria-label={t('Market for the projects')} style={{ minHeight: 34, fontSize: 13, width: 'auto' }} defaultValue={market}>
+                {d.targets.map((c) => <option key={c} value={c}>{t(countryName(c))}</option>)}</select>
+              <button className="btn btn-ghost btn-sm" type="submit" name="act" value="project">{t('Start projects')}</button></span>
+            <button className="btn btn-ghost btn-sm" type="submit" name="act" value="remove" formNoValidate>{t('Remove')}</button>
+          </form>)}
+        {sp.bulk && <p className="ok small" role="status">{(() => { const [a, k] = String(sp.bulk).split(':'); const n = Number(k);
+          return a === 'watch' ? t('{n} molecules watched', { n }) : a === 'project' ? t('{n} projects started', { n }) : t('{n} products removed', { n }); })()}</p>}
       </section>
 
       </>)}

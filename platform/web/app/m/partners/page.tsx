@@ -59,7 +59,7 @@ export default async function Partners({ searchParams }: { searchParams: Promise
   const pipelineOpen = canUse(tier, 'portfolio');
   const here = `/m/partners?market=${d.market}${d.cls ? `&class=${encodeURIComponent(d.cls)}` : ''}${d.molecule ? `&molecule=${d.molecule.id}` : ''}${d.group ? `&group=${d.group}` : ''}`;
   return (
-    <Shell user={u} title={t('Partners')} sub={t('Who could carry your products in {market}', { market: t(countryName(d.market)) })}
+    <Shell user={u} help={t('The companies holding registrations in this market, strongest first. Filter by class or by a molecule they do not carry yet. Shortlist the ones that fit; names and introductions come with Complete Market Access.')} title={t('Partners')} sub={t('Who could carry your products in {market}', { market: t(countryName(d.market)) })}
       actions={u.role === 'team'
         ? <Link className="btn btn-blue btn-sm" href={`/m/partners?market=${d.market}${sp.names === '1' ? '' : '&names=1'}`}>{sp.names === '1' ? t('Hide names') : t('Show names')}</Link>
         : <>{lists && <a className="btn btn-ghost btn-sm" href={`/m/export?what=partners&market=${d.market}`}>{t('Excel (CSV)')}</a>}

@@ -34,7 +34,7 @@ export default async function Inbox({ searchParams }: { searchParams: Promise<{ 
   const total = d.counts.reduce((t, c) => t + c.n, 0);
   const date = (v: string | Date) => new Date(v).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
   return (
-    <Shell user={u} title={t('Inbox')} sub={t('What moved in your markets and on your molecules')}>
+    <Shell user={u} help={t('Everything that moved on your molecules and markets: new competitors, tenders, price moves, requirements and deadlines. Unread items go out once a day by email or WhatsApp if you turn that on.')} title={t('Inbox')} sub={t('What moved in your markets and on your molecules')}>
       <Flash sp={sp} />
       <div className="row" style={{ gap: 6 }}>
         <Link className={`pill ${!sp.kind ? 'solid' : ''}`} href="/m/inbox">All{total ? ` (${total})` : ''}</Link>
@@ -44,7 +44,7 @@ export default async function Inbox({ searchParams }: { searchParams: Promise<{ 
       <div className="split">
         <section className="card">
           {d.items.length === 0 ? (
-            <Empty>{t('Nothing yet. Items arrive within an hour of a change: a new competitor on one of your molecules, a tender, a price that moved, a requirement published in one of your markets. Add products and watches to hear about more.')}</Empty>
+            <Empty action={{ href: '/m/products?tab=watch', label: t('Watch your molecules') }}>{t('Nothing yet. Items arrive within an hour of a change: a new competitor on one of your molecules, a tender, a price that moved, a requirement published in one of your markets. Add products and watches to hear about more.')}</Empty>
           ) : (
             <div>{d.items.map((x, i) => (
               <div key={x.id} className="between" style={{ alignItems: 'flex-start', gap: 12, padding: '10px 0', borderTop: i ? '1px solid var(--line)' : undefined,

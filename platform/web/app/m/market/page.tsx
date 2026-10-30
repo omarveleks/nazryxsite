@@ -75,7 +75,7 @@ export default async function MfrMarket({ searchParams }: { searchParams: Promis
   const m = d.market;
   const full = canUse(tierIn(u, m), 'market');
   return (
-    <Shell user={u} title={t('Market')} sub={hasData(m) ? `${countryName(m)}: size, openings and competition` : `${countryName(m)}: managed by Nazryx`}
+    <Shell user={u} help={t('Pick a market at the top. The tiles count what is registered and where the gaps are; the lists below show what the regulator asks for, who makes what, and what sells. Open any molecule for its competitors, prices and tenders.')} title={t('Market')} sub={hasData(m) ? `${countryName(m)}: size, openings and competition` : `${countryName(m)}: managed by Nazryx`}
       actions={hasData(m) ? (canUse(tierIn(u, m), 'market_read') ? <Link className="btn btn-ghost btn-sm" href={`/m/report?market=${m}`}>{t('Download market read')}</Link>
         : <PlanLock compact need="data" title={t('Market read (PDF)')} u={u} market={m} />) : undefined}>
       <MarketPicker u={u} targets={d.targets} current={m} path="/m/market" />

@@ -37,7 +37,7 @@ export default async function Ask({ searchParams }: { searchParams: Promise<{ a?
     return isList ? <ul key={i} style={{ margin: 0, paddingLeft: 18 }}>{lines.map((l, j) => <li key={j}>{inline(l.replace(/^\s*[-*•]\s/, ''))}</li>)}</ul> : <p key={i} style={{ margin: 0 }}>{lines.map((l, j) => <span key={j}>{inline(l)}{j < lines.length - 1 && <br />}</span>)}</p>;
   });
   return (
-    <Shell user={u} title={t('Ask Nazryx')} sub={t('A question over your own data and your markets. Every answer says where it came from.')}>
+    <Shell user={u} help={t('Ask a question in plain words about a molecule, a market or a distributor. The answer comes from the data you see here, with links to the pages behind it.')} title={t('Ask Nazryx')} sub={t('A question over your own data and your markets. Every answer says where it came from.')}>
       <Flash sp={sp} />
       <div className="split">
         <div className="stack">

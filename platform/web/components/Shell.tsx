@@ -10,8 +10,8 @@ import NavLinks from './NavLinks';
 import SearchBox from './SearchBox';
 import { signOut } from '@/app/actions/auth';
 
-export default function Shell({ user, title, sub, crumb, actions, children }: {
-  user: User; title: ReactNode; sub?: ReactNode; crumb?: ReactNode; actions?: ReactNode; children: ReactNode;
+export default function Shell({ user, title, sub, crumb, actions, help, children }: {
+  user: User; title: ReactNode; sub?: ReactNode; crumb?: ReactNode; actions?: ReactNode; help?: ReactNode; children: ReactNode;
 }) {
   const t = tt();
   const initials = (user.name || user.email).split(/[\s@.]+/).filter(Boolean).slice(0, 2).map((s) => s[0]!.toUpperCase()).join('');
@@ -68,6 +68,7 @@ export default function Shell({ user, title, sub, crumb, actions, children }: {
               {actions}
             </div>)}
         </header>
+        {help && <details className="explain"><summary>{t('How to use this page')}</summary><p>{help}</p></details>}
         {user.account_type === 'manufacturer' && user.role !== 'team' && user.tour_step ? <TourBar step={user.tour_step} /> : null}
         {children}
       </main>

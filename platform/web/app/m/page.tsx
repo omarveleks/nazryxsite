@@ -1,5 +1,8 @@
 import Link from 'next/link';
 import Shell from '@/components/Shell';
+import NextActions from '@/components/NextActions';
+import TileIcon from '@/components/TileIcon';
+import { loadNextActions } from '@/lib/next';
 import LocalTime from '@/components/LocalTime';
 import { ManagedBadge, hasData, loadLive, pickMarket, targetMarkets } from '@/components/MarketPicker';
 import { DemandIcon, VerifiedIcon } from '@/components/Icons';
@@ -48,7 +51,7 @@ export default async function MfrHome({ searchParams }: { searchParams: Promise<
     const focus = hasData(chosen) && (!u.mfr_active || covers(u, chosen)) ? chosen : inPlan[0] ?? (hasData(chosen) ? chosen : live[0] ?? 'TZ');
     const full = canUse(tierIn(u, focus), 'portfolio');
     const watchMarkets = u.mfr_active ? inPlan : live;
-    const [counts, first, watch, engagements, deadlines, call, zone, products, own] = await Promise.all([
+    const [counts, first, watch, engagements, deadlines, call, zone, products, own, actions] = await Promise.all([
       one(db, `select count(*)::int as products, count(p.molecule_id)::int as matched,
         count(*) filter (where g.demand >= ${HIGH_DEMAND})::int as high,
         count(*) filter (where cm.registrants <= 3 and (cm.registrations > 0 or cm.on_national_list))::int as few,
@@ -69,6 +72,7 @@ export default async function MfrHome({ searchParams }: { searchParams: Promise<
         left join molecules m on m.id = p.molecule_id where p.user_id = $1 and p.molecule_id is not null order by 2 limit 200`, [u.id]),
       one(db, `select count(*)::int as n, array_agg(distinct r.country) as markets from registrations r
         join manufacturer_profiles mp on mp.user_id = $1 where r.active and r.manufacturer_id = any(mp.company_ids)`, [u.id]),
+      loadNextActions(db, u.id, targets, (c) => t(countryName(c))),
     ]);
     // the outcome line: what is moving for them right now
     const outcome = await one(db, `select
@@ -80,7 +84,7 @@ export default async function MfrHome({ searchParams }: { searchParams: Promise<
         (select count(distinct r.id)::int from registration_history h join registrations r on r.id = h.registration_id
            where h.created_at > now() - interval '30 days' and r.country = any($2) and r.molecule_id in (select molecule_id from mfr_products where user_id = $1 and molecule_id is not null)) as moved`,
       [u.owner_id ?? u.id, targets]);
-    return { profile, targets, focus, full, counts, first, watch, engagements, deadlines, products, call, zone, mine: own?.n ?? 0, mineMarkets: (own?.markets ?? []) as string[], outcome };
+    return { profile, targets, focus, full, counts, first, watch, engagements, deadlines, products, call, zone, actions, mine: own?.n ?? 0, mineMarkets: (own?.markets ?? []) as string[], outcome };
   });
   const p = d.profile;
   const full = d.full;
@@ -107,17 +111,16 @@ export default async function MfrHome({ searchParams }: { searchParams: Promise<
         {u.mfr_trial && u.mfr_trial_until ? ` Basic Market Data is open for you on ${countryName(u.mfr_markets[0])} until ${fmtDate(u.mfr_trial_until)}, free.` : ''}</div>}
       {!sp.welcome && u.mfr_trial && u.mfr_trial_until && <div className="note">{t('Trial: Basic Market Data on {market} until {date}.', { market: t(countryName(u.mfr_markets[0])), date: fmtDate(u.mfr_trial_until) })} <Link href="/m/plan">{t('See the plans')}</Link></div>}
 
-      {d.outcome && (d.outcome.intros + d.outcome.reviews + d.outcome.closing + d.outcome.projects + d.outcome.moved > 0) && (
-        <section className="card between" style={{ flexWrap: 'wrap', gap: 10 }}>
-          <span className="row" style={{ gap: 14, flexWrap: 'wrap' }}>
-            {d.outcome.projects > 0 && <Link href="/m/projects"><b className="num">{d.outcome.projects}</b> {t(d.outcome.projects === 1 ? 'project in progress' : 'projects in progress')}</Link>}
-            {d.outcome.intros > 0 && <Link href="/m/activity"><b className="num">{d.outcome.intros}</b> {t(d.outcome.intros === 1 ? 'introduction in progress' : 'introductions in progress')}</Link>}
-            {d.outcome.reviews > 0 && <Link href="/m/activity"><b className="num">{d.outcome.reviews}</b> {t(d.outcome.reviews === 1 ? 'dossier under review' : 'dossiers under review')}</Link>}
-            {d.outcome.closing > 0 && <Link href="/m/tenders?show=desk"><b className="num">{d.outcome.closing}</b> {t(d.outcome.closing === 1 ? 'tender closing this month' : 'tenders closing this month')}</Link>}
-            {d.outcome.moved > 0 && <Link href="/m/inbox"><b className="num">{d.outcome.moved}</b> {t(d.outcome.moved === 1 ? 'registration moved on your molecules' : 'registrations moved on your molecules')}</Link>}
-          </span>
-          <Link className="btn-link small" href="/m/calendar">{t('Calendar')}</Link>
-        </section>)}
+      <section className="pulse" aria-label={t('Your numbers')}>
+        <Link href="/m/products"><b className="num">{d.counts?.products ?? 0}</b><span>{t('products')}</span></Link>
+        <Link href="/m/market"><b className="num">{d.targets.filter((c) => hasData(c)).length}</b><span>{t('markets with data')}</span></Link>
+        {d.outcome && d.outcome.projects > 0 && <Link href="/m/projects"><b className="num">{d.outcome.projects}</b><span>{t(d.outcome.projects === 1 ? 'project in progress' : 'projects in progress')}</span></Link>}
+        {d.outcome && d.outcome.intros > 0 && <Link href="/m/activity"><b className="num">{d.outcome.intros}</b><span>{t(d.outcome.intros === 1 ? 'introduction in progress' : 'introductions in progress')}</span></Link>}
+        {d.outcome && d.outcome.reviews > 0 && <Link href="/m/activity"><b className="num">{d.outcome.reviews}</b><span>{t(d.outcome.reviews === 1 ? 'dossier under review' : 'dossiers under review')}</span></Link>}
+        {d.outcome && d.outcome.closing > 0 && <Link href="/m/tenders?show=desk"><b className="num">{d.outcome.closing}</b><span>{t(d.outcome.closing === 1 ? 'tender closing this month' : 'tenders closing this month')}</span></Link>}
+        {d.outcome && d.outcome.moved > 0 && <Link href="/m/inbox"><b className="num">{d.outcome.moved}</b><span>{t(d.outcome.moved === 1 ? 'registration moved on your molecules' : 'registrations moved on your molecules')}</span></Link>}
+        <span className="tail"><Link href="/m/calendar">{t('Calendar')} →</Link></span>
+      </section>
       {doneN < setup.length && (
         <section className="card stack" style={{ gap: 10 }}>
           <div className="between"><h2>{t('Get set up')} · {t('{n} of {total}', { n: doneN, total: setup.length })}</h2>
@@ -128,18 +131,19 @@ export default async function MfrHome({ searchParams }: { searchParams: Promise<
             : <Link key={label} href={href} className="small">{t(label)} →</Link>)}</div>
         </section>)}
       <div className="grid g4">
-        <Link className="tile t-white" href="/m/products"><span className="k">{t('Your products')}</span><span className="v num">{d.counts?.products}</span>
+        <Link className="tile t-white" href="/m/products"><span className="k"><TileIcon name="My products" /> {t('Your products')}</span><span className="v num">{d.counts?.products}</span>
           <span className="small">{t('{n} matched', { n: d.counts?.matched ?? 0 })}</span></Link>
         <Link className="tile t-peach" href="/m/products"><span className="k"><DemandIcon /> {t('In high demand')}</span><span className="v num">{d.counts?.high}</span>
           <span className="small">{t('in {market}', { market: t(countryName(d.focus)) })}</span></Link>
-        <Link className="tile t-mint" href="/m/products"><span className="k">{t('Little or no competition')}</span><span className="v num">{d.counts?.few}</span>
+        <Link className="tile t-mint" href="/m/products"><span className="k"><TileIcon name="Opportunities" /> {t('Little or no competition')}</span><span className="v num">{d.counts?.few}</span>
           <span className="small">{t('3 competitors or fewer')}</span></Link>
-        <Link className="tile t-blue" href="/m/projects"><span className="k">{t('Projects')}</span><span className="v num">{d.counts?.launches}</span>
+        <Link className="tile t-blue" href="/m/projects"><span className="k"><TileIcon name="Projects" /> {t('Projects')}</span><span className="v num">{d.counts?.launches}</span>
           <span className="small">{t('products and markets')}</span></Link>
       </div>
 
       <div className="split">
         <div className="stack">
+          <NextActions actions={d.actions} t={t} />
           <section className="card" data-tour="home">
             <div className="card-h"><div><h2>{t('Register these first')}</h2><p className="note">{t('The clearest openings for your products in {market}.', { market: t(countryName(d.focus)) })}</p></div>
               <Link className="btn-link" href="/m/products">{t('All products')}</Link></div>

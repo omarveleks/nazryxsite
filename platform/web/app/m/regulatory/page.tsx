@@ -54,7 +54,7 @@ export default async function MfrRegulatory({ searchParams }: { searchParams: Pr
   const WHO: Record<string, string> = { all: 'Any product', sra_or_pq: 'Approved by a strict regulator or WHO-prequalified', eaeu: 'Filed under EAEU rules', eac: 'Filed through the EAC joint procedure' };
 
   return (
-    <Shell user={u} title={t('Regulatory')} sub={`${countryName(m)}: what it takes to register, and to stay registered`}
+    <Shell user={u} help={t('Each market\'s rules, routes, fees and documents, with the source and when we last checked it. Your products are listed first with the requirements that apply to them.')} title={t('Regulatory')} sub={`${countryName(m)}: what it takes to register, and to stay registered`}
       actions={<Link className="btn btn-blue btn-sm" href="/m/services/dossier_review">{t('Check my dossier')}</Link>}>
       <MarketPicker u={u} targets={d.targets} current={m} path="/m/regulatory" />
 

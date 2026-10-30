@@ -326,6 +326,22 @@ check((await t.locator('main').innerText()).includes('Smoke Generics'), 'the tea
 await k.goto(B + '/m');
 check((await k.locator('main').innerText()).includes('Your call:'), 'the next call shows on Home');
 
+// 3b. the tool side: next actions, where first, bulk actions, decision windows (demo manufacturer, who has products in several markets)
+const dm = await page();
+await signin(dm, 'demo-maker@nazryx.test', process.env.DEMO_PASSWORD);
+await dm.goto(B + '/m'); await dm.waitForLoadState('networkidle');
+check((await dm.locator('main').innerText()).includes('Next actions'), 'Home shows next actions');
+await dm.goto(B + '/m/products/1'); await dm.waitForLoadState('networkidle');
+const pp = await dm.locator('main').innerText();
+check(pp.includes('Where first') && pp.includes('Fit'), 'a product ranks the markets to enter first');
+await dm.goto(B + '/m/products'); await dm.waitForLoadState('networkidle');
+await dm.locator('input[name=ids]').first().check();
+await Promise.all([dm.waitForURL(/bulk=watch/), dm.click('button[name=act][value=watch]')]);
+check((await dm.locator('main').innerText()).includes('molecules watched'), 'bulk action: watch the ticked products');
+await dm.goto(B + '/m/projects?view=list'); await dm.waitForLoadState('networkidle');
+check((await dm.locator('main').innerText()).includes('Decision'), 'projects list shows the decision window');
+check(await dm.locator('details.explain').count() === 1, 'the page explains how to use it');
+
 // 4. phone width: no sideways scrolling
 const mk = await page(375);
 await mk.goto(B + '/signup?mode=signin'); await mk.fill('#email', kmail); await mk.fill('#password', 'smoke-password-123');

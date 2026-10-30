@@ -38,7 +38,7 @@ export default async function Tenders({ searchParams }: { searchParams: Promise<
   const m = d.market;
   const full = canUse(tierIn(u, m), 'market');
   return (
-    <Shell user={u} title={t('Tenders')} sub={`Public medicine tenders in ${countryName(m)}, collected daily from the official portals`}
+    <Shell user={u} help={t('Public tenders on your molecules in your markets, closing dates first. Open one for the buyer, quantities and past prices. Watch a keyword in the inbox to widen the net.')} title={t('Tenders')} sub={`Public medicine tenders in ${countryName(m)}, collected daily from the official portals`}
       actions={full && hasData(m) ? <a className="btn btn-ghost btn-sm" href={`/m/export?what=tenders&market=${m}`}>{t('Excel (CSV)')}</a> : undefined}>
       <MarketPicker u={u} targets={d.targets} current={m} path="/m/tenders" />
       {!hasData(m) ? <AgencyMarket code={m} /> : (<>
@@ -72,7 +72,7 @@ export default async function Tenders({ searchParams }: { searchParams: Promise<
                   </span>
                 </Link>); })}
           </section>
-        ) : d.list.length === 0 ? <Empty>{t('No tenders here yet. New ones arrive every day.')}</Empty> : (
+        ) : d.list.length === 0 ? <Empty action={{ href: '/m/inbox#watches', label: t('Watch a keyword') }}>{t('No tenders here yet. New ones arrive every day.')}</Empty> : (
           <section className="card">
             {d.list.map((x, i) => (
               <Link key={x.id} href={`/m/tenders/${x.id}`} className="between small"

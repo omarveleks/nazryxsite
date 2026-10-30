@@ -154,6 +154,6 @@ export function ConfidenceChip({ level }: { level?: Confidence | null }) {
   return <span className={`pill ${c.tone}`} title={t(c.title)}>{t(c.label)}</span>;
 }
 
-export function Empty({ children }: { children: ReactNode }) {
-  return <div className="empty">{children}</div>;
+export function Empty({ children, action }: { children: ReactNode; action?: { href: string; label: string } }) {
+  return <div className="empty">{children}{action && <div style={{ marginTop: 10 }}><Link className="btn btn-ghost btn-sm" href={action.href}>{action.label}</Link></div>}</div>;
 }

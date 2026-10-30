@@ -13,7 +13,7 @@ import { one, rows, withUser } from '@/lib/db';
 import { BE_STATUS, beSuggestion, fmtDate, fmtMoney, levelLabel, registeredLine } from '@/lib/format';
 import { DEVICE_REQ_SQL, REQ_SQL, appliesTo, forProduct, type Requirement } from '@/lib/regulatory';
 import { PRICE_SQL, packOf, priceBasis, priceFor, unitShort, unitWord, usd, type MoleculePrice } from '@/lib/prices';
-import { AGENCY_KINDS, MFR_PLANS, NEEDS_PLAN, SERVICES, canUse, tierIn, countryName, displayClass, mfrProductsSql, productClass, reasons } from '@/lib/mfr';
+import { AGENCY_KINDS, MFR_PLANS, NEEDS_PLAN, SERVICES, canUse, covers, tierIn, countryName, displayClass, mfrProductsSql, productClass, reasons } from '@/lib/mfr';
 import { brandPresence, segmentBrands, type BrandRow } from '@/lib/competitors';
 import { GROUP_LABEL, isDevice, productGroup } from '@/lib/segments';
 
@@ -101,7 +101,16 @@ export default async function MfrProduct({ params, searchParams }: { params: Pro
     const costs = avg ? await one(db, 'select freight, duty, distributor, pharmacy, vat from market_costs where country = $1', [market]) : null;
     const brands = avg ? await one(db, `select (select registrants from country_molecules where molecule_id = $1 and country = $2) as registrants,
         (select value from price_factors where key = 'generic_vs_originator') as generic`, [p.molecule_id, market]) : null;
-    return { ...base, origin, lapsed, route, routes, checklist, ready, open, tenders, brands, costs, ...(canUse(t, 'market') ? { avg, history } : {}) };
+    // this molecule across every market with data: where to go first
+    const dataTargets = base.targets.filter((c: string) => hasData(c));
+    const ranking = dataTargets.length > 1 ? await rows(db, `select c.code as country, cm.registrants, cm.registrations, cm.on_national_list, cm.facility_level, g.demand, g.score,
+        r.months_low, r.months_high, r.fee_usd_low, r.label as route
+        from unnest($2::text[]) as c(code)
+        left join country_molecules cm on cm.molecule_id = $1 and cm.country = c.code
+        left join visible_gap_scores g on g.molecule_id = $1 and g.country = c.code
+        left join lateral (select label, months_low, months_high, fee_usd_low from country_routes where country = c.code and scope = 'medicine' order by sort limit 1) r on true`,
+        [p.molecule_id, dataTargets]) : [];
+    return { ...base, origin, lapsed, route, routes, checklist, ready, open, tenders, brands, costs, ranking, ...(canUse(t, 'market') ? { avg, history } : {}) };
   });
   if (!d) notFound();
   const { p, market } = d;
@@ -171,6 +180,42 @@ export default async function MfrProduct({ params, searchParams }: { params: Pro
                 </tbody></table>)}
               {p.registrants != null && <p className="note">{t('In short:')} {reasons(p).join(', ')}.</p>}
             </section>
+            {'ranking' in d && d.ranking.length > 1 && (() => {
+              const fit = (r: any) => {
+                if (r.score != null) return Math.round(Number(r.score));
+                let f = 40;
+                if (r.on_national_list) f += 20;
+                const n = Number(r.registrants ?? 0);
+                f += r.registrants == null ? (r.on_national_list ? 25 : 5) : n === 0 ? 25 : n <= 3 ? 15 : n <= 7 ? 5 : -10;
+                if (r.demand != null) f += Math.round(Number(r.demand) * 15);
+                if (r.months_low != null) f -= Math.min(15, Math.round(Number(r.months_low) / 2));
+                return Math.max(0, Math.min(100, f));
+              };
+              const ranked = d.ranking.map((r: any) => ({ ...r, fit: fit(r), open: covers(u, r.country) })).sort((a: any, b: any) => (b.open ? b.fit : -1) - (a.open ? a.fit : -1));
+              const comp = (r: any) => r.registrants == null ? t('Not on the market') : Number(r.registrants) === 0 ? t('Nobody registered') : `${r.registrants} ${Number(r.registrants) === 1 ? t('competitor') : t('competitors')}`;
+              return (
+                <section className="card stack" id="where-first">
+                  <div className="card-h"><div><h2>{t('Where first')}</h2><p className="note">{t('{name} across your markets: demand against competition, with the route and official fee. Best fit first.', { name: p.inn ?? p.name })}</p></div></div>
+                  <div className="tbl-wrap" tabIndex={0}><table className="tbl">
+                    <thead><tr><th>{t('Market')}</th><th>{t('Competition')}</th><th className="hide-m">{t('Official list')}</th><th className="hide-m">{t('Review')} · {t('Fee')}</th><th className="r">{t('Fit')}</th><th><span className="sr-only">Actions</span></th></tr></thead>
+                    <tbody>{ranked.map((r: any) => (
+                      <tr key={r.country} className={r.country === market ? 'row-on' : ''}>
+                        <td><Link href={`/m/products/${id}?market=${r.country}`}><b>{t(countryName(r.country))}</b></Link></td>
+                        {r.open ? (<>
+                          <td><span className={`pill ${r.registrants == null ? '' : Number(r.registrants) === 0 ? 'peach' : Number(r.registrants) <= 3 ? 'mint' : 'blue'}`}>{comp(r)}</span></td>
+                          <td className="hide-m small">{r.on_national_list ? (r.facility_level ? `${t('Yes')} · ${r.facility_level}` : t('Yes')) : t('No')}</td>
+                          <td className="hide-m small num nowrap">{r.months_low != null ? `${r.months_low}–${r.months_high} ${t('mo')}` : '—'}{r.fee_usd_low != null ? ` · $${Number(r.fee_usd_low).toLocaleString('en')}` : ''}</td>
+                          <td className="r"><span className="fit" title={`${r.fit} / 100`}><span className="fit-bar"><i style={{ width: `${r.fit}%` }} /></span><b className="num">{r.fit}</b></span></td>
+                          <td className="r"><form action={createProject}><input type="hidden" name="product_id" value={id} /><input type="hidden" name="country" value={r.country} />
+                            <button className="btn btn-ghost btn-sm" type="submit" title={t('Start a project')}>{t('Start')}</button></form></td>
+                        </>) : (<>
+                          <td colSpan={4} className="small muted">{t('Not in your plan')}</td>
+                          <td className="r"><Link className="btn-link small" href={`/m/add-market?market=${r.country}`}>{t('Add market')}</Link></td>
+                        </>)}
+                      </tr>))}</tbody></table></div>
+                  <p className="note">{t('Fit mixes demand (official list, facility level, tenders) with how many already sell it, the review time and the fee. It ranks; it does not decide.')}</p>
+                </section>);
+            })()}
             <section className="card stack">
               <h2>{t('Distributors who could take it on')}</h2>
               {'open' in d && d.open != null ? (<>
