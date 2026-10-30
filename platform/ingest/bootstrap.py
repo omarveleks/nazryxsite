@@ -30,6 +30,7 @@ def run():
         regulatory.load(cur)                      # researched requirements, routes and checklists, when they changed
         import ingest_job
         ingest_job.classes(cur)                   # therapeutic classes from ATC codes and registered forms
+        rescore_if_model_changed(cur)
         for kind, pattern in (("national_list", "*nemlit*.txt"), ("global_list", "*who*.txt")):
             files = sorted(glob.glob(os.path.join(raw, pattern)))
             if files and not cur.execute("select 1 from reference_files where kind = %s", (kind,)).fetchone():
@@ -52,6 +53,19 @@ def run():
         seed.ensure_team()
     set_owner()
     print("bootstrap done")
+
+
+GAP_MODEL = "gap_model_2026_10_demand_graded"
+
+
+def rescore_if_model_changed(cur):
+    """The demand model changed: every market's gap scores are recomputed once, on the first start that carries the new code."""
+    if cur.execute("insert into schema_migrations (name) values (%s) on conflict do nothing returning name", (GAP_MODEL,)).fetchone() is None:
+        return
+    import loader
+    for (country,) in cur.execute("select distinct country from country_molecules").fetchall():
+        moved = loader.recompute_gaps(cur, country)
+        log.info("rescored %s: %d molecules moved", country, moved)
 
 
 def set_owner():

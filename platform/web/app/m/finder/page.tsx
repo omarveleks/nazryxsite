@@ -8,7 +8,7 @@ import { langOf, setLang } from '@/lib/i18n';
 import { one, rows, withUser } from '@/lib/db';
 import { categories } from '@/lib/queries';
 import { ago } from '@/lib/format';
-import { canUse, countryName, tierIn } from '@/lib/mfr';
+import { canUse, countryName, tierIn, demandLabel, demandTone } from '@/lib/mfr';
 import { usd } from '@/lib/prices';
 import { COMPETITION_STEPS, DEMAND_STEPS, FORM_STEPS, describeSearch, finderParams, finderQuery } from '@/lib/finder';
 
@@ -86,7 +86,7 @@ export default async function Finder({ searchParams }: { searchParams: Promise<R
                       <div className="sub2">{r.category ? t(r.category) : t('Class not set')}{r.on_national_list ? ` · ${t('essential list')}` : ''}{r.mine ? ` · ${t('in your catalogue')}` : ''}{r.local_made ? ` · ${r.local_made} made locally` : ''}</div></td>
                     <td className="r">{r.registrants === 0 ? <span className="pill peach">{t('Open')}</span> : <span className="num">{r.registrants}</span>}
                       {r.registrations > 0 && <div className="sub2">{t('{n} products', { n: r.registrations })}</div>}</td>
-                    <td className="hide-m">{r.demand != null ? <div className="row" style={{ gap: 6 }}><div className="meter" style={{ width: 60 }}><i style={{ width: `${Math.round(Number(r.demand) * 100)}%` }} /></div><span className="small num">{Number(r.demand).toFixed(2)}</span></div> : <span className="muted">—</span>}</td>
+                    <td className="hide-m">{r.demand != null ? <div className="row" style={{ gap: 8, flexWrap: 'nowrap' }} title={`${Number(r.demand).toFixed(2)} of 1: essential lists, facility level, tenders, registered products, shelf listings`}><div className="meter" style={{ width: 56, flex: 'none' }}><i style={{ width: `${Math.round(Number(r.demand) * 100)}%` }} /></div><span className={`pill ${demandTone(r.demand)}`}>{t(demandLabel(r.demand))}</span></div> : <span className="muted">—</span>}</td>
                     <td className="r hide-m">{r.unit_usd != null ? <><span className="num">{usd(r.unit_usd)}</span> <ConfidenceChip level={r.confidence} /></> : <span className="muted">—</span>}</td>
                     <td className="hide-m small muted">{r.forms ?? ''}</td>
                     <td className="r"><Link className="btn btn-ghost btn-sm" href={`/m/molecules/${r.molecule_id}?market=${m}`}>{t('View')}</Link></td>
@@ -113,7 +113,7 @@ export default async function Finder({ searchParams }: { searchParams: Promise<R
             </section>
             <section className="card stack">
               <h2>{t('How to read it')}</h2>
-              <p className="small muted">{t('Companies: how many hold an active registration of the molecule here; Open means nobody does. Demand: from the essential list, facility levels and tenders, 0 to 1. Price: the market’s median shelf price per unit, with how sure we are.')}
+              <p className="small muted">{t('Companies: how many hold an active registration of the molecule here; Open means nobody does. Demand: from the essential lists, facility level, public tenders, registered products and shelf listings; tenders, 0 to 1. Price: the market’s median shelf price per unit, with how sure we are.')}
                 {' '}<Link href={`/m/coverage?market=${m}`}>{t('How we read {market}', { market: t(countryName(m)) })}</Link>.</p>
             </section>
           </div>

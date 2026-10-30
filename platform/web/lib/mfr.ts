@@ -247,8 +247,15 @@ export const MFR_FILE_KINDS: Record<string, string> = {
   coa: 'Certificate of analysis', label: 'Labels and leaflets', other: 'Other',
 };
 
-/** High demand: the demand measure behind the ranking (official essential list, how widely it is used, WHO list) at 0.8 or more. */
-export const HIGH_DEMAND = 0.8;
+/** High demand: the graded demand index (essential lists, facility level, tenders, registered products, shelf listings) at 0.5 or more. */
+export const HIGH_DEMAND = 0.5;
+/** The word for a demand value, the same on every screen. */
+export function demandLabel(d: number | string | null | undefined): string {
+  if (d == null) return 'Not scored';
+  const v = Number(d);
+  return v >= 0.7 ? 'Very high' : v >= 0.5 ? 'High' : v >= 0.3 ? 'Some' : 'Low';
+}
+export const demandTone = (d: number | string | null | undefined) => d == null ? '' : Number(d) >= 0.7 ? 'peach' : Number(d) >= 0.5 ? 'mint' : Number(d) >= 0.3 ? 'blue' : '';
 
 /** Launch tracker stages, from chosen to on the shelf. */
 export const LAUNCH_STAGES: [string, string][] = [

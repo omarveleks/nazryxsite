@@ -11,7 +11,7 @@ import { requireUser } from '@/lib/auth';
 import { langOf, setLang } from '@/lib/i18n';
 import { one, rows, withUser } from '@/lib/db';
 import { fmtDate, fmtMoney, levelLabel } from '@/lib/format';
-import { canUse, countryName, tierIn } from '@/lib/mfr';
+import { canUse, countryName, tierIn, demandLabel } from '@/lib/mfr';
 import { PRICE_SQL, packOf, priceBasis, unitShort, usd, type MoleculePrice } from '@/lib/prices';
 
 export const metadata = { title: 'Molecule' };
@@ -91,8 +91,8 @@ export default async function MoleculePage({ params, searchParams }: { params: P
             <span className="small">{f.registrants === 0 ? 'nobody registered: open' : `${n(f.registrations)} registered products`}</span></div>
           <div className="tile t-lav"><span className="k">{t('Essential list')}</span><span className="v" style={{ fontSize: 20, lineHeight: 1.2 }}>{f.on_national_list ? 'Listed' : 'Not listed'}</span>
             <span className="small">{f.on_national_list ? levelLabel(f.facility_level) : f.on_who_eml ? 'on the WHO list' : 'neither national nor WHO list'}</span></div>
-          <div className="tile t-mint"><span className="k">{t('Demand')}</span><span className="v num">{f.demand != null ? Number(f.demand).toFixed(2) : '—'}</span>
-            <span className="small">{f.demand != null ? 'of 1, from lists, levels and tenders' : 'not scored'}</span></div>
+          <div className="tile t-mint"><span className="k">{t('Demand')}</span><span className="v" style={{ fontSize: 24, lineHeight: 1.15 }}>{t(demandLabel(f.demand))}</span>
+            <span className="small">{f.demand != null ? `${Number(f.demand).toFixed(2)} of 1 · lists, level, tenders, sales, shelf` : t('not scored')}</span></div>
           <div className="tile t-white"><span className="k">{t('Made locally')}</span><span className="v num">{f.local_made ?? 0}</span><span className="small">{f.in_combinations ? `${f.in_combinations} in combinations` : 'products made in ' + name}</span></div>
         </div>
         <div className="split">

@@ -219,12 +219,15 @@ def load_registrations(cur, data, key_to_id, cluster_to_id, upload_id, country, 
 def recompute_gaps(cur, country, upload_id=None):
     """Recompute D, S and the gap score for every molecule with a demand signal. Returns how many moved >= 1 point."""
     rows = cur.execute("""
-        select cm.molecule_id, cm.on_national_list, cm.on_who_eml, cm.facility_level, cm.registrants, g.score
+        select cm.molecule_id, cm.on_national_list, cm.on_who_eml, cm.facility_level, cm.registrants, g.score, cm.registrations,
+               (select count(*) from tenders t where t.country = cm.country and cm.molecule_id = any(t.molecule_ids)
+                   and coalesce(t.published, t.closing, t.awarded) > current_date - 730) as tenders,
+               (select coalesce(max(mp.n), 0) from molecule_prices mp where mp.country = cm.country and mp.molecule_id = cm.molecule_id) as listings
         from country_molecules cm left join gap_scores g on g.country = cm.country and g.molecule_id = cm.molecule_id
         where cm.country = %s""", (country,)).fetchall()
     moved, keep = 0, []
-    for mid, nat, who, lvl, regs, old in rows:
-        sc = score_molecule(nat, who, lvl or "", regs)
+    for mid, nat, who, lvl, regs, old, registrations, tenders, listings in rows:
+        sc = score_molecule(nat, who, lvl or "", regs, tenders=tenders, registrations=registrations, listings=listings)
         if sc["D"] <= 0:
             continue
         keep.append(mid)

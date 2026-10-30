@@ -277,7 +277,7 @@ def build(registry, nemlit, who, out, cap=SATURATION_CAP, company_aliases=None, 
     g = em.merge(stats, left_on="reg_key", right_on="key", how="left", suffixes=("", "_r")).drop(columns=["key_r"])
     for c in ["registrations", "registrants", "ltrs", "manufacturers", "local_made"]:
         g[c] = g[c].fillna(0).astype(int)
-    sc = g.apply(lambda r: score_molecule(True, bool(r.in_who), r.level, r.registrants, cap=cap), axis=1)
+    sc = g.apply(lambda r: score_molecule(True, bool(r.in_who), r.level, r.registrants, cap=cap, registrations=r.registrations), axis=1)
     g["D"] = sc.map(lambda x: x["D"]); g["S"] = sc.map(lambda x: x["S"])
     g["gap_score"] = sc.map(lambda x: x["gap_score"])
     donor = r"vaccine|immunolog|antiretro|anti-tuberc|tubercul|malaria|blood|sera|hormones|contracept|antineoplastic|neglected tropical"

@@ -341,6 +341,13 @@ check((await dm.locator('main').innerText()).includes('molecules watched'), 'bul
 await dm.goto(B + '/m/projects?view=list'); await dm.waitForLoadState('networkidle');
 check(/decision/i.test(await dm.locator('main').innerText()), 'projects list shows the decision window');
 check(await dm.locator('details.explain').count() === 1, 'the page explains how to use it');
+await dm.goto(B + '/m/simulator?exw=2.4'); await dm.waitForLoadState('networkidle');
+const sim = await dm.locator('main').innerText();
+check(sim.includes('across your markets') && /per pack of \d/.test(sim) && (await dm.locator('#mol-q').count()) === 1, 'the pricing simulator opens with a searchable molecule and a pack size');
+await dm.fill('#mol-q', 'metf');
+check((await dm.locator('#mol-hits [role=option]').allInnerTexts()).some((x) => /Metformin/.test(x)), 'typing filters the molecules');
+await dm.goto(B + '/m/finder'); await dm.waitForLoadState('networkidle');
+check(/(Very high|High|Some|Low)/.test(await dm.locator('main').innerText()) && !/\b1\.00\b/.test(await dm.locator('main').innerText()), 'demand reads as a word, not 1.00');
 
 // 4. phone width: no sideways scrolling
 const mk = await page(375);

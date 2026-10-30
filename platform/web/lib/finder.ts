@@ -43,7 +43,7 @@ export function describeSearch(p: FinderParams) {
   return bits.join(' · ');
 }
 
-export const DEMAND_STEPS: [string, string][] = [['', 'Any demand'], ['0.5', 'Some demand (0.5+)'], ['0.8', 'High demand (0.8+)'], ['0.95', 'Very high (0.95+)']];
+export const DEMAND_STEPS: [string, string][] = [['', 'Any demand'], ['0.3', 'Some demand (0.3+)'], ['0.5', 'High demand (0.5+)'], ['0.7', 'Very high (0.7+)']];
 export const COMPETITION_STEPS: [string, string][] = [['', 'Any competition'], ['0', 'Nobody registered'], ['2', 'Two companies or fewer'], ['5', 'Five or fewer']];
 export const FORM_STEPS = ['Tablet', 'Capsule', 'Injection', 'Syrup', 'Suspension', 'Cream', 'Drops', 'Inhaler', 'Powder', 'Suppository'];
 

@@ -97,3 +97,30 @@ export function priceFor(p: MoleculePrice | null | undefined, form?: string | nu
 
 /** The middle of a list of numbers. */
 export const median = (v: number[]) => { const s = [...v].sort((a, b) => a - b); return s.length ? s[Math.floor(s.length / 2)] : null; };
+
+/** Each market's currency, for shelf prices shown in local money. */
+export const MARKET_CURRENCY: Record<string, string> = { KZ: 'KZT', KG: 'KGS', UZ: 'UZS', KE: 'KES', TZ: 'TZS', NG: 'NGN', GH: 'GHS', SN: 'XOF', CI: 'XOF', CM: 'XAF',
+  ET: 'ETB', UG: 'UGX', AZ: 'AZN', AM: 'AMD', BY: 'BYN' };
+
+/** Where a price can be borrowed from when a market has none read yet, nearest first. A far market says little. */
+export const NEIGHBOURS: Record<string, string[]> = {
+  TZ: ['KE', 'UG', 'NG', 'GH'], KE: ['TZ', 'UG', 'NG', 'GH'], UG: ['KE', 'TZ', 'ET'], ET: ['KE', 'UG', 'TZ'], NG: ['GH', 'KE', 'TZ', 'SN'], GH: ['NG', 'SN', 'CI', 'KE'],
+  SN: ['CI', 'CM', 'GH', 'NG'], CI: ['SN', 'CM', 'GH', 'NG'], CM: ['CI', 'SN', 'NG', 'GH'],
+  KZ: ['KG', 'UZ', 'BY'], KG: ['KZ', 'UZ'], UZ: ['KZ', 'KG'], BY: ['KZ', 'AM', 'AZ'], AM: ['AZ', 'BY', 'KZ'], AZ: ['AM', 'BY', 'KZ'],
+};
+
+/** What a pack of this form is counted in, with a usual size: tablets per box, ml per bottle, vials per box. */
+export function packKind(form?: string | null): { label: string; unit: string; size: number; liquid: boolean } {
+  const f = (form ?? '').toLowerCase();
+  const u = formUnit(form);
+  if (u === 'tablet or capsule') return { label: 'Tablets or capsules per pack', unit: 'tablets', size: 30, liquid: false };
+  if (u === 'ampoule or vial') return { label: 'Vials or ampoules per pack', unit: 'vials', size: 10, liquid: false };
+  if (u === 'inhaler') return { label: 'Inhalers per pack', unit: 'inhalers', size: 1, liquid: false };
+  if (u === 'ml') {
+    if (/cream|ointment|gel|lotion|paste/.test(f)) return { label: 'Grams per tube', unit: 'g', size: 30, liquid: true };
+    if (/drop|ophthalm|eye|ear|nasal|spray/.test(f)) return { label: 'ml per bottle', unit: 'ml', size: 5, liquid: true };
+    if (/sachet|powder/.test(f)) return { label: 'Grams per sachet or tin', unit: 'g', size: 100, liquid: true };
+    return { label: 'ml per bottle', unit: 'ml', size: 100, liquid: true };
+  }
+  return { label: 'Units per pack', unit: 'units', size: 30, liquid: false };
+}

@@ -93,9 +93,10 @@ def test_initial_load_then_diffed_upload(env):
     alpha = q("select count(distinct ltr_id) from registrations r join company_aliases a on a.company_id = r.ltr_id "
               "where a.alias in ('ALPHA PHARMA LIMITED', 'Alpha Pharma Ltd')")[0][0]
     assert alpha == 1
-    # essential molecules with no registrations score highest; Digoxin is level C and unregistered
+    # essential molecules with no registrations score highest; Digoxin is level C and unregistered. Under the graded demand
+    # model a listed WHO molecule with no tender and no sales behind it is 0.60 demand, so 60 with nobody registered.
     top = q("select m.inn, g.score from gap_scores g join molecules m on m.id = g.molecule_id order by g.score desc, m.inn")
-    assert top[0] == ("Doxycycline", 100) and ("Digoxin", 94) in [(n, float(s)) for n, s in top]
+    assert top[0] == ("Doxycycline", 60) and ("Digoxin", 57) in [(n, float(s)) for n, s in top]
     before_scores = dict(q("select m.inn, g.score from gap_scores g join molecules m on m.id = g.molecule_id"))
 
     # second upload: 2 new doxycycline products (one from a new distributor), one product cancelled, one removed
