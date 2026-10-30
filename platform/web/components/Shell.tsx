@@ -1,4 +1,6 @@
 import Link from 'next/link';
+import { cookies } from 'next/headers';
+import { MenuButton, NavToggle } from './NavToggle';
 import { curLang, tt } from '@/lib/i18n';
 import TourBar from './TourBar';
 import { MFR_PLANS } from '@/lib/mfr';
@@ -10,10 +12,11 @@ import NavLinks from './NavLinks';
 import SearchBox from './SearchBox';
 import { signOut } from '@/app/actions/auth';
 
-export default function Shell({ user, title, sub, crumb, actions, help, children }: {
+export default async function Shell({ user, title, sub, crumb, actions, help, children }: {
   user: User; title: ReactNode; sub?: ReactNode; crumb?: ReactNode; actions?: ReactNode; help?: ReactNode; children: ReactNode;
 }) {
   const t = tt();
+  const collapsed = (await cookies()).get('nzx_nav')?.value === 'collapsed';
   const initials = (user.name || user.email).split(/[\s@.]+/).filter(Boolean).slice(0, 2).map((s) => s[0]!.toUpperCase()).join('');
   const account = (
     <Link className="account" href="/settings" title={t('Settings')}>
@@ -21,12 +24,18 @@ export default function Shell({ user, title, sub, crumb, actions, help, children
       <span className="who"><b>{user.name || user.company_name || t('Your account')}</b><span>{user.email}</span></span>
     </Link>);
   return (
-    <div className="shell">
+    <div className={`shell${collapsed ? ' collapsed' : ''}`} id="shell">
       <a className="skip" href="#main">{t('Skip to content')}</a>
-      <aside className="side">
+      <header className="m-bar">
+        <MenuButton open={t('Open menu')} close={t('Close menu')} />
+        <Brand />
+        <Link className="avatar" href="/settings" aria-label={t('Settings')} style={{ marginLeft: 'auto', width: 36, height: 36, fontSize: 13 }}>{initials || t('You')}</Link>
+      </header>
+      <aside className="side" id="sidenav" aria-label={t('Navigation')}>
         <div className="side-top">
           <Brand />
-          <Link className="avatar m-only" href="/settings" aria-label={t('Settings')}>{initials || t('You')}</Link>
+          <NavToggle hide={t('Hide navigation')} show={t('Show navigation')} />
+          <MenuButton open={t('Open menu')} close={t('Close menu')} variant="close" />
         </div>
         <NavLinks team={user.role === 'team'} unread={user.inbox_unread ?? 0} lang={curLang()} />
         {user.account_type === 'manufacturer' && user.role !== 'team' ? (

@@ -844,6 +844,11 @@ const fr: Record<string, string> = {
   "mo": "mois",
   "Your numbers": "Vos chiffres",
   "markets with data": "marchés avec données",
+  "Open menu": "Ouvrir le menu",
+  "Close menu": "Fermer le menu",
+  "Hide navigation": "Masquer la navigation",
+  "Show navigation": "Afficher la navigation",
+  "Navigation": "Navigation",
   // misc
   "on the official TMDA list, level {level}": "sur la liste officielle TMDA, niveau {level}",
   "on the official TMDA list": "sur la liste officielle TMDA",

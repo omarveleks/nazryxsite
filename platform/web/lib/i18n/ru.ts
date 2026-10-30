@@ -839,6 +839,11 @@ const ru: Record<string, string> = {
   "mo": "мес.",
   "Your numbers": "Ваши цифры",
   "markets with data": "рынков с данными",
+  "Open menu": "Открыть меню",
+  "Close menu": "Закрыть меню",
+  "Hide navigation": "Скрыть навигацию",
+  "Show navigation": "Показать навигацию",
+  "Navigation": "Навигация",
   // misc
   "on the official TMDA list, level {level}": "в официальном списке TMDA, уровень {level}",
   "on the official TMDA list": "в официальном списке TMDA",

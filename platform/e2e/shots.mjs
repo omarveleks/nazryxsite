@@ -6,9 +6,14 @@ const browser = await chromium.launch(process.env.CHROMIUM ? { executablePath: p
 async function shoot(email, pw, pages, widths, tag) {
   for (const width of widths) {
     const c = await browser.newContext({ viewport: { width, height: width < 600 ? 740 : 900 } });
+    if (process.env.COLLAPSED) await c.addCookies([{ name: 'nzx_nav', value: 'collapsed', url: B }]);
     const p = await c.newPage(); await p.goto(B + '/signup?mode=signin'); await p.fill('#email', email); await p.fill('#password', pw);
     await Promise.all([p.waitForURL(/\/m|\/d|admin/), p.click('button[type=submit]')]);
-    for (const path of pages) { await p.goto(B + path, { waitUntil: 'load' }); await p.waitForTimeout(400); await p.screenshot({ path: `${OUT}/${tag}_${path.replace(/[^a-z0-9]+/gi, '_')}_${width}.png`, fullPage: !process.env.FOLD }); }
+    for (const path of pages) {
+      await p.goto(B + path, { waitUntil: 'load' }); await p.waitForTimeout(400);
+      if (process.env.DRAWER && width < 900) { await p.click('#menu-button'); await p.waitForTimeout(350); }
+      await p.screenshot({ path: `${OUT}/${tag}_${path.replace(/[^a-z0-9]+/gi, '_')}_${width}${process.env.COLLAPSED ? '_rail' : ''}${process.env.DRAWER ? '_drawer' : ''}.png`, fullPage: !process.env.FOLD });
+    }
     await c.close();
   }
 }

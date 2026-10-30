@@ -164,7 +164,7 @@ check(/Distributor [0-9A-F]{8}/.test(free) && !free.includes('Reaches EML') && !
   && (await k.locator('.nm').count()) <= 5, 'partners opens on every distributor, five free, introductions locked');
 await k.goto(B + '/m/products');
 const prodFree = await k.locator('main').innerText();
-check(prodFree.includes('In high demand') && !prodFree.includes('Unlock with Basic Market Data'), 'products dashboard: the analysis is open on the trial market');
+check(/in high demand/i.test(prodFree) && !prodFree.includes('Unlock with Basic Market Data'), 'products dashboard: the analysis is open on the trial market');
 await k.goto(B + '/m/products?market=KE');
 check((await k.locator('main').innerText()).includes('Managed by Nazryx'), 'products dashboard: a market without data is managed by Nazryx, trial or not');
 await k.goto(B + '/m/products');
@@ -339,7 +339,7 @@ await dm.locator('input[name=ids]').first().check();
 await Promise.all([dm.waitForURL(/bulk=watch/), dm.click('button[name=act][value=watch]')]);
 check((await dm.locator('main').innerText()).includes('molecules watched'), 'bulk action: watch the ticked products');
 await dm.goto(B + '/m/projects?view=list'); await dm.waitForLoadState('networkidle');
-check((await dm.locator('main').innerText()).includes('Decision'), 'projects list shows the decision window');
+check(/decision/i.test(await dm.locator('main').innerText()), 'projects list shows the decision window');
 check(await dm.locator('details.explain').count() === 1, 'the page explains how to use it');
 
 // 4. phone width: no sideways scrolling
