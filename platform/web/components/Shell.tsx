@@ -15,33 +15,37 @@ export default function Shell({ user, title, sub, crumb, actions, children }: {
 }) {
   const t = tt();
   const initials = (user.name || user.email).split(/[\s@.]+/).filter(Boolean).slice(0, 2).map((s) => s[0]!.toUpperCase()).join('');
+  const account = (
+    <Link className="account" href="/settings" title={t('Settings')}>
+      <span className="avatar" aria-hidden="true">{initials || t('You')}</span>
+      <span className="who"><b>{user.name || user.company_name || t('Your account')}</b><span>{user.email}</span></span>
+    </Link>);
   return (
     <div className="shell">
       <a className="skip" href="#main">{t('Skip to content')}</a>
       <aside className="side">
-        <Brand />
-        <NavLinks team={user.role === 'team'} unread={user.inbox_unread ?? 0} lang={curLang()} side={user.account_type === 'distributor' && user.role !== 'team' ? 'd' : 'm'} />
+        <div className="side-top">
+          <Brand />
+          <Link className="avatar m-only" href="/settings" aria-label={t('Settings')}>{initials || t('You')}</Link>
+        </div>
+        <NavLinks team={user.role === 'team'} unread={user.inbox_unread ?? 0} lang={curLang()} />
         {user.account_type === 'manufacturer' && user.role !== 'team' ? (
           <div className="plan-box">
-            <b>{user.mfr_active ? t(MFR_PLANS[user.mfr_active as keyof typeof MFR_PLANS]?.name) : t('No plan yet')}</b>
-            <span className="hide-m">{user.mfr_active ? t('Active') : user.mfr_plan_chosen
+            <div className="between" style={{ gap: 8 }}><b>{user.mfr_active ? t(MFR_PLANS[user.mfr_active as keyof typeof MFR_PLANS]?.name) : t('No plan yet')}</b>
+              {user.mfr_verified && <VerifiedIcon title={t('Verified manufacturer')} />}</div>
+            <span>{user.mfr_active ? t('Active') : user.mfr_plan_chosen
               ? t('{plan} requested', { plan: t(MFR_PLANS[user.mfr_plan as keyof typeof MFR_PLANS]?.name) }) : t('Some screens are locked')}</span>
-            <Link className="btn-link hide-m" href="/m/plan">{user.mfr_active ? t('Your plan') : t('See plans')}</Link>
-            {user.mfr_verified && <span className="pill blue hide-m" style={{ alignSelf: 'flex-start' }}><VerifiedIcon /> {t('Verified manufacturer')}</span>}
+            <Link className="btn-link" href="/m/plan">{user.mfr_active ? t('Your plan') : t('See plans')}</Link>
           </div>
         ) : user.role === 'team' ? <div className="plan-box"><b>{t('Nazryx team')}</b></div>
-        : user.account_type === 'distributor' ? (
-          <div className="plan-box">
-            <b>{user.dist_company ?? t('Distributor')}</b>
-            <span className="hide-m">{t('Free account')}</span>
-            {user.dist_verified ? <span className="pill blue hide-m" style={{ alignSelf: 'flex-start' }}><VerifiedIcon /> {t('Verified distributor')}</span>
-              : <Link className="btn-link hide-m" href="/d/onboarding">{t('Get verified')}</Link>}
-          </div>) : null}
+        : null}
         <div className="side-foot">
-          {user.account_type !== 'distributor' && <Link href="/settings">{t('Settings')}</Link>}
-          <Link href="/help">{t('Help and contact')}</Link>
-          <span>{user.email}</span>
-          <form action={signOut}><button className="btn-link" type="submit">{t('Sign out')}</button></form>
+          {account}
+          <div className="foot-links">
+            <Link href="/settings">{t('Settings')}</Link>
+            <Link href="/help">{t('Help')}</Link>
+            <form action={signOut}><button className="btn-link" type="submit">{t('Sign out')}</button></form>
+          </div>
         </div>
       </aside>
       <main className="main" id="main" tabIndex={-1}>
@@ -52,18 +56,18 @@ export default function Shell({ user, title, sub, crumb, actions, children }: {
               : <>{t('Your view of an account has ended. Exit it to make changes again.')}</>}</span>
             <a className="btn-link" href="/view-as/exit">{t('Exit view')}</a>
           </div>)}
-        <div className="topbar">
-          <div>
+        <header className="topbar">
+          <div className="title">
             {crumb && <div className="crumb">{crumb}</div>}
             <h1>{title}</h1>
             {sub && <div className="sub">{sub}</div>}
           </div>
-          <div className="top-right">
-            {(user.account_type === 'manufacturer' || user.role === 'team') && <SearchBox lang={curLang()} />}
-            {actions}
-            <Link className="avatar" href="/settings" title={t('Settings')}>{initials || t('You')}</Link>
-          </div>
-        </div>
+          {((user.account_type === 'manufacturer' || user.role === 'team') || actions) && (
+            <div className="top-right">
+              {(user.account_type === 'manufacturer' || user.role === 'team') && <SearchBox lang={curLang()} />}
+              {actions}
+            </div>)}
+        </header>
         {user.account_type === 'manufacturer' && user.role !== 'team' && user.tour_step ? <TourBar step={user.tour_step} /> : null}
         {children}
       </main>

@@ -1,7 +1,6 @@
 import Link from 'next/link';
 import Shell from '@/components/Shell';
 import { Empty, Flash, Tabs } from '@/components/ui';
-import { loadThreads, ThreadList } from '@/components/Threads';
 import { saveService, setDistributorVerified } from '@/app/actions/market';
 import { requireTeam } from '@/lib/auth';
 import { teamCan } from '@/lib/team';
@@ -13,8 +12,8 @@ import { stageLabel } from '@/lib/projects';
 export const metadata = { title: 'Marketplace' };
 export const dynamic = 'force-dynamic';
 
-// The marketplace for the team: distributors to verify, every open need, the conversations to step into, and the
-// service catalogue with its prices.
+// The marketplace for the team: distributors to verify and the service catalogue with its prices. Needs, hands up and
+// conversations are paused until the two-sided marketplace reopens (the tables stay).
 export default async function AdminMarketplace({ searchParams }: { searchParams: Promise<{ error?: string; saved?: string }> }) {
   const sp = await searchParams;
   const u = await requireTeam('manufacturers');
@@ -23,13 +22,12 @@ export default async function AdminMarketplace({ searchParams }: { searchParams:
     needs: await rows(db, `select n.id, n.source, n.country, coalesce(m.inn, n.molecule_text) as name, n.quantity, n.deliver_by, n.created_at, n.status, d.company_name,
         (select count(*)::int from leads l where l.need_id = n.id) as leads from needs n left join molecules m on m.id = n.molecule_id left join distributor_profiles d on d.user_id = n.user_id
         where n.status = 'open' order by (n.source = 'distributor') desc, n.created_at desc limit 100`),
-    threads: await loadThreads(db),
     services: await rows(db, 'select * from service_catalog order by sort'),
   }));
   const canContent = teamCan(u, 'content');
   return (
-    <Shell user={u} title="Marketplace" sub="Distributors, needs, conversations and the service catalogue" crumb={<Link href="/admin">Admin</Link>}>
-      <Tabs items={[{ key: 'dists', label: `Distributors (${d.dists.length})`, href: '#dists' }, { key: 'needs', label: `Open needs (${d.needs.length})`, href: '#needs' }, { key: 'threads', label: `Conversations (${d.threads.filter((x) => x.unread).length} new)`, href: '#threads' }, { key: 'services', label: 'Services', href: '#services' }]} current="" />
+    <Shell user={u} title="Marketplace" sub="Distributors to verify and the service catalogue. Needs and conversations are paused." crumb={<Link href="/admin">Admin</Link>}>
+      <Tabs items={[{ key: 'dists', label: `Distributors (${d.dists.length})`, href: '#dists' }, { key: 'needs', label: `Open needs (${d.needs.length})`, href: '#needs' }, { key: 'services', label: 'Services', href: '#services' }]} current="" />
       <Flash sp={sp} />
       <section className="card stack" id="dists">
         <h2>Distributors</h2>
@@ -54,8 +52,6 @@ export default async function AdminMarketplace({ searchParams }: { searchParams:
                 <td className="hide-m small">{n.company_name ?? (n.source === 'tender' ? 'Tender' : '')}</td><td className="hide-m small">{n.quantity ?? ''}</td><td className="hide-m small">{n.deliver_by ? fmtDate(n.deliver_by) : ''}</td>
                 <td className="r num">{n.leads}</td><td className="r small muted">{ago(n.created_at)}</td></tr>))}</tbody></table></div>)}
       </section>
-      <div className="card-h" id="threads"><h2>Conversations</h2><Link className="btn-link" href="/m/threads">Open all</Link></div>
-      <ThreadList list={d.threads.slice(0, 30)} base="/m/threads" />
       <section className="card stack" id="services">
         <h2>Service catalogue</h2>
         <div className="tbl-wrap" tabIndex={0}><table className="tbl">

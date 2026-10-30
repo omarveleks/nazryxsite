@@ -43,14 +43,14 @@ export default function SearchBox({ lang = 'en' }: { lang?: Lang }) {
     <div className="search" style={{ position: 'relative' }}>
       <input ref={ref} className="input" value={q} onChange={(e) => setQ(e.target.value)} onFocus={() => hits.length && setOpen(true)} onBlur={() => setTimeout(() => setOpen(false), 150)}
         placeholder={t('Search · press /')} aria-label={t('Search')} role="combobox" aria-expanded={open && hits.length > 0} aria-controls="search-hits" autoComplete="off"
-        style={{ minHeight: 36, fontSize: 13.5, width: 240, maxWidth: '100%' }}
+        style={{ minHeight: 38, fontSize: 13.5, width: '100%' }}
         onKeyDown={(e) => {
           if (e.key === 'ArrowDown') { e.preventDefault(); setSel((s) => Math.min(hits.length - 1, s + 1)); }
           else if (e.key === 'ArrowUp') { e.preventDefault(); setSel((s) => Math.max(0, s - 1)); }
           else if (e.key === 'Enter' && hits[sel]) { e.preventDefault(); go(hits[sel]); }
         }} />
       {open && q.trim().length >= 2 && (
-        <div id="search-hits" role="listbox" className="card" style={{ position: 'absolute', right: 0, top: 40, width: 360, maxWidth: '90vw', zIndex: 40, padding: 6, maxHeight: 420, overflowY: 'auto' }}>
+        <div id="search-hits" role="listbox" className="card" style={{ position: 'absolute', left: 0, top: 44, width: 380, maxWidth: 'calc(100vw - 32px)', zIndex: 40, padding: 6, maxHeight: 420, overflowY: 'auto' }}>
           {hits.length === 0 ? <div className="small muted" style={{ padding: '8px 10px' }}>{t('Nothing found. Try a molecule, a distributor code, a tender or a page.')}</div>
             : hits.map((h, i) => (
               <button key={h.href + h.label} type="button" role="option" aria-selected={i === sel} onMouseDown={(e) => e.preventDefault()} onClick={() => go(h)} onMouseEnter={() => setSel(i)}

@@ -47,10 +47,10 @@ export default async function Projects({ searchParams }: { searchParams: Promise
       <Flash sp={sp} />
       <div className="between" style={{ flexWrap: 'wrap', gap: 10 }}>
         <Tabs current={view} items={[{ key: 'board', label: t('Board'), href: '/m/projects' }, { key: 'list', label: t('List'), href: '/m/projects?view=list' }]} />
-        <form action={createProject} className="row" style={{ gap: 6 }}>
-          <select className="input" name="product_id" aria-label={t('Product')} style={{ minHeight: 34, fontSize: 13, maxWidth: 220 }} required>
+        <form action={createProject} className="row inline-form">
+          <select className="input" name="product_id" aria-label={t('Product')} style={{ minHeight: 38, fontSize: 13.5 }} required>
             <option value="">{t('Start a project: product')}</option>{d.products.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}</select>
-          <select className="input" name="country" aria-label={t('Market')} style={{ minHeight: 34, fontSize: 13 }}>
+          <select className="input" name="country" aria-label={t('Market')} style={{ minHeight: 38, fontSize: 13.5 }}>
             {d.targets.map((c) => <option key={c} value={c}>{t(countryName(c))}</option>)}</select>
           <button className="btn btn-blue btn-sm" type="submit">{t('Start')}</button>
         </form>

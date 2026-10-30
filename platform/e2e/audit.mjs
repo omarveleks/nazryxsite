@@ -72,9 +72,8 @@ async function firstHref(c, path, prefix) {
 
 const ANON = ['/', '/signup', '/signup?mode=signin', '/help', '/p', '/p/demo-generics-manufacturing', '/this-page-does-not-exist'];
 const MAKER = ['/m', '/m/inbox', '/m/projects', '/m/projects/12', '/m/calendar', '/m/market', '/m/market?market=TZ', '/m/finder', '/m/simulator', '/m/products', '/m/products/1',
-  '/m/products/1/dossier', '/m/regulatory', '/m/partners', '/m/partners/intro', '/m/tenders', '/m/rfq', '/m/threads', '/m/threads/1', '/m/ask', '/m/services', '/m/plan', '/m/marketplace',
+  '/m/products/1/dossier', '/m/regulatory', '/m/partners', '/m/partners/intro', '/m/tenders', '/m/ask', '/m/services', '/m/plan', '/m/marketplace',
   '/m/molecules/1', '/m/coverage', '/m/activity', '/m/report', '/m/call', '/m/add-market', '/m/engagements/1', '/settings', '/settings/security', '/settings/api'];
-const DIST = ['/d', '/d/needs', '/d/needs/1', '/d/makers', '/d/makers/demo-generics-manufacturing', '/d/threads', '/d/threads/1', '/d/onboarding'];
 const TEAM = ['/admin', ...['data', 'review', 'claims', 'manufacturers', 'documents', 'questions', 'accounts', 'content', 'billing', 'activity', 'regulatory', 'calls', 'team', 'requests', 'usage'].map((t) => '/admin?tab=' + t),
   '/admin/marketplace', '/admin/invoice-maker', '/admin/engagements/1', '/admin/accounts/' + (process.env.MAKER_ID || '')];
 
@@ -89,10 +88,6 @@ for (const width of WIDTHS) {
   const svc = await firstHref(m, '/m/services', '/m/services/'); if (svc) extra.push(svc);
   for (const path of [...MAKER, ...extra]) await audit(m, 'maker', path, width);
   await m.close();
-
-  const d = await ctx(width); await signin(d, 'demo-free@nazryx.test', process.env.DEMO_PASSWORD);
-  for (const path of DIST) await audit(d, 'dist', path, width);
-  await d.close();
 
   const t = await ctx(width); await signin(t, process.env.SEED_TEAM_EMAIL || 'team@nazryx.test', process.env.SEED_TEAM_PASSWORD);
   for (const path of TEAM) await audit(t, 'team', path, width);

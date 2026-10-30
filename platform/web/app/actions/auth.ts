@@ -24,7 +24,7 @@ export async function signUp(f: FormData) {
   const r = await pool.query('select auth_create_user($1, $2, $3) as id', [email, name, hashPassword(pw)]);
   await withUser(r.rows[0].id, (db) => db.query('update users set account_type = $2 where id = $1', [r.rows[0].id, as]));
   await createSession(r.rows[0].id);
-  redirect(as === 'distributor' ? '/d/onboarding' : '/m/onboarding');
+  redirect(as === 'distributor' ? '/help' : '/m/onboarding');
 }
 
 export async function signIn(f: FormData) {

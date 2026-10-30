@@ -119,20 +119,17 @@ function loadUser(id: string) {
     where u.id = $1`, [id]));
 }
 
-/** Signed-in customer pages: the manufacturer area (`manufacturer`), the distributor area (`distributor`) and `shared`
- *  pages (settings, help, threads). A customer who opens the other side's page is sent to their own home; the team
- *  can open everything. */
+/** Signed-in customer pages: the manufacturer area (`manufacturer`) and `shared` pages (settings, help). Distributor
+ *  accounts only reach the shared pages while the marketplace is paused; the team can open everything. */
 export async function requireUser(opts: { allowOnboarding?: boolean; manufacturer?: boolean; distributor?: boolean; shared?: boolean } = {}): Promise<User> {
   const u = await getUser();
   if (!u) redirect('/signup?mode=signin');
   if (u.role === 'team') return u;
   const mfr = u.account_type === 'manufacturer';
-  const home = mfr ? '/m' : '/d';
-  if (!u.onboarded && !opts.allowOnboarding) redirect(mfr ? '/m/onboarding' : '/d/onboarding');
+  if (!mfr && !opts.shared) redirect('/help');          // the distributor side is paused until the marketplace reopens
+  if (mfr && !u.onboarded && !opts.allowOnboarding) redirect('/m/onboarding');
   if (opts.shared) return u;
-  if (opts.manufacturer && !mfr) redirect(home);
-  if (opts.distributor && mfr) redirect(home);
-  if (!opts.manufacturer && !opts.distributor) redirect(home);
+  if (opts.distributor) redirect('/m');
   return u;
 }
 
