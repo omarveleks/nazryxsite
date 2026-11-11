@@ -1,6 +1,6 @@
 :root{
   /* Brand palette, sampled from the Nazryx brief */
-  --blue:#0066FF; --blue-txt:#0052D6;
+  --blue:#1259E6; --blue-txt:#0E47B8;
   --blue-deep:#0D3082;
   --blue-mid:#0F4AB6;
   --ground:#F7F6F2;
@@ -10,7 +10,7 @@
   --line:#E2E0D9;
   --card:#FFFFFF;
 
-  --pastel-blue:#DCEAFF;   --pastel-blue-ink:#0052D6;
+  --pastel-blue:#DCEAFF;   --pastel-blue-ink:#0E47B8;
   --pastel-mint:#DAF2E4;   --pastel-mint-ink:#0E6B3F;
   --pastel-peach:#FCE7D6;  --pastel-peach-ink:#9A4200;
   --pastel-lav:#E7E1FB;    --pastel-lav-ink:#3B00FF;
@@ -67,7 +67,7 @@ p{margin:0}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:11px 20px;border-radius:999px;font-size:14.5px;font-weight:600;text-decoration:none;border:1px solid transparent;transition:transform .15s ease,background .15s ease,color .15s ease;white-space:nowrap}
 .btn:active{transform:translateY(1px)}
 .btn-blue{background:var(--blue);color:#fff}
-.btn-blue:hover{background:#0052D6}
+.btn-blue:hover{background:#0E47B8}
 .btn-ghost{background:transparent;color:var(--ink);border-color:#CFCCC3}
 .btn-ghost:hover{border-color:var(--ink);}
 .btn-white{background:#fff;color:var(--blue)}

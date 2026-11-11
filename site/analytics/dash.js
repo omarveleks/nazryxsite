@@ -59,7 +59,7 @@
     var k = [['Visitors', 'visitors', fmt, 's1'], ['Sessions', 'sessions', fmt, 's2'], ['Pageviews', 'pageviews', fmt, 's3'], ['Avg time on page', 'avg_time', secs, 's4'], ['Engaged visits', 'engaged', function (v) { return v == null ? '–' : v + '%'; }, 's1'], ['Conversion actions', 'conversions', fmt, 's2']];
     $('kpis').innerHTML = k.map(function (x) { return '<div class="stat ' + x[3] + '"><b>' + x[2](c[x[1]]) + '</b><span>' + x[0] + '</span>' + delta(c[x[1]], p[x[1]]) + '</div>'; }).join('');
     chart();
-    var f = d.funnel || {}, pf = d.prevFunnel || {}, st = [['Manufacturers page', 's1'], ['/markets', 's2'], ['/markets/kazakhstan', 's3'], ['CTA click', 's4']];
+    var f = d.funnel || {}, pf = d.prevFunnel || {}, st = [['Home page', 's1'], ['/manufacturers', 's2'], ['/kazakhstan', 's3'], ['CTA or scan click', 's4']];
     $('funnel').innerHTML = st.map(function (s, i) {
       var n = f[s[1]] || 0, prevN = i ? (f[st[i - 1][1]] || 0) : null;
       var drop = i ? (prevN ? Math.round((1 - n / prevN) * 100) + '% drop-off' : '–') : 'sessions';

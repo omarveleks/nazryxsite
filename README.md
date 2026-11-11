@@ -5,8 +5,9 @@ Static site on Cloudflare Pages, with Pages Functions for the Markets pages and 
 | Path | What |
 |---|---|
 | `site/` | Published folder (Pages **build output directory = `site`**, no build command) |
-| `functions/` | Pages Functions: `/markets`, `/markets/:country`, `/api/collect`, `/api/stats`, `/analytics/*` |
-| `content/markets/` | One file per country. Add `content/markets/<slug>.js` and list it in `content/markets/index.js` |
+| `tools/build.py` | Generates the pages in `site/` (`python3 tools/build.py`); output is committed |
+| `docs/NAZRYX_SITE_BRIEF.md` | The rebuild brief and the only source of facts |
+| `functions/` | Pages Functions: `/api/collect`, `/api/stats`, `/analytics/*` |
 | `migrations/` | D1 schema (`wrangler d1 migrations apply nazryx-analytics --remote`) |
 | `wrangler.toml` | D1 binding `DB` → `nazryx-analytics` |
 
