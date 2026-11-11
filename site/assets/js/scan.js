@@ -71,6 +71,7 @@
     miss.hidden = false;
   }
 
+  if (input) {
   input.addEventListener('input', renderList);
   input.addEventListener('focus', renderList);
   input.addEventListener('keydown', function (e) {
@@ -84,6 +85,7 @@
   });
   list.addEventListener('mousedown', function (e) { var li = e.target.closest('li'); if (li) { e.preventDefault(); choose(shown[+li.getAttribute('data-i')]); } });
   document.addEventListener('click', function (e) { if (!root.contains(e.target)) list.hidden = true; });
+  }
 
   var timers = [];
   function later(fn, ms) { timers.push(setTimeout(fn, reduce ? 0 : ms)); }
@@ -91,8 +93,9 @@
   function run(m, chip) {
     timers.forEach(clearTimeout); timers = [];
     root.querySelectorAll('.chip').forEach(function (c) { c.setAttribute('aria-pressed', c === chip); });
-    if (chip) input.value = m.inn;
-    miss.hidden = true; list.hidden = true;
+    if (chip && input) input.value = m.inn;
+    if (miss && input) miss.hidden = true;
+    if (list) list.hidden = true;
     if (window.nzxTrack) window.nzxTrack('scan:' + m.inn);
     empty.hidden = true;
     var o = m.makers_by_origin, total = ORIGINS.reduce(function (a, k) { return a + (o[k] || 0); }, 0) || 1;

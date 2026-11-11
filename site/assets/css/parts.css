@@ -117,7 +117,7 @@
 
 /* ---------- horizontal data bars (imports C1, price index, doctors) ---------- */
 .hbars{display:flex;flex-direction:column;gap:10px}
-.hbar{display:grid;grid-template-columns:minmax(120px,190px) 1fr 70px;gap:12px;align-items:center;font-size:14.5px;color:var(--ink)}
+.hbar{display:grid;grid-template-columns:minmax(120px,190px) 1fr 92px;gap:12px;align-items:center;font-size:14.5px;color:var(--ink)}
 .hbar .t{height:24px;background:var(--track);border-radius:6px;overflow:hidden}
 .hbar .t i{display:block;height:100%;background:var(--brand);border-radius:6px;transform-origin:left;transform:scaleX(.04);transition:transform .7s var(--ease),background-color .2s var(--ease)}
 .hbars.on .t i{transform:scaleX(1)}
@@ -351,3 +351,25 @@
 .pfoot small{flex-basis:100%;font-size:12.5px;color:var(--ink-3)}
 .bridge-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
 @media (max-width:640px){.bridge-scroll svg{min-width:720px}}
+
+/* ---------- colour accents (round 2b): blue, green, amber; no pink or purple ---------- */
+:root{--green-a:#2E9E6B;--amber-a:#E08A2E}
+.hbar.c-africa .t i{background:var(--green-a)}
+.layer.l1{border-top:4px solid var(--brand)}
+.layer.l2{border-top:4px solid var(--green-a)}.layer.l2 small,.layer.l2 span{color:var(--green-a)}
+.layer.l3{border-top:4px solid var(--amber-a)}.layer.l3 small,.layer.l3 span{color:#B8661A}
+.rtiles{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.rtile{border-radius:var(--r-md,18px);padding:18px 20px}
+.rtile small{display:block;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px}
+.rtile b{font-family:"Inter Tight",Inter,sans-serif;font-size:17px;letter-spacing:-.02em;line-height:1.3;color:var(--ink)}
+.rtile.r1{background:var(--pastel-blue,#DCE8FD)}.rtile.r1 small{color:#0E47B8}
+.rtile.r2{background:var(--pastel-mint,#DAF2E4)}.rtile.r2 small{color:#0E6B3F}
+.rtile.r3{background:var(--pastel-peach,#FCE7D6)}.rtile.r3 small{color:#9A4200}
+.go-a{color:var(--a);font-weight:600;text-decoration:none;font-size:15px}
+.jny-stop:nth-child(2) small{color:var(--green-a)}.jny-stop:nth-child(3) small{color:#B8661A}
+.jny-stop:nth-child(4) small{color:var(--green-a)}
+.fstep:nth-child(2) .fdots i{background:var(--green-a)}.fstep:nth-child(3) .fdots i{background:var(--amber-a)}
+@media (max-width:860px){.rtiles{grid-template-columns:1fr 1fr}}
+@media (max-width:520px){.rtiles{grid-template-columns:1fr}}
+.scan-lbl{font-weight:600;font-size:14px;color:var(--ink);margin:0}
+.scan-live .chips{margin-top:10px}

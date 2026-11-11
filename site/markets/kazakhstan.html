@@ -41,14 +41,14 @@
   --card:#FFFFFF;
 
   --pastel-blue:#DCEAFF;   --pastel-blue-ink:#0E47B8;
-  --pastel-mint:#EEF3FD;   --pastel-mint-ink:#1259E6;
-  --pastel-peach:#DCE8FD;  --pastel-peach-ink:#0E47B8;
-  --pastel-lav:#DCE8FD;    --pastel-lav-ink:#0E47B8;
+  --pastel-mint:#DAF2E4;   --pastel-mint-ink:#0E6B3F;
+  --pastel-peach:#FCE7D6;  --pastel-peach-ink:#9A4200;
+  --pastel-lav:#DAF2E4;    --pastel-lav-ink:#0E6B3F;
   --panel:#E8EFF6;
   --soft:#ECF4FF;
-  --green:#EEF3FD;         --green-ink:#1259E6;
-  --pink:#DCE8FD;          --pink-ink:#0E47B8;
-  --cream:#EEF3FD;
+  --green:#E2FFE3;         --green-ink:#0E6B2A;
+  --pink:#FCE7D6;          --pink-ink:#9A4200;
+  --cream:#FFF1E5;
 
   --r-lg:26px;
   --r-md:18px;
@@ -497,16 +497,9 @@ h2{font-size:clamp(31px,4.1vw,46px)}
       <div class="mswitch" role="group" aria-label="Market"><button type="button" aria-pressed="true" data-live data-track="scan:market">Kazakhstan</button><button type="button" aria-pressed="false" data-track="scan:market">Uzbekistan</button><button type="button" aria-pressed="false" data-track="scan:market">Azerbaijan</button><button type="button" aria-pressed="false" data-track="scan:market">Kenya</button><button type="button" aria-pressed="false" data-track="scan:market">Uganda</button><button type="button" aria-pressed="false" data-track="scan:market">Tanzania</button><button type="button" aria-pressed="false" data-track="scan:market">Rwanda</button><button type="button" aria-pressed="false" data-track="scan:market">Nigeria</button><button type="button" aria-pressed="false" data-track="scan:market">Ghana</button><button type="button" aria-pressed="false" data-track="scan:market">Senegal</button><button type="button" aria-pressed="false" data-track="scan:market">Sudan</button><button type="button" aria-pressed="false" data-track="scan:market">Libya</button><button type="button" aria-pressed="false" data-track="scan:market">Iraq</button><button type="button" aria-pressed="false" data-track="scan:market">Peru</button></div>
       <p class="mswitch-note" hidden aria-live="polite"></p>
       <div class="scan-live">
-        <label for="scan-q">Molecule</label>
-        <input class="scan-input" id="scan-q" type="text" autocomplete="off" placeholder="Start typing, e.g. Apixaban" role="combobox" aria-expanded="false" aria-controls="scan-list" aria-autocomplete="list">
-        <ul class="scan-list" id="scan-list" role="listbox" aria-label="Molecules" hidden></ul>
-        <p class="scan-miss" hidden aria-live="polite"></p>
-        <div class="chips" aria-label="Quick picks">
-          <button class="chip" type="button" data-inn="Apixaban" data-track="scan:chip">Apixaban</button>
-          <button class="chip" type="button" data-inn="Amlodipine" data-track="scan:chip">Amlodipine</button>
-          <button class="chip" type="button" data-inn="Dapagliflozin" data-track="scan:chip">Dapagliflozin</button>
-          <button class="chip" type="button" data-inn="Atorvastatin + ezetimibe" data-track="scan:chip">Atorvastatin + ezetimibe</button>
-        </div>
+        <p class="scan-lbl" id="scan-lbl">Pick a molecule</p>
+        <div class="chips" role="group" aria-labelledby="scan-lbl"><button class="chip" type="button" data-inn="Azithromycin" data-track="scan:chip">Azithromycin</button><button class="chip" type="button" data-inn="Ibuprofen" data-track="scan:chip">Ibuprofen</button><button class="chip" type="button" data-inn="Amlodipine" data-track="scan:chip">Amlodipine</button><button class="chip" type="button" data-inn="Ciprofloxacin" data-track="scan:chip">Ciprofloxacin</button><button class="chip" type="button" data-inn="Omeprazole" data-track="scan:chip">Omeprazole</button><button class="chip" type="button" data-inn="Metformin" data-track="scan:chip">Metformin</button><button class="chip" type="button" data-inn="Cetirizine" data-track="scan:chip">Cetirizine</button><button class="chip" type="button" data-inn="Dapagliflozin" data-track="scan:chip">Dapagliflozin</button><button class="chip" type="button" data-inn="Atorvastatin" data-track="scan:chip">Atorvastatin</button><button class="chip" type="button" data-inn="Levothyroxine" data-track="scan:chip">Levothyroxine</button><button class="chip" type="button" data-inn="Apixaban" data-track="scan:chip">Apixaban</button><button class="chip" type="button" data-inn="Bisoprolol + amlodipine" data-track="scan:chip">Bisoprolol + amlodipine</button><button class="chip" type="button" data-inn="Amlodipine + candesartan" data-track="scan:chip">Amlodipine + candesartan</button><button class="chip" type="button" data-inn="Atorvastatin + ezetimibe" data-track="scan:chip">Atorvastatin + ezetimibe</button></div>
+        <p class="scan-miss">Not in the list? We have this read for every molecule. <a href="mailto:contact@nazryx.com?subject=Molecule%20check" data-track="scan:email">Email it to us</a> or <a href="https://wa.me/447466253544?text=Please%20check%20this%20molecule%20for%20me%3A%20" target="_blank" rel="noopener" data-track="scan:whatsapp">send it on WhatsApp</a>.</p>
       </div>
     </div>
     <div class="pcard scan-card" aria-live="polite">

@@ -208,13 +208,15 @@ def journey():
 </section>"""
 
 
-def imports_chart():
-    bars = "".join(f'<div class="hbar"><span>{n}</span><div class="t"><i style="width:{v}%"></i></div><b>{lbl}</b></div>' for n, v, lbl in IMPORTS)
-    vals = "".join(f'<div class="hbar val"><span>{n}</span><div class="t"><span>{t}</span></div><b>value</b></div>' for n, t in IMPORT_VALUES)
+def imports_chart(values=True):
+    asia = {"Kazakhstan", "Iraq"}
+    bars = "".join(f'<div class="hbar {"c-asia" if n in asia else "c-africa"}"><span>{n}</span><div class="t"><i style="width:{v}%"></i></div><b>{lbl}</b></div>' for n, v, lbl in IMPORTS)
+    vals = "".join(f'<div class="hbar val"><span>{n}</span><div class="t"><span>{t}</span></div><b></b></div>' for n, t in IMPORT_VALUES)
     aria = "; ".join(f"{n} {lbl}" for n, _, lbl in IMPORTS)
     return f"""<div class="pcard">
     <div class="hbars" role="img" aria-label="Share of medicines imported: {aria}">{bars}</div>
-    <div class="hbars" style="margin-top:14px;padding-top:14px;border-top:1px solid var(--line)">{vals}</div>
+    {f'<div class="hbars" style="margin-top:14px;padding-top:14px;border-top:1px solid var(--line)">{vals}</div>' if values else '<p class="pnote" style="margin-top:12px">Uzbekistan, Sudan, Peru, Azerbaijan, Libya and Rwanda are import-led too; see <a href="/markets" style="color:var(--a)">all markets</a>.</p>'}
+    <p class="keyx"><span><i style="background:#2E9E6B"></i>Africa</span><span><i style="background:#1259E6"></i>Asia and the Middle East</span></p>
     <p class="pnote">Share of medicines imported. National data, 2024–26.</p>
   </div>"""
 
@@ -234,6 +236,8 @@ def clocks():
 
 
 def scan(dark=False):
+    mol = json.loads((SITE / "assets/data/kz_demo_molecules.json").read_text())["molecules"]
+    chips = "".join(f'<button class="chip" type="button" data-inn="{m["inn"]}" data-track="scan:chip">{m["inn"]}</button>' for m in mol)
     sw = '<button type="button" aria-pressed="true" data-live data-track="scan:market">Kazakhstan</button>' + "".join(
         f'<button type="button" aria-pressed="false" data-track="scan:market">{m}</button>' for m in MARKET_NAMES if m != "Kazakhstan")
     return f"""<div class="scanx" id="scan" data-autorun="Apixaban">
@@ -242,16 +246,9 @@ def scan(dark=False):
       <div class="mswitch" role="group" aria-label="Market">{sw}</div>
       <p class="mswitch-note" hidden aria-live="polite"></p>
       <div class="scan-live">
-        <label for="scan-q">Molecule</label>
-        <input class="scan-input" id="scan-q" type="text" autocomplete="off" placeholder="Start typing, e.g. Apixaban" role="combobox" aria-expanded="false" aria-controls="scan-list" aria-autocomplete="list">
-        <ul class="scan-list" id="scan-list" role="listbox" aria-label="Molecules" hidden></ul>
-        <p class="scan-miss" hidden aria-live="polite"></p>
-        <div class="chips" aria-label="Quick picks">
-          <button class="chip" type="button" data-inn="Apixaban" data-track="scan:chip">Apixaban</button>
-          <button class="chip" type="button" data-inn="Amlodipine" data-track="scan:chip">Amlodipine</button>
-          <button class="chip" type="button" data-inn="Dapagliflozin" data-track="scan:chip">Dapagliflozin</button>
-          <button class="chip" type="button" data-inn="Atorvastatin + ezetimibe" data-track="scan:chip">Atorvastatin + ezetimibe</button>
-        </div>
+        <p class="scan-lbl" id="scan-lbl">Pick a molecule</p>
+        <div class="chips" role="group" aria-labelledby="scan-lbl">{chips}</div>
+        <p class="scan-miss">Not in the list? We have this read for every molecule. <a href="mailto:{EMAIL}?subject=Molecule%20check" data-track="scan:email">Email it to us</a> or <a href="{WA}?text=Please%20check%20this%20molecule%20for%20me%3A%20" target="_blank" rel="noopener" data-track="scan:whatsapp">send it on WhatsApp</a>.</p>
       </div>
     </div>
     <div class="pcard scan-card" aria-live="polite">
@@ -373,6 +370,11 @@ def mockups():
   <p class="mock-cap">Our own platform, built for these markets. Demo data; names hidden.</p>"""
 
 
+def region_strip():
+    tiles = "".join(f'<div class="rtile r{i % 3 + 1}"><small>{r}</small><b>{", ".join("Francophone W. & C. Africa" if m[3] == "regional" else m[0] for m in ms)}</b></div>' for i, (r, _, ms) in enumerate(REGIONS))
+    return f'<div class="rtiles">{tiles}</div><p style="margin-top:14px"><a class="go-a" href="/markets" data-track="home:all-markets">See all 14 markets &rarr;</a></p>'
+
+
 def market_cards():
     out = ""
     for region, role, ms in REGIONS:
@@ -462,12 +464,8 @@ def refit_css(html, dark):
     if dark:
         css = css.replace("--t4:#191233; --t4i:#9B8CFF;", "--t4:#0F1B33; --t4i:#82A4F2;").replace("--t1i:#82A4F2", "--t1i:#82A4F2")
     else:
-        css = css.replace("--pastel-lav:#E7E1FB;    --pastel-lav-ink:#3B00FF;", "--pastel-lav:#DCE8FD;    --pastel-lav-ink:#0E47B8;")
-        css = css.replace("--pink:#FBE1EC;          --pink-ink:#D6006C;", "--pink:#DCE8FD;          --pink-ink:#0E47B8;")
-        css = css.replace("--pastel-mint:#DAF2E4;   --pastel-mint-ink:#0E6B3F;", "--pastel-mint:#EEF3FD;   --pastel-mint-ink:#1259E6;")
-        css = css.replace("--pastel-peach:#FCE7D6;  --pastel-peach-ink:#9A4200;", "--pastel-peach:#DCE8FD;  --pastel-peach-ink:#0E47B8;")
-        css = css.replace("--green:#E2FFE3;         --green-ink:#0E6B2A;", "--green:#EEF3FD;         --green-ink:#1259E6;")
-        css = css.replace("--cream:#FFF1E5;", "--cream:#EEF3FD;")
+        css = css.replace("--pastel-lav:#E7E1FB;    --pastel-lav-ink:#3B00FF;", "--pastel-lav:#DAF2E4;    --pastel-lav-ink:#0E6B3F;")
+        css = css.replace("--pink:#FBE1EC;          --pink-ink:#D6006C;", "--pink:#FCE7D6;          --pink-ink:#9A4200;")
     css = css.replace("transform:translateY(-3px)", "transform:none")
     return html[:style_a] + css + html[style_b:]
 
@@ -530,7 +528,7 @@ def home():
     <div><div class="eyebrow">The gap</div><h2>Frontier markets import most of their medicines. <span class="blue">70–95% in ours.</span></h2></div>
     <p class="lede">Their data is scattered and every market has its own rules. Manufacturers can't see where they fit; buyers can't find reliable supply. Import-led markets buy on price, supply and registration. That is the work we do.</p>
   </div>
-  {imports_chart()}
+  {imports_chart(False)}
 </section>
 
 <!-- INTELLIGENCE, ACCESS, TRADE -->
@@ -540,9 +538,9 @@ def home():
     <p class="lede">We work with manufacturers of finished medicines and devices, suppliers and distributors, and state and hospital buyers.</p>
   </div>
   <div class="layers">
-    <a class="layer" href="#scan-demo"><small>Intelligence</small><b>We know these markets line by line.</b><p>Registers, shelves, tenders and state buyers, read and kept current.</p><span>Try the register scan &darr;</span></a>
-    <a class="layer" href="#clocks"><small>Access</small><b>We open markets.</b><p>Registration, local representation and partners, all in the maker's name.</p><span>See the registration clocks &darr;</span></a>
-    <a class="layer" href="#markets"><small>Trade</small><b>We keep products moving.</b><p>Sourcing, supply, promotion and state bids, run by our teams.</p><span>See the markets &darr;</span></a>
+    <a class="layer l1" href="#scan-demo"><small>Intelligence</small><b>We know these markets line by line.</b><p>Registers, shelves, tenders and state buyers, read and kept current.</p><span>Try the register scan &darr;</span></a>
+    <a class="layer l2" href="/markets#clocks"><small>Access</small><b>We open markets.</b><p>Registration, local representation and partners, all in the maker's name.</p><span>See the registration clocks &rarr;</span></a>
+    <a class="layer l3" href="#markets"><small>Trade</small><b>We keep products moving.</b><p>Sourcing, supply, promotion and state bids, run by our teams.</p><span>See the markets &darr;</span></a>
   </div>
 </section>
 
@@ -550,13 +548,6 @@ def home():
   <div class="svc-head"><div><div class="eyebrow">Intelligence</div><h2>Is your molecule open? <span class="blue">See for yourself.</span></h2></div>
   <p class="lede">We run the same read in every market we serve. Here is a live example from Kazakhstan, already running.</p></div>
   {scan()}
-  <div style="margin-top:28px">{mockups()}</div>
-</section>
-
-<section class="wrap" id="clocks" style="padding-top:0">
-  <div class="svc-head"><div><div class="eyebrow">Access</div><h2>Every market has its own clock. <span class="blue">We plan to it.</span></h2></div>
-  <p class="lede">Official review times, on one scale. Real timelines add questions and the plant inspection.</p></div>
-  {clocks()}
 </section>
 
 <!-- TWO DOORS -->"""
@@ -588,10 +579,8 @@ def home():
 <section class="wrap" id="markets" style="padding-top:0">
   <div class="svc-head"><div><div class="eyebrow">Trade</div><h2>14 markets on 3 continents. <span class="blue">From Almaty to Cape Town.</span></h2></div>
   <p class="lede">USD 10bn+ of medicines imported a year and 650m+ people. Kazakhstan is the one we show in full; every market gets the same work.</p></div>
-  {world_map()}
   {kz}
-  {market_cards()}
-  <div style="margin-top:28px">{tide()}</div>
+  <p style="margin-top:14px"><a class="go-a" href="/markets" data-track="home:all-markets">See all 14 markets &rarr;</a></p>
 </section>
 
 <!-- CONTACT -->"""
@@ -636,8 +625,8 @@ def manufacturers():
     h = must(h, "<!-- PROOF -->", f"""<!-- REGISTRATION ROUTE -->
 <section class="wrap" id="route" style="padding-top:0">
   <div class="head2"><div><div class="eyebrow">Registration route</div><h2>We choose the route <span class="blue">per product.</span></h2></div>
-  <p class="lede">Every market has its own clock. In Kazakhstan there are two routes, and the national one closes on 31 December 2027.</p></div>
-  {route()}<div style="margin-top:16px">{clocks()}</div>
+  <p class="lede">In Kazakhstan there are two routes, and the national one closes on 31 December 2027.</p></div>
+  {route()}
 </section>
 
 <!-- PROOF -->""")
@@ -815,13 +804,13 @@ def markets_page():
     {mrun_card()}
   </div>
 </div>
-<section class="wrap" style="padding-top:0">{world_map()}{market_cards()}</section>
+<section class="wrap" style="padding-top:0">{market_cards()}</section>
 <section class="wrap" style="padding-top:0">
   <div class="svc-head"><div><div class="eyebrow">How much each market imports</div><h2>Import-led markets. <span class="blue">That is the work.</span></h2></div>
   <p class="lede">Import-led markets buy on price, supply and registration. That is the work we do.</p></div>
   {imports_chart()}
 </section>
-<section class="wrap" style="padding-top:0">
+<section class="wrap" id="clocks" style="padding-top:0">
   <div class="svc-head"><div><div class="eyebrow">Registration clocks</div><h2>Every market has its own clock.</h2></div>
   <p class="lede">Official review times, on one scale. Labelled law or target.</p></div>
   {clocks()}
