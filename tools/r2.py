@@ -475,7 +475,7 @@ def common(html, path, title, desc, dark):
     # fonts: self-hosted (parts.css), no Google Fonts
     html = re.sub(r'<link rel="preconnect"[^>]*>\n?', "", html)
     html = re.sub(r'<link rel="stylesheet" href="https://fonts.googleapis.com[^>]*>\n?', "", html)
-    html = re.sub(r'<link rel="icon"[^>]*>\n?', "", html)
+    html = re.sub(r'<link rel="icon"[^\n]*\n', "", html)
     html = re.sub(r'<link rel="apple-touch-icon"[^>]*>\n?', "", html)
     for pat in [r'<title>.*?</title>\n?', r'<meta name="description"[^>]*>\n?', r'<link rel="canonical"[^>]*>\n?', r'<meta property="og:[^>]*>\n?',
                 r'<meta name="twitter:[^>]*>\n?', r'<meta name="theme-color"[^>]*>\n?', r'<script type="application/ld\+json">.*?</script>\n?']:
@@ -499,6 +499,24 @@ def must(html, old, new, count=1):
     return html.replace(old, new, count)
 
 
+# ------------------------------------------------------------------ round 2c: representative, not detailed
+def drop_sections(h, names):
+    """Remove each top-level block that starts with a <!-- NAME --> comment, up to the next top-level comment or </main>."""
+    for n in names:
+        a = h.find(f"\n<!-- {n}")
+        if a < 0:
+            raise SystemExit(f"section not found: {n}")
+        nxt = [i for i in (h.find("\n<!-- ", a + 5), h.find("\n</main>", a + 5)) if i > 0]
+        h = h[:a] + h[min(nxt):]
+    return h
+
+
+def strip_feature_detail(h):
+    h = re.sub(r"\s*<ul>\s*(?:<li>.*?</li>\s*)+</ul>", "", h, flags=re.S)
+    h = re.sub(r'\s*<div class="portal-ui".*?</div>\s*</div>', "", h, count=1, flags=re.S)
+    return h
+
+
 # ------------------------------------------------------------------ home (light)
 def home():
     h = (SRC / "index.html").read_text()
@@ -507,47 +525,28 @@ def home():
     # hero
     h = must(h, '<h1>Enabling trade in <span class="blue">frontier markets.</span></h1>\n      <p>Nazryx works with dozens of manufacturers and distributors to streamline sourcing, registration and market entry across 7 markets in Africa and Asia.</p>',
              '<h1>Bridging the gap in medical trade <span class="blue">across frontier markets.</span></h1>\n      <p>Nazryx connects medicine makers with the frontier markets that need them, and runs the trade in between: market reads, registration in the maker\'s name, partners, promotion and state bids. 14 markets on 3 continents.</p>')
-    h = must(h, '<a class="btn btn-blue" href="/#who">See what we do</a>', '<a class="btn btn-blue" href="/#scan-demo" data-track="cta:see-open">See what\'s open</a>')
+    h = must(h, '<a class="btn btn-blue" href="/#who">See what we do</a>', '<a class="btn btn-blue" href="/#layers" data-track="cta:what-we-do">See what we do</a>')
     h = re.sub(r'<div class="locard">.*?</div>\s*</div>\s*</div>\s*</div>\s*</div>', mrun_card() + "\n  </div>\n</div>", h, count=1, flags=re.S)
     # bridge under hero, then journey
-    h = must(h, "<!-- STATS -->", f'<section class="wrap" style="padding-block:0 40px">{bridge()}</section>\n\n{journey()}\n\n<!-- STATS -->')
     # stats: 6 confirmed tiles
     h = re.sub(r'<div class="wrap stats">.*?</div>\n</div>', """<div class="wrap stats stats6">
-  <div class="stat s1"><b><span data-count="14">14</span> · 3</b><span>markets on 3 continents</span></div>
+  <div class="stat s1"><b>14 · 3</b><span>markets on 3 continents</span></div>
   <div class="stat s2"><b>3 · 10</b><span>manufacturers represented: 3 in Kazakhstan, 10 worldwide</span></div>
   <div class="stat s3"><b data-count="14,000" data-suf="+">14,000+</b><span>register records read</span></div>
   <div class="stat s4"><b data-count="300" data-suf="+">300+</b><span>distributors profiled</span></div>
-  <div class="stat s1"><b data-count="88,000" data-suf="+">88,000+</b><span>state lots read</span></div>
-  <div class="stat s2"><b data-count="6">6</b><span>source countries: Pakistan, Bangladesh, Turkey, Egypt, Europe, Korea</span></div>
 </div>""", h, count=1, flags=re.S)
-    h = must(h, "</style>", ".stats.stats6{grid-template-columns:repeat(3,1fr)}@media(max-width:560px){.stats.stats6{grid-template-columns:1fr 1fr}}\n</style>")
     # problem + three layers, before the doors
-    layers = f"""<!-- THE GAP -->
-<section class="wrap" id="gap" style="padding-top:56px">
-  <div class="svc-head">
-    <div><div class="eyebrow">The gap</div><h2>Frontier markets import most of their medicines. <span class="blue">70–95% in ours.</span></h2></div>
-    <p class="lede">Their data is scattered and every market has its own rules. Manufacturers can't see where they fit; buyers can't find reliable supply. Import-led markets buy on price, supply and registration. That is the work we do.</p>
-  </div>
-  {imports_chart(False)}
-</section>
-
-<!-- INTELLIGENCE, ACCESS, TRADE -->
+    layers = f"""<!-- INTELLIGENCE, ACCESS, TRADE -->
 <section class="wrap" id="layers" style="padding-top:0">
   <div class="svc-head">
     <div><div class="eyebrow">What Nazryx is</div><h2>One company between both sides. <span class="blue">Three layers.</span></h2></div>
     <p class="lede">We work with manufacturers of finished medicines and devices, suppliers and distributors, and state and hospital buyers.</p>
   </div>
   <div class="layers">
-    <a class="layer l1" href="#scan-demo"><small>Intelligence</small><b>We know these markets line by line.</b><p>Registers, shelves, tenders and state buyers, read and kept current.</p><span>Try the register scan &darr;</span></a>
-    <a class="layer l2" href="/markets#clocks"><small>Access</small><b>We open markets.</b><p>Registration, local representation and partners, all in the maker's name.</p><span>See the registration clocks &rarr;</span></a>
-    <a class="layer l3" href="#markets"><small>Trade</small><b>We keep products moving.</b><p>Sourcing, supply, promotion and state bids, run by our teams.</p><span>See the markets &darr;</span></a>
+    <a class="layer l1" href="/manufacturers"><small>Intelligence</small><b>We know these markets line by line.</b><p>Registers, shelves, tenders and state buyers, read and kept current.</p><span>For manufacturers &rarr;</span></a>
+    <a class="layer l2" href="/manufacturers"><small>Access</small><b>We open markets.</b><p>Registration, local representation and partners, all in the maker's name.</p><span>For manufacturers &rarr;</span></a>
+    <a class="layer l3" href="#markets"><small>Trade</small><b>We keep products moving.</b><p>Sourcing, supply, promotion and state bids, run by our teams.</p><span>See our markets &darr;</span></a>
   </div>
-</section>
-
-<section class="wrap" id="scan-demo" style="padding-top:0">
-  <div class="svc-head"><div><div class="eyebrow">Intelligence</div><h2>Is your molecule open? <span class="blue">See for yourself.</span></h2></div>
-  <p class="lede">We run the same read in every market we serve. Here is a live example from Kazakhstan, already running.</p></div>
-  {scan()}
 </section>
 
 <!-- TWO DOORS -->"""
@@ -578,9 +577,8 @@ def home():
     mk = f"""<!-- MARKETS -->
 <section class="wrap" id="markets" style="padding-top:0">
   <div class="svc-head"><div><div class="eyebrow">Trade</div><h2>14 markets on 3 continents. <span class="blue">From Almaty to Cape Town.</span></h2></div>
-  <p class="lede">USD 10bn+ of medicines imported a year and 650m+ people. Kazakhstan is the one we show in full; every market gets the same work.</p></div>
-  {kz}
-  <p style="margin-top:14px"><a class="go-a" href="/markets" data-track="home:all-markets">See all 14 markets &rarr;</a></p>
+  <p class="lede">Frontier markets import most of their medicines. We connect them with the makers who can supply them, and run the trade in between.</p></div>
+  {region_strip()}
 </section>
 
 <!-- CONTACT -->"""
@@ -598,7 +596,7 @@ def home():
     h = must(h, '<a href="tel:+447466253544" data-track="phone:+447466253544">+44 7466 253544</a>\n        <a href="tel:+923254307967"', '<a href="tel:+447466253544" data-track="phone:+447466253544">+44 7466 253544</a>\n        <a href="tel:+77086922409" data-track="phone:+77086922409">+7 708 692 2409</a>\n        <a href="tel:+923254307967"')
     h = must(h, '\n        <a href="tel:+77086922409" data-track="phone:+77086922409">+7 708 692 2409</a>\n        </div>', "\n        </div>")
     h = replace_footer(h)
-    h = must(h, SCRIPTS, '<script src="/assets/js/site.js" defer></script>\n<script src="/assets/js/scan.js" defer></script>\n<script src="/assets/a.js" defer></script>')
+    h = drop_sections(h, ["SERVICES", "PLATFORM", "CATALOGUE", "THESIS", "PARTNER", "WHY IT WORKS"])
     org = {"@context": "https://schema.org", "@type": "Organization", "name": "Nazryx", "url": BASE + "/", "logo": BASE + "/assets/icons/icon-512.png", "email": EMAIL,
            "description": "Nazryx connects medicine makers with the frontier markets that need them, and runs the trade in between.",
            "contactPoint": [{"@type": "ContactPoint", "telephone": d, "contactType": "sales"} for _, d, _ in PHONES]}
@@ -727,6 +725,9 @@ def manufacturers():
     h = re.sub(r'(<div class="faq">\s*)', r"\1" + faq_add.replace("\\", "\\\\"), h, count=1)
     h = h.replace("Nazryx &mdash; a company of Nazir &amp; Company International (PVT) Limited", "Teams in Lahore and on the ground in Almaty")
     h = must(h, "Where you hold leverage and where you would be undercut", "Where you have the edge, and where you would be undercut")
+    h = drop_sections(h, ["PROBLEM", "REGISTRATION ROUTE", "PROOF", "MARKET IN FOCUS", "EAEU ROUTE", "OUTPUT", "FIT", "SAMPLE PROFILE"])
+    h = strip_feature_detail(h)
+    h = re.sub(r'<div style="margin-top:8px"><div class="ptabs" role="tablist" aria-label="Regions">.*?</div>\n</section>', f'<div style="margin-top:8px">{region_strip()}</div>\n</section>', h, count=1, flags=re.S)
     h = must(h, "</style>", ".kz-regions span{font-size:12.5px}\n@media(max-width:560px){.kz-table th,.kz-table td{white-space:normal}}\n</style>")
     h = replace_footer(h)
     return h
@@ -757,7 +758,8 @@ def partners():
                "We work across 14 markets on 3 continents: Kazakhstan, Uzbekistan, Azerbaijan, Kenya, Uganda, Tanzania, Rwanda, Nigeria, Ghana, Senegal, francophone West and Central Africa, Sudan, Libya, Iraq and Peru. Teams in Lahore and on the ground in Almaty. Sourcing runs through Pakistan, Bangladesh, Turkey, Egypt, Europe and Korea.</p>", h, count=1, flags=re.S)
     h = h.replace("Distribute, manufacture or source pharmaceuticals in Africa, Asia or the Middle East", "Distribute, source or buy medicines in Africa, Asia, the Middle East or South America")
     h = h.replace("Nazryx &mdash; a company of Nazir &amp; Company International (PVT) Limited", "Teams in Lahore and on the ground in Almaty")
-    h = h.replace("<b>Markets</b><b>All you operate in</b>", "<b>Markets</b><b>All you operate in</b>")
+    h = drop_sections(h, ["PROBLEM", "MOVED FROM HOME: the platform", "MOVED FROM HOME: the objective", "PROOF", "OUTPUT", "FIT"])
+    h = strip_feature_detail(h)
     h = replace_footer(h)
     return h
 
@@ -805,17 +807,6 @@ def markets_page():
   </div>
 </div>
 <section class="wrap" style="padding-top:0">{market_cards()}</section>
-<section class="wrap" style="padding-top:0">
-  <div class="svc-head"><div><div class="eyebrow">How much each market imports</div><h2>Import-led markets. <span class="blue">That is the work.</span></h2></div>
-  <p class="lede">Import-led markets buy on price, supply and registration. That is the work we do.</p></div>
-  {imports_chart()}
-</section>
-<section class="wrap" id="clocks" style="padding-top:0">
-  <div class="svc-head"><div><div class="eyebrow">Registration clocks</div><h2>Every market has its own clock.</h2></div>
-  <p class="lede">Official review times, on one scale. Labelled law or target.</p></div>
-  {clocks()}
-</section>
-<section class="wrap" style="padding-top:0"><div class="eyebrow">Why now</div><h2 style="margin-bottom:24px">The tide is turning.</h2>{tide()}</section>
 {contact_light("Ask for a market file.", "Tell us which market and send your product list. We will show you what is open there.")}"""
     return light_page("/markets", "Markets we serve: 14 markets on 3 continents | Nazryx",
                       "Nazryx serves 14 pharmaceutical markets on 3 continents: Central Asia, East and West Africa, North Africa, the Middle East and South America. Kazakhstan shown in full.", body)

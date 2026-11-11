@@ -362,9 +362,9 @@
 .rtile{border-radius:var(--r-md,18px);padding:18px 20px}
 .rtile small{display:block;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px}
 .rtile b{font-family:"Inter Tight",Inter,sans-serif;font-size:17px;letter-spacing:-.02em;line-height:1.3;color:var(--ink)}
-.rtile.r1{background:var(--pastel-blue,#DCE8FD)}.rtile.r1 small{color:#0E47B8}
-.rtile.r2{background:var(--pastel-mint,#DAF2E4)}.rtile.r2 small{color:#0E6B3F}
-.rtile.r3{background:var(--pastel-peach,#FCE7D6)}.rtile.r3 small{color:#9A4200}
+.rtile.r1{background:var(--t1,var(--pastel-blue,#DCE8FD))}.rtile.r1 small{color:var(--t1i,#0E47B8)}
+.rtile.r2{background:var(--t2,var(--pastel-mint,#DAF2E4))}.rtile.r2 small{color:var(--t2i,#0E6B3F)}
+.rtile.r3{background:var(--t3,var(--pastel-peach,#FCE7D6))}.rtile.r3 small{color:var(--t3i,#9A4200)}
 .go-a{color:var(--a);font-weight:600;text-decoration:none;font-size:15px}
 .jny-stop:nth-child(2) small{color:var(--green-a)}.jny-stop:nth-child(3) small{color:#B8661A}
 .jny-stop:nth-child(4) small{color:var(--green-a)}
