@@ -2,15 +2,24 @@
 
 Static HTML on Cloudflare Pages. Published folder: `site/` (Pages output directory = `site`). Functions live in `functions/`.
 
+## Sources
+- `docs/NAZRYX_SITE_BRIEF_v2.md` (round 2) overrides `docs/NAZRYX_SITE_BRIEF.md`. Facts: `docs/NAZRYX_SITE_FACTS.md` (all markets) and section 1 of the round-1 brief (Kazakhstan).
+- Pages are built by `python3 tools/r2.py` from the original pages kept in `tools/src/`. Edit the script or the sources, never the generated `site/*.html` by hand.
+
 ## Design
-- Reuse the site's existing CSS, tokens, fonts (Inter, Inter Tight) and components. No new visual styles.
-- Flat design: no drop shadows, no blur, no glows, no pink, no new gradients. Only gradients the site already uses.
-- Light ground #F7F6F2, blue #0066FF, flat pastel tiles, white rounded cards.
-- Mobile-first: everything must work at 375px.
+- Keep the original look: light home page; dark, premium manufacturers and distributors pages; large display headlines; numbered service cards.
+- One brand blue #1259E6 for accents. No glows, radial gradients, drop shadows or glass blur. No pink or purple.
+- Shared components live in `site/assets/css/parts.css` and use each page's own tokens, so they work light and dark.
+- Fonts self-hosted (Inter, Inter Tight). Every demo and chart shows data on first view. Respect prefers-reduced-motion.
+- Mobile-first: no horizontal scroll at 360px; header fits one line at 390px.
 
 ## Copy
 - Short, concrete, confident ("You make medicines. We run Kazakhstan."). No jargon unless it matters (keep EAEU).
-- Never publish client names, other manufacturers' names, distributor names, fees or costs, NDA wording, personal names, or specific molecule names.
+- Facts only from the facts file and brief section 1; anything else gets a `<!-- TODO Omar: confirm -->` and stays off the page.
+- Never publish client, principal, prospect, distributor, importer or chain names, fees or margins, addresses, or any legal entity name. Brand is "Nazryx"; "Part of the Nazir Group" may appear once in the footer.
+- Molecule names only from `site/assets/data/kz_demo_molecules.json`; never add one without Omar's approval.
+- Teams are in Lahore and on the ground in Almaty ("team on the ground", never "office"). Omar's title: Director, International Business.
+- 14 markets on 3 continents; Kazakhstan is shown in full but never as the only market. State buyers and regulators may be named.
 
 ## Security
 - Never write any password, token or secret into the repo, code, comments, logs or previews. Secrets live only in Cloudflare (`wrangler pages secret put`).
