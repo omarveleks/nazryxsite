@@ -1,0 +1,42 @@
+{
+  "path": "/markets/kazakhstan",
+  "title": "Kazakhstan market file for pharmaceutical manufacturers | Nazryx",
+  "description": "Kazakhstan, one of Nazryx's 14 markets, shown in full: a USD 2.5bn medicines market, 85% imported. Channels, buyers, registration routes, labelling and tax.",
+  "theme": "light",
+  "sections": [
+    { "type": "hero", "eyebrow": "One of our 14 markets, shown in full", "title": "Kazakhstan:", "accent": "an import market of USD 2.5bn.",
+      "lede": "85% of the value is imported. About 20.3 million people, 9,659 pharmacies and one national state buyer. Our team is on the ground in Almaty.",
+      "ctas": ["primary"],
+      "side": { "kind": "kv", "title": "At a glance", "rows": [["Population", "about 20.3 million"], ["Medicines market 2025", "about USD 2.5bn, 537m packs"], ["Imported", "85% of value, 68% of packs"], ["Doctors", "83,994 (excluding dentists)"], ["Import duty (HS 3004)", "0%"]] } },
+    { "type": "stats", "items": [{ "value": "9,659", "label": "pharmacies" }, { "value": "76–77%", "label": "of pharmacy turnover held by chains" }, "kzPharmacies", "kzPhysicians"] },
+    { "type": "bars", "id": "structure", "eyebrow": "Market structure", "title": "Where the money", "accent": "and the packs go.",
+      "groups": [
+        { "title": "Retail and hospital, 2025", "rows": [["Value", [["Retail", 57], ["Hospital", 43]]], ["Packs", [["Retail", 83], ["Hospital", 17]]]], "note": "Retail KZT 754.7bn, 448.1m packs. Hospital KZT 561.8bn, 89.0m packs." },
+        { "title": "Imported share", "rows": [["Value", [["Imported", 85], ["Local", 15]]], ["Packs", [["Imported", 68], ["Local", 32]]]], "note": "Imports carry the value; local producers carry more of the volume." }
+      ] },
+    { "type": "cards", "id": "buyers", "eyebrow": "Who buys", "title": "Chains, hospitals", "accent": "and one state buyer.", "cols": 3, "style": "plain",
+      "items": [
+        { "title": "Pharmacy chains", "text": "Chains hold 76–77% of pharmacy turnover. The top 15 run 2,507 pharmacies and hold 50.5%." },
+        { "title": "The state buyer", "text": "SK-Pharmacy buys for free and insured care in one national round a year. 2027 round: 976 lots, about USD 860m." },
+        { "title": "Priority rules", "text": "Local and EAEU producers have priority in the state round. We position you where there is a way in." }
+      ] },
+    { "type": "table", "id": "registration", "eyebrow": "Registration", "title": "Two routes.", "accent": "We pick one per product.",
+      "head": ["", "National route", "EAEU route"],
+      "rows": [["Open until", "31 Dec 2027", "Ongoing"], ["Review time", "Up to 100 working days", "140 working days plus clock stops"], ["Valid in", "Kazakhstan only", "Kazakhstan, extendable to Russia, Belarus, Armenia, Kyrgyzstan"], ["Validity", "", "5 years, then permanent"], ["Plant", "", "GMP inspection by the Kazakh inspectorate"]],
+      "note": "Registrations are always held in your name." },
+    { "type": "steps", "id": "pack", "eyebrow": "On every pack", "title": "Labels, marking", "accent": "and tax.",
+      "items": [
+        { "when": "1 Jul 2024", "title": "Data Matrix", "text": "Marking code on every pack." },
+        { "when": "Always", "title": "Kazakh and Russian", "text": "Both languages on every pack and leaflet." },
+        { "when": "2026", "title": "VAT 5%", "text": "On medicines." },
+        { "when": "1 Jan 2027", "title": "VAT 10%", "text": "On medicines, from this date.", "dark": true }
+      ] },
+    { "type": "cards", "id": "ground", "eyebrow": "On the ground in Almaty", "title": "What our team", "accent": "runs for you.", "cols": 3, "style": "tiles",
+      "items": [
+        { "title": "100+ distributor relationships", "text": "The importer and chain listings, chosen with you." },
+        { "title": "1,000+ physicians", "text": "Direct physician outreach, by specialty and region." },
+        { "title": "Regulatory and government services", "text": "Filing and follow-up, with Kazakh and Russian translation in-house." }
+      ] },
+    { "type": "cta", "id": "contact", "title": "Send your product list.", "text": "We check every product against the register, 1,340 pharmacy shelves and the state purchase list.", "contact": true }
+  ]
+}

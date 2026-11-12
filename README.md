@@ -5,7 +5,8 @@ Static site on Cloudflare Pages, with Pages Functions for the Markets pages and 
 | Path | What |
 |---|---|
 | `site/` | Published folder (Pages **build output directory = `site`**, no build command) |
-| `tools/r2.py` | Builds the pages from the originals in `tools/src/` (`python3 tools/r2.py`); output is committed |
+| `content/` | All copy and figures: `site.json` (shared) and `pages/*.json` (one per page) |
+| `tools/build.py` | Renders `content/` into `site/` (`python3 tools/build.py`); output is committed |
 | `docs/` | Briefs and the facts file: the only source of facts |
 | `functions/` | Pages Functions: `/markets`, `/markets/:country`, `/api/collect`, `/api/stats`, `/analytics/*` |
 | `content/markets/` | One file per country. Add `content/markets/<slug>.js` and list it in `content/markets/index.js` |

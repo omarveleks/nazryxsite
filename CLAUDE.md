@@ -4,12 +4,14 @@ Static HTML on Cloudflare Pages. Published folder: `site/` (Pages output directo
 
 ## Sources
 - `docs/NAZRYX_SITE_BRIEF_v2.md` (round 2) overrides `docs/NAZRYX_SITE_BRIEF.md`. Facts: `docs/NAZRYX_SITE_FACTS.md` (all markets) and section 1 of the round-1 brief (Kazakhstan).
-- Pages are built by `python3 tools/r2.py` from the original pages kept in `tools/src/`. Edit the script or the sources, never the generated `site/*.html` by hand.
+- All copy and figures live in `content/site.json` (shared) and `content/pages/*.json` (one file per page, an ordered list of typed sections).
+- `python3 tools/build.py` renders them into `site/`. Edit the JSON, never the generated `site/*.html`. Every page needs 6+ sections (the build checks).
+- Positioning: a market data and market entry agency for manufacturers. Primary call to action everywhere: "Request a market read" (/start).
 
 ## Design
-- Keep the original look: light home page; dark, premium manufacturers and distributors pages; large display headlines; numbered service cards.
+- Light pages by default; /market-entry and /distributors use the dark theme. Large Inter Tight headlines, numbered cards, blue/mint/peach tiles.
 - One brand blue #1259E6 for accents. No glows, radial gradients, drop shadows or glass blur. No pink or purple.
-- Shared components live in `site/assets/css/parts.css` and use each page's own tokens, so they work light and dark.
+- One stylesheet, `site/assets/css/site.css`, with light and dark token sets.
 - Fonts self-hosted (Inter, Inter Tight). Every demo and chart shows data on first view. Respect prefers-reduced-motion.
 - Mobile-first: no horizontal scroll at 360px; header fits one line at 390px.
 

@@ -1,0 +1,32 @@
+{
+  "path": "/about",
+  "title": "About Nazryx: market data and market entry for frontier markets",
+  "description": "Nazryx connects medicine makers with the frontier markets that need them, and runs the trade in between. Teams in Lahore and on the ground in Almaty.",
+  "theme": "light",
+  "sections": [
+    { "type": "hero", "eyebrow": "About Nazryx", "title": "Every tablet has a journey.", "accent": "We make it work.",
+      "lede": "From the plant to the patient. Nazryx connects medicine makers with the frontier markets that need them, and runs the trade in between.",
+      "ctas": ["primary"], "side": { "kind": "figures", "title": "Nazryx in numbers", "items": ["markets", "manufacturers", "records", "sources"] } },
+    { "type": "cards", "id": "what", "eyebrow": "What we are", "title": "A market data", "accent": "and market entry agency.", "cols": 3, "style": "numbered",
+      "items": [
+        { "title": "Intelligence", "text": "We know these markets line by line: registers, shelves, tenders and state buyers, read and kept current." },
+        { "title": "Access", "text": "We open markets: registration, local representation and partners, all in the maker's name." },
+        { "title": "Trade", "text": "We keep products moving: sourcing, supply, promotion and state bids, run by our teams." }
+      ] },
+    { "type": "cards", "id": "why", "eyebrow": "Why Nazryx", "title": "Four reasons", "accent": "manufacturers work with us.", "cols": 4, "style": "tiles",
+      "items": [
+        { "title": "Both sides of the trade", "text": "We work with makers and buyers, so we see supply and demand at once." },
+        { "title": "Data no one else assembles", "text": "Registers, shelves and state purchases, read market by market." },
+        { "title": "People on the ground", "text": "Teams in Lahore and Almaty, and local networks in every market we serve." },
+        { "title": "Aligned incentives", "text": "Paid on results. The market stays in the maker's name." }
+      ] },
+    { "type": "cards", "id": "chain", "eyebrow": "Who we work with", "title": "Along the whole", "accent": "supply chain.", "cols": 3, "style": "plain",
+      "items": [
+        { "title": "Manufacturers", "text": "Of finished medicines and devices, in Pakistan, Bangladesh, Turkey, Egypt, Europe and Korea, looking for new markets.", "href": "/market-entry" },
+        { "title": "Suppliers and distributors", "text": "Looking for vetted products and data on demand.", "href": "/distributors" },
+        { "title": "Institutional buyers", "text": "State and hospital buyers looking for reliable, validated supply.", "href": "/distributors" }
+      ] },
+    { "type": "teams", "id": "teams", "eyebrow": "Teams", "title": "On the ground,", "accent": "where it matters." },
+    { "type": "cta", "id": "contact", "title": "Talk to us.", "text": "Send your product list, or book twenty minutes.", "contact": true }
+  ]
+}

@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url><loc>https://nazryx.com/</loc></url>
-  <url><loc>https://nazryx.com/manufacturers</loc></url>
+  <url><loc>https://nazryx.com/market-entry</loc></url>
+  <url><loc>https://nazryx.com/market-data</loc></url>
   <url><loc>https://nazryx.com/markets</loc></url>
   <url><loc>https://nazryx.com/markets/kazakhstan</loc></url>
-  <url><loc>https://nazryx.com/partners</loc></url>
-  <url><loc>https://nazryx.com/sample</loc></url>
+  <url><loc>https://nazryx.com/about</loc></url>
+  <url><loc>https://nazryx.com/distributors</loc></url>
+  <url><loc>https://nazryx.com/start</loc></url>
 </urlset>

@@ -1,0 +1,27 @@
+{
+  "path": "/start",
+  "title": "Request a market read | Nazryx",
+  "description": "Send your product list and target markets. Nazryx will show you what is open, thin or crowded for your products.",
+  "theme": "light",
+  "sections": [
+    { "type": "hero", "eyebrow": "Request a market read", "title": "Send your product list.", "accent": "We'll show you what's open.",
+      "lede": "Tell us who you are, what you make and which markets interest you. One of our team will come back to you.",
+      "ctas": [{ "label": "Go to the form", "href": "#form" }],
+      "side": { "kind": "kv", "title": "What happens next", "rows": [["1", "We review your list and markets"], ["2", "A 20-minute call with you"], ["3", "Your market read, 2–3 weeks"], ["4", "A proposal, if the market is open"]] } },
+    { "type": "form", "id": "form", "eyebrow": "Your request", "title": "Five fields.", "accent": "That's all we need to start." },
+    { "type": "steps", "id": "next", "eyebrow": "After you send it", "title": "What you can", "accent": "expect.",
+      "items": [
+        { "when": "First", "title": "We read your list", "text": "Products, dosage forms and the markets you named." },
+        { "when": "Then", "title": "A short call", "text": "Twenty minutes on your portfolio and certificates." },
+        { "when": "2–3 weeks", "title": "Your market read", "text": "What is open, thin or crowded, per market.", "dark": true }
+      ] },
+    { "type": "cards", "id": "reassure", "eyebrow": "Before you send", "title": "Confidential.", "accent": "No obligation.", "cols": 3, "style": "plain",
+      "items": [
+        { "title": "Your list stays private", "text": "Used to read the market for you and nothing else." },
+        { "title": "No obligation", "text": "You see the evidence before anything is agreed." },
+        { "title": "Registrations stay yours", "text": "If you go ahead, everything is filed in your name." }
+      ] },
+    { "type": "faq", "id": "faq", "eyebrow": "Questions", "title": "Before you", "accent": "send.", "for": "start" },
+    { "type": "cta", "id": "contact", "title": "Prefer to talk first?", "text": "Call, WhatsApp or book twenty minutes.", "contact": true }
+  ]
+}

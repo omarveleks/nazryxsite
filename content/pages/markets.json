@@ -1,0 +1,17 @@
+{
+  "path": "/markets",
+  "title": "Markets we serve: 14 frontier markets on 3 continents | Nazryx",
+  "description": "Nazryx serves 14 pharmaceutical markets on 3 continents: Central Asia, East and West Africa, North Africa, the Middle East and South America.",
+  "theme": "light",
+  "sections": [
+    { "type": "hero", "eyebrow": "Markets", "title": "14 markets", "accent": "on 3 continents.",
+      "lede": "Asia, Africa and South America. Frontier markets that import most of their medicines, read and run one at a time.",
+      "ctas": ["primary"], "side": { "kind": "regions", "title": "Markets we run", "sub": "14 markets · 3 continents" } },
+    { "type": "stats", "items": ["markets", "people", "imports", "importShare"] },
+    { "type": "regions", "id": "regions", "eyebrow": "By region", "title": "Six regions.", "accent": "One way of working." },
+    { "type": "marketCards", "id": "cards", "eyebrow": "Market by market", "title": "What we know", "accent": "about each one.", "lede": "Two facts per market. Kazakhstan is shown in full; every other market file is available on request." },
+    { "type": "chips", "id": "sources", "eyebrow": "Where products come from", "title": "Six source countries.", "accent": "Built for their exporters.",
+      "lede": "South Asia makes medicines for the world at a price frontier markets can pay. We take them to the markets that need them.", "items": "sourceCountries" },
+    { "type": "cta", "id": "contact", "title": "Ask for a market file.", "text": "Tell us which market and send your product list. We will show you what is open there.", "contact": true }
+  ]
+}

@@ -25,6 +25,7 @@
   </div>
   <p class="an-status" id="status">Loading…</p>
 
+  <section><h2>Market-read requests</h2><p class="an-sub">Sent from the form on /start.</p><div class="an-card an-tbl" id="requests"></div></section>
   <section><h2>Overview</h2><div class="an-kpis" id="kpis"></div></section>
   <section><div class="an-h"><h2>Traffic over time</h2><div class="aud an-metric"><button data-m="visitors" class="on">Visitors</button><button data-m="pageviews">Pageviews</button></div></div><div class="an-card" id="chart"></div></section>
   <section><h2>Kazakhstan funnel</h2><div class="an-funnel" id="funnel"></div></section>
@@ -35,12 +36,12 @@
     <div class="an-card an-builder">
       <h3>Link builder</h3>
       <div class="an-form">
-        <label>Page<select id="lb-p"><option>/markets/kazakhstan</option><option>/markets</option><option>/manufacturers</option><option>/</option><option>/partners</option></select></label>
+        <label>Page<select id="lb-p"><option>/market-entry</option><option>/market-data</option><option>/</option><option>/markets/kazakhstan</option><option>/start</option></select></label>
         <label>Source<input id="lb-s" placeholder="whatsapp"></label>
         <label>Campaign<input id="lb-c" placeholder="kz-oct"></label>
         <label>Lead ref<input id="lb-r" placeholder="lead-name"></label>
       </div>
-      <div class="an-link"><code id="lb-out">https://nazryx.com/markets/kazakhstan</code><button class="btn btn-blue" id="lb-copy">Copy</button></div>
+      <div class="an-link"><code id="lb-out">https://nazryx.com/market-entry</code><button class="btn btn-blue" id="lb-copy">Copy</button></div>
     </div>
   </section>
   <section><h2>Warm leads</h2><p class="an-sub">Visits that arrived with a <code>?ref=</code> link, most recent first.</p><div class="an-card an-tbl" id="leads"></div></section>

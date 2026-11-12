@@ -1,0 +1,54 @@
+{
+  "path": "/market-entry",
+  "title": "Market entry management for pharmaceutical manufacturers | Nazryx",
+  "description": "Launch into frontier markets with the registrations in your name. Nazryx registers your products, appoints the importer, reaches the doctors and bids in state rounds. Paid on results.",
+  "theme": "dark",
+  "sections": [
+    { "type": "hero", "eyebrow": "Market entry management", "title": "Launch into new markets.", "accent": "Keep the registrations in your name.",
+      "lede": "We are your export team on the ground: we register your products, appoint the importer, reach the doctors and bid in state rounds. Paid on results.",
+      "ctas": ["primary", "secondary"],
+      "side": { "kind": "kv", "title": "How we work", "rows": [["Model", "Agent, never the distributor"], ["Registrations", "In your name"], ["Paid", "Commission on sales"], ["Reporting", "Weekly"]] } },
+    { "type": "cards", "id": "fit", "eyebrow": "Who it's for", "title": "Built for manufacturers", "accent": "ready to export.", "cols": 4, "style": "plain",
+      "items": [
+        { "title": "Finished medicines and devices", "text": "Made in your own plant to a recognised GMP standard." },
+        { "title": "Real portfolio", "text": "Enough lines that choosing which to launch matters." },
+        { "title": "Dossier ready", "text": "Able to support registration with a dossier." },
+        { "title": "Exporting from", "text": "Pakistan, Bangladesh, Turkey, Egypt, Europe or Korea." }
+      ] },
+    { "type": "cards", "id": "outcomes", "eyebrow": "What it delivers", "title": "More exports. More markets.", "accent": "Less of the work.", "cols": 3, "style": "tiles",
+      "items": [
+        { "title": "Grow your exports", "text": "More volume, more orders, steady reorders." },
+        { "title": "Launch in new markets", "text": "We pick the market, register your products and sign the right importer." },
+        { "title": "Win more of the markets you're in", "text": "Sharper pricing, better partners, more of your lines on the shelf." }
+      ] },
+    { "type": "cards", "id": "scope", "eyebrow": "Scope", "title": "Four phases,", "accent": "one team.", "cols": 4, "style": "numbered",
+      "items": [
+        { "title": "Read", "text": "Choose what to launch and where, from the register, shelves and state buyers." },
+        { "title": "Register", "text": "Route, dossier, translation and filing in your name. Quality checks before the regulator sees them." },
+        { "title": "Launch", "text": "Importer appointed, chain listings, and state bids prepared." },
+        { "title": "Grow", "text": "Doctors reached, prices kept right, and a written report every week." }
+      ] },
+    { "type": "steps", "id": "timeline", "eyebrow": "Timeline", "title": "A short call.", "accent": "Then the evidence.",
+      "items": [
+        { "when": "Day 1", "title": "20-minute call", "text": "Your portfolio, certificates and target markets." },
+        { "when": "2–3 weeks", "title": "Market read", "text": "Your catalogue against each target market." },
+        { "when": "Then", "title": "Proposal", "text": "Products, filing waves, route, launch plan and volumes by year." },
+        { "when": "12–24 months after filing", "title": "First sales", "text": "Depending on the market and the route.", "dark": true }
+      ] },
+    { "type": "cards", "id": "roles", "eyebrow": "Who holds what", "title": "You keep the registrations.", "accent": "We do the work.", "cols": 3, "style": "roles",
+      "items": [
+        { "label": "You", "title": "Product, dossier, plant, brand, registrations", "text": "Yours throughout, in every market." },
+        { "label": "Nazryx", "title": "Your local representative", "text": "We act for you in the market. Never the holder; we never take title to stock.", "featured": true },
+        { "label": "The importer", "title": "Stocks and sells", "text": "Appointed with you, and replaceable without losing anything." }
+      ] },
+    { "type": "cards", "id": "model", "eyebrow": "Commercial model", "title": "Paid when", "accent": "your products sell.", "cols": 3, "style": "plain",
+      "items": [
+        { "title": "Commission on sales", "text": "Agreed per market before anything starts." },
+        { "title": "No fee for introductions", "text": "We earn when product moves, not when we make a call." },
+        { "title": "Exclusive partnerships", "text": "A few manufacturers at a time, each with real work in market." }
+      ] },
+    { "type": "commitments", "id": "commitments", "audience": "manufacturers", "eyebrow": "What we put in writing", "title": "Four commitments,", "accent": "on paper before you start." },
+    { "type": "faq", "id": "faq", "eyebrow": "Questions", "title": "What manufacturers", "accent": "ask first.", "for": "manufacturers" },
+    { "type": "cta", "id": "contact", "title": "Start with the market read.", "text": "Send your product list and the markets you are curious about. We will show you what is open before we talk about an agreement.", "contact": true }
+  ]
+}

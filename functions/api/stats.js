@@ -3,7 +3,7 @@ import { isAuthed } from '../_lib/auth.js';
 import { SEC_HEADERS } from '../_lib/util.js';
 
 const CONV = "(target LIKE 'whatsapp%' OR target LIKE 'phone%' OR target LIKE 'email%')";
-const CTA = "(target LIKE 'cta:%' OR target LIKE 'whatsapp%' OR target LIKE 'phone%' OR target LIKE 'email%' OR target LIKE 'calendly%')";
+const CTA = "(target LIKE 'cta:%' OR target LIKE 'form:%' OR target LIKE 'whatsapp%' OR target LIKE 'phone%' OR target LIKE 'email%' OR target LIKE 'calendly%')";
 const json = (o, s = 200, extra = {}) => new Response(typeof o === 'string' ? o : JSON.stringify(o), { status: s, headers: { 'content-type': 'application/json', ...SEC_HEADERS, ...extra } });
 const DAY = 86400000;
 
@@ -57,7 +57,7 @@ export async function onRequestGet({ request, env }) {
     all(`SELECT utm_source s, IFNULL(utm_medium,'') m, IFNULL(utm_campaign,'') c, COUNT(DISTINCT sid) sessions, COUNT(*) pageviews FROM events WHERE ts>=? AND ts<? AND type='pageview' AND utm_source IS NOT NULL GROUP BY s,m,c ORDER BY sessions DESC LIMIT 50`, a, b),
     all(`SELECT lead_ref ref, MIN(ts) first, MAX(ts) last, SUM(type='pageview') pages,
         (SELECT IFNULL(SUM(t),0) FROM (SELECT MAX(value) t FROM events x WHERE x.lead_ref=e.lead_ref AND x.type='time' AND x.ts>=?1 AND x.ts<?2 GROUP BY x.pv)) secs,
-        MAX(path LIKE '/markets/kazakhstan%') kz, MAX(type='click' AND ${CTA}) cta, MAX(country) country
+        MAX(path='/start') kz, MAX(type='click' AND ${CTA}) cta, MAX(country) country
       FROM events e WHERE ts>=?1 AND ts<?2 AND lead_ref IS NOT NULL GROUP BY lead_ref ORDER BY last DESC LIMIT 200`, a, b),
     all(`SELECT IFNULL(country,'??') k, COUNT(DISTINCT vkey) n FROM events WHERE ts>=? AND ts<? AND type='pageview' GROUP BY k ORDER BY n DESC LIMIT 20`, a, b),
     all(`SELECT IFNULL(city,'Unknown')||', '||IFNULL(country,'??') k, COUNT(DISTINCT vkey) n FROM events WHERE ts>=? AND ts<? AND type='pageview' GROUP BY k ORDER BY n DESC LIMIT 20`, a, b),
@@ -69,12 +69,14 @@ export async function onRequestGet({ request, env }) {
     all(`SELECT target, path, COUNT(*) n FROM events WHERE ts>=? AND ts<? AND type IN ('click','submit') GROUP BY target, path ORDER BY n DESC LIMIT 100`, a, b),
     all(`SELECT ts, type, path, target, IFNULL(source,'direct') source, country FROM events WHERE ts>=? AND ts<? ORDER BY ts DESC LIMIT 50`, a, b)
   ]);
-  return json({ from, to, cur, prev, series, prevSeries, funnel, prevFunnel, pages, sources, referrers, utms, leads, audience: { countries, cities, devices, browsers, oses, langs, newret }, actions, recent });
+  let leads2 = [];
+  try { leads2 = (await DB.prepare('SELECT ts, name, company, email, phone, market, substr(products,1,300) products, country FROM leads WHERE ts>=? AND ts<? ORDER BY ts DESC LIMIT 200').bind(a, b).all()).results; } catch {}
+  return json({ requests: leads2, from, to, cur, prev, series, prevSeries, funnel, prevFunnel, pages, sources, referrers, utms, leads, audience: { countries, cities, devices, browsers, oses, langs, newret }, actions, recent });
 }
 
 async function funnelQ(DB, a, b) {
   return DB.prepare(`WITH s AS (SELECT sid,
-      MAX(type='pageview' AND path='/manufacturers') m, MAX(type='pageview' AND path='/markets') k,
-      MAX(type='pageview' AND path='/markets/kazakhstan') z, MAX(type='click' AND ${CTA}) c FROM events WHERE ts>=? AND ts<? GROUP BY sid)
+      MAX(type='pageview' AND path='/') m, MAX(type='pageview' AND path='/market-entry') k,
+      MAX(type='pageview' AND path='/start') z, MAX(type='click' AND ${CTA}) c FROM events WHERE ts>=? AND ts<? GROUP BY sid)
     SELECT SUM(m) s1, SUM(m AND k) s2, SUM(m AND k AND z) s3, SUM(m AND k AND z AND c) s4, SUM(z) kz_any, SUM(z AND c) kz_cta FROM s`).bind(a, b).first();
 }
