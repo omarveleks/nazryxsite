@@ -19,49 +19,44 @@
       ],
       "trust": "14 markets on 3 continents · 10 manufacturers represented",
       "side": {
-        "kind": "figures",
-        "title": "What we know",
-        "items": [
-          "trade",
-          "manufacturers",
-          "lots",
-          "markets"
-        ]
+        "kind": "regions",
+        "title": "Markets we run",
+        "sub": "14 markets · 3 continents"
       }
     },
     {
       "type": "figures",
       "id": "opportunity",
-      "eyebrow": "The opportunity",
-      "title": "Frontier markets need medicines.",
-      "accent": "Most of them come from abroad.",
+      "eyebrow": "Our track record",
+      "title": "What we have built",
+      "accent": "so far.",
       "items": [
         [
-          "650m+",
-          "people in the 14 markets we serve"
+          "USD 13m+",
+          "of pharmaceutical trade facilitated"
         ],
         [
-          "USD 10bn+",
-          "of medicines imported into them a year"
+          "10",
+          "manufacturers represented, in selected partnerships"
         ],
         [
-          "70–95%",
-          "of medicines imported in most of our markets"
+          "14",
+          "markets on 3 continents"
         ],
         [
-          "USD 65bn+",
-          "a year spent by Africa on imported medical products"
+          "300+",
+          "distributors profiled"
         ],
         [
-          "USD 3bn",
-          "of medicines imported into Iraq a year, through one state importer"
+          "88,000+",
+          "state tender lots read"
         ],
         [
-          "USD 2bn",
-          "of medicines imported into Uzbekistan (2025)"
+          "1,000+",
+          "physicians in our Kazakhstan network"
         ]
       ],
-      "note": "Nazryx estimate from national, UN and AUDA-NEPAD data, 2024–26."
+      "note": ""
     },
     {
       "type": "cards",
@@ -220,7 +215,7 @@
         },
         {
           "title": "Central Asia is opening",
-          "text": "Uzbekistan cut registration review times to 60–120 days in Nov 2025, with medicine imports at about USD 2bn."
+          "text": "Uzbekistan cut registration review times to 60–120 days in Nov 2025. Early filers get the head start."
         }
       ]
     },

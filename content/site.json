@@ -116,14 +116,6 @@
       "value": "650m+",
       "label": "people in our markets"
     },
-    "imports": {
-      "value": "USD 10bn+",
-      "label": "of medicines imported a year"
-    },
-    "importShare": {
-      "value": "70–95%",
-      "label": "of medicines imported in most of our markets"
-    },
     "kzPharmacies": {
       "value": "1,340",
       "label": "pharmacies tracked in Kazakhstan"
@@ -154,7 +146,7 @@
       "angle": "One dossier, five markets.",
       "insight": "With Kazakhstan as EAEU reference state, one registration can be extended to Russia, Belarus, Armenia and Kyrgyzstan. Kazakhstan's national route closes on 31 Dec 2027, so the order of filing matters now.",
       "keyFacts": [
-        "85% of Kazakhstan's medicine value is imported",
+        "Kazakhstan's national route closes on 31 Dec 2027",
         "Uzbekistan cut review times to 60–120 days in Nov 2025"
       ]
     },
@@ -171,8 +163,8 @@
       "angle": "A good dossier now travels.",
       "insight": "Seven East African regulators share assessment work and the CTD format is mandatory. Done right once, a dossier opens the region.",
       "keyFacts": [
-        "More than 80% of medicines imported in Tanzania",
-        "About 70% imported in Kenya, at least 70% in Uganda"
+        "7 regulators share assessment work",
+        "CTD format mandatory across the region"
       ]
     },
     {
@@ -186,10 +178,10 @@
         "fwa"
       ],
       "angle": "Import-led, centrally bought.",
-      "insight": "Most medicines are imported and much of the volume runs through central state buyers. Winning here is about registration and price, not presence.",
+      "insight": "Much of the volume runs through central state buyers. Winning here is about registration and price, not presence.",
       "keyFacts": [
-        "95% of pharmaceutical products imported in Senegal",
-        "About 60% imported in Nigeria, about 70% in Ghana"
+        "Central state buyers, such as SEN-PNA in Senegal",
+        "2 WHO-prequalified local makers in Nigeria"
       ]
     },
     {
@@ -203,8 +195,8 @@
       "angle": "Supply is being rebuilt.",
       "insight": "National buyers are rebuilding supply and need reliable makers. Early, compliant suppliers earn the position.",
       "keyFacts": [
-        "Sudan imported USD 274m+ of medicines in H1 2026",
-        "Libya imports almost all of its medicines"
+        "13 factories back in production in Sudan",
+        "Libya's first national import tender in a decade (2024)"
       ]
     },
     {
@@ -217,8 +209,8 @@
       "angle": "One buyer decides.",
       "insight": "A single state importer sets the volume. The strategy is to be registered, priced and ready when its lists open.",
       "keyFacts": [
-        "Iraq imports about USD 3bn of medicines a year",
-        "Single state importer: Kimadia"
+        "Single state importer: Kimadia",
+        "More than 40% of demand made locally"
       ]
     },
     {
@@ -229,10 +221,10 @@
         "pe"
       ],
       "angle": "Price-led, centrally bought.",
-      "insight": "An import-led market with a central state buyer. India is already its largest supplier, at about 14.5%: proof that imported generics compete on price.",
+      "insight": "A central state buyer and a price-led market, where Indian generics already lead at about 14.5% of supply.",
       "keyFacts": [
-        "Peru imported USD 715m of medicines in 2025, up 9%",
-        "Central state buyer: CENARES"
+        "Central state buyer: CENARES",
+        "Regulator: DIGEMID"
       ]
     }
   ],
@@ -242,43 +234,41 @@
       "file": "/markets/kazakhstan",
       "facts": [
         "USD 2.5bn medicines market (2025)",
-        "85% of value imported",
         "9,659 pharmacies"
       ]
     },
     "uz": {
       "name": "Uzbekistan",
       "facts": [
-        "Imports about USD 2bn (2025)",
+        "38.2m people (2026)",
         "Registration review 60–120 days since Nov 2025"
       ]
     },
     "az": {
       "name": "Azerbaijan",
       "facts": [
-        "Imports USD 259m in H1 2025",
-        "Up 4.6% on the year before"
+        "Pharmaceutical imports up 4.6% in H1 2025"
       ]
     },
     "ke": {
       "name": "Kenya",
       "facts": [
-        "About 70% of medicines imported",
-        "State buyer: KEMSA"
+        "State buyer: KEMSA",
+        "Regulator: Pharmacy and Poisons Board, 90-day verification route"
       ]
     },
     "ug": {
       "name": "Uganda",
       "facts": [
-        "At least 70% imported",
-        "State buyer: National Medical Stores"
+        "State buyer: National Medical Stores",
+        "25 licensed manufacturing sites, 13 producing"
       ]
     },
     "tz": {
       "name": "Tanzania",
       "facts": [
-        "More than 80% imported",
-        "State buyer: MSD, about USD 491m a year"
+        "State buyer: MSD, about USD 491m a year",
+        "Regulator: TMDA, generics approved in about 61 days (2022)"
       ]
     },
     "rw": {
@@ -291,21 +281,21 @@
     "ng": {
       "name": "Nigeria",
       "facts": [
-        "About 60% of medicines imported",
-        "Regulator: NAFDAC"
+        "Regulator: NAFDAC",
+        "2 WHO-prequalified local makers"
       ]
     },
     "gh": {
       "name": "Ghana",
       "facts": [
-        "About 70% of medicines imported",
-        "Regulator: FDA Ghana"
+        "Regulator: FDA Ghana",
+        "Five-year roadmap for local manufacturing"
       ]
     },
     "sn": {
       "name": "Senegal",
       "facts": [
-        "95% of pharmaceutical products imported",
+        "Regulator: ARP",
         "State buyer: SEN-PNA"
       ]
     },
@@ -314,35 +304,35 @@
       "short": "Francophone W. & C. Africa",
       "facts": [
         "Dossiers in French, regional regulators",
-        "Côte d'Ivoire: more than 90% imported"
+        "Côte d'Ivoire market about EUR 537m"
       ]
     },
     "sd": {
       "name": "Sudan",
       "facts": [
-        "USD 274m+ imported in H1 2026",
-        "13 factories back in production"
+        "13 factories back in production",
+        "National fund reports availability above 70%"
       ]
     },
     "ly": {
       "name": "Libya",
       "facts": [
-        "Almost all medicines imported",
-        "State buyer: Medical Supply Organization"
+        "State buyer: Medical Supply Organization",
+        "First national import tender in a decade (2024)"
       ]
     },
     "iq": {
       "name": "Iraq",
       "facts": [
-        "About USD 3bn of medicines imported a year",
-        "Single state importer: Kimadia"
+        "Single state importer: Kimadia",
+        "More than 40% of demand made locally"
       ]
     },
     "pe": {
       "name": "Peru",
       "facts": [
-        "Imports USD 715m (2025), up 9%",
-        "Central state buyer: CENARES"
+        "Central state buyer: CENARES",
+        "Regulator: DIGEMID"
       ]
     }
   },

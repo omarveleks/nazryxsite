@@ -9,7 +9,7 @@
       "eyebrow": "Markets",
       "title": "14 markets",
       "accent": "on 3 continents.",
-      "lede": "Asia, Africa and South America. Frontier markets that import most of their medicines, read and run one at a time.",
+      "lede": "Asia, Africa and South America. Frontier markets with their own rules, buyers and clocks, read and run one at a time.",
       "ctas": [
         "primary"
       ],
@@ -24,8 +24,8 @@
       "items": [
         "markets",
         "people",
-        "imports",
-        "importShare"
+        "manufacturers",
+        "trade"
       ]
     },
     {
@@ -42,63 +42,30 @@
       "eyebrow": "Market by market",
       "title": "What we know",
       "accent": "about each one.",
-      "lede": "Two facts per market. Kazakhstan is shown in full; every other market file is available on request."
+      "lede": "Our view of each market in two facts. Kazakhstan is shown in full; every other market file is available on request."
     },
     {
-      "type": "hbars",
-      "id": "imports",
-      "eyebrow": "The data",
-      "title": "How much each market imports.",
-      "accent": "Most of it.",
-      "lede": "Import-led markets buy on price, supply and registration. That is the work we do.",
+      "type": "cards",
+      "id": "why-now",
+      "eyebrow": "Why now",
+      "title": "The rules are changing.",
+      "accent": "Early movers win.",
+      "cols": 3,
+      "style": "tiles",
       "items": [
-        [
-          "Senegal",
-          95,
-          "95%"
-        ],
-        [
-          "Côte d'Ivoire",
-          90,
-          "90%+"
-        ],
-        [
-          "Kazakhstan",
-          85,
-          "85% of value"
-        ],
-        [
-          "Tanzania",
-          80,
-          "80%+"
-        ],
-        [
-          "Uganda",
-          70,
-          "70%+"
-        ],
-        [
-          "Kenya",
-          70,
-          "~70%"
-        ],
-        [
-          "Ghana",
-          70,
-          "~70%"
-        ],
-        [
-          "Nigeria",
-          60,
-          "~60%"
-        ],
-        [
-          "Iraq",
-          58,
-          "under 60%"
-        ]
-      ],
-      "note": "Share of medicines imported. National data, 2024–26."
+        {
+          "title": "Africa is converging",
+          "text": "The African Medicines Agency became operational in October 2025. East Africa already shares assessments across 7 regulators."
+        },
+        {
+          "title": "Eurasia is consolidating",
+          "text": "National registrations not aligned to EAEU rules are being annulled in several member states. Kazakhstan's national route closes on 31 Dec 2027."
+        },
+        {
+          "title": "Central Asia is opening",
+          "text": "Uzbekistan cut registration review times to 60–120 days in Nov 2025. Early filers get the head start."
+        }
+      ]
     },
     {
       "type": "cta",
