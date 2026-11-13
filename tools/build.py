@@ -156,7 +156,7 @@ def r_proof(s, p):
 def r_commitments(s, p):
     c = D["commitments"]
     out = "".join(f'<div class="card rv"><span class="tick" aria-hidden="true"></span><div><h3>{e(x["title"])}</h3><p>{e(x["text"])}</p></div></div>' for x in c[s["audience"]])
-    return f'<section class="wrap" id="{s["id"]}">{head(s)}<div class="grid c2 commit">{out}</div><p class="sign"><b>{e(c["signedBy"])}</b>, {e(c["title"])}</p></section>'
+    return f'<section class="wrap" id="{s["id"]}">{head(s)}<div class="grid c2 commit">{out}</div><p class="sign">Written into every agreement.</p></section>'
 
 
 def r_faq(s, p):

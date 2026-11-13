@@ -20,7 +20,7 @@ Static HTML on Cloudflare Pages. Published folder: `site/` (Pages output directo
 - Facts only from the facts file and brief section 1; anything else gets a `<!-- TODO Omar: confirm -->` and stays off the page.
 - Never publish client, principal, prospect, distributor, importer or chain names, fees or margins, addresses, or any legal entity name. Brand is "Nazryx"; "Part of the Nazir Group" may appear once in the footer.
 - Molecule names only from `site/assets/data/kz_demo_molecules.json`; never add one without Omar's approval.
-- Teams are in Lahore and on the ground in Almaty ("team on the ground", never "office"). Omar's title: Director, International Business.
+- Teams are in Lahore and on the ground in Almaty ("team on the ground", never "office"). No personal names anywhere on the site (no leadership names until Omar approves).
 - 14 markets on 3 continents; Kazakhstan is shown in full but never as the only market. State buyers and regulators may be named.
 - Never say where our data comes from (no "we read registers"); call it "our market data". No "register records" figures.
 - No sourcing-country lists (Pakistan, Bangladesh and "Europe" are not our sourcing countries).
