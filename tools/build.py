@@ -10,6 +10,7 @@ Every page must have at least 6 sections (checked below).
 import html
 import json
 import pathlib
+import hashlib
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 SITE, CONTENT = ROOT / "site", ROOT / "content"
@@ -204,19 +205,16 @@ def r_teams(s, p):
 
 
 def r_form(s, p):
-    mk = "".join(f'<option>{e(D["markets"][m]["name"])}</option>' for r in D["regions"] for m in r["markets"])
     return f"""<section class="wrap" id="{s["id"]}">{head(s)}
 <form class="form rv" method="post" action="/api/lead" data-lead>
   <label>Your name<input name="name" autocomplete="name" required maxlength="120"></label>
   <label>Company<input name="company" autocomplete="organization" required maxlength="160"></label>
-  <label>Work email<input name="email" type="email" autocomplete="email" required maxlength="160"></label>
-  <label>Phone or WhatsApp <small>(optional)</small><input name="phone" type="tel" autocomplete="tel" maxlength="40"></label>
-  <label class="full">Markets of interest<select name="market"><option value="">Choose one, or tell us below</option>{mk}<option>Several markets</option></select></label>
-  <label class="full">Your products <small>(optional: paste a list now, or send it later)</small><textarea name="products" maxlength="8000"></textarea></label>
+  <label class="full">Work email<input name="email" type="email" autocomplete="email" required maxlength="160"></label>
+  <label class="full">What do you want? <small>(a market, a question, anything)</small><textarea name="products" maxlength="8000" rows="4" placeholder="e.g. We want to sell our generics in Kazakhstan and Kenya."></textarea></label>
   <label class="hp" aria-hidden="true">Leave empty<input name="website" tabindex="-1" autocomplete="off"></label>
-  <button class="btn btn-blue" type="submit" data-track="form:submit">Send request</button>
+  <button class="btn btn-blue" type="submit" data-track="form:submit">Send</button>
   <p class="form-msg" role="status" hidden></p>
-  <p class="note full" style="margin:0">We reply within one working day. Your details are confidential and used only to respond to you; see our <a class="ac" href="/privacy">privacy notice</a>.</p>
+  <p class="note full" style="margin:0">That's all we need. We reply within one working day and ask for anything else ourselves. See our <a class="ac" href="/privacy">privacy notice</a>.</p>
 </form></section>"""
 
 
@@ -292,9 +290,20 @@ def bridge_svg():
 <p class="bridge-card" aria-live="polite">Hover or tap a market.</p></div>'''
 
 
+def market_strip():
+    n, cols = 0, ""
+    for ri, r in enumerate(D["regions"]):
+        ms = ""
+        for m in r["markets"]:
+            ms += f'<i style="--d:{n}">{e(D["markets"][m]["name"])}</i>'
+            n += 1
+        cols += f'<div class="ms-r" style="--r:{ri}"><span>{e(r["name"])}</span><p>{ms}</p></div>'
+    return f'<div class="mstrip" aria-label="Markets we serve"><div class="ms-line" aria-hidden="true"><b></b></div>{cols}</div>'
+
+
 def r_flagship(s, p):
     btns = "".join(btn(c) if c != "secondary" else btn({"label": D["secondaryCta"]["label"], "href": D["secondaryCta"]["href"]}, "btn-ghostw") for c in s.get("ctas", []))
-    inner = f'<div class="flag rv"><div class="eyebrow">{e(s["eyebrow"])}</div>{title(s, "h1")}<p class="lede">{e(s["lede"])}</p><div class="btns">{btns}</div></div>{bridge_svg()}'
+    inner = f'<div class="flag rv"><div class="eyebrow">{e(s["eyebrow"])}</div>{title(s, "h1")}<p class="lede">{e(s["lede"])}</p><div class="btns">{btns}</div></div>{market_strip()}'
     return bleed(s, inner).replace('class="bleed dark"', 'class="bleed dark flagship"')
 
 
@@ -385,6 +394,12 @@ RENDER = {k[2:]: v for k, v in globals().items() if k.startswith("r_")}
 
 
 # ------------------------------------------------------------------ page shell
+def V(path):
+    """Asset URL with a content hash, so browsers never mix a cached old file with new pages."""
+    h = hashlib.sha1((ROOT / "site" / path.lstrip("/")).read_bytes()).hexdigest()[:8]
+    return f"{path}?v={h}"
+
+
 def shell(p, body):
     url = BASE + p["path"]
     links = "".join(f'<a href="{n["href"]}"{" aria-current=page" if p["path"].startswith(n["href"]) else ""} data-track="nav:{slug(n["label"])}">{e(n["label"])}</a>' for n in D["nav"])
@@ -395,7 +410,7 @@ def shell(p, body):
            "contactPoint": [{"@type": "ContactPoint", "telephone": x["display"], "contactType": "sales"} for x in D["contact"]["phones"]]}
     ld = f'<script type="application/ld+json">{json.dumps(org)}</script>\n' if p["path"] == "/" else ""
     types = {x["type"] for x in p.get("sections", [])}
-    scripts = '<script src="/assets/js/site.js" defer></script>\n' + ('<script src="/assets/js/lead.js" defer></script>\n' if types & {"form", "checklist"} else "") + ('<script src="/assets/js/quiz.js" defer></script>\n' if "quiz" in types else "") + '<script src="/assets/a.js" defer></script>'
+    scripts = f'<script src="{V("/assets/js/site.js")}" defer></script>\n' + (f'<script src="{V("/assets/js/lead.js")}" defer></script>\n' if types & {"form", "checklist"} else "") + (f'<script src="{V("/assets/js/quiz.js")}" defer></script>\n' if "quiz" in types else "") + '<script src="/assets/a.js" defer></script>'
     return f"""<!doctype html>
 <html lang="en">
 <head>
@@ -406,7 +421,7 @@ def shell(p, body):
 <link rel="canonical" href="{url}">
 <link rel="preload" href="/assets/fonts/intertight-700.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/assets/fonts/inter-400.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="/assets/css/site.css">
+<link rel="stylesheet" href="{V('/assets/css/site.css')}">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="icon" href="/assets/icons/icon-32.png" sizes="32x32" type="image/png">
 <link rel="apple-touch-icon" href="/assets/icons/icon-180.png">

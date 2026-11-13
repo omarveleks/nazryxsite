@@ -425,7 +425,7 @@
     },
     {
       "q": "What do you need from us to start?",
-      "a": "A short note on what you make and where you want to sell. A product list helps, and you can send it later. Dossiers come only for the products you take forward.",
+      "a": "One line on what you want. We follow up for product details ourselves. Dossiers come only for the products you take forward.",
       "for": [
         "manufacturers",
         "home",
@@ -433,8 +433,8 @@
       ]
     },
     {
-      "q": "Is my product list kept confidential?",
-      "a": "Yes. It is used to read the market for you and nothing else.",
+      "q": "Is what we share kept confidential?",
+      "a": "Yes. Anything you share is used to read the market for you and nothing else.",
       "for": [
         "start",
         "data"
@@ -475,6 +475,55 @@
       "for": [
         "start",
         "home"
+      ]
+    },
+    {
+      "q": "How long does a market read take?",
+      "a": "Two to three weeks from our first call.",
+      "for": [
+        "data"
+      ]
+    },
+    {
+      "q": "What do I get?",
+      "a": "Every product rated open, thin or crowded in each market, with the competition, where your price lands and a recommended launch order. We walk you through it on a call.",
+      "for": [
+        "data"
+      ]
+    },
+    {
+      "q": "What does it cost?",
+      "a": "A fixed fee for the read, quoted after the first call and agreed before we start. It depends on how many markets and products you want read.",
+      "for": [
+        "data"
+      ]
+    },
+    {
+      "q": "Do I need dossiers or registrations first?",
+      "a": "No. The read comes first, so you only prepare dossiers for the products worth filing.",
+      "for": [
+        "data"
+      ]
+    },
+    {
+      "q": "Can I start with one market or a few products?",
+      "a": "Yes. Many manufacturers start with one market or a short list and add more later.",
+      "for": [
+        "data"
+      ]
+    },
+    {
+      "q": "How current is the data?",
+      "a": "Our market data is kept current market by market. If you want it watched after the read, Monitoring reports changes weekly.",
+      "for": [
+        "data"
+      ]
+    },
+    {
+      "q": "What happens after the read?",
+      "a": "If a market is open, we propose how to enter it and what it would take. You decide whether to go further.",
+      "for": [
+        "data"
       ]
     }
   ]

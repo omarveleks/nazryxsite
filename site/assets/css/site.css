@@ -348,8 +348,9 @@ a.card:hover{border-color:var(--brand)}
 .cmp table{font-size:15.5px}
 .cmp th.us,.cmp td.us{background:var(--t1);text-align:center}
 .cmp thead th.us{color:var(--t1i);font-weight:700;border-radius:12px 12px 0 0}
-.cmp td{text-align:center}
-.cmp tbody th{width:34%}
+.cmp td,.cmp thead th:not(:first-child){text-align:center;vertical-align:middle}
+.cmp .cm{margin-inline:auto}
+.cmp tbody th{width:34%;vertical-align:middle}
 .cm{display:inline-grid;place-items:center;width:28px;height:28px;border-radius:50%;font-weight:700}
 .cm.y{background:var(--brand);color:#fff}
 .cm.n{color:var(--ink3)}
@@ -424,6 +425,22 @@ h2{font-size:clamp(32px,4.4vw,56px);letter-spacing:-.04em;line-height:1.02}
 .bridge-card{margin-top:14px;font-size:14px;color:#8A8A82;min-height:22px}
 .bridge-card b{color:#F2F1EC}
 .bridge-scroll{overflow-x:auto}
+.mstrip{position:relative;margin-top:64px;padding-top:28px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px 32px}
+.ms-line{position:absolute;inset:0 0 auto;height:1px;background:#1B202B;overflow:hidden;transform-origin:left}
+.ms-line b{position:absolute;top:0;left:0;height:1px;width:22%;background:#1259E6;transform:translateX(-100%)}
+.ms-r span{display:block;font:700 11px Inter,sans-serif;letter-spacing:.08em;text-transform:uppercase;color:#82A4F2;margin-bottom:6px}
+.ms-r p{margin:0;font-size:15px;line-height:1.5;color:#C9C9C2;display:flex;flex-wrap:wrap;gap:2px 14px}
+.ms-r i{font-style:normal}
+.js .mstrip .ms-line{transform:scaleX(0)}
+.js .mstrip .ms-r span,.js .mstrip .ms-r i{opacity:0;display:inline-block;transform:translateY(8px)}
+.js .mstrip .ms-r span{display:block}
+.js .mstrip.on .ms-line{transform:scaleX(1);transition:transform 1.1s cubic-bezier(.2,.7,.2,1)}
+.js .mstrip.on .ms-line b{animation:ms-run 5.5s cubic-bezier(.45,0,.2,1) 1.4s infinite}
+.js .mstrip.on .ms-r span{opacity:1;transform:none;transition:opacity .6s,transform .6s cubic-bezier(.2,.7,.2,1);transition-delay:calc(.35s + var(--r) * .12s)}
+.js .mstrip.on .ms-r i{opacity:1;transform:none;transition:opacity .5s,transform .5s cubic-bezier(.2,.7,.2,1);transition-delay:calc(.7s + var(--d) * .07s)}
+@keyframes ms-run{0%{transform:translateX(-100%)}70%,100%{transform:translateX(560%)}}
+@media (max-width:720px){.mstrip{grid-template-columns:repeat(2,minmax(0,1fr));margin-top:44px;gap:20px}}
+@media (prefers-reduced-motion:reduce){.js .mstrip .ms-line{transform:none}.js .mstrip .ms-r span,.js .mstrip .ms-r i{opacity:1;transform:none}.ms-line b{display:none}}
 
 /* scale counters */
 .scale-sec{padding-block:72px}

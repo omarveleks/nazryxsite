@@ -1,15 +1,15 @@
 {
   "path": "/start",
   "title": "Request a market read | Nazryx",
-  "description": "Send your product list and target markets. Nazryx will show you what is open, thin or crowded for your products.",
+  "description": "Tell Nazryx what you want. We reply within one working day and ask for anything else ourselves.",
   "theme": "light",
   "sections": [
     {
       "type": "hero",
       "eyebrow": "Request a market read",
-      "title": "Send your product list.",
-      "accent": "We'll show you what's open.",
-      "lede": "Tell us who you are, what you make and which markets interest you. We reply within one working day. Prefer to talk first? Book twenty minutes.",
+      "title": "Tell us what you want.",
+      "accent": "We take it from there.",
+      "lede": "Your name, your company and one line on what you want. We reply within one working day. Prefer to talk first? Book twenty minutes.",
       "ctas": [
         {
           "label": "Go to the form",
@@ -47,8 +47,8 @@
       "type": "form",
       "id": "form",
       "eyebrow": "Your request",
-      "title": "Tell us the basics.",
-      "accent": "A product list is optional."
+      "title": "Three fields",
+      "accent": "and one line."
     },
     {
       "type": "steps",

@@ -128,6 +128,9 @@
     });
   }
 
+  // hero market strip: line draws, markets appear in sequence
+  d.querySelectorAll('.mstrip').forEach(function (m) { onView(m, function (x) { requestAnimationFrame(function () { x.classList.add('on'); }); }, '0px'); });
+
   // markets map
   d.querySelectorAll('.wmap').forEach(function (m) {
     prep([].slice.call(m.querySelectorAll('.arc')), 120);
