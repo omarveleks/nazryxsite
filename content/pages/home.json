@@ -1,53 +1,331 @@
 {
   "path": "/",
-  "title": "Market data and market entry for pharmaceutical manufacturers | Nazryx",
-  "description": "Nazryx is a market data and market entry agency for pharmaceutical manufacturers. We show you where your products can sell across 14 frontier markets, then take them there.",
+  "title": "Nazryx | Market entry experts for frontier pharmaceutical markets",
+  "description": "Nazryx is a specialist market data and market entry agency for pharmaceutical manufacturers. We know 14 frontier markets line by line and turn that knowledge into launches.",
   "theme": "light",
   "sections": [
-    { "type": "hero", "eyebrow": "Bridging the gap in medical trade across frontier markets", "title": "Enter frontier markets", "accent": "with the data first.",
-      "lede": "Nazryx is a market data and market entry agency for pharmaceutical manufacturers. We show you where your products can sell, then take them there, with the registrations in your name.",
-      "ctas": ["primary", "secondary"], "trust": "14 markets on 3 continents · 10 manufacturers represented",
-      "side": { "kind": "regions", "title": "Markets we run", "sub": "14 markets · 3 continents" } },
-    { "type": "stats", "items": ["records", "distributors", "lots", "markets"] },
-    { "type": "cards", "id": "problem", "eyebrow": "The problem", "title": "Most export launches fail", "accent": "before the first shipment.",
-      "lede": "Not because of the product or the price. Because of what was decided before anyone read the market.", "cols": 3, "style": "numbered",
+    {
+      "type": "hero",
+      "eyebrow": "Bridging the gap in medical trade across frontier markets",
+      "title": "Frontier markets reward",
+      "accent": "the ones who read them first.",
+      "lede": "Nazryx is a specialist market data and market entry agency for pharmaceutical manufacturers. We know these markets line by line, and we turn that knowledge into launches.",
+      "ctas": [
+        {
+          "label": "Where should you start?",
+          "href": "#start-check"
+        },
+        "secondary"
+      ],
+      "trust": "14 markets on 3 continents · 10 manufacturers represented",
+      "side": {
+        "kind": "figures",
+        "title": "What we know",
+        "items": [
+          "records",
+          "lots",
+          "distributors",
+          "markets"
+        ]
+      }
+    },
+    {
+      "type": "figures",
+      "id": "opportunity",
+      "eyebrow": "The opportunity",
+      "title": "Frontier markets need medicines.",
+      "accent": "Most of them come from abroad.",
       "items": [
-        { "title": "The wrong market", "text": "Chosen from a brochure, not from the national register. Crowded categories look open; open ones go unnoticed." },
-        { "title": "The wrong partner", "text": "Picked because they replied first, not because they sell your category or reach the right buyers." },
-        { "title": "Registration found too late", "text": "The route is worked out after the product is chosen. A year and a dossier are lost to dead ends." }
-      ] },
-    { "type": "offers", "id": "offers", "eyebrow": "What we do", "title": "Two services.", "accent": "One goal: your products selling abroad.",
+        [
+          "650m+",
+          "people in the 14 markets we serve"
+        ],
+        [
+          "USD 10bn+",
+          "of medicines imported into them a year"
+        ],
+        [
+          "70–95%",
+          "of medicines imported in most of our markets"
+        ],
+        [
+          "USD 65bn+",
+          "a year spent by Africa on imported medical products"
+        ],
+        [
+          "USD 457m",
+          "Pakistan's pharmaceutical exports, a 20-year high (FY2025)"
+        ],
+        [
+          "USD 238.5m",
+          "Bangladesh's pharmaceutical exports (FY2025–26), to 130+ countries"
+        ]
+      ],
+      "note": "Nazryx estimate from national, UN and AUDA-NEPAD data, 2024–26."
+    },
+    {
+      "type": "cards",
+      "id": "pov",
+      "eyebrow": "Our point of view",
+      "title": "Market entry is a strategy,",
+      "accent": "not a filing.",
+      "lede": "Most manufacturers enter frontier markets on brochures and first replies. The ones who win decide on evidence. That is the whole of our approach.",
+      "cols": 3,
+      "style": "numbered",
       "items": [
-        { "label": "Market data", "title": "Know what's open before you commit.", "text": "We read each market's register, pharmacy shelves and state tenders against your catalogue, product by product.", "points": ["Market read for your whole catalogue", "Two-page profile for every product", "Ongoing monitoring, weekly"], "href": "/market-data", "cta": "Explore market data" },
-        { "label": "Market entry management", "title": "Launch, with the registrations in your name.", "text": "We register your products, appoint the importer, reach the doctors and bid in state rounds. Paid on results.", "points": ["Registration and local representation", "Importer, chains and state buyers", "Promotion and weekly reporting"], "href": "/market-entry", "cta": "Explore market entry", "featured": true }
-      ] },
-    { "type": "steps", "id": "plan", "eyebrow": "How it works", "title": "Three steps.", "accent": "Evidence first.",
+        {
+          "title": "Evidence before decisions",
+          "text": "The register, the shelf and the state buyer already say where a product can win. We read them before anyone commits."
+        },
+        {
+          "title": "Every market is its own game",
+          "text": "Different rules, buyers and clocks in each country. Expertise has to be local, or it is guesswork."
+        },
+        {
+          "title": "The market belongs to the maker",
+          "text": "We build your position, not ours. Registrations stay in your name, so the market stays yours."
+        }
+      ]
+    },
+    {
+      "type": "quiz",
+      "id": "start-check",
+      "eyebrow": "Try it",
+      "title": "Where should you start?",
+      "accent": "Five questions.",
+      "lede": "Answer five questions and get our view of where your products should enter first, and why."
+    },
+    {
+      "type": "offers",
+      "id": "offers",
+      "eyebrow": "What we do",
+      "title": "Two disciplines.",
+      "accent": "One outcome: your products, selling abroad.",
       "items": [
-        { "when": "Step 1", "title": "Read the market", "text": "Your catalogue against the register, shelves and state buyers of each target market, in 2–3 weeks." },
-        { "when": "Step 2", "title": "Plan the launch", "text": "Which products, which markets, which registration route, and in which order." },
-        { "when": "Step 3", "title": "Enter and manage", "text": "Filing in your name, importer appointed, doctors and state bids, reported every week.", "dark": true }
-      ] },
-    { "type": "cards", "id": "deliverables", "eyebrow": "What you get", "title": "Four things", "accent": "you can act on.", "cols": 4, "style": "tiles",
+        {
+          "label": "Market data",
+          "title": "We know what's open before you commit.",
+          "text": "We read each market's registers, shelves and state purchases against your portfolio, so every decision starts from evidence.",
+          "points": [
+            "Where you can win, and where you can't",
+            "Where your price lands",
+            "Which route gets you there first"
+          ],
+          "href": "/market-data",
+          "cta": "Our market data"
+        },
+        {
+          "label": "Market entry management",
+          "title": "We take you there, in your name.",
+          "text": "From the first filing to steady reorders, we run the launch on the ground and stay on the account.",
+          "points": [
+            "Registration and local representation",
+            "The right partners and buyers",
+            "Growth after launch"
+          ],
+          "href": "/market-entry",
+          "cta": "Our market entry",
+          "featured": true
+        }
+      ]
+    },
+    {
+      "type": "compare",
+      "id": "compare",
+      "eyebrow": "How we're different",
+      "title": "Not a consultancy.",
+      "accent": "Not a distributor.",
+      "lede": "Regulatory firms file dossiers. Distributors buy stock. We sit between both, and own the outcome.",
+      "head": [
+        "",
+        "Regulatory consultancy",
+        "Distributor",
+        "Nazryx"
+      ],
+      "rows": [
+        [
+          "Reads the market before you commit",
+          [
+            "no",
+            "no",
+            "yes"
+          ]
+        ],
+        [
+          "Registers your products",
+          [
+            "yes",
+            "sometimes",
+            "yes"
+          ]
+        ],
+        [
+          "Registration held in your name",
+          [
+            "yes",
+            "sometimes",
+            "yes"
+          ]
+        ],
+        [
+          "Finds partners and buyers",
+          [
+            "no",
+            "they are the buyer",
+            "yes"
+          ]
+        ],
+        [
+          "Stays on the account after launch",
+          [
+            "no",
+            "yes",
+            "yes"
+          ]
+        ],
+        [
+          "Paid on your results",
+          [
+            "no",
+            "margin on stock",
+            "yes"
+          ]
+        ]
+      ]
+    },
+    {
+      "type": "explorer",
+      "id": "markets",
+      "eyebrow": "Where we work",
+      "title": "14 markets. Six regions.",
+      "accent": "A view on each.",
+      "lede": "Pick a region to see how we think about entering it."
+    },
+    {
+      "type": "cards",
+      "id": "why-now",
+      "eyebrow": "Why now",
+      "title": "The rules are changing.",
+      "accent": "Early movers win.",
+      "cols": 3,
+      "style": "tiles",
       "items": [
-        { "title": "Market read", "text": "What is open, thin or crowded for your products, per market." },
-        { "title": "Product profiles", "text": "Two pages per product: the market, then the plan." },
-        { "title": "Launch plan", "text": "Filing waves, route, importer and volumes by year." },
-        { "title": "Weekly report", "text": "Orders, stock, listings, what to push and what to fix." }
-      ] },
-    { "type": "regions", "id": "markets", "eyebrow": "Where we work", "title": "14 markets on 3 continents.", "accent": "From Almaty to Cape Town.",
-      "lede": "Frontier markets import most of their medicines. We read them and run them, one market at a time.", "link": { "label": "See all markets", "href": "/markets" } },
-    { "type": "proof", "id": "proof", "tone": "dark", "eyebrow": "What a market read finds", "title": "The register tells you", "accent": "what a brochure can't.",
+        {
+          "title": "Africa is converging",
+          "text": "The African Medicines Agency became operational in October 2025. East Africa already shares assessments across 7 regulators."
+        },
+        {
+          "title": "Eurasia is consolidating",
+          "text": "National registrations not aligned to EAEU rules are being annulled in several member states. Kazakhstan's national route closes on 31 Dec 2027."
+        },
+        {
+          "title": "South Asia is exporting",
+          "text": "Pakistan's pharmaceutical exports hit a 20-year high in FY2025. Bangladesh now exports to more than 130 countries."
+        }
+      ]
+    },
+    {
+      "type": "cards",
+      "id": "expertise",
+      "eyebrow": "Why Nazryx",
+      "title": "What expertise",
+      "accent": "looks like.",
+      "cols": 4,
+      "style": "tiles",
       "items": [
-        { "title": "12 eye-care medicines. Zero suppliers.", "text": "One market's register read against its essential medicines list: twelve eye-care medicines with no registered supplier, and a distributor already asking for one of them.", "figures": [["Medicines with no supplier", "12"], ["Registered in the country", "0"]] },
-        { "title": "53 registrations. All veterinary.", "text": "A widely used molecule looked saturated on paper. Every registration was for animal use. For human medicine, the market was open.", "figures": [["Registrations found", "53"], ["Human medicine", "0"]] }
-      ] },
-    { "type": "cards", "id": "assurance", "eyebrow": "How we work with you", "title": "Low risk,", "accent": "by design.", "cols": 3, "style": "plain",
+        {
+          "title": "We see both sides",
+          "text": "We work with makers and buyers, so we see supply and demand at once."
+        },
+        {
+          "title": "We read what others don't",
+          "text": "Registers, shelves and state purchases, market by market, kept current."
+        },
+        {
+          "title": "We are on the ground",
+          "text": "Teams in Lahore and Almaty, and local networks in every market we serve."
+        },
+        {
+          "title": "We win when you win",
+          "text": "Paid on results. The market stays in your name."
+        }
+      ]
+    },
+    {
+      "type": "cards",
+      "id": "ways",
+      "eyebrow": "Ways to work with us",
+      "title": "Start small.",
+      "accent": "Scale when the data says so.",
+      "cols": 4,
+      "style": "numbered",
       "items": [
-        { "title": "Paid on results", "text": "Commission on sales, agreed per market. No fee for introductions." },
-        { "title": "Registrations in your name", "text": "You keep the product, dossier, plant, brand and registrations." },
-        { "title": "Evidence before contracts", "text": "You see the market read before anything is signed." }
-      ] },
-    { "type": "faq", "id": "faq", "eyebrow": "Questions", "title": "What manufacturers", "accent": "ask first.", "for": "home" },
-    { "type": "cta", "id": "contact", "title": "Send your product list.", "text": "Tell us which markets interest you. We will show you what is open there.", "contact": true }
+        {
+          "title": "Market read",
+          "text": "Your portfolio against one or more markets. The evidence first.",
+          "href": "/market-data"
+        },
+        {
+          "title": "Market file",
+          "text": "One country in full, for a decision at board level.",
+          "href": "/markets/kazakhstan"
+        },
+        {
+          "title": "Market entry",
+          "text": "We take your products to market and run them, in your name.",
+          "href": "/market-entry"
+        },
+        {
+          "title": "Monitoring",
+          "text": "We watch your markets and categories, and report weekly.",
+          "href": "/market-data"
+        }
+      ]
+    },
+    {
+      "type": "proof",
+      "id": "proof",
+      "tone": "dark",
+      "eyebrow": "Why evidence matters",
+      "title": "The register tells you",
+      "accent": "what a brochure can't.",
+      "items": [
+        {
+          "title": "An empty category, hiding in plain sight.",
+          "text": "Twelve eye-care medicines on one market's essential list had no registered supplier, and a distributor was already asking for one of them.",
+          "figures": [
+            [
+              "Medicines with no supplier",
+              "12"
+            ],
+            [
+              "Registered in the country",
+              "0"
+            ]
+          ]
+        },
+        {
+          "title": "A 'crowded' molecule that was wide open.",
+          "text": "53 registrations on paper. Every one was for animal use. For human medicine, the market was open.",
+          "figures": [
+            [
+              "Registrations found",
+              "53"
+            ],
+            [
+              "Human medicine",
+              "0"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "type": "cta",
+      "id": "contact",
+      "title": "Talk to the people who read the market first.",
+      "text": "Send us your portfolio and the markets you are considering. We will give you our view.",
+      "contact": true
+    }
   ]
 }

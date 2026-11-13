@@ -4,39 +4,179 @@
   "description": "Know what's open before you commit. Nazryx reads national registers, pharmacy shelves and state tenders across 14 frontier markets, product by product, for your catalogue.",
   "theme": "light",
   "sections": [
-    { "type": "hero", "eyebrow": "Market data", "title": "Know what's open", "accent": "before you commit.",
-      "lede": "We read each market's national register, pharmacy shelves and state purchases against your catalogue, product by product. You see what is open, what is crowded and where your price lands, before anyone signs anything.",
-      "ctas": ["primary", "secondary"],
-      "side": { "kind": "figures", "title": "Data we have read", "items": ["records", "lots", "distributors", "kzPharmacies"] } },
-    { "type": "cards", "id": "sources", "eyebrow": "What we read", "title": "Four sources,", "accent": "kept current.", "cols": 4, "style": "tiles",
+    {
+      "type": "hero",
+      "eyebrow": "Market data",
+      "title": "Know what's open",
+      "accent": "before you commit.",
+      "lede": "Frontier markets are not opaque. They are unread. We read their registers, shelves and state purchases, and turn them into decisions: where to enter, with what, and at what price.",
+      "ctas": [
+        "primary",
+        "secondary"
+      ],
+      "side": {
+        "kind": "figures",
+        "title": "Data we have read",
+        "items": [
+          "records",
+          "lots",
+          "distributors",
+          "kzPharmacies"
+        ]
+      }
+    },
+    {
+      "type": "cards",
+      "id": "pov",
+      "eyebrow": "Our point of view",
+      "title": "The data already knows",
+      "accent": "where you can win.",
+      "cols": 3,
+      "style": "numbered",
       "items": [
-        { "title": "National registers", "text": "Every registered product: who holds it, from where, in which form." },
-        { "title": "Pharmacy shelves", "text": "What actually sells and at what price. 1,340 pharmacies tracked in Kazakhstan." },
-        { "title": "State tenders", "text": "Every lot of the national purchase rounds. 88,000+ lots read." },
-        { "title": "Buyers and partners", "text": "Distributors and importers profiled by their real portfolios. 300+ so far." }
-      ] },
-    { "type": "cards", "id": "products", "eyebrow": "Products", "title": "From one product", "accent": "to a whole market.", "cols": 4, "style": "numbered",
+        {
+          "title": "Read, don't search",
+          "text": "Openings only show when a whole register is read, not when one product is searched."
+        },
+        {
+          "title": "Shelves beat surveys",
+          "text": "What actually sells, and at what price, is on the shelf. That is where we look."
+        },
+        {
+          "title": "Fresh beats thorough",
+          "text": "A market changes every week. We keep the read current, not filed."
+        }
+      ]
+    },
+    {
+      "type": "cards",
+      "id": "sources",
+      "eyebrow": "What we read",
+      "title": "Four sources,",
+      "accent": "kept current.",
+      "cols": 4,
+      "style": "tiles",
       "items": [
-        { "title": "Market read", "text": "Your whole catalogue against one or more markets: open, thin or crowded, line by line. 2–3 weeks." },
-        { "title": "Product profile", "text": "Two pages per product: competitors, packs and prices, market structure, then the registration and launch plan." },
-        { "title": "Market file", "text": "One country in full: market size, buyers, chains, prices by producer country, doctors and registration routes." },
-        { "title": "Monitoring", "text": "New registrations, lapses, competitors and tenders in your categories, reported weekly." }
-      ] },
-    { "type": "cards", "id": "decisions", "eyebrow": "Decisions it answers", "title": "The questions", "accent": "an export plan needs answered.", "cols": 4, "style": "plain",
+        {
+          "title": "National registers",
+          "text": "Every registered product: who holds it, from where, in which form."
+        },
+        {
+          "title": "Pharmacy shelves",
+          "text": "What actually sells and at what price. 1,340 pharmacies tracked in Kazakhstan."
+        },
+        {
+          "title": "State tenders",
+          "text": "Every lot of the national purchase rounds. 88,000+ lots read."
+        },
+        {
+          "title": "Buyers and partners",
+          "text": "Distributors and importers profiled by their real portfolios. 300+ so far."
+        }
+      ]
+    },
+    {
+      "type": "cards",
+      "id": "products",
+      "eyebrow": "Products",
+      "title": "From one product",
+      "accent": "to a whole market.",
+      "cols": 4,
+      "style": "numbered",
       "items": [
-        { "title": "Which market?", "text": "Where your categories are open, and where they are crowded." },
-        { "title": "Which products?", "text": "The lines with room for one more source, ranked." },
-        { "title": "At what price?", "text": "Where your price lands against Indian, Western and local brands." },
-        { "title": "Through which route?", "text": "National or regional registration, and how long each takes." }
-      ] },
-    { "type": "steps", "id": "method", "eyebrow": "Method", "title": "How the data", "accent": "is built.",
+        {
+          "title": "Market read",
+          "text": "Your whole catalogue against one or more markets: open, thin or crowded, line by line. 2–3 weeks."
+        },
+        {
+          "title": "Product profile",
+          "text": "Two pages per product: competitors, packs and prices, market structure, then the registration and launch plan."
+        },
+        {
+          "title": "Market file",
+          "text": "One country in full: market size, buyers, chains, prices by producer country, doctors and registration routes."
+        },
+        {
+          "title": "Monitoring",
+          "text": "New registrations, lapses, competitors and tenders in your categories, reported weekly."
+        }
+      ],
+      "lede": "Four ways to use our data, from one product to a whole market."
+    },
+    {
+      "type": "cards",
+      "id": "decisions",
+      "eyebrow": "Decisions it answers",
+      "title": "The questions",
+      "accent": "an export plan needs answered.",
+      "cols": 4,
+      "style": "plain",
       "items": [
-        { "when": "1", "title": "Collect", "text": "Registers, shelves and tender lots, gathered market by market." },
-        { "when": "2", "title": "Match", "text": "Your catalogue matched by molecule, dosage form and strength." },
-        { "when": "3", "title": "Score", "text": "Each line rated open, thin or crowded, with the reason in writing.", "dark": true }
-      ] },
-    { "type": "regions", "id": "coverage", "eyebrow": "Coverage", "title": "Every market we serve,", "accent": "read the same way.", "link": { "label": "See the Kazakhstan market file", "href": "/markets/kazakhstan" } },
-    { "type": "faq", "id": "faq", "eyebrow": "Questions", "title": "Before you", "accent": "send a list.", "for": "data" },
-    { "type": "cta", "id": "contact", "title": "Request a market read.", "text": "Send your product list and your target markets. We read them for you.", "contact": true }
+        {
+          "title": "Which market?",
+          "text": "Where your categories are open, and where they are crowded."
+        },
+        {
+          "title": "Which products?",
+          "text": "The lines with room for one more source, ranked."
+        },
+        {
+          "title": "At what price?",
+          "text": "Where your price lands against Indian, Western and local brands."
+        },
+        {
+          "title": "Through which route?",
+          "text": "National or regional registration, and how long each takes."
+        }
+      ]
+    },
+    {
+      "type": "steps",
+      "id": "method",
+      "eyebrow": "Method",
+      "title": "How the data",
+      "accent": "is built.",
+      "items": [
+        {
+          "when": "1",
+          "title": "Collect",
+          "text": "Registers, shelves and tender lots, gathered market by market."
+        },
+        {
+          "when": "2",
+          "title": "Match",
+          "text": "Your catalogue matched by molecule, dosage form and strength."
+        },
+        {
+          "when": "3",
+          "title": "Score",
+          "text": "Each line rated open, thin or crowded, with the reason in writing.",
+          "dark": true
+        }
+      ]
+    },
+    {
+      "type": "explorer",
+      "id": "coverage",
+      "eyebrow": "Coverage",
+      "title": "Every market we serve,",
+      "accent": "read the same way.",
+      "lede": "Pick a region to see our view of it."
+    },
+    {
+      "type": "faq",
+      "id": "faq",
+      "eyebrow": "Questions",
+      "title": "Before you",
+      "accent": "send a list.",
+      "for": "data"
+    },
+    {
+      "type": "cta",
+      "id": "contact",
+      "title": "Request a market read.",
+      "text": "Send your product list and your target markets. We read them for you.",
+      "contact": true
+    }
   ]
 }

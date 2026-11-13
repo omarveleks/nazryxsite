@@ -219,6 +219,67 @@ def r_form(s, p):
 </form></section>"""
 
 
+def r_figures(s, p):
+    out = "".join(f'<div class="fig rv"><b>{e(v)}</b><span>{e(l)}</span></div>' for v, l in s["items"])
+    return f'<section class="wrap" id="{s["id"]}">{head(s)}<div class="figs-grid">{out}</div><p class="note">{e(s.get("note", ""))}</p></section>'
+
+
+def r_compare(s, p):
+    mark = {"yes": '<span class="cm y" aria-label="Yes">&#10003;</span>', "no": '<span class="cm n" aria-label="No">&ndash;</span>'}
+    th = "".join(f'<th scope="col"{" class=us" if i == len(s["head"]) - 1 else ""}>{e(h)}</th>' for i, h in enumerate(s["head"]))
+    body = ""
+    for label, vals in s["rows"]:
+        cells = "".join(f'<td data-l="{e(s["head"][i + 1])}"{" class=us" if i == len(vals) - 1 else ""}>{mark.get(v, f"<span class=cm-t>{e(v)}</span>")}</td>' for i, v in enumerate(vals))
+        body += f'<tr><th scope="row">{e(label)}</th>{cells}</tr>'
+    return f'<section class="wrap" id="{s["id"]}">{head(s)}<div class="card tbl cmp rv"><table><thead><tr>{th}</tr></thead><tbody>{body}</tbody></table></div></section>'
+
+
+def r_hbars(s, p):
+    rows = "".join(f'<div class="hb"><span>{e(n)}</span><div class="t"><i style="width:{v}%"></i></div><b>{e(l)}</b></div>' for n, v, l in s["items"])
+    aria = "; ".join(f"{n} {l}" for n, _, l in s["items"])
+    return f'<section class="wrap" id="{s["id"]}">{head(s)}<div class="card rv"><div class="hbs" role="img" aria-label="{e(aria)}">{rows}</div><p class="note">{e(s.get("note", ""))}</p></div></section>'
+
+
+QUIZ = [
+    {"id": "make", "q": "What do you make?", "a": ["Finished medicines", "Medical devices", "Both"]},
+    {"id": "from", "q": "Where do you manufacture?", "a": D["sourceCountries"] + ["Elsewhere"]},
+    {"id": "region", "q": "Which region interests you most?", "a": [r["name"] for r in D["regions"]] + ["Not sure yet"]},
+    {"id": "dossier", "q": "Is your dossier in CTD format?", "a": ["Yes", "Partly", "Not yet"]},
+    {"id": "stage", "q": "How do you sell abroad today?", "a": ["Not exporting yet", "Through distributors", "Our own presence"]},
+]
+
+
+def r_quiz(s, p):
+    regions = [{"name": r["name"], "angle": r["angle"], "insight": r["insight"], "facts": r["keyFacts"], "markets": market_names(r)} for r in D["regions"]]
+    data = json.dumps({"questions": QUIZ, "regions": regions}).replace("</", "<\\/")
+    return f"""<section class="wrap" id="{s["id"]}">{head(s)}
+<div class="quiz rv" data-quiz>
+  <div class="quiz-bar" aria-hidden="true"><i></i></div>
+  <div class="quiz-body" aria-live="polite"><noscript><p class="lede">This check needs JavaScript. <a class="ac" href="/start">Tell us about your products</a> and we will give you our view directly.</p></noscript></div>
+  <script type="application/json" class="quiz-data">{data}</script>
+</div></section>"""
+
+
+def r_explorer(s, p):
+    tabs, panels = "", ""
+    for i, r in enumerate(D["regions"]):
+        sel = i == 0
+        tabs += f'<button role="tab" id="x-t{i}" aria-controls="x-p{i}" aria-selected="{str(sel).lower()}"{"" if sel else " tabindex=-1"} data-track="explore:{r["id"]}"><small>{len(r["markets"])} market{"s" if len(r["markets"]) > 1 else ""}</small>{e(r["name"])}</button>'
+        names = []
+        for m in r["markets"]:
+            mk = D["markets"][m]
+            nm = e(mk.get("short", mk["name"]))
+            names.append(f'<a href="{mk["file"]}">{nm} &rarr;</a>' if mk.get("file") else f"<span>{nm}</span>")
+        facts = "".join(f"<li>{e(f)}</li>" for f in r["keyFacts"])
+        panels += f"""<div class="xp" id="x-p{i}" role="tabpanel" aria-labelledby="x-t{i}"{"" if sel else " hidden"}>
+  <span class="card-lbl">Our view</span><h3>{e(r["angle"])}</h3><p class="xp-ins">{e(r["insight"])}</p>
+  <ul class="xp-facts">{facts}</ul>
+  <div class="xp-mk">{"".join(names)}</div>
+  <a class="btn btn-blue" href="/start?region={e(r["name"])}" data-track="explore:request">Request a market read for {e(r["name"])}</a>
+</div>"""
+    return f'<section class="wrap" id="{s["id"]}">{head(s)}<div class="explorer rv"><div class="xtabs" role="tablist" aria-label="Regions" aria-orientation="vertical">{tabs}</div><div class="xpanels">{panels}</div></div></section>'
+
+
 RENDER = {k[2:]: v for k, v in globals().items() if k.startswith("r_")}
 
 
@@ -232,7 +293,8 @@ def shell(p, body):
            "email": D["contact"]["email"], "description": D["company"]["oneLiner"],
            "contactPoint": [{"@type": "ContactPoint", "telephone": x["display"], "contactType": "sales"} for x in D["contact"]["phones"]]}
     ld = f'<script type="application/ld+json">{json.dumps(org)}</script>\n' if p["path"] == "/" else ""
-    scripts = '<script src="/assets/js/site.js" defer></script>\n' + ('<script src="/assets/js/lead.js" defer></script>\n' if p["path"] == "/start" else "") + '<script src="/assets/a.js" defer></script>'
+    types = {x["type"] for x in p.get("sections", [])}
+    scripts = '<script src="/assets/js/site.js" defer></script>\n' + ('<script src="/assets/js/lead.js" defer></script>\n' if p["path"] == "/start" else "") + ('<script src="/assets/js/quiz.js" defer></script>\n' if "quiz" in types else "") + '<script src="/assets/a.js" defer></script>'
     return f"""<!doctype html>
 <html lang="en">
 <head>

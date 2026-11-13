@@ -3,6 +3,11 @@
   var f = document.querySelector('form[data-lead]');
   if (!f || !window.fetch) return;
   var msg = f.querySelector('.form-msg'), btn = f.querySelector('button[type=submit]');
+  // arriving from the quiz or the market explorer: preselect the region
+  try {
+    var reg = new URLSearchParams(location.search).get('region'), sel = f.querySelector('select[name=market]');
+    if (reg && sel && !sel.value) { var o = document.createElement('option'); o.textContent = reg.slice(0, 60); sel.appendChild(o); sel.value = o.textContent; }
+  } catch (e) {}
   f.addEventListener('submit', function (ev) {
     ev.preventDefault();
     btn.disabled = true; btn.textContent = 'Sending…';

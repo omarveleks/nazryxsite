@@ -7,105 +7,489 @@
     "oneLiner": "We show manufacturers where their products can sell, then take them there.",
     "group": "Part of the Nazir Group"
   },
-  "primaryCta": { "label": "Request a market read", "href": "/start" },
-  "secondaryCta": { "label": "Talk to us", "href": "/start#contact" },
+  "primaryCta": {
+    "label": "Request a market read",
+    "href": "/start"
+  },
+  "secondaryCta": {
+    "label": "Talk to us",
+    "href": "/start#contact"
+  },
   "nav": [
-    { "label": "Market entry", "href": "/market-entry" },
-    { "label": "Market data", "href": "/market-data" },
-    { "label": "Markets", "href": "/markets" },
-    { "label": "About", "href": "/about" }
+    {
+      "label": "Market entry",
+      "href": "/market-entry"
+    },
+    {
+      "label": "Market data",
+      "href": "/market-data"
+    },
+    {
+      "label": "Markets",
+      "href": "/markets"
+    },
+    {
+      "label": "About",
+      "href": "/about"
+    }
   ],
   "footerNav": [
-    { "label": "Home", "href": "/" },
-    { "label": "Market entry", "href": "/market-entry" },
-    { "label": "Market data", "href": "/market-data" },
-    { "label": "Markets", "href": "/markets" },
-    { "label": "About", "href": "/about" },
-    { "label": "For distributors and buyers", "href": "/distributors" },
-    { "label": "Contact", "href": "/start" }
+    {
+      "label": "Home",
+      "href": "/"
+    },
+    {
+      "label": "Market entry",
+      "href": "/market-entry"
+    },
+    {
+      "label": "Market data",
+      "href": "/market-data"
+    },
+    {
+      "label": "Markets",
+      "href": "/markets"
+    },
+    {
+      "label": "About",
+      "href": "/about"
+    },
+    {
+      "label": "For distributors and buyers",
+      "href": "/distributors"
+    },
+    {
+      "label": "Contact",
+      "href": "/start"
+    }
   ],
   "contact": {
     "email": "contact@nazryx.com",
     "whatsapp": "https://wa.me/447466253544",
     "booking": "/call",
     "phones": [
-      { "tel": "+447466253544", "display": "+44 7466 253544", "label": "UK · WhatsApp" },
-      { "tel": "+77086922409", "display": "+7 708 692 2409", "label": "Kazakhstan · WhatsApp" },
-      { "tel": "+923254307967", "display": "+92 325 4307967", "label": "Pakistan" }
+      {
+        "tel": "+447466253544",
+        "display": "+44 7466 253544",
+        "label": "UK · WhatsApp"
+      },
+      {
+        "tel": "+77086922409",
+        "display": "+7 708 692 2409",
+        "label": "Kazakhstan · WhatsApp"
+      },
+      {
+        "tel": "+923254307967",
+        "display": "+92 325 4307967",
+        "label": "Pakistan"
+      }
     ],
     "teams": [
-      { "city": "Lahore", "role": "Team in Pakistan" },
-      { "city": "Almaty", "role": "Team on the ground in Kazakhstan" }
+      {
+        "city": "Lahore",
+        "role": "Team in Pakistan"
+      },
+      {
+        "city": "Almaty",
+        "role": "Team on the ground in Kazakhstan"
+      }
     ]
   },
   "stats": {
-    "markets": { "value": "14", "label": "markets on 3 continents" },
-    "manufacturers": { "value": "10", "label": "manufacturers represented, 3 of them in Kazakhstan" },
-    "records": { "value": "14,000+", "label": "register records read" },
-    "distributors": { "value": "300+", "label": "distributors profiled" },
-    "lots": { "value": "88,000+", "label": "state tender lots read" },
-    "sources": { "value": "6", "label": "source countries" },
-    "people": { "value": "650m+", "label": "people in our markets" },
-    "imports": { "value": "USD 10bn+", "label": "of medicines imported a year" },
-    "importShare": { "value": "70–95%", "label": "of medicines imported in most of our markets" },
-    "kzPharmacies": { "value": "1,340", "label": "pharmacies tracked in Kazakhstan" },
-    "kzPhysicians": { "value": "1,000+", "label": "physicians in our Kazakhstan network" },
-    "kzDistributors": { "value": "100+", "label": "distributor relationships in Kazakhstan" }
+    "markets": {
+      "value": "14",
+      "label": "markets on 3 continents"
+    },
+    "manufacturers": {
+      "value": "10",
+      "label": "manufacturers represented, 3 of them in Kazakhstan"
+    },
+    "records": {
+      "value": "14,000+",
+      "label": "register records read"
+    },
+    "distributors": {
+      "value": "300+",
+      "label": "distributors profiled"
+    },
+    "lots": {
+      "value": "88,000+",
+      "label": "state tender lots read"
+    },
+    "sources": {
+      "value": "6",
+      "label": "source countries"
+    },
+    "people": {
+      "value": "650m+",
+      "label": "people in our markets"
+    },
+    "imports": {
+      "value": "USD 10bn+",
+      "label": "of medicines imported a year"
+    },
+    "importShare": {
+      "value": "70–95%",
+      "label": "of medicines imported in most of our markets"
+    },
+    "kzPharmacies": {
+      "value": "1,340",
+      "label": "pharmacies tracked in Kazakhstan"
+    },
+    "kzPhysicians": {
+      "value": "1,000+",
+      "label": "physicians in our Kazakhstan network"
+    },
+    "kzDistributors": {
+      "value": "100+",
+      "label": "distributor relationships in Kazakhstan"
+    }
   },
   "regions": [
-    { "id": "ca", "name": "Central Asia and the Caucasus", "role": "Team on the ground in Almaty. National and EAEU routes.", "markets": ["kz", "uz", "az"] },
-    { "id": "ea", "name": "East Africa", "role": "Register-led and tender-heavy. One dossier format across the region.", "markets": ["ke", "ug", "tz", "rw"] },
-    { "id": "wa", "name": "West Africa", "role": "Import-led markets with central state buyers.", "markets": ["ng", "gh", "sn", "fwa"] },
-    { "id": "na", "name": "North Africa and the Horn", "role": "Supply rebuilding through national buyers.", "markets": ["sd", "ly"] },
-    { "id": "me", "name": "Middle East", "role": "One state importer.", "markets": ["iq"] },
-    { "id": "sa", "name": "South America", "role": "A central state buyer.", "markets": ["pe"] }
+    {
+      "id": "ca",
+      "name": "Central Asia and the Caucasus",
+      "role": "Team on the ground in Almaty. National and EAEU routes.",
+      "markets": [
+        "kz",
+        "uz",
+        "az"
+      ],
+      "angle": "One dossier, five markets.",
+      "insight": "With Kazakhstan as EAEU reference state, one registration can be extended to Russia, Belarus, Armenia and Kyrgyzstan. Kazakhstan's national route closes on 31 Dec 2027, so the order of filing matters now.",
+      "keyFacts": [
+        "85% of Kazakhstan's medicine value is imported",
+        "Uzbekistan cut review times to 60–120 days in Nov 2025"
+      ]
+    },
+    {
+      "id": "ea",
+      "name": "East Africa",
+      "role": "Register-led and tender-heavy. One dossier format across the region.",
+      "markets": [
+        "ke",
+        "ug",
+        "tz",
+        "rw"
+      ],
+      "angle": "A good dossier now travels.",
+      "insight": "Seven East African regulators share assessment work and the CTD format is mandatory. Done right once, a dossier opens the region.",
+      "keyFacts": [
+        "More than 80% of medicines imported in Tanzania",
+        "About 70% imported in Kenya, at least 70% in Uganda"
+      ]
+    },
+    {
+      "id": "wa",
+      "name": "West Africa",
+      "role": "Import-led markets with central state buyers.",
+      "markets": [
+        "ng",
+        "gh",
+        "sn",
+        "fwa"
+      ],
+      "angle": "Import-led, centrally bought.",
+      "insight": "Most medicines are imported and much of the volume runs through central state buyers. Winning here is about registration and price, not presence.",
+      "keyFacts": [
+        "95% of pharmaceutical products imported in Senegal",
+        "About 60% imported in Nigeria, about 70% in Ghana"
+      ]
+    },
+    {
+      "id": "na",
+      "name": "North Africa and the Horn",
+      "role": "Supply rebuilding through national buyers.",
+      "markets": [
+        "sd",
+        "ly"
+      ],
+      "angle": "Supply is being rebuilt.",
+      "insight": "National buyers are rebuilding supply and need reliable makers. Early, compliant suppliers earn the position.",
+      "keyFacts": [
+        "Sudan imported USD 274m+ of medicines in H1 2026",
+        "Libya imports almost all of its medicines"
+      ]
+    },
+    {
+      "id": "me",
+      "name": "Middle East",
+      "role": "One state importer.",
+      "markets": [
+        "iq"
+      ],
+      "angle": "One buyer decides.",
+      "insight": "A single state importer sets the volume. The strategy is to be registered, priced and ready when its lists open.",
+      "keyFacts": [
+        "Iraq imports about USD 3bn of medicines a year",
+        "Single state importer: Kimadia"
+      ]
+    },
+    {
+      "id": "sa",
+      "name": "South America",
+      "role": "A central state buyer.",
+      "markets": [
+        "pe"
+      ],
+      "angle": "Price-led, centrally bought.",
+      "insight": "An import-led market with a central state buyer. India is already its largest supplier, at about 14.5%: proof that exporters from our source countries can compete.",
+      "keyFacts": [
+        "Peru imported USD 715m of medicines in 2025, up 9%",
+        "Central state buyer: CENARES"
+      ]
+    }
   ],
   "markets": {
-    "kz": { "name": "Kazakhstan", "file": "/markets/kazakhstan", "facts": ["USD 2.5bn medicines market (2025)", "85% of value imported", "9,659 pharmacies"] },
-    "uz": { "name": "Uzbekistan", "facts": ["Imports about USD 2bn (2025)", "Registration review 60–120 days since Nov 2025"] },
-    "az": { "name": "Azerbaijan", "facts": ["Imports USD 259m in H1 2025", "Up 4.6% on the year before"] },
-    "ke": { "name": "Kenya", "facts": ["About 70% of medicines imported", "State buyer: KEMSA"] },
-    "ug": { "name": "Uganda", "facts": ["At least 70% imported", "State buyer: National Medical Stores"] },
-    "tz": { "name": "Tanzania", "facts": ["More than 80% imported", "9,270+ register records read by Nazryx"] },
-    "rw": { "name": "Rwanda", "facts": ["Home of the African Medicines Agency", "Regulator: Rwanda FDA"] },
-    "ng": { "name": "Nigeria", "facts": ["About 60% of medicines imported", "Regulator: NAFDAC"] },
-    "gh": { "name": "Ghana", "facts": ["About 70% of medicines imported", "Regulator: FDA Ghana"] },
-    "sn": { "name": "Senegal", "facts": ["95% of pharmaceutical products imported", "State buyer: SEN-PNA"] },
-    "fwa": { "name": "Francophone West and Central Africa", "short": "Francophone W. & C. Africa", "facts": ["Dossiers in French, regional regulators", "Côte d'Ivoire: more than 90% imported"] },
-    "sd": { "name": "Sudan", "facts": ["USD 274m+ imported in H1 2026", "13 factories back in production"] },
-    "ly": { "name": "Libya", "facts": ["Almost all medicines imported", "State buyer: Medical Supply Organization"] },
-    "iq": { "name": "Iraq", "facts": ["About USD 3bn of medicines imported a year", "Single state importer: Kimadia"] },
-    "pe": { "name": "Peru", "facts": ["Imports USD 715m (2025), up 9%", "Central state buyer: CENARES"] }
+    "kz": {
+      "name": "Kazakhstan",
+      "file": "/markets/kazakhstan",
+      "facts": [
+        "USD 2.5bn medicines market (2025)",
+        "85% of value imported",
+        "9,659 pharmacies"
+      ]
+    },
+    "uz": {
+      "name": "Uzbekistan",
+      "facts": [
+        "Imports about USD 2bn (2025)",
+        "Registration review 60–120 days since Nov 2025"
+      ]
+    },
+    "az": {
+      "name": "Azerbaijan",
+      "facts": [
+        "Imports USD 259m in H1 2025",
+        "Up 4.6% on the year before"
+      ]
+    },
+    "ke": {
+      "name": "Kenya",
+      "facts": [
+        "About 70% of medicines imported",
+        "State buyer: KEMSA"
+      ]
+    },
+    "ug": {
+      "name": "Uganda",
+      "facts": [
+        "At least 70% imported",
+        "State buyer: National Medical Stores"
+      ]
+    },
+    "tz": {
+      "name": "Tanzania",
+      "facts": [
+        "More than 80% imported",
+        "9,270+ register records read by Nazryx"
+      ]
+    },
+    "rw": {
+      "name": "Rwanda",
+      "facts": [
+        "Home of the African Medicines Agency",
+        "Regulator: Rwanda FDA"
+      ]
+    },
+    "ng": {
+      "name": "Nigeria",
+      "facts": [
+        "About 60% of medicines imported",
+        "Regulator: NAFDAC"
+      ]
+    },
+    "gh": {
+      "name": "Ghana",
+      "facts": [
+        "About 70% of medicines imported",
+        "Regulator: FDA Ghana"
+      ]
+    },
+    "sn": {
+      "name": "Senegal",
+      "facts": [
+        "95% of pharmaceutical products imported",
+        "State buyer: SEN-PNA"
+      ]
+    },
+    "fwa": {
+      "name": "Francophone West and Central Africa",
+      "short": "Francophone W. & C. Africa",
+      "facts": [
+        "Dossiers in French, regional regulators",
+        "Côte d'Ivoire: more than 90% imported"
+      ]
+    },
+    "sd": {
+      "name": "Sudan",
+      "facts": [
+        "USD 274m+ imported in H1 2026",
+        "13 factories back in production"
+      ]
+    },
+    "ly": {
+      "name": "Libya",
+      "facts": [
+        "Almost all medicines imported",
+        "State buyer: Medical Supply Organization"
+      ]
+    },
+    "iq": {
+      "name": "Iraq",
+      "facts": [
+        "About USD 3bn of medicines imported a year",
+        "Single state importer: Kimadia"
+      ]
+    },
+    "pe": {
+      "name": "Peru",
+      "facts": [
+        "Imports USD 715m (2025), up 9%",
+        "Central state buyer: CENARES"
+      ]
+    }
   },
-  "sourceCountries": ["Pakistan", "Bangladesh", "Turkey", "Egypt", "Europe", "Korea"],
+  "sourceCountries": [
+    "Pakistan",
+    "Bangladesh",
+    "Turkey",
+    "Egypt",
+    "Europe",
+    "Korea"
+  ],
   "commitments": {
     "signedBy": "Omar Nazir",
     "title": "Director, International Business",
     "manufacturers": [
-      { "title": "No competing line in your category", "text": "We do not represent a directly competing product in the same category in the same market." },
-      { "title": "The registration is always yours", "text": "Held in your name. We are your local representative, never the holder." },
-      { "title": "We tell you when not to enter", "text": "If a market is crowded or the numbers do not work, you hear it before you pay for a dossier." },
-      { "title": "Your documents stay yours", "text": "Portfolio, pricing and certificates stay confidential. If we part ways, nothing of yours stays with us." }
+      {
+        "title": "No competing line in your category",
+        "text": "We do not represent a directly competing product in the same category in the same market."
+      },
+      {
+        "title": "The registration is always yours",
+        "text": "Held in your name. We are your local representative, never the holder."
+      },
+      {
+        "title": "We tell you when not to enter",
+        "text": "If a market is crowded or the numbers do not work, you hear it before you pay for a dossier."
+      },
+      {
+        "title": "Your documents stay yours",
+        "text": "Portfolio, pricing and certificates stay confidential. If we part ways, nothing of yours stays with us."
+      }
     ],
     "distributors": [
-      { "title": "Your data stays yours", "text": "Not sold, not pooled, not shown to another company." },
-      { "title": "No two of you in one category", "text": "We do not run the same work for a direct competitor in the same city and category." },
-      { "title": "We tell you when to walk away", "text": "If a line is not worth chasing, you hear it before you spend on it." },
-      { "title": "What we build goes with you", "text": "If we part ways, the catalogue work and supplier mapping are yours." }
+      {
+        "title": "Your data stays yours",
+        "text": "Not sold, not pooled, not shown to another company."
+      },
+      {
+        "title": "No two of you in one category",
+        "text": "We do not run the same work for a direct competitor in the same city and category."
+      },
+      {
+        "title": "We tell you when to walk away",
+        "text": "If a line is not worth chasing, you hear it before you spend on it."
+      },
+      {
+        "title": "What we build goes with you",
+        "text": "If we part ways, the catalogue work and supplier mapping are yours."
+      }
     ]
   },
   "faq": [
-    { "q": "Are you an agent, a consultant or a distributor?", "a": "An agent. We never take title to stock. We read the market, register your products, appoint the importer, run promotion and state bids, and report weekly.", "for": ["manufacturers", "home"] },
-    { "q": "How are you paid?", "a": "On results: commission on sales, agreed per market before anything starts. There is no fee for introductions.", "for": ["manufacturers", "home"] },
-    { "q": "Whose name is on the registration?", "a": "Yours. Registrations are always held in the manufacturer's name. We act as your local representative and are never the holder.", "for": ["manufacturers", "home"] },
-    { "q": "Do we need an EAEU GMP certificate?", "a": "It depends on the route. For the EAEU route the plant is inspected by the Kazakh inspectorate. We check your plant's position for each route on the first call, before you spend anything on a dossier.", "for": ["manufacturers"] },
-    { "q": "We already have a distributor in that market.", "a": "Then we look at whether they are the right one. Because the registration is yours, the importer can always be replaced.", "for": ["manufacturers"] },
-    { "q": "How long until first sales?", "a": "Typically 12–24 months after filing, depending on the market and the route.", "for": ["manufacturers", "home"] },
-    { "q": "What do you need from us to start?", "a": "Your product list with dosage forms and strengths, and your certificates. Dossiers come later, and only for the products you take forward.", "for": ["manufacturers", "home", "start"] },
-    { "q": "Is my product list kept confidential?", "a": "Yes. It is used to read the market for you and nothing else.", "for": ["start", "data"] },
-    { "q": "Which markets can you read?", "a": "All 14 markets we serve. Kazakhstan is the one we show in full on this site; every market gets the same read.", "for": ["data", "start"] },
-    { "q": "Is this software, or people?", "a": "People, using our own software. You are not buying a login: our team does the work and you get the result, weekly.", "for": ["distributors"] },
-    { "q": "What do you need from us?", "a": "One person for about a week at the start: your catalogue, supplier list, markets and priorities. After that, a weekly read and a call when a decision is needed.", "for": ["distributors"] },
-    { "q": "What happens to our data?", "a": "It is used for your partnership only. Not pooled, not resold, not used for anyone else. This is written into the agreement.", "for": ["distributors"] }
+    {
+      "q": "Are you an agent, a consultant or a distributor?",
+      "a": "An agent. We never take title to stock. We read the market, register your products, appoint the importer, run promotion and state bids, and report weekly.",
+      "for": [
+        "manufacturers",
+        "home"
+      ]
+    },
+    {
+      "q": "How are you paid?",
+      "a": "On results: commission on sales, agreed per market before anything starts. There is no fee for introductions.",
+      "for": [
+        "manufacturers",
+        "home"
+      ]
+    },
+    {
+      "q": "Whose name is on the registration?",
+      "a": "Yours. Registrations are always held in the manufacturer's name. We act as your local representative and are never the holder.",
+      "for": [
+        "manufacturers",
+        "home"
+      ]
+    },
+    {
+      "q": "Do we need an EAEU GMP certificate?",
+      "a": "It depends on the route. For the EAEU route the plant is inspected by the Kazakh inspectorate. We check your plant's position for each route on the first call, before you spend anything on a dossier.",
+      "for": [
+        "manufacturers"
+      ]
+    },
+    {
+      "q": "We already have a distributor in that market.",
+      "a": "Then we look at whether they are the right one. Because the registration is yours, the importer can always be replaced.",
+      "for": [
+        "manufacturers"
+      ]
+    },
+    {
+      "q": "How long until first sales?",
+      "a": "Typically 12–24 months after filing, depending on the market and the route.",
+      "for": [
+        "manufacturers",
+        "home"
+      ]
+    },
+    {
+      "q": "What do you need from us to start?",
+      "a": "Your product list with dosage forms and strengths, and your certificates. Dossiers come later, and only for the products you take forward.",
+      "for": [
+        "manufacturers",
+        "home",
+        "start"
+      ]
+    },
+    {
+      "q": "Is my product list kept confidential?",
+      "a": "Yes. It is used to read the market for you and nothing else.",
+      "for": [
+        "start",
+        "data"
+      ]
+    },
+    {
+      "q": "Which markets can you read?",
+      "a": "All 14 markets we serve. Kazakhstan is the one we show in full on this site; every market gets the same read.",
+      "for": [
+        "data",
+        "start"
+      ]
+    },
+    {
+      "q": "Is this software, or people?",
+      "a": "People, using our own software. You are not buying a login: our team does the work and you get the result, weekly.",
+      "for": [
+        "distributors"
+      ]
+    },
+    {
+      "q": "What do you need from us?",
+      "a": "One person for about a week at the start: your catalogue, supplier list, markets and priorities. After that, a weekly read and a call when a decision is needed.",
+      "for": [
+        "distributors"
+      ]
+    },
+    {
+      "q": "What happens to our data?",
+      "a": "It is used for your partnership only. Not pooled, not resold, not used for anyone else. This is written into the agreement.",
+      "for": [
+        "distributors"
+      ]
+    }
   ]
 }

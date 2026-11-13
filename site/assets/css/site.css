@@ -292,3 +292,78 @@ a.card:hover{border-color:var(--brand)}
   .chipset span{font-size:17px;padding:11px 18px}
 }
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}.js .rv{opacity:1;transform:none}html{scroll-behavior:auto}}
+
+/* ---------- interactive: "Where should you start?" ---------- */
+.quiz{background:var(--card);border:1px solid var(--line);border-radius:28px;padding:clamp(24px,4vw,48px);position:relative;overflow:hidden}
+.quiz-bar{position:absolute;left:0;right:0;top:0;height:5px;background:var(--panel)}
+.quiz-bar i{display:block;height:100%;background:var(--brand);transform-origin:left;transform:scaleX(0);transition:transform .4s cubic-bezier(.2,.7,.2,1)}
+.quiz-step{font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--a)}
+.quiz-q{font-size:clamp(26px,3.2vw,38px);letter-spacing:-.035em;margin-top:10px}
+.quiz-opts{display:flex;flex-wrap:wrap;gap:10px;margin-top:26px}
+.quiz-opt{font:600 16px Inter,sans-serif;padding:14px 20px;border-radius:14px;border:1px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer;transition:border-color .15s,background-color .15s}
+.quiz-opt:hover,.quiz-opt:focus-visible{border-color:var(--brand);background:var(--t1)}
+.quiz-back{margin-top:20px;font:600 14px Inter,sans-serif;background:none;border:0;color:var(--ink3);cursor:pointer;padding:6px 0}
+.quiz-why{margin-top:12px;font-size:17px;color:var(--ink2);max-width:62ch}
+.quiz-res{display:grid;grid-template-columns:1.2fr .8fr;gap:16px;margin-top:24px}
+.quiz-res>div{border-radius:18px;padding:22px;background:var(--t1)}
+.quiz-res>div+div{background:var(--t2)}
+.quiz-res b{display:block;font-family:"Inter Tight",Inter,sans-serif;font-size:21px;letter-spacing:-.02em;margin:6px 0 8px}
+.quiz-res p,.quiz-res li{font-size:15px;color:var(--ink2)}
+.quiz-res ul{margin:0;padding-left:18px}
+.quiz-notes{list-style:none;margin:18px 0 0;padding:0;display:flex;flex-direction:column;gap:8px}
+.quiz-notes li{position:relative;padding-left:26px;color:var(--ink2);font-size:15.5px}
+.quiz-notes li::before{content:"";position:absolute;left:2px;top:7px;width:11px;height:6px;border-left:2px solid var(--brand);border-bottom:2px solid var(--brand);transform:rotate(-45deg)}
+
+/* ---------- interactive: market explorer ---------- */
+.explorer{display:grid;grid-template-columns:320px 1fr;gap:16px;align-items:stretch}
+.xtabs{display:flex;flex-direction:column;gap:8px}
+.xtabs button{text-align:left;font:600 17px "Inter Tight",Inter,sans-serif;letter-spacing:-.02em;padding:16px 18px;border-radius:16px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer;transition:border-color .15s,background-color .15s}
+.xtabs button small{display:block;font:600 11.5px Inter,sans-serif;letter-spacing:.05em;text-transform:uppercase;color:var(--ink3);margin-bottom:3px}
+.xtabs button:hover{border-color:var(--brand)}
+.xtabs button[aria-selected=true]{background:var(--brand);border-color:var(--brand);color:#fff}
+.xtabs button[aria-selected=true] small{color:rgba(255,255,255,.8)}
+.xpanels{background:var(--card);border:1px solid var(--line);border-radius:24px;padding:clamp(24px,3.5vw,40px);min-width:0}
+.xp h3{font-size:clamp(28px,3.4vw,42px);letter-spacing:-.035em;margin-top:8px}
+.xp-ins{font-size:17px;color:var(--ink2);margin-top:14px;max-width:60ch}
+.xp-facts{list-style:none;margin:22px 0 0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.xp-facts li{border-radius:14px;padding:16px;background:var(--t1);font-weight:600;font-size:15px;color:var(--t1i)}
+.xp-facts li+li{background:var(--t2);color:var(--t2i)}
+.xp-mk{display:flex;flex-wrap:wrap;gap:8px;margin:20px 0 24px}
+.xp-mk span,.xp-mk a{font-size:14px;font-weight:600;padding:8px 14px;border-radius:999px;border:1px solid var(--line);text-decoration:none}
+.xp-mk a{border-color:var(--brand);color:var(--a)}
+.xp .btn{white-space:normal;text-align:center}
+@media (max-width:860px){
+  .explorer,.quiz-res{grid-template-columns:1fr}
+  .xtabs{flex-direction:row;overflow-x:auto;padding-bottom:4px}
+  .xtabs button{flex:0 0 auto;font-size:15px;padding:12px 14px}
+  .xp-facts{grid-template-columns:1fr}
+}
+
+/* ---------- data: big figures, comparison, bars ---------- */
+.figs-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:0;border-top:1px solid var(--line)}
+.fig{padding:28px 24px 28px 0;border-bottom:1px solid var(--line)}
+.fig b{display:block;font-family:"Inter Tight",Inter,sans-serif;font-size:clamp(38px,4.6vw,60px);letter-spacing:-.045em;line-height:1;color:var(--brand)}
+.fig:nth-child(3n+2) b{color:#2E9E6B}.fig:nth-child(3n+3) b{color:#D27A1E}
+.fig span{display:block;margin-top:10px;font-size:15px;color:var(--ink2);max-width:30ch}
+.cmp table{font-size:15.5px}
+.cmp th.us,.cmp td.us{background:var(--t1);text-align:center}
+.cmp thead th.us{color:var(--t1i);font-weight:700;border-radius:12px 12px 0 0}
+.cmp td{text-align:center}
+.cmp tbody th{width:34%}
+.cm{display:inline-grid;place-items:center;width:28px;height:28px;border-radius:50%;font-weight:700}
+.cm.y{background:var(--brand);color:#fff}
+.cm.n{color:var(--ink3)}
+.cm-t{font-size:13px;color:var(--ink3)}
+.hbs{display:flex;flex-direction:column;gap:10px}
+.hb{display:grid;grid-template-columns:150px 1fr 120px;gap:14px;align-items:center;font-size:15px}
+.hb .t{height:26px;background:var(--panel);border-radius:7px;overflow:hidden}
+.hb .t i{display:block;height:100%;background:var(--brand);border-radius:7px}
+.hb:nth-child(n+4) .t i{background:#2E9E6B}
+.hb:nth-child(3) .t i,.hb:nth-child(9) .t i{background:var(--brand)}
+.hb b{text-align:right;font-variant-numeric:tabular-nums}
+@media (max-width:860px){.figs-grid{grid-template-columns:1fr 1fr}}
+@media (max-width:620px){
+  .figs-grid{grid-template-columns:1fr}
+  .hb{grid-template-columns:96px 1fr 76px;font-size:13.5px}
+  .cmp td{text-align:left}.cmp th.us,.cmp td.us{background:var(--t1);border-radius:8px;padding-left:8px}
+}
