@@ -76,32 +76,90 @@
       ]
     },
     {
-      "type": "cards",
+      "type": "phases",
       "id": "products",
-      "eyebrow": "Products",
-      "title": "From one product",
-      "accent": "to a whole market.",
-      "cols": 4,
-      "style": "numbered",
+      "eyebrow": "Our data products",
+      "title": "Four products.",
+      "accent": "Each one explained.",
+      "lede": "From one product to a whole market. Each is scoped and agreed up front.",
       "items": [
         {
           "title": "Market read",
-          "text": "Your whole catalogue against one or more markets: open, thin or crowded, line by line. 2–3 weeks."
+          "text": "Your whole portfolio against one or more markets. Where every engagement starts.",
+          "time": "2–3 weeks",
+          "cols": [
+            [
+              "It answers",
+              "Which of your products can win, in which markets, and in what order."
+            ],
+            [
+              "What's inside",
+              "Every line rated open, thin or crowded, with competition, price position and a recommended launch order."
+            ],
+            [
+              "Best for",
+              "Deciding where to go next, before you spend on dossiers."
+            ]
+          ]
         },
         {
           "title": "Product profile",
-          "text": "Two pages per product: competitors, packs and prices, market structure, then the registration and launch plan."
+          "text": "Two pages per product: the market, then the plan.",
+          "time": "With the market read",
+          "cols": [
+            [
+              "It answers",
+              "Is this product worth filing, and how would we launch it?"
+            ],
+            [
+              "What's inside",
+              "Competitors, packs and prices, market structure, the registration route and launch plan."
+            ],
+            [
+              "Best for",
+              "Choosing the first filing wave."
+            ]
+          ]
         },
         {
           "title": "Market file",
-          "text": "One country in full: market size, buyers, chains, prices by producer country, doctors and registration routes."
+          "text": "One country in full, for a decision at board level.",
+          "time": "Scoped per market",
+          "cols": [
+            [
+              "It answers",
+              "Is this market worth entering, and how?"
+            ],
+            [
+              "What's inside",
+              "Market size and channels, buyers and chains, price position by producer country, doctors and registration routes."
+            ],
+            [
+              "Best for",
+              "Board decisions and market selection. See our Kazakhstan file."
+            ]
+          ]
         },
         {
           "title": "Monitoring",
-          "text": "New registrations, lapses, competitors and tenders in your categories, reported weekly."
+          "text": "Your markets and categories, watched for you.",
+          "time": "Weekly",
+          "cols": [
+            [
+              "It answers",
+              "What changed this week, and what should we do about it?"
+            ],
+            [
+              "What's inside",
+              "New competitors and lapses, state rounds and price moves in your categories."
+            ],
+            [
+              "Best for",
+              "Staying ahead once you are in a market."
+            ]
+          ]
         }
-      ],
-      "lede": "Four ways to use our data, from one product to a whole market."
+      ]
     },
     {
       "type": "cards",

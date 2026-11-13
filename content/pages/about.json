@@ -25,6 +25,18 @@
       }
     },
     {
+      "type": "prose",
+      "id": "story",
+      "eyebrow": "Our story",
+      "title": "From the plant",
+      "accent": "to the patient.",
+      "paras": [
+        "A single tablet in a patient's hands in a village has a journey worth telling. It starts in a plant, crosses borders, passes a regulator, an importer and a pharmacy shelf, and only then reaches the person who needs it.",
+        "Frontier markets import most of their medicines, yet their data is scattered and every country has its own rules. Manufacturers can't see where they fit. Buyers can't find reliable supply.",
+        "Nazryx exists to close that gap. We read these markets line by line, and we take manufacturers into them, with the registrations in their name."
+      ]
+    },
+    {
       "type": "cards",
       "id": "what",
       "eyebrow": "What we are",
@@ -44,33 +56,6 @@
         {
           "title": "On the ground",
           "text": "Teams in Lahore and Almaty, and local networks in every market we serve."
-        }
-      ]
-    },
-    {
-      "type": "cards",
-      "id": "why",
-      "eyebrow": "Why Nazryx",
-      "title": "Four reasons",
-      "accent": "manufacturers work with us.",
-      "cols": 4,
-      "style": "tiles",
-      "items": [
-        {
-          "title": "Both sides of the trade",
-          "text": "We work with makers and buyers, so we see supply and demand at once."
-        },
-        {
-          "title": "Data built for these markets",
-          "text": "Our own market data, built market by market and kept current."
-        },
-        {
-          "title": "People on the ground",
-          "text": "Teams in Lahore and Almaty, and local networks in every market we serve."
-        },
-        {
-          "title": "Aligned incentives",
-          "text": "Our commission is tied to your sales. The market stays in the maker's name."
         }
       ]
     },
@@ -97,6 +82,33 @@
           "title": "Institutional buyers",
           "text": "State and hospital buyers looking for reliable, validated supply.",
           "href": "/distributors"
+        }
+      ]
+    },
+    {
+      "type": "cards",
+      "id": "values",
+      "eyebrow": "How we work",
+      "title": "Four principles,",
+      "accent": "in every market.",
+      "cols": 4,
+      "style": "numbered",
+      "items": [
+        {
+          "title": "Evidence first",
+          "text": "We decide from data, and show you the evidence before anything is signed."
+        },
+        {
+          "title": "The market stays yours",
+          "text": "Registrations in your name, partners you can replace."
+        },
+        {
+          "title": "On the ground",
+          "text": "Local teams and networks, not advice from a distance."
+        },
+        {
+          "title": "Straight answers",
+          "text": "If a market won't work, you hear it from us early."
         }
       ]
     },

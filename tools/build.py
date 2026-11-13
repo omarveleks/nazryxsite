@@ -259,6 +259,88 @@ def r_checklist(s, p):
 </section>"""
 
 
+# ------------------------------------------------------------------ flagship sections (home) and detailed explainers
+def bleed(s, inner, tone="dark"):
+    return f'<section class="bleed {tone}" id="{s.get("id", "")}"><div class="wrap">{inner}</div></section>'
+
+
+def bridge_svg():
+    W, H = 1200, 470
+    hub = (560, 235)
+    flows, back, nodes = [], [], []
+    for i in range(7):
+        y = 70 + i * 55
+        nodes.append(f'<circle class="mkr" cx="120" cy="{y}" r="7"/>')
+        flows.append(f'<path class="flow" d="M127 {y} C 330 {y}, 380 {hub[1]}, {hub[0] - 72} {hub[1]}"/>')
+    nodes.append('<text class="lbl" x="120" y="40" text-anchor="middle">Manufacturers</text>')
+    y = 30
+    for r in D["regions"]:
+        nodes.append(f'<text class="rg" x="905" y="{y + 4}">{e(r["name"])}</text>')
+        y += 20
+        for m in r["markets"]:
+            mk = D["markets"][m]
+            nm = mk.get("short", mk["name"])
+            facts = " · ".join(mk["facts"][:2])
+            nodes.append(f'<g class="mk" tabindex="0" role="button" aria-label="{e(nm)}: {e(facts)}" data-name="{e(nm)}" data-facts="{e(facts)}"><circle cx="895" cy="{y}" r="6"/><text x="910" y="{y + 4}">{e(nm)}</text></g>')
+            flows.append(f'<path class="flow" d="M{hub[0] + 72} {hub[1]} C 720 {hub[1]}, 760 {y}, 887 {y}"/>')
+            back.append(f'<path class="back" d="M887 {y + 3} C 760 {y + 3}, 720 {hub[1] + 9}, {hub[0] + 72} {hub[1] + 9}"/>')
+            y += 21
+        y += 8
+    H = max(H, y)
+    hubg = f'<g class="hub"><rect x="{hub[0] - 72}" y="{hub[1] - 28}" width="144" height="56" rx="28"/><text x="{hub[0]}" y="{hub[1] + 6}" text-anchor="middle">Nazryx</text></g>'
+    return f'''<div class="bridge"><div class="bridge-scroll"><svg viewBox="0 0 {W} {H}" role="img" aria-label="Products flow from manufacturers through Nazryx into 14 markets in six regions; market data flows back.">{"".join(back)}{"".join(flows)}{"".join(nodes)}{hubg}</svg></div>
+<p class="bridge-card" aria-live="polite">Hover or tap a market.</p></div>'''
+
+
+def r_flagship(s, p):
+    btns = "".join(btn(c) if c != "secondary" else btn({"label": D["secondaryCta"]["label"], "href": D["secondaryCta"]["href"]}, "btn-ghostw") for c in s.get("ctas", []))
+    inner = f'<div class="flag rv"><div class="eyebrow">{e(s["eyebrow"])}</div>{title(s, "h1")}<p class="lede">{e(s["lede"])}</p><div class="btns">{btns}</div></div>{bridge_svg()}'
+    return bleed(s, inner).replace('class="bleed dark"', 'class="bleed dark flagship"')
+
+
+def r_scale(s, p):
+    out = ""
+    for it in s["items"]:
+        out += f'<div class="sc rv"><b data-count="{it["n"]}" data-pre="{e(it.get("pre", ""))}" data-suf="{e(it.get("suf", ""))}">{e(it.get("pre", ""))}{it["n"]}{e(it.get("suf", ""))}</b><span>{e(it["label"])}</span></div>'
+    eb = f'<div class="eyebrow">{e(s["eyebrow"])}</div>' if s.get("eyebrow") else ""
+    return f'<section class="wrap scale-sec" id="{s.get("id", "")}">{eb}<div class="scale">{out}</div></section>'
+
+
+def r_manifesto(s, p):
+    lines = "".join(f'<div class="mf rv"><b>{e(t)}</b><p>{e(x)}</p></div>' for t, x in s["items"])
+    inner = f'<div class="eyebrow">{e(s["eyebrow"])}</div><h2 class="mf-h">{e(s["title"])} <span class="ac">{e(s.get("accent", ""))}</span></h2><div class="mf-grid">{lines}</div>'
+    return bleed(s, inner)
+
+
+def r_panels(s, p):
+    out = ""
+    for i, it in enumerate(s["items"]):
+        pts = "".join(f"<li>{e(x)}</li>" for x in it["points"])
+        out += f'<a class="panelx p{i + 1} rv" href="{it["href"]}" data-track="panel:{slug(it["label"])}"><span class="card-lbl">{e(it["label"])}</span><h3>{e(it["title"])}</h3><p>{e(it["text"])}</p><ul>{pts}</ul><span class="go">{e(it["cta"])} &rarr;</span></a>'
+    return f'<section class="wrap" id="{s["id"]}">{head(s)}<div class="panels">{out}</div></section>'
+
+
+def r_phases(s, p):
+    out = ""
+    for i, ph in enumerate(s["items"], 1):
+        cols = "".join(f'<div><span class="card-lbl">{e(k)}</span><p>{e(v)}</p></div>' for k, v in ph["cols"])
+        out += f'<div class="phase rv"><div class="ph-h"><span class="ph-n">{i:02d}</span><div><h3>{e(ph["title"])}</h3><p>{e(ph["text"])}</p></div><span class="ph-t">{e(ph["time"])}</span></div><div class="ph-cols">{cols}</div></div>'
+    return f'<section class="wrap" id="{s["id"]}">{head(s)}<div class="phases">{out}</div></section>'
+
+
+def r_prose(s, p):
+    paras = "".join(f"<p>{e(x)}</p>" for x in s["paras"])
+    return f'<section class="wrap" id="{s["id"]}"><div class="prose-grid"><div><div class="eyebrow">{e(s["eyebrow"])}</div>{title(s)}</div><div class="prose rv">{paras}</div></div></section>'
+
+
+def r_closing(s, p):
+    c = D["contact"]
+    btns = (btn("primary") + f'<a class="btn btn-ghostw" href="{c["booking"]}" data-track="calendly">Book a call</a>'
+            f'<a class="btn btn-ghostw" href="{c["whatsapp"]}" target="_blank" rel="noopener" data-track="whatsapp">WhatsApp</a>')
+    inner = f'<div class="closing rv"><h2>{e(s["title"])} <span class="ac">{e(s.get("accent", ""))}</span></h2><p class="lede">{e(s["text"])} {e(c["reply"])}</p><div class="btns">{btns}</div>{contact_dl()}</div>'
+    return bleed(s, inner)
+
+
 QUIZ = [
     {"id": "make", "q": "What do you make?", "a": ["Finished medicines", "Medical devices", "Both"]},
     {"id": "from", "q": "Where do you manufacture?", "a": ["Middle East and Turkey", "Asia", "Europe", "Africa", "The Americas", "Elsewhere"]},
@@ -343,7 +425,7 @@ def shell(p, body):
 <meta name="twitter:description" content="{e(p["description"])}">
 <meta name="twitter:image" content="{BASE}/assets/og.png">
 {ld}</head>
-<body class="{p.get("theme", "light")}">
+<body class="{p.get("theme", "light")}{" has-flag" if p.get("sections") and p["sections"][0]["type"] == "flagship" else ""}">
 <a class="skip" href="#main">Skip to content</a>
 <header class="hdr">
   <div class="hdr-in">

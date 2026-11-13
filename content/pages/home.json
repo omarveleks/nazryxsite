@@ -1,79 +1,108 @@
 {
   "path": "/",
-  "title": "Nazryx | Market entry experts for frontier pharmaceutical markets",
-  "description": "Nazryx is a specialist market data and market entry agency for pharmaceutical manufacturers. We know 14 frontier markets line by line and turn that knowledge into launches.",
+  "title": "Nazryx | The bridge between medicine makers and frontier markets",
+  "description": "Nazryx is a market data and market entry agency for pharmaceutical manufacturers, working across 14 markets on 3 continents. We take manufacturers into frontier markets, with the registrations in their name.",
   "theme": "light",
   "sections": [
     {
-      "type": "hero",
-      "eyebrow": "Bridging the gap in medical trade across frontier markets",
-      "title": "Frontier markets reward",
-      "accent": "the ones who read them first.",
-      "lede": "Nazryx is a specialist market data and market entry agency for pharmaceutical manufacturers. We know these markets line by line, and we turn that knowledge into registered, selling products.",
+      "type": "flagship",
+      "id": "top",
+      "eyebrow": "Market data and market entry for pharmaceutical manufacturers",
+      "title": "The bridge between medicine makers",
+      "accent": "and frontier markets.",
+      "lede": "We know 14 markets on 3 continents line by line, and we take manufacturers into them, with the registrations in their name.",
       "ctas": [
-        {
-          "label": "Where should you start?",
-          "href": "#start-check"
-        },
+        "primary",
         "secondary"
-      ],
-      "side": {
-        "kind": "regions",
-        "title": "Markets we run",
-        "sub": "14 markets · 3 continents"
-      }
+      ]
     },
     {
-      "type": "figures",
-      "id": "opportunity",
-      "eyebrow": "Our track record",
-      "title": "What we have built",
-      "accent": "so far.",
+      "type": "scale",
+      "id": "scale",
+      "eyebrow": "Nazryx in numbers",
+      "items": [
+        {
+          "pre": "USD ",
+          "n": "13",
+          "suf": "m+",
+          "label": "of pharmaceutical trade facilitated"
+        },
+        {
+          "n": "10",
+          "label": "manufacturers represented, in selected partnerships"
+        },
+        {
+          "n": "14",
+          "label": "markets across Asia, Africa and South America"
+        },
+        {
+          "n": "3",
+          "label": "continents, one team"
+        },
+        {
+          "n": "300",
+          "suf": "+",
+          "label": "distributors profiled"
+        },
+        {
+          "n": "88,000",
+          "suf": "+",
+          "label": "state tender lots read"
+        }
+      ]
+    },
+    {
+      "type": "manifesto",
+      "id": "belief",
+      "eyebrow": "What we believe",
+      "title": "Every tablet has a journey.",
+      "accent": "We make it work.",
       "items": [
         [
-          "USD 13m+",
-          "of pharmaceutical trade facilitated"
+          "Evidence comes before decisions.",
+          "The market already says where a product can win. We read it before anyone commits."
         ],
         [
-          "10",
-          "manufacturers represented, in selected partnerships"
+          "Every market is its own game.",
+          "Different rules, buyers and clocks in each country. Expertise has to be local."
         ],
         [
-          "300+",
-          "distributors profiled"
-        ],
-        [
-          "88,000+",
-          "state tender lots read"
-        ],
-        [
-          "1,000+",
-          "physicians in our Kazakhstan network"
+          "The market belongs to the maker.",
+          "Registrations stay in your name. We build your position, not ours."
         ]
-      ],
-      "note": ""
+      ]
     },
     {
-      "type": "cards",
-      "id": "pov",
-      "eyebrow": "Our point of view",
-      "title": "Market entry is a strategy,",
-      "accent": "not a filing.",
-      "lede": "Most manufacturers enter frontier markets on brochures and first replies. The ones who win decide on evidence. That is the whole of our approach.",
-      "cols": 3,
-      "style": "numbered",
+      "type": "panels",
+      "id": "what",
+      "eyebrow": "What we do",
+      "title": "Two disciplines.",
+      "accent": "One outcome.",
+      "lede": "Your products, registered and selling in the markets that need them.",
       "items": [
         {
-          "title": "Evidence before decisions",
-          "text": "The data already says where a product can win. We read it before anyone commits."
+          "label": "Market data",
+          "title": "Know what's open before you commit.",
+          "text": "Our assessment of your portfolio against each market: where you can win, where you can't, and where your price lands.",
+          "points": [
+            "Market reads and product profiles",
+            "Full market files",
+            "Ongoing monitoring"
+          ],
+          "href": "/market-data",
+          "cta": "Explore market data"
         },
         {
-          "title": "Every market is its own game",
-          "text": "Different rules, buyers and clocks in each country. Expertise has to be local, or it is guesswork."
-        },
-        {
-          "title": "The market belongs to the maker",
-          "text": "We build your position, not ours. Registrations stay in your name, so the market stays yours."
+          "label": "Market entry management",
+          "title": "We take you there, in your name.",
+          "text": "From the first filing to steady reorders, we run the launch on the ground and stay on the account.",
+          "points": [
+            "Registration and local representation",
+            "Partners, chains and state buyers",
+            "Promotion and weekly reporting"
+          ],
+          "href": "/market-entry",
+          "cta": "Explore market entry"
         }
       ]
     },
@@ -86,39 +115,12 @@
       "lede": "Answer five questions and get our view of where your products should enter first, and why."
     },
     {
-      "type": "offers",
-      "id": "offers",
-      "eyebrow": "What we do",
-      "title": "Two disciplines.",
-      "accent": "One outcome: your products, selling abroad.",
-      "items": [
-        {
-          "label": "Market data",
-          "title": "We know what's open before you commit.",
-          "text": "We read each market against your portfolio, so every decision starts from evidence.",
-          "points": [
-            "Where you can win, and where you can't",
-            "Where your price lands",
-            "Which route gets you there first"
-          ],
-          "href": "/market-data",
-          "cta": "Our market data"
-        },
-        {
-          "label": "Market entry management",
-          "title": "We take you there, in your name.",
-          "text": "From the first filing to steady reorders, we run the launch on the ground and stay on the account.",
-          "points": [
-            "Registration and local representation",
-            "The right partners and buyers",
-            "Growth after launch"
-          ],
-          "href": "/market-entry",
-          "cta": "Our market entry",
-          "featured": true
-        }
-      ],
-      "lede": "A market read is our assessment of your portfolio against a market: what's open, what's crowded, and where your price lands. It is where every engagement starts."
+      "type": "explorer",
+      "id": "markets",
+      "eyebrow": "Where we operate",
+      "title": "Six regions. 14 markets.",
+      "accent": "A strategy for each.",
+      "lede": "Pick a region to see how we think about entering it."
     },
     {
       "type": "compare",
@@ -185,111 +187,11 @@
       ]
     },
     {
-      "type": "explorer",
-      "id": "markets",
-      "eyebrow": "Where we work",
-      "title": "Six regions.",
-      "accent": "A view on each.",
-      "lede": "Pick a region to see how we think about entering it."
-    },
-    {
-      "type": "cards",
-      "id": "why-now",
-      "eyebrow": "Why now",
-      "title": "The rules are changing.",
-      "accent": "Early movers win.",
-      "cols": 3,
-      "style": "tiles",
-      "items": [
-        {
-          "title": "Africa is converging",
-          "text": "The African Medicines Agency became operational in October 2025. East Africa already shares assessments across 7 regulators."
-        },
-        {
-          "title": "Eurasia is consolidating",
-          "text": "National registrations not aligned to EAEU rules are being annulled in several member states. Kazakhstan's national route closes on 31 Dec 2027."
-        },
-        {
-          "title": "Central Asia is opening",
-          "text": "Uzbekistan cut registration review times to 60–120 days in Nov 2025. Early filers get the head start."
-        }
-      ]
-    },
-    {
-      "type": "cards",
-      "id": "ways",
-      "eyebrow": "Ways to work with us",
-      "title": "Start small.",
-      "accent": "Scale when the data says so.",
-      "cols": 4,
-      "style": "numbered",
-      "items": [
-        {
-          "title": "Market read",
-          "text": "Your portfolio against one or more markets. The evidence first.",
-          "href": "/market-data"
-        },
-        {
-          "title": "Market file",
-          "text": "One country in full, for a decision at board level.",
-          "href": "/markets/kazakhstan"
-        },
-        {
-          "title": "Market entry",
-          "text": "We take your products to market and run them, in your name.",
-          "href": "/market-entry"
-        },
-        {
-          "title": "Monitoring",
-          "text": "We watch your markets and categories, and report weekly.",
-          "href": "/market-data"
-        }
-      ]
-    },
-    {
-      "type": "proof",
-      "id": "proof",
-      "tone": "dark",
-      "eyebrow": "Why evidence matters",
-      "title": "Our data shows you",
-      "accent": "what a brochure can't.",
-      "items": [
-        {
-          "title": "An empty category, hiding in plain sight.",
-          "text": "Twelve eye-care medicines on one market's essential list had no supplier at all, and a distributor was already asking for one of them.",
-          "figures": [
-            [
-              "Medicines with no supplier",
-              "12"
-            ],
-            [
-              "Suppliers in the country",
-              "0"
-            ]
-          ]
-        },
-        {
-          "title": "A 'crowded' molecule that was wide open.",
-          "text": "53 listings on paper. Every one was for animal use. For human medicine, the market was open.",
-          "figures": [
-            [
-              "Listings found",
-              "53"
-            ],
-            [
-              "Human medicine",
-              "0"
-            ]
-          ]
-        }
-      ]
-    },
-    {
-      "type": "cta",
+      "type": "closing",
       "id": "contact",
-      "title": "Talk to the people who read the market first.",
-      "text": "Send us your portfolio and the markets you are considering. We reply within one working day with our view.",
-      "contact": true
+      "title": "Talk to the people",
+      "accent": "who read the market first.",
+      "text": "Send us your portfolio and the markets you are considering."
     }
   ]
 }

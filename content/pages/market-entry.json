@@ -62,52 +62,88 @@
       ]
     },
     {
-      "type": "cards",
-      "id": "outcomes",
-      "eyebrow": "What it delivers",
-      "title": "More exports. More markets.",
-      "accent": "Less of the work.",
-      "cols": 3,
-      "style": "tiles",
+      "type": "phases",
+      "id": "phases",
+      "eyebrow": "The service, step by step",
+      "title": "Four phases.",
+      "accent": "Each one explained.",
+      "lede": "What we do, what we need from you, what you receive, and how long it typically takes.",
       "items": [
         {
-          "title": "Grow your exports",
-          "text": "More volume, more orders, steady reorders."
-        },
-        {
-          "title": "Launch in new markets",
-          "text": "We pick the market, register your products and sign the right importer."
-        },
-        {
-          "title": "Win more of the markets you're in",
-          "text": "Sharper pricing, better partners, more of your lines on the shelf."
-        }
-      ]
-    },
-    {
-      "type": "cards",
-      "id": "scope",
-      "eyebrow": "Scope",
-      "title": "How we take you",
-      "accent": "to market.",
-      "cols": 4,
-      "style": "numbered",
-      "items": [
-        {
-          "title": "Read",
-          "text": "We find where your portfolio can win."
+          "title": "Read the market",
+          "text": "We assess your portfolio against each target market and agree where to start.",
+          "time": "2–3 weeks",
+          "cols": [
+            [
+              "We do",
+              "Assess each product's competition, price position and demand in each market."
+            ],
+            [
+              "You provide",
+              "Your product list, dosage forms and strengths, and your certificates."
+            ],
+            [
+              "You receive",
+              "A market read: what's open, thin or crowded, and a recommended launch order."
+            ]
+          ]
         },
         {
           "title": "Register",
-          "text": "We choose the route and file in your name."
+          "text": "We choose the route, prepare the local part of the dossier and follow the filing through.",
+          "time": "Depends on market and route",
+          "cols": [
+            [
+              "We do",
+              "Choose the route, translate and complete the local dossier, file, answer the regulator, and coordinate any plant inspection."
+            ],
+            [
+              "You provide",
+              "Your dossier and plant documentation for the products you take forward."
+            ],
+            [
+              "You receive",
+              "Registrations held in your name, with a clear timeline for each."
+            ]
+          ]
         },
         {
           "title": "Launch",
-          "text": "We bring in the right partners and buyers."
+          "text": "We bring in the right partners and buyers so the product is ready to sell from approval.",
+          "time": "From approval",
+          "cols": [
+            [
+              "We do",
+              "Appoint and vet the importer, secure listings with pharmacy chains, and prepare state bids."
+            ],
+            [
+              "You provide",
+              "Pricing approval and supply plans."
+            ],
+            [
+              "You receive",
+              "A launch plan with partners, listings and volumes by year."
+            ]
+          ]
         },
         {
           "title": "Grow",
-          "text": "We stay on the account and keep it moving."
+          "text": "We stay on the account: doctors, prices, reorders and reporting.",
+          "time": "Ongoing",
+          "cols": [
+            [
+              "We do",
+              "Reach the doctors who prescribe, keep pricing right, bid in state rounds and track reorders."
+            ],
+            [
+              "You provide",
+              "Stock and marketing support as agreed."
+            ],
+            [
+              "You receive",
+              "A written report every week: orders, stock, listings, what to push and what to fix."
+            ]
+          ]
         }
       ]
     },

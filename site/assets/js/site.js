@@ -45,6 +45,10 @@
     d.addEventListener('keydown', function (e) { if (e.key === 'Escape' && panel.classList.contains('open')) open(false); });
   }
 
+  // compact header after scrolling
+  var hdr = d.querySelector('.hdr');
+  if (hdr) { var hs = function () { hdr.classList.toggle('small', w.scrollY > 24); }; w.addEventListener('scroll', hs, { passive: true }); hs(); }
+
   d.querySelectorAll('.rv').forEach(function (el) { onView(el, function (x) { x.classList.add('in'); }); });
   d.querySelectorAll('[data-count]').forEach(function (el) { onView(el, count); });
 
