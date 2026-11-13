@@ -22,6 +22,10 @@ Static HTML on Cloudflare Pages. Published folder: `site/` (Pages output directo
 - Molecule names only from `site/assets/data/kz_demo_molecules.json`; never add one without Omar's approval.
 - Teams are in Lahore and on the ground in Almaty ("team on the ground", never "office"). Omar's title: Director, International Business.
 - 14 markets on 3 continents; Kazakhstan is shown in full but never as the only market. State buyers and regulators may be named.
+- Never say where our data comes from (no "we read registers"); call it "our market data". No "register records" figures.
+- No sourcing-country lists (Pakistan, Bangladesh and "Europe" are not our sourcing countries).
+- Commercial terms: fees for defined work (market reads, registration, monitoring) plus commission where we run the market. Never "paid on results only" or "no fees".
+- No exclusivity promises (no "no competing line" / "no two in one category").
 
 ## Security
 - Never write any password, token or secret into the repo, code, comments, logs or previews. Secrets live only in Cloudflare (`wrangler pages secret put`).
