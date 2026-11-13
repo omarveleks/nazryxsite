@@ -1,7 +1,7 @@
 {
   "path": "/market-data",
   "title": "Pharmaceutical market data for frontier markets | Nazryx",
-  "description": "Know what's open before you commit. Nazryx reads national registers, pharmacy shelves and state tenders across 14 frontier markets, product by product, for your catalogue.",
+  "description": "Know what's open before you commit. Nazryx builds market data across 14 frontier markets and reads it against your portfolio, product by product.",
   "theme": "light",
   "sections": [
     {
@@ -9,7 +9,7 @@
       "eyebrow": "Market data",
       "title": "Know what's open",
       "accent": "before you commit.",
-      "lede": "Frontier markets are not opaque. They are unread. We read their registers, shelves and state purchases, and turn them into decisions: where to enter, with what, and at what price.",
+      "lede": "Frontier markets are not opaque. They are unread. We build the data, read it against your portfolio, and turn it into decisions: where to enter, with what, and at what price.",
       "ctas": [
         "primary",
         "secondary"
@@ -18,10 +18,10 @@
         "kind": "figures",
         "title": "Data we have read",
         "items": [
-          "records",
+          "trade",
           "lots",
           "distributors",
-          "kzPharmacies"
+          "manufacturers"
         ]
       }
     },
@@ -36,7 +36,7 @@
       "items": [
         {
           "title": "Read, don't search",
-          "text": "Openings only show when a whole register is read, not when one product is searched."
+          "text": "Openings only show when a whole market is read, not when one product is searched."
         },
         {
           "title": "Shelves beat surveys",
@@ -51,27 +51,27 @@
     {
       "type": "cards",
       "id": "sources",
-      "eyebrow": "What we read",
-      "title": "Four sources,",
+      "eyebrow": "What our data shows",
+      "title": "Four answers,",
       "accent": "kept current.",
       "cols": 4,
       "style": "tiles",
       "items": [
         {
-          "title": "National registers",
-          "text": "Every registered product: who holds it, from where, in which form."
+          "title": "Competition",
+          "text": "Who already sells your products, from where, and how crowded each line is."
         },
         {
-          "title": "Pharmacy shelves",
-          "text": "What actually sells and at what price. 1,340 pharmacies tracked in Kazakhstan."
+          "title": "Price",
+          "text": "What your products sell for, and where your price lands against the competition."
         },
         {
-          "title": "State tenders",
-          "text": "Every lot of the national purchase rounds. 88,000+ lots read."
+          "title": "Demand",
+          "text": "What actually moves, and what the state buys, round by round."
         },
         {
           "title": "Buyers and partners",
-          "text": "Distributors and importers profiled by their real portfolios. 300+ so far."
+          "text": "Who can sell your products, judged by what they really carry. 300+ distributors profiled."
         }
       ]
     },
@@ -140,12 +140,12 @@
         {
           "when": "1",
           "title": "Collect",
-          "text": "Registers, shelves and tender lots, gathered market by market."
+          "text": "Our own data, built and kept current market by market."
         },
         {
           "when": "2",
           "title": "Match",
-          "text": "Your catalogue matched by molecule, dosage form and strength."
+          "text": "Your portfolio matched product by product, by form and strength."
         },
         {
           "when": "3",

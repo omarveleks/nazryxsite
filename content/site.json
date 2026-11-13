@@ -104,10 +104,6 @@
       "value": "10",
       "label": "manufacturers represented, 3 of them in Kazakhstan"
     },
-    "records": {
-      "value": "14,000+",
-      "label": "register records read"
-    },
     "distributors": {
       "value": "300+",
       "label": "distributors profiled"
@@ -115,10 +111,6 @@
     "lots": {
       "value": "88,000+",
       "label": "state tender lots read"
-    },
-    "sources": {
-      "value": "6",
-      "label": "source countries"
     },
     "people": {
       "value": "650m+",
@@ -143,6 +135,10 @@
     "kzDistributors": {
       "value": "100+",
       "label": "distributor relationships in Kazakhstan"
+    },
+    "trade": {
+      "value": "USD 13m+",
+      "label": "of pharmaceutical trade facilitated"
     }
   },
   "regions": [
@@ -233,7 +229,7 @@
         "pe"
       ],
       "angle": "Price-led, centrally bought.",
-      "insight": "An import-led market with a central state buyer. India is already its largest supplier, at about 14.5%: proof that exporters from our source countries can compete.",
+      "insight": "An import-led market with a central state buyer. India is already its largest supplier, at about 14.5%: proof that imported generics compete on price.",
       "keyFacts": [
         "Peru imported USD 715m of medicines in 2025, up 9%",
         "Central state buyer: CENARES"
@@ -282,7 +278,7 @@
       "name": "Tanzania",
       "facts": [
         "More than 80% imported",
-        "9,270+ register records read by Nazryx"
+        "State buyer: MSD, about USD 491m a year"
       ]
     },
     "rw": {
@@ -350,22 +346,11 @@
       ]
     }
   },
-  "sourceCountries": [
-    "Pakistan",
-    "Bangladesh",
-    "Turkey",
-    "Egypt",
-    "Europe",
-    "Korea"
-  ],
+  "sourceCountries": [],
   "commitments": {
     "signedBy": "Omar Nazir",
     "title": "Director, International Business",
     "manufacturers": [
-      {
-        "title": "No competing line in your category",
-        "text": "We do not represent a directly competing product in the same category in the same market."
-      },
       {
         "title": "The registration is always yours",
         "text": "Held in your name. We are your local representative, never the holder."
@@ -383,10 +368,6 @@
       {
         "title": "Your data stays yours",
         "text": "Not sold, not pooled, not shown to another company."
-      },
-      {
-        "title": "No two of you in one category",
-        "text": "We do not run the same work for a direct competitor in the same city and category."
       },
       {
         "title": "We tell you when to walk away",
@@ -409,7 +390,7 @@
     },
     {
       "q": "How are you paid?",
-      "a": "Terms are agreed per market before anything starts. Usually that is commission on sales, often with a fee for defined work such as market reads, registration or monitoring. You know the full picture up front.",
+      "a": "Terms are agreed per market before anything starts: a fee for defined work such as market reads, registration and monitoring, and commission on sales where we run the market for you. You know the full picture up front.",
       "for": [
         "manufacturers",
         "home"
@@ -421,13 +402,6 @@
       "for": [
         "manufacturers",
         "home"
-      ]
-    },
-    {
-      "q": "Do we need an EAEU GMP certificate?",
-      "a": "It depends on the route. For the EAEU route the plant is inspected by the Kazakh inspectorate. We check your plant's position for each route on the first call, before you spend anything on a dossier.",
-      "for": [
-        "manufacturers"
       ]
     },
     {

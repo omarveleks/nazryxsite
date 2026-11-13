@@ -242,7 +242,7 @@ def r_hbars(s, p):
 
 QUIZ = [
     {"id": "make", "q": "What do you make?", "a": ["Finished medicines", "Medical devices", "Both"]},
-    {"id": "from", "q": "Where do you manufacture?", "a": D["sourceCountries"] + ["Elsewhere"]},
+    {"id": "from", "q": "Where do you manufacture?", "a": ["Middle East and Turkey", "Asia", "Europe", "Africa", "The Americas", "Elsewhere"]},
     {"id": "region", "q": "Which region interests you most?", "a": [r["name"] for r in D["regions"]] + ["Not sure yet"]},
     {"id": "dossier", "q": "Is your dossier in CTD format?", "a": ["Yes", "Partly", "Not yet"]},
     {"id": "stage", "q": "How do you sell abroad today?", "a": ["Not exporting yet", "Through distributors", "Our own presence"]},

@@ -17,10 +17,10 @@
         "kind": "figures",
         "title": "Nazryx in numbers",
         "items": [
+          "trade",
           "markets",
           "manufacturers",
-          "records",
-          "sources"
+          "lots"
         ]
       }
     },
@@ -35,7 +35,7 @@
       "items": [
         {
           "title": "Intelligence",
-          "text": "We know these markets line by line: registers, shelves, tenders and state buyers, read and kept current."
+          "text": "We know these markets line by line, from our own data, kept current."
         },
         {
           "title": "Access",
@@ -62,7 +62,7 @@
         },
         {
           "title": "Data no one else assembles",
-          "text": "Registers, shelves and state purchases, read market by market."
+          "text": "Our own market data, built market by market."
         },
         {
           "title": "People on the ground",
@@ -70,7 +70,7 @@
         },
         {
           "title": "Aligned incentives",
-          "text": "Most of what we earn is tied to your sales. The market stays in the maker's name."
+          "text": "Our commission is tied to your sales. The market stays in the maker's name."
         }
       ]
     },
@@ -85,7 +85,7 @@
       "items": [
         {
           "title": "Manufacturers",
-          "text": "Of finished medicines and devices, in Pakistan, Bangladesh, Turkey, Egypt, Europe and Korea, looking for new markets.",
+          "text": "Of finished medicines and devices, looking for new markets.",
           "href": "/market-entry"
         },
         {

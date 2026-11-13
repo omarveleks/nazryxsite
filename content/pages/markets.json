@@ -101,15 +101,6 @@
       "note": "Share of medicines imported. National data, 2024–26."
     },
     {
-      "type": "chips",
-      "id": "sources",
-      "eyebrow": "Where products come from",
-      "title": "Six source countries.",
-      "accent": "Built for their exporters.",
-      "lede": "South Asia makes medicines for the world at a price frontier markets can pay. We take them to the markets that need them.",
-      "items": "sourceCountries"
-    },
-    {
       "type": "cta",
       "id": "contact",
       "title": "Ask for a market file.",

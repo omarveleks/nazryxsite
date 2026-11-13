@@ -25,7 +25,7 @@
     var named = R.filter(function (r) { return r.name === ans.region; })[0];
     if (named) return { r: named, why: 'You named it. Here is how we would approach it.' };
     if (ans.dossier === 'Yes') return { r: R[1], why: 'Your CTD dossier is ready, and East Africa is where a good dossier travels furthest.' };
-    if (['Pakistan', 'Bangladesh', 'Turkey'].indexOf(ans.from) > -1) return { r: R[0], why: 'Our team is on the ground in Almaty, and one EAEU dossier can open five markets.' };
+    if (ans.from === 'Middle East and Turkey' || ans.from === 'Asia') return { r: R[0], why: 'Our team is on the ground in Almaty, and one EAEU dossier can open five markets.' };
     return { r: R[1], why: 'One dossier format across the region makes it the most efficient first step.' };
   }
 

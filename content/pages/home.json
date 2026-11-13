@@ -22,9 +22,9 @@
         "kind": "figures",
         "title": "What we know",
         "items": [
-          "records",
+          "trade",
+          "manufacturers",
           "lots",
-          "distributors",
           "markets"
         ]
       }
@@ -53,12 +53,12 @@
           "a year spent by Africa on imported medical products"
         ],
         [
-          "USD 457m",
-          "Pakistan's pharmaceutical exports, a 20-year high (FY2025)"
+          "USD 3bn",
+          "of medicines imported into Iraq a year, through one state importer"
         ],
         [
-          "USD 238.5m",
-          "Bangladesh's pharmaceutical exports (FY2025–26), to 130+ countries"
+          "USD 2bn",
+          "of medicines imported into Uzbekistan (2025)"
         ]
       ],
       "note": "Nazryx estimate from national, UN and AUDA-NEPAD data, 2024–26."
@@ -75,7 +75,7 @@
       "items": [
         {
           "title": "Evidence before decisions",
-          "text": "The register, the shelf and the state buyer already say where a product can win. We read them before anyone commits."
+          "text": "The data already says where a product can win. We read it before anyone commits."
         },
         {
           "title": "Every market is its own game",
@@ -105,7 +105,7 @@
         {
           "label": "Market data",
           "title": "We know what's open before you commit.",
-          "text": "We read each market's registers, shelves and state purchases against your portfolio, so every decision starts from evidence.",
+          "text": "We read each market against your portfolio, so every decision starts from evidence.",
           "points": [
             "Where you can win, and where you can't",
             "Where your price lands",
@@ -144,7 +144,7 @@
       ],
       "rows": [
         [
-          "Reads the market before you commit",
+          "Reads the market for you before you commit",
           [
             "no",
             "no",
@@ -219,8 +219,8 @@
           "text": "National registrations not aligned to EAEU rules are being annulled in several member states. Kazakhstan's national route closes on 31 Dec 2027."
         },
         {
-          "title": "South Asia is exporting",
-          "text": "Pakistan's pharmaceutical exports hit a 20-year high in FY2025. Bangladesh now exports to more than 130 countries."
+          "title": "Central Asia is opening",
+          "text": "Uzbekistan cut registration review times to 60–120 days in Nov 2025, with medicine imports at about USD 2bn."
         }
       ]
     },
@@ -239,7 +239,7 @@
         },
         {
           "title": "We read what others don't",
-          "text": "Registers, shelves and state purchases, market by market, kept current."
+          "text": "Market data no one else assembles, kept current."
         },
         {
           "title": "We are on the ground",
@@ -247,7 +247,7 @@
         },
         {
           "title": "We win when you win",
-          "text": "Most of what we earn is tied to your sales. The market stays in your name."
+          "text": "Our commission is tied to your sales. The market stays in your name."
         }
       ]
     },
@@ -287,29 +287,29 @@
       "id": "proof",
       "tone": "dark",
       "eyebrow": "Why evidence matters",
-      "title": "The register tells you",
+      "title": "Our data shows you",
       "accent": "what a brochure can't.",
       "items": [
         {
           "title": "An empty category, hiding in plain sight.",
-          "text": "Twelve eye-care medicines on one market's essential list had no registered supplier, and a distributor was already asking for one of them.",
+          "text": "Twelve eye-care medicines on one market's essential list had no supplier at all, and a distributor was already asking for one of them.",
           "figures": [
             [
               "Medicines with no supplier",
               "12"
             ],
             [
-              "Registered in the country",
+              "Suppliers in the country",
               "0"
             ]
           ]
         },
         {
           "title": "A 'crowded' molecule that was wide open.",
-          "text": "53 registrations on paper. Every one was for animal use. For human medicine, the market was open.",
+          "text": "53 listings on paper. Every one was for animal use. For human medicine, the market was open.",
           "figures": [
             [
-              "Registrations found",
+              "Listings found",
               "53"
             ],
             [

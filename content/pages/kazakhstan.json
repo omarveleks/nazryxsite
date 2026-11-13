@@ -37,6 +37,6 @@
         { "title": "1,000+ physicians", "text": "Direct physician outreach, by specialty and region." },
         { "title": "Regulatory and government services", "text": "Filing and follow-up, with Kazakh and Russian translation in-house." }
       ] },
-    { "type": "cta", "id": "contact", "title": "Send your product list.", "text": "We check every product against the register, 1,340 pharmacy shelves and the state purchase list.", "contact": true }
+    { "type": "cta", "id": "contact", "title": "Send your product list.", "text": "We read every product against our market data and show you where it can win.", "contact": true }
   ]
 }

@@ -4,32 +4,152 @@
   "description": "Nazryx runs sourcing and market intelligence for pharmaceutical distributors and institutional buyers: suppliers found and vetted, quotes compared, registrations watched, reported weekly.",
   "theme": "dark",
   "sections": [
-    { "type": "hero", "eyebrow": "For distributors and buyers", "title": "We don't sell you data.", "accent": "We run the function.",
+    {
+      "type": "hero",
+      "eyebrow": "For distributors and buyers",
+      "title": "We don't sell you data.",
+      "accent": "We run the function.",
       "lede": "Sourcing, market intelligence, registration tracking and pricing, run by our team on your catalogue, every week.",
-      "ctas": [{ "label": "Talk to us", "href": "#contact" }],
-      "side": { "kind": "kv", "title": "How it works", "rows": [["Built around", "Your catalogue"], ["Onboarding", "About a week"], ["Reporting", "Weekly"], ["Intake", "A few partners at a time"]] } },
-    { "type": "stats", "items": ["records", "distributors", "lots", "markets"] },
-    { "type": "cards", "id": "run", "eyebrow": "What we run", "title": "Eight functions,", "accent": "run every week.", "cols": 4, "style": "numbered",
+      "ctas": [
+        {
+          "label": "Talk to us",
+          "href": "#contact"
+        }
+      ],
+      "side": {
+        "kind": "kv",
+        "title": "How it works",
+        "rows": [
+          [
+            "Built around",
+            "Your catalogue"
+          ],
+          [
+            "Onboarding",
+            "About a week"
+          ],
+          [
+            "Reporting",
+            "Weekly"
+          ],
+          [
+            "Intake",
+            "A few partners at a time"
+          ]
+        ]
+      }
+    },
+    {
+      "type": "stats",
       "items": [
-        { "title": "Market and demand intelligence", "text": "Demand, competition and registrations, per molecule and per market." },
-        { "title": "Manufacturer discovery and vetting", "text": "Manufacturers checked for capability and certification before they reach you." },
-        { "title": "Portfolio consolidation", "text": "The fewest manufacturers that cover the most of your lines." },
-        { "title": "Registration tracking", "text": "Lapses and new entrants flagged as they happen." },
-        { "title": "Pricing and RFQs", "text": "Quotation rounds run for you, compared like for like." },
-        { "title": "Buyer analytics", "text": "What to offer whom, and which accounts are slowing." },
-        { "title": "Your private portal", "text": "Everything we find, in one place for your whole team." },
-        { "title": "Quarterly reviews", "text": "What moved, what did not and why. Targets reset with us." }
-      ] },
-    { "type": "steps", "id": "onboarding", "eyebrow": "How we work", "title": "About a week.", "accent": "One person from your side.",
+        "trade",
+        "distributors",
+        "lots",
+        "markets"
+      ]
+    },
+    {
+      "type": "cards",
+      "id": "run",
+      "eyebrow": "What we run",
+      "title": "Eight functions,",
+      "accent": "run every week.",
+      "cols": 4,
+      "style": "numbered",
       "items": [
-        { "when": "Before we start", "title": "A 20-minute call", "text": "Your categories, markets and where the friction is." },
-        { "when": "Days 1–3", "title": "We load your business", "text": "Catalogue, suppliers, buyers and goals." },
-        { "when": "Days 4–7", "title": "We set up your portal", "text": "Scoring weighted to your economics." },
-        { "when": "Week 2 onward", "title": "The function runs", "text": "Weekly reports, alerts and RFQs.", "dark": true }
-      ] },
-    { "type": "commitments", "id": "commitments", "audience": "distributors", "eyebrow": "What we put in writing", "title": "Four", "accent": "commitments." },
-    { "type": "regions", "id": "markets", "eyebrow": "Where we work", "title": "14 markets", "accent": "on 3 continents." },
-    { "type": "faq", "id": "faq", "eyebrow": "Questions", "title": "What distributors", "accent": "ask first.", "for": "distributors" },
-    { "type": "cta", "id": "contact", "title": "Start with twenty minutes.", "text": "Tell us what you carry and where you sell it. We will tell you what we would look at first.", "contact": true }
+        {
+          "title": "Market and demand intelligence",
+          "text": "Demand, competition and registrations, per molecule and per market."
+        },
+        {
+          "title": "Manufacturer discovery and vetting",
+          "text": "Manufacturers checked for capability and certification before they reach you."
+        },
+        {
+          "title": "Portfolio consolidation",
+          "text": "The fewest manufacturers that cover the most of your lines."
+        },
+        {
+          "title": "Registration tracking",
+          "text": "Lapses and new entrants flagged as they happen."
+        },
+        {
+          "title": "Pricing and RFQs",
+          "text": "Quotation rounds run for you, compared like for like."
+        },
+        {
+          "title": "Buyer analytics",
+          "text": "What to offer whom, and which accounts are slowing."
+        },
+        {
+          "title": "Your private portal",
+          "text": "Everything we find, in one place for your whole team."
+        },
+        {
+          "title": "Quarterly reviews",
+          "text": "What moved, what did not and why. Targets reset with us."
+        }
+      ]
+    },
+    {
+      "type": "steps",
+      "id": "onboarding",
+      "eyebrow": "How we work",
+      "title": "About a week.",
+      "accent": "One person from your side.",
+      "items": [
+        {
+          "when": "Before we start",
+          "title": "A 20-minute call",
+          "text": "Your categories, markets and where the friction is."
+        },
+        {
+          "when": "Days 1–3",
+          "title": "We load your business",
+          "text": "Catalogue, suppliers, buyers and goals."
+        },
+        {
+          "when": "Days 4–7",
+          "title": "We set up your portal",
+          "text": "Scoring weighted to your economics."
+        },
+        {
+          "when": "Week 2 onward",
+          "title": "The function runs",
+          "text": "Weekly reports, alerts and RFQs.",
+          "dark": true
+        }
+      ]
+    },
+    {
+      "type": "commitments",
+      "id": "commitments",
+      "audience": "distributors",
+      "eyebrow": "What we put in writing",
+      "title": "Three",
+      "accent": "commitments."
+    },
+    {
+      "type": "regions",
+      "id": "markets",
+      "eyebrow": "Where we work",
+      "title": "14 markets",
+      "accent": "on 3 continents."
+    },
+    {
+      "type": "faq",
+      "id": "faq",
+      "eyebrow": "Questions",
+      "title": "What distributors",
+      "accent": "ask first.",
+      "for": "distributors"
+    },
+    {
+      "type": "cta",
+      "id": "contact",
+      "title": "Start with twenty minutes.",
+      "text": "Tell us what you carry and where you sell it. We will tell you what we would look at first.",
+      "contact": true
+    }
   ]
 }

@@ -49,7 +49,7 @@
       "items": [
         {
           "title": "Choose on evidence",
-          "text": "Which products have room, and which markets will pay, is already written in the register, the shelf and the state buyer."
+          "text": "Which products have room, and which markets will pay, is already in the data. We read it before you commit."
         },
         {
           "title": "Sequence the route",
@@ -179,11 +179,11 @@
       "items": [
         {
           "title": "Commission on sales",
-          "text": "Where we run the market for you, most of what we earn is tied to what you sell."
+          "text": "Where we run the market for you, our commission is tied to what you sell."
         },
         {
           "title": "Fees for defined work",
-          "text": "Market reads, registration and monitoring can carry a fee, agreed and scoped up front."
+          "text": "Market reads, registration and monitoring are fee-based work, scoped and agreed up front."
         },
         {
           "title": "Exclusive partnerships",
@@ -196,7 +196,7 @@
       "id": "commitments",
       "audience": "manufacturers",
       "eyebrow": "What we put in writing",
-      "title": "Four commitments,",
+      "title": "Three commitments,",
       "accent": "on paper before you start."
     },
     {
