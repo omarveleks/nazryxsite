@@ -28,22 +28,22 @@
       "type": "cards",
       "id": "what",
       "eyebrow": "What we are",
-      "title": "A market data",
-      "accent": "and market entry agency.",
+      "title": "Two disciplines,",
+      "accent": "one team on the ground.",
       "cols": 3,
       "style": "numbered",
       "items": [
         {
-          "title": "Intelligence",
-          "text": "We know these markets line by line, from our own data, kept current."
+          "title": "Market data",
+          "text": "We know these markets line by line and read them against your portfolio, so every decision starts from evidence."
         },
         {
-          "title": "Access",
-          "text": "We open markets: registration, local representation and partners, all in the maker's name."
+          "title": "Market entry management",
+          "text": "We open markets in the maker's name and run them: registration, partners, buyers and growth."
         },
         {
-          "title": "Trade",
-          "text": "We keep products moving: sourcing, supply, promotion and state bids, run by our teams."
+          "title": "On the ground",
+          "text": "Teams in Lahore and Almaty, and local networks in every market we serve."
         }
       ]
     },
@@ -61,8 +61,8 @@
           "text": "We work with makers and buyers, so we see supply and demand at once."
         },
         {
-          "title": "Data no one else assembles",
-          "text": "Our own market data, built market by market."
+          "title": "Data built for these markets",
+          "text": "Our own market data, built market by market and kept current."
         },
         {
           "title": "People on the ground",

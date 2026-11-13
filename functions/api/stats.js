@@ -70,7 +70,7 @@ export async function onRequestGet({ request, env }) {
     all(`SELECT ts, type, path, target, IFNULL(source,'direct') source, country FROM events WHERE ts>=? AND ts<? ORDER BY ts DESC LIMIT 50`, a, b)
   ]);
   let leads2 = [];
-  try { leads2 = (await DB.prepare('SELECT ts, name, company, email, phone, market, substr(products,1,300) products, country FROM leads WHERE ts>=? AND ts<? ORDER BY ts DESC LIMIT 200').bind(a, b).all()).results; } catch {}
+  try { leads2 = (await DB.prepare('SELECT ts, name, company, email, phone, market, substr(products,1,300) products, country, kind FROM leads WHERE ts>=? AND ts<? ORDER BY ts DESC LIMIT 200').bind(a, b).all()).results; } catch {}
   return json({ requests: leads2, from, to, cur, prev, series, prevSeries, funnel, prevFunnel, pages, sources, referrers, utms, leads, audience: { countries, cities, devices, browsers, oses, langs, newret }, actions, recent });
 }
 

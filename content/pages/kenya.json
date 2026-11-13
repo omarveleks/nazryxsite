@@ -1,0 +1,30 @@
+{
+  "path": "/markets/kenya",
+  "title": "Kenya pharmaceutical market overview | Nazryx",
+  "description": "Kenya, one of Nazryx's 14 markets: about 70% of medicines imported, about USD 705m of pharmaceutical imports in 2024, and a 90-day verification route.",
+  "theme": "light",
+  "sections": [
+    { "type": "hero", "eyebrow": "Market overview · East Africa", "title": "Kenya:", "accent": "East Africa's gateway.",
+      "lede": "An import-led market with one state buyer, a recognised regulator and a fast route for products already approved elsewhere.",
+      "ctas": ["primary"],
+      "side": { "kind": "kv", "title": "At a glance", "rows": [["Population", "52.2 million (2024 projection)"], ["Medicines imported", "about 70%"], ["Pharmaceutical imports", "about USD 705m (2024)"], ["Regulator", "Pharmacy and Poisons Board"], ["State buyer", "KEMSA"]] } },
+    { "type": "stats", "items": [{ "value": "~70%", "label": "of medicines imported" }, { "value": "USD 705m", "label": "pharmaceutical imports, 2024" }, { "value": "220 of 1,096", "label": "essential formulations made locally" }, { "value": "90 days", "label": "verification review target" }] },
+    { "type": "cards", "id": "market", "eyebrow": "The market", "title": "Large gaps", "accent": "in local supply.", "cols": 3, "style": "plain",
+      "items": [
+        { "title": "Import-led", "text": "About 70% of medicines are imported." },
+        { "title": "Room on the list", "text": "Local makers produce 220 of the 1,096 formulations on the national essential medicines list." },
+        { "title": "One state buyer", "text": "KEMSA buys for the public sector." }
+      ] },
+    { "type": "table", "id": "registration", "eyebrow": "Registration", "title": "Two routes,", "accent": "one regional format.",
+      "head": ["", "Review target", "When it applies"],
+      "rows": [["Full review", "262 days", "New products"], ["Verification review", "90 days", "Products already approved by reference authorities"], ["Dossier format", "CTD, mandatory", "Across the East African Community"]],
+      "note": "Official targets. Real timelines add questions. Registrations are always held in your name." },
+    { "type": "cards", "id": "view", "eyebrow": "Our view", "title": "One dossier,", "accent": "a whole region.", "cols": 3, "style": "numbered",
+      "items": [
+        { "title": "Use the fast route", "text": "Products approved by reference authorities can qualify for the 90-day verification review." },
+        { "title": "Build for the region", "text": "Seven East African regulators share assessment work. A good Kenyan dossier travels." },
+        { "title": "Fill the list gaps", "text": "Most essential formulations are not made locally. That is where demand waits." }
+      ] },
+    { "type": "cta", "id": "contact", "title": "Request a market read for Kenya.", "text": "Send us your portfolio. We reply within one working day.", "contact": true }
+  ]
+}

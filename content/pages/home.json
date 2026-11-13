@@ -9,7 +9,7 @@
       "eyebrow": "Bridging the gap in medical trade across frontier markets",
       "title": "Frontier markets reward",
       "accent": "the ones who read them first.",
-      "lede": "Nazryx is a specialist market data and market entry agency for pharmaceutical manufacturers. We know these markets line by line, and we turn that knowledge into launches.",
+      "lede": "Nazryx is a specialist market data and market entry agency for pharmaceutical manufacturers. We know these markets line by line, and we turn that knowledge into registered, selling products.",
       "ctas": [
         {
           "label": "Where should you start?",
@@ -17,7 +17,6 @@
         },
         "secondary"
       ],
-      "trust": "14 markets on 3 continents · 10 manufacturers represented",
       "side": {
         "kind": "regions",
         "title": "Markets we run",
@@ -38,10 +37,6 @@
         [
           "10",
           "manufacturers represented, in selected partnerships"
-        ],
-        [
-          "14",
-          "markets on 3 continents"
         ],
         [
           "300+",
@@ -122,7 +117,8 @@
           "cta": "Our market entry",
           "featured": true
         }
-      ]
+      ],
+      "lede": "A market read is our assessment of your portfolio against a market: what's open, what's crowded, and where your price lands. It is where every engagement starts."
     },
     {
       "type": "compare",
@@ -130,11 +126,11 @@
       "eyebrow": "How we're different",
       "title": "Not a consultancy.",
       "accent": "Not a distributor.",
-      "lede": "Regulatory firms file dossiers. Distributors buy stock. We sit between both, and own the outcome.",
+      "lede": "Regulatory firms file dossiers. Distributors buy stock. We read the market, open it in your name, and stay on the account. One team, on the ground.",
       "head": [
         "",
-        "Regulatory consultancy",
-        "Distributor",
+        "Typical regulatory consultancy",
+        "Typical distributor",
         "Nazryx"
       ],
       "rows": [
@@ -192,7 +188,7 @@
       "type": "explorer",
       "id": "markets",
       "eyebrow": "Where we work",
-      "title": "14 markets. Six regions.",
+      "title": "Six regions.",
       "accent": "A view on each.",
       "lede": "Pick a region to see how we think about entering it."
     },
@@ -216,33 +212,6 @@
         {
           "title": "Central Asia is opening",
           "text": "Uzbekistan cut registration review times to 60–120 days in Nov 2025. Early filers get the head start."
-        }
-      ]
-    },
-    {
-      "type": "cards",
-      "id": "expertise",
-      "eyebrow": "Why Nazryx",
-      "title": "What expertise",
-      "accent": "looks like.",
-      "cols": 4,
-      "style": "tiles",
-      "items": [
-        {
-          "title": "We see both sides",
-          "text": "We work with makers and buyers, so we see supply and demand at once."
-        },
-        {
-          "title": "We read what others don't",
-          "text": "Market data no one else assembles, kept current."
-        },
-        {
-          "title": "We are on the ground",
-          "text": "Teams in Lahore and Almaty, and local networks in every market we serve."
-        },
-        {
-          "title": "We win when you win",
-          "text": "Our commission is tied to your sales. The market stays in your name."
         }
       ]
     },
@@ -319,7 +288,7 @@
       "type": "cta",
       "id": "contact",
       "title": "Talk to the people who read the market first.",
-      "text": "Send us your portfolio and the markets you are considering. We will give you our view.",
+      "text": "Send us your portfolio and the markets you are considering. We reply within one working day with our view.",
       "contact": true
     }
   ]

@@ -59,8 +59,16 @@
       "href": "/distributors"
     },
     {
+      "label": "Entry checklist",
+      "href": "/checklist"
+    },
+    {
       "label": "Contact",
       "href": "/start"
+    },
+    {
+      "label": "Privacy",
+      "href": "/privacy"
     }
   ],
   "contact": {
@@ -93,7 +101,8 @@
         "city": "Almaty",
         "role": "Team on the ground in Kazakhstan"
       }
-    ]
+    ],
+    "reply": "We reply within one working day."
   },
   "stats": {
     "markets": {
@@ -246,7 +255,8 @@
       "facts": [
         "38.2m people (2026)",
         "Registration review 60–120 days since Nov 2025"
-      ]
+      ],
+      "file": "/markets/uzbekistan"
     },
     "az": {
       "name": "Azerbaijan",
@@ -259,7 +269,8 @@
       "facts": [
         "State buyer: KEMSA",
         "Regulator: Pharmacy and Poisons Board, 90-day verification route"
-      ]
+      ],
+      "file": "/markets/kenya"
     },
     "ug": {
       "name": "Uganda",
@@ -273,7 +284,8 @@
       "facts": [
         "State buyer: MSD, about USD 491m a year",
         "Regulator: TMDA, generics approved in about 61 days (2022)"
-      ]
+      ],
+      "file": "/markets/tanzania"
     },
     "rw": {
       "name": "Rwanda",
@@ -415,7 +427,7 @@
     },
     {
       "q": "What do you need from us to start?",
-      "a": "Your product list with dosage forms and strengths, and your certificates. Dossiers come later, and only for the products you take forward.",
+      "a": "A short note on what you make and where you want to sell. A product list helps, and you can send it later. Dossiers come only for the products you take forward.",
       "for": [
         "manufacturers",
         "home",
@@ -457,6 +469,14 @@
       "a": "It is used for your partnership only. Not pooled, not resold, not used for anyone else. This is written into the agreement.",
       "for": [
         "distributors"
+      ]
+    },
+    {
+      "q": "How quickly do you reply?",
+      "a": "Within one working day.",
+      "for": [
+        "start",
+        "home"
       ]
     }
   ]

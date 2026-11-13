@@ -2,14 +2,14 @@
 // Stored in D1 (table created on first use) and shown on the private /analytics dashboard.
 import { sha256 } from '../_lib/util.js';
 
-const MAX = { name: 120, company: 160, email: 160, phone: 40, market: 80, products: 8000 };
+const MAX = { name: 120, company: 160, email: 160, phone: 40, market: 80, products: 8000, kind: 20 };
 const seen = new Map();
 
 function reply(request, ok, error, status) {
   if ((request.headers.get('accept') || '').includes('application/json')) {
     return new Response(JSON.stringify(ok ? { ok: true } : { error }), { status: status || (ok ? 200 : 400), headers: { 'content-type': 'application/json' } });
   }
-  const body = ok ? 'Thank you. We have your request and will come back to you.' : error;
+  const body = ok ? 'Thank you. We have your request and will reply within one working day.' : error;
   return new Response(`<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Nazryx</title><link rel="stylesheet" href="/assets/css/site.css"><section class="wrap hero"><h1>${ok ? 'Request received.' : 'Not sent.'}</h1><p class="lede" style="margin-top:20px">${body}</p><p style="margin-top:24px"><a class="btn btn-blue" href="/">Back to Nazryx</a></p></section>`,
     { status: status || (ok ? 200 : 400), headers: { 'content-type': 'text/html; charset=utf-8' } });
 }
@@ -24,7 +24,8 @@ export async function onRequestPost({ request, env }) {
   if (String(f.get('website') || '')) return reply(request, true); // honeypot: pretend success
   const v = {};
   for (const k of Object.keys(MAX)) v[k] = String(f.get(k) || '').trim().slice(0, MAX[k]);
-  if (!v.name || !v.company || !v.products || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.email)) return reply(request, false, 'Please fill in your name, company, a valid email and your products.');
+  v.kind = v.kind === 'checklist' ? 'checklist' : 'market-read';
+  if (!v.name || !v.company || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.email)) return reply(request, false, 'Please fill in your name, company and a valid email.');
   const ip = request.headers.get('cf-connecting-ip') || '';
   const key = (await sha256((env.ANALYTICS_SESSION_KEY || env.ANALYTICS_PASSWORD || 'nzx') + '|lead|' + ip)).slice(0, 16);
   const now = Date.now();
@@ -32,8 +33,9 @@ export async function onRequestPost({ request, env }) {
   seen.set(key, now); if (seen.size > 2000) seen.clear();
   if (!env.DB) return reply(request, false, 'Could not save right now. Please email contact@nazryx.com.', 500);
   await env.DB.prepare(`CREATE TABLE IF NOT EXISTS leads (id INTEGER PRIMARY KEY AUTOINCREMENT, ts INTEGER NOT NULL, name TEXT, company TEXT, email TEXT, phone TEXT, market TEXT, products TEXT, country TEXT, status TEXT DEFAULT 'new')`).run();
-  await env.DB.prepare('INSERT INTO leads (ts,name,company,email,phone,market,products,country) VALUES (?,?,?,?,?,?,?,?)')
-    .bind(now, v.name, v.company, v.email, v.phone, v.market, v.products, (request.cf && request.cf.country) || null).run();
+  try { await env.DB.prepare("ALTER TABLE leads ADD COLUMN kind TEXT DEFAULT 'market-read'").run(); } catch {}
+  await env.DB.prepare('INSERT INTO leads (ts,name,company,email,phone,market,products,country,kind) VALUES (?,?,?,?,?,?,?,?,?)')
+    .bind(now, v.name, v.company, v.email, v.phone, v.market, v.products, (request.cf && request.cf.country) || null, v.kind).run();
   return reply(request, true);
 }
 

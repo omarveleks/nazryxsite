@@ -1,0 +1,30 @@
+{
+  "path": "/markets/uzbekistan",
+  "title": "Uzbekistan pharmaceutical market overview | Nazryx",
+  "description": "Uzbekistan, one of Nazryx's 14 markets: 38.2 million people, pharmaceutical turnover of about USD 2bn in 2025, and registration review cut to 60–120 days.",
+  "theme": "light",
+  "sections": [
+    { "type": "hero", "eyebrow": "Market overview · Central Asia", "title": "Uzbekistan:", "accent": "a faster route in.",
+      "lede": "One of Central Asia's largest markets, growing fast, with registration review times cut sharply in November 2025.",
+      "ctas": ["primary"],
+      "side": { "kind": "kv", "title": "At a glance", "rows": [["Population", "38.2 million (1 Jan 2026)"], ["Pharmaceutical turnover 2025", "about USD 2bn, up 18%"], ["Medicine imports 2025", "about USD 2bn"], ["Registration review", "60–120 days by category"]] } },
+    { "type": "stats", "items": [{ "value": "38.2m", "label": "people (2026)" }, { "value": "+18%", "label": "pharmaceutical turnover growth, 2025" }, { "value": "60 days", "label": "review for the lowest-risk category, down from 150" }, { "value": "120 days", "label": "review for higher-risk categories" }] },
+    { "type": "cards", "id": "market", "eyebrow": "The market", "title": "Growing,", "accent": "and still import-led.", "cols": 3, "style": "plain",
+      "items": [
+        { "title": "Fast growth", "text": "Pharmaceutical turnover reached about USD 2bn in 2025, up 18% on 2024." },
+        { "title": "Import-led", "text": "Medicine imports were about USD 2bn in 2025. The government is pushing local production to reduce them." },
+        { "title": "Generics favoured", "text": "Generics get a shortened registration period under the November 2025 reform." }
+      ] },
+    { "type": "table", "id": "registration", "eyebrow": "Registration", "title": "Review times", "accent": "by safety category.",
+      "head": ["", "Review time", "Before Nov 2025"],
+      "rows": [["Lowest-risk category", "60 days", "150 days"], ["Category 2", "90 days", ""], ["Higher-risk categories", "120 days", ""], ["Generics", "Shortened registration period", ""]],
+      "note": "Official review times. Real timelines add questions. Registrations are always held in your name." },
+    { "type": "cards", "id": "view", "eyebrow": "Our view", "title": "Move early,", "accent": "while the clock is short.", "cols": 3, "style": "numbered",
+      "items": [
+        { "title": "File while it's fast", "text": "Short review times reward manufacturers who are ready now." },
+        { "title": "Lead with generics", "text": "The shortened route makes well-priced generics the natural first wave." },
+        { "title": "Plan for local production", "text": "Policy favours local manufacturing over time. Enter with that in mind." }
+      ] },
+    { "type": "cta", "id": "contact", "title": "Request a market read for Uzbekistan.", "text": "Send us your portfolio. We reply within one working day.", "contact": true }
+  ]
+}

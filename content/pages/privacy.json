@@ -1,0 +1,37 @@
+{
+  "path": "/privacy",
+  "title": "Privacy notice | Nazryx",
+  "description": "How Nazryx handles the details you send through this website, and how our anonymous analytics work.",
+  "theme": "light",
+  "sections": [
+    { "type": "hero", "eyebrow": "Privacy notice", "title": "Your details,", "accent": "used only to work with you.",
+      "lede": "This notice covers the details you send through nazryx.com and the anonymous analytics on the site.",
+      "ctas": [{ "label": "Contact us about your data", "href": "#contact" }],
+      "side": { "kind": "kv", "title": "In short", "rows": [["Sold or shared", "Never"], ["Cookies", "None for analytics"], ["IP addresses", "Not stored"], ["Delete on request", "Yes"]] } },
+    { "type": "cards", "id": "collect", "eyebrow": "What we collect", "title": "Only what you", "accent": "choose to send.", "cols": 3, "style": "plain",
+      "items": [
+        { "title": "Market-read requests", "text": "Your name, company, work email, phone (optional), markets of interest and, if you send one, your product list." },
+        { "title": "Checklist requests", "text": "Your name, company and work email." },
+        { "title": "Messages", "text": "Whatever you send us by email, phone or WhatsApp." }
+      ] },
+    { "type": "cards", "id": "use", "eyebrow": "How we use it", "title": "To respond,", "accent": "and nothing else.", "cols": 3, "style": "plain",
+      "items": [
+        { "title": "To reply to you", "text": "We use your details to answer your request and, if you ask, to prepare a market read." },
+        { "title": "Kept confidential", "text": "Your product list is used only to read the market for you. It is not shared with anyone else." },
+        { "title": "Never sold", "text": "We do not sell, rent or pass on your details." }
+      ] },
+    { "type": "cards", "id": "analytics", "eyebrow": "Anonymous analytics", "title": "We count visits,", "accent": "not people.", "cols": 3, "style": "plain",
+      "items": [
+        { "title": "No cookies", "text": "Our analytics set no cookies and store no identifiers in your browser beyond a 'seen before' flag." },
+        { "title": "No IP addresses", "text": "We do not store IP addresses. Visits are counted with a key that changes every day and cannot be traced back." },
+        { "title": "13 months", "text": "Raw visit data is kept for 13 months, then reduced to daily totals." }
+      ] },
+    { "type": "cards", "id": "rights", "eyebrow": "Your choices", "title": "Ask us", "accent": "any time.", "cols": 3, "style": "plain",
+      "items": [
+        { "title": "See it", "text": "Ask what we hold about you." },
+        { "title": "Change it", "text": "Ask us to correct anything that is wrong." },
+        { "title": "Delete it", "text": "Ask us to delete your details. We will confirm when it is done." }
+      ] },
+    { "type": "cta", "id": "contact", "title": "Questions about your data?", "text": "Email contact@nazryx.com. We reply within one working day.", "contact": true }
+  ]
+}

@@ -133,7 +133,7 @@ def r_marketCards(s, p):
         for m in r["markets"]:
             mk = D["markets"][m]
             facts = "".join(f"<li>{e(f)}</li>" for f in mk["facts"][:2])
-            go = (f'<a class="go" href="{mk["file"]}">Full market file &rarr;</a>' if mk.get("file")
+            go = (f'<a class="go" href="{mk["file"]}">{"Full market file" if m == "kz" else "Market overview"} &rarr;</a>' if mk.get("file")
                   else f'<a class="go req" href="mailto:{D["contact"]["email"]}?subject={e(mk["name"])}%20market%20file" data-track="markets:request">Market file on request</a>')
             out += f'<div class="mcard rv{" full" if mk.get("file") else ""}"><small>{e(r["name"])}</small><h3>{e(mk["name"])}</h3><ul>{facts}</ul>{go}</div>'
     return f'<section class="wrap" id="{s["id"]}">{head(s)}<div class="mcards">{out}</div></section>'
@@ -173,7 +173,8 @@ def r_cta(s, p):
             f'<a class="btn btn-ghostw" href="{c["whatsapp"]}" target="_blank" rel="noopener" data-track="whatsapp">WhatsApp</a>')
     if p["path"] == "/start":
         btns = btns.split("</a>", 1)[1]
-    return f'<section class="wrap" id="{s["id"]}"><div class="cta rv"><div><h2>{e(s["title"])}</h2><p>{e(s["text"])}</p><div class="btns">{btns}</div></div>{contact_dl()}</div></section>'
+    text = s["text"] if "one working day" in s["text"] else s["text"] + " " + D["contact"]["reply"]
+    return f'<section class="wrap" id="{s["id"]}"><div class="cta rv"><div><h2>{e(s["title"])}</h2><p>{e(text)}</p><div class="btns">{btns}</div></div>{contact_dl()}</div></section>'
 
 
 def r_bars(s, p):
@@ -211,11 +212,11 @@ def r_form(s, p):
   <label>Work email<input name="email" type="email" autocomplete="email" required maxlength="160"></label>
   <label>Phone or WhatsApp <small>(optional)</small><input name="phone" type="tel" autocomplete="tel" maxlength="40"></label>
   <label class="full">Markets of interest<select name="market"><option value="">Choose one, or tell us below</option>{mk}<option>Several markets</option></select></label>
-  <label class="full">Your products <small>(names, dosage forms and strengths; paste a list)</small><textarea name="products" required maxlength="8000"></textarea></label>
+  <label class="full">Your products <small>(optional: paste a list now, or send it later)</small><textarea name="products" maxlength="8000"></textarea></label>
   <label class="hp" aria-hidden="true">Leave empty<input name="website" tabindex="-1" autocomplete="off"></label>
   <button class="btn btn-blue" type="submit" data-track="form:submit">Send request</button>
   <p class="form-msg" role="status" hidden></p>
-  <p class="note full" style="margin:0">Your list is confidential and used only to read the market for you.</p>
+  <p class="note full" style="margin:0">We reply within one working day. Your details are confidential and used only to respond to you; see our <a class="ac" href="/privacy">privacy notice</a>.</p>
 </form></section>"""
 
 
@@ -238,6 +239,24 @@ def r_hbars(s, p):
     rows = "".join(f'<div class="hb"><span>{e(n)}</span><div class="t"><i style="width:{v}%"></i></div><b>{e(l)}</b></div>' for n, v, l in s["items"])
     aria = "; ".join(f"{n} {l}" for n, _, l in s["items"])
     return f'<section class="wrap" id="{s["id"]}">{head(s)}<div class="card rv"><div class="hbs" role="img" aria-label="{e(aria)}">{rows}</div><p class="note">{e(s.get("note", ""))}</p></div></section>'
+
+
+def r_checklist(s, p):
+    items = "".join(f'<li><b>{e(t)}</b><span>{e(x)}</span></li>' for t, x in s["items"])
+    return f"""<section class="wrap" id="{s["id"]}">{head(s)}
+<form class="form rv" method="post" action="/api/lead" data-lead data-reveal="checklist-body" data-ok="Thank you. Your checklist is below.">
+  <input type="hidden" name="kind" value="checklist">
+  <label>Your name<input name="name" autocomplete="name" required maxlength="120"></label>
+  <label>Company<input name="company" autocomplete="organization" required maxlength="160"></label>
+  <label class="full">Work email<input name="email" type="email" autocomplete="email" required maxlength="160"></label>
+  <label class="hp" aria-hidden="true">Leave empty<input name="website" tabindex="-1" autocomplete="off"></label>
+  <button class="btn btn-blue" type="submit" data-track="checklist:submit">Get the checklist</button>
+  <p class="form-msg" role="status" hidden></p>
+  <p class="note full" style="margin:0">We use your email to send you the checklist and, occasionally, our view on new markets. See our <a class="ac" href="/privacy">privacy notice</a>.</p>
+</form>
+<div class="card cl rv" id="checklist-body" hidden><span class="card-lbl">The checklist</span><h3>{e(s["listTitle"])}</h3><ol class="cl-list">{items}</ol>
+<a class="btn btn-blue" href="/start" data-track="checklist:request" style="align-self:flex-start;margin-top:12px">Request a market read</a></div>
+</section>"""
 
 
 QUIZ = [
@@ -294,7 +313,7 @@ def shell(p, body):
            "contactPoint": [{"@type": "ContactPoint", "telephone": x["display"], "contactType": "sales"} for x in D["contact"]["phones"]]}
     ld = f'<script type="application/ld+json">{json.dumps(org)}</script>\n' if p["path"] == "/" else ""
     types = {x["type"] for x in p.get("sections", [])}
-    scripts = '<script src="/assets/js/site.js" defer></script>\n' + ('<script src="/assets/js/lead.js" defer></script>\n' if p["path"] == "/start" else "") + ('<script src="/assets/js/quiz.js" defer></script>\n' if "quiz" in types else "") + '<script src="/assets/a.js" defer></script>'
+    scripts = '<script src="/assets/js/site.js" defer></script>\n' + ('<script src="/assets/js/lead.js" defer></script>\n' if types & {"form", "checklist"} else "") + ('<script src="/assets/js/quiz.js" defer></script>\n' if "quiz" in types else "") + '<script src="/assets/a.js" defer></script>'
     return f"""<!doctype html>
 <html lang="en">
 <head>

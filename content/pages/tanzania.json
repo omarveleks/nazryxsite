@@ -1,0 +1,30 @@
+{
+  "path": "/markets/tanzania",
+  "title": "Tanzania pharmaceutical market overview | Nazryx",
+  "description": "Tanzania, one of Nazryx's 14 markets: more than 80% of medicines imported, a state buyer spending about USD 491m a year, and generics approved in about 61 days.",
+  "theme": "light",
+  "sections": [
+    { "type": "hero", "eyebrow": "Market overview · East Africa", "title": "Tanzania:", "accent": "one buyer, a big list.",
+      "lede": "A market that imports most of its medicines, buys centrally for thousands of public facilities, and has cut generic approval times sharply.",
+      "ctas": ["primary"],
+      "side": { "kind": "kv", "title": "At a glance", "rows": [["Population", "about 68 million"], ["Medicines imported", "more than 80%"], ["Import bill", "about USD 1bn a year"], ["Regulator", "TMDA"], ["State buyer", "Medical Stores Department (MSD)"]] } },
+    { "type": "stats", "items": [{ "value": "80%+", "label": "of medicines and devices imported" }, { "value": "USD 491m", "label": "bought by MSD a year" }, { "value": "8,800+", "label": "public facilities supplied by MSD" }, { "value": "61 days", "label": "average generic approval (2022), down from 202" }] },
+    { "type": "cards", "id": "market", "eyebrow": "The market", "title": "Central buying,", "accent": "national reach.", "cols": 3, "style": "plain",
+      "items": [
+        { "title": "Import-led", "text": "More than 80% of medicines and devices are imported. Local output covers 10–20% of demand." },
+        { "title": "One big buyer", "text": "MSD buys about USD 491m of health commodities a year for 8,800+ public facilities." },
+        { "title": "Faster approvals", "text": "Average approval time for generics fell from 202 days in 2020 to 61 days in 2022." }
+      ] },
+    { "type": "table", "id": "registration", "eyebrow": "Registration", "title": "A regulator", "accent": "that has sped up.",
+      "head": ["", "Time", "Note"],
+      "rows": [["Full review target", "180 days", "TMDA"], ["Generics, average (2022)", "61 days", "Down from 202 days in 2020"], ["Dossier format", "CTD, mandatory", "Across the East African Community"]],
+      "note": "Official figures. Real timelines add questions. Registrations are always held in your name." },
+    { "type": "cards", "id": "view", "eyebrow": "Our view", "title": "Win the buyer,", "accent": "reach the country.", "cols": 3, "style": "numbered",
+      "items": [
+        { "title": "Plan around MSD", "text": "One state buyer supplies thousands of facilities. Its tenders set the volume." },
+        { "title": "Lead with generics", "text": "Fast generic approvals make a well-priced first wave the natural start." },
+        { "title": "Think regional", "text": "The same dossier format works across East Africa." }
+      ] },
+    { "type": "cta", "id": "contact", "title": "Request a market read for Tanzania.", "text": "Send us your portfolio. We reply within one working day.", "contact": true }
+  ]
+}

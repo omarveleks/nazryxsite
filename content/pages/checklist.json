@@ -1,0 +1,39 @@
+{
+  "path": "/checklist",
+  "title": "Frontier market entry checklist for pharmaceutical manufacturers | Nazryx",
+  "description": "Ten questions to answer before you enter a frontier pharmaceutical market. A free checklist from Nazryx.",
+  "theme": "light",
+  "sections": [
+    { "type": "hero", "eyebrow": "Free checklist", "title": "Ten questions to answer", "accent": "before you enter a frontier market.",
+      "lede": "The checklist we work through with every manufacturer before a launch. Leave your details and it opens on this page.",
+      "ctas": [{ "label": "Get the checklist", "href": "#get" }, "secondary"],
+      "side": { "kind": "kv", "title": "What it covers", "rows": [["Market", "Choosing on evidence"], ["Portfolio", "Which lines to lead with"], ["Route", "Registration and timing"], ["Partners", "Choosing who sells"], ["Launch", "Price, buyers, reporting"]] } },
+    { "type": "checklist", "id": "get", "eyebrow": "Get the checklist", "title": "Three fields.", "accent": "It opens right here.",
+      "listTitle": "Frontier market entry: ten questions",
+      "items": [
+        ["Is the market chosen on evidence?", "Competition, price and demand for your products, not a brochure or a first reply."],
+        ["Which of your lines have room?", "Lead with the products that face the least competition, not the ones you sell most at home."],
+        ["Which registration route, and how long?", "National or regional, and the real clock including questions and the plant inspection."],
+        ["Is your dossier ready for that route?", "Format, translations and the local parts, completed only for the products you will file."],
+        ["Is your plant ready for inspection?", "Some routes inspect the site before any product is approved."],
+        ["Whose name is on the registration?", "It should be yours, so the market stays yours if a partner changes."],
+        ["Who will actually sell it?", "Partners judged by what they really carry and who they reach."],
+        ["Where does your price land?", "Against the products already on the shelf, not against a target margin."],
+        ["Who buys in volume?", "State buyers, hospitals and pharmacy chains, and when their rounds open."],
+        ["How will you know it's working?", "Agree weekly reporting on orders, stock and listings before launch."]
+      ] },
+    { "type": "cards", "id": "why", "eyebrow": "Why it matters", "title": "Most launches are decided", "accent": "before the first filing.", "cols": 3, "style": "numbered",
+      "items": [
+        { "title": "The order matters", "text": "Get the market and route right first, and the rest follows." },
+        { "title": "Money goes early", "text": "Dossiers and inspections are the big costs. Spend them on lines that will win." },
+        { "title": "Control stays with you", "text": "Registrations in your name keep your options open." }
+      ] },
+    { "type": "offers", "id": "next", "eyebrow": "After the checklist", "title": "Want the answers", "accent": "for your portfolio?",
+      "items": [
+        { "label": "Market data", "title": "A market read for your products.", "text": "Our assessment of your portfolio against a market: what's open, what's crowded and where your price lands.", "points": ["Product by product", "Market by market", "Before you commit"], "href": "/market-data", "cta": "Our market data" },
+        { "label": "Market entry management", "title": "We take you there, in your name.", "text": "Registration, partners, buyers and growth, run on the ground.", "points": ["Registrations in your name", "The right partners", "Weekly reporting"], "href": "/market-entry", "cta": "Our market entry", "featured": true }
+      ] },
+    { "type": "faq", "id": "faq", "eyebrow": "Questions", "title": "Before you", "accent": "start.", "for": "start" },
+    { "type": "cta", "id": "contact", "title": "Talk to us.", "text": "We reply within one working day.", "contact": true }
+  ]
+}
