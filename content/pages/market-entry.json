@@ -1,7 +1,7 @@
 {
   "path": "/market-entry",
   "title": "Market entry management for pharmaceutical manufacturers | Nazryx",
-  "description": "Launch into frontier markets with the registrations in your name. Nazryx registers your products, appoints the importer, reaches the doctors and bids in state rounds. Paid on results.",
+  "description": "Launch into frontier markets with the registrations in your name. Nazryx registers your products, appoints the importer, reaches the doctors and bids in state rounds.",
   "theme": "dark",
   "sections": [
     {
@@ -27,8 +27,8 @@
             "In your name"
           ],
           [
-            "Paid",
-            "Commission on sales"
+            "Terms",
+            "Agreed per market"
           ],
           [
             "Reporting",
@@ -172,18 +172,18 @@
       "type": "cards",
       "id": "model",
       "eyebrow": "Commercial model",
-      "title": "Paid when",
-      "accent": "your products sell.",
+      "title": "Terms that fit",
+      "accent": "the work.",
       "cols": 3,
       "style": "plain",
       "items": [
         {
           "title": "Commission on sales",
-          "text": "Agreed per market before anything starts."
+          "text": "Where we run the market for you, most of what we earn is tied to what you sell."
         },
         {
-          "title": "No fee for introductions",
-          "text": "We earn when product moves, not when we make a call."
+          "title": "Fees for defined work",
+          "text": "Market reads, registration and monitoring can carry a fee, agreed and scoped up front."
         },
         {
           "title": "Exclusive partnerships",
