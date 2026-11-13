@@ -131,6 +131,10 @@
     "trade": {
       "value": "USD 13m+",
       "label": "of pharmaceutical trade facilitated"
+    },
+    "imports": {
+      "value": "USD 10bn+",
+      "label": "of medicines imported a year into our markets"
     }
   },
   "regions": [
@@ -234,7 +238,7 @@
       "file": "/markets/kazakhstan",
       "facts": [
         "USD 2.5bn medicines market (2025)",
-        "9,659 pharmacies"
+        "85% of value imported"
       ]
     },
     "uz": {
