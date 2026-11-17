@@ -493,7 +493,7 @@
     },
     {
       "q": "What does it cost?",
-      "a": "A fixed fee for the read, quoted after the first call and agreed before we start. It depends on how many markets and products you want read.",
+      "a": "It depends on the markets and products you want read. We agree terms with you before any work starts.",
       "for": [
         "data"
       ]
