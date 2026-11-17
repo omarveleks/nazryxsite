@@ -103,19 +103,70 @@ tr:last-child .us{border-radius:0 0 12px 12px}
 .pr:nth-child(2){border-color:#2E9E6B}.pr:nth-child(3){border-color:#E08A2E}.pr:nth-child(4){border-color:#0B0D12}
 .pr b{display:block;font:700 20px "Inter Tight",sans-serif;letter-spacing:-.02em;margin-bottom:6px}
 .pr p{font-size:14.5px;color:#45453F}
+/* covers */
+.cover{background:#1259E6;color:#fff;padding:0;position:relative}
+.cover .mark{position:absolute;right:-120px;top:-60px;width:760px;height:auto}
+.cover .mark path{fill:#2A6BEB}
+.cover .in{position:relative;z-index:1;height:100%;display:flex;flex-direction:column;padding:60px 72px 56px}
+.cover .wm{display:flex;align-items:center;gap:14px;font:700 30px "Inter Tight",sans-serif;letter-spacing:-.02em}
+.cover .wm svg{width:52px}
+.cover .ttl{margin-top:auto}
+.cover .ttl small{display:block;font:700 13px Inter,sans-serif;letter-spacing:.14em;text-transform:uppercase;opacity:.85;margin-bottom:18px}
+.cover .ttl b{display:block;font:700 76px/0.98 "Inter Tight",sans-serif;letter-spacing:-.04em;max-width:1000px}
+.cover .ttl p{font-size:21px;margin-top:22px;max-width:620px;opacity:.92}
+.cover .meta{display:flex;gap:40px;margin-top:44px;font:600 14px Inter,sans-serif;opacity:.9}
+.back{background:#0B0D12;color:#F2F1EC;padding:0}
+.back .in{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:60px 72px}
+.back .wm{display:flex;align-items:center;gap:16px;font:700 44px "Inter Tight",sans-serif;letter-spacing:-.03em}
+.back .wm svg{width:76px}
+.back .tag{font:600 26px/1.3 "Inter Tight",sans-serif;letter-spacing:-.02em;color:#C9C9C2;margin-top:26px;max-width:640px}
+.back .row{display:flex;gap:44px;margin-top:56px;padding-top:26px;border-top:1px solid #1B202B;font-size:16px;color:#C9C9C2}
+.back .row b{display:block;font:700 10.5px Inter,sans-serif;letter-spacing:.1em;text-transform:uppercase;color:#82A4F2;margin-bottom:6px}
+.back .grp{position:absolute;bottom:34px;left:0;right:0;text-align:center;font-size:12px;color:#8A8A82}
+.back .bar{position:absolute;left:0;right:0;bottom:0;height:10px;background:#1259E6}
+.steps3{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.steps3 .card b{display:block;font:700 46px "Inter Tight",sans-serif;letter-spacing:-.03em;color:var(--blue);line-height:1;margin-bottom:14px}
+.ex{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.ex .tile h3{font-size:26px}
 </style>
 </head>
 <body>
-<section class="s dark"><div class="top"><div class="logo"><svg viewBox="0 0 837 346"><path d="M171 0 L403 0 L613 210 L613 0 L837 0 L837 198 L689 346 L461 346 L295 179 L131 346 L0 346 L0 174 Z" fill="#1259E6"/></svg>Nazryx</div><span>Company profile · 2026</span></div>
-<div class="mid"><div class="eb">Market data and market entry for pharmaceutical manufacturers</div>
-<h1>The bridge between medicine makers <span class="ac">and frontier markets.</span></h1>
-<p class="lede" style="margin-top:22px">14 markets on 3 continents. From Almaty to Cape Town.</p></div>
-<div class="ms"><div><span>Central Asia and the Caucasus</span><p>Kazakhstan · Uzbekistan · Azerbaijan</p></div><div><span>East Africa</span><p>Kenya · Uganda · Tanzania · Rwanda</p></div><div><span>West Africa</span><p>Nigeria · Ghana · Senegal · Francophone West and Central Africa</p></div><div><span>North Africa and the Horn</span><p>Sudan · Libya</p></div><div><span>Middle East</span><p>Iraq</p></div><div><span>South America</span><p>Peru</p></div></div></section>
-<section class="s"><div class="top"><div class="logo"><svg viewBox="0 0 837 346"><path d="M171 0 L403 0 L613 210 L613 0 L837 0 L837 198 L689 346 L461 346 L295 179 L131 346 L0 346 L0 174 Z" fill="#1259E6"/></svg>Nazryx</div><span>01 · At a glance</span></div>
+<section class="s cover"><svg class="mark" viewBox="0 0 837 346" aria-hidden="true"><path d="M171 0 L403 0 L613 210 L613 0 L837 0 L837 198 L689 346 L461 346 L295 179 L131 346 L0 346 L0 174 Z"/></svg>
+<div class="in"><div class="wm" style="color:#fff"><svg viewBox="0 0 837 346"><path d="M171 0 L403 0 L613 210 L613 0 L837 0 L837 198 L689 346 L461 346 L295 179 L131 346 L0 346 L0 174 Z" fill="#fff"/></svg>Nazryx</div>
+<div class="ttl"><small>Company profile · 2026</small><b>Bridging the gap in medical trade across frontier markets.</b>
+<p>Market data and market entry for pharmaceutical manufacturers.</p></div>
+<div class="meta"><span>14 markets · 3 continents</span><span>nazryx.com</span></div></div></section>
+<section class="s"><div class="top"><div class="logo"><svg viewBox="0 0 837 346"><path d="M171 0 L403 0 L613 210 L613 0 L837 0 L837 198 L689 346 L461 346 L295 179 L131 346 L0 346 L0 174 Z" fill="#1259E6"/></svg>Nazryx</div><span>01 · The gap</span></div>
+<div class="eb">The situation</div><h2>Frontier markets import most of their medicines. <span class="ac">The data to enter them is scattered.</span></h2>
+<div class="grid" style="grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+<div class="tile" style="background:var(--dk);color:#F2F1EC"><b class="big" style="font-size:80px">650m+</b><p style="color:var(--dktext);font-size:17px;margin-top:10px">people across the 14 markets we serve</p></div>
+<div class="tile" style="background:var(--dk);color:#F2F1EC"><b class="big" style="font-size:80px;color:var(--sky)">USD 10bn+</b><p style="color:var(--dktext);font-size:17px;margin-top:10px">of medicines imported into them every year</p></div></div>
+<div class="imp">
+<div class="tile b"><b>85%</b><p>of medicines imported in Kazakhstan</p></div>
+<div class="tile m"><b>60%</b><p>of medicines imported in Nigeria</p></div>
+<div class="tile p"><b>95%</b><p>of medicines imported in Senegal</p></div></div>
+<div class="foot"><span>Nazryx · Company profile</span><span>02</span></div></section>
+<section class="s dark"><div class="top"><div class="logo"><svg viewBox="0 0 837 346"><path d="M171 0 L403 0 L613 210 L613 0 L837 0 L837 198 L689 346 L461 346 L295 179 L131 346 L0 346 L0 174 Z" fill="#1259E6"/></svg>Nazryx</div><span>02 · Our answer</span></div>
+<div class="eb">Nazryx in one line</div><h2 style="font-size:60px;max-width:1100px">We show manufacturers where their products can sell, <span class="ac">then take them there.</span></h2>
+<div class="grid g3 mid" style="gap:40px">
+<div class="bl"><i>01</i><b>We know the markets.</b><p>14 frontier markets, read line by line, so every decision starts from evidence.</p></div>
+<div class="bl"><i>02</i><b>We open them in your name.</b><p>Registrations held by the manufacturer. We act as the local representative.</p></div>
+<div class="bl"><i>03</i><b>We stay on the ground.</b><p>Teams in Lahore and Almaty, and local networks in every market we serve.</p></div></div>
+<div class="foot"><span>Nazryx · Company profile</span><span>03</span></div></section>
+<section class="s"><div class="top"><div class="logo"><svg viewBox="0 0 837 346"><path d="M171 0 L403 0 L613 210 L613 0 L837 0 L837 198 L689 346 L461 346 L295 179 L131 346 L0 346 L0 174 Z" fill="#1259E6"/></svg>Nazryx</div><span>03 · Track record</span></div>
+<div class="eb">Proof</div><h2>USD 13m+ of pharmaceutical trade, <span class="ac">across three continents.</span></h2>
+<div class="scale" style="margin-top:14px">
+<div class="sc"><b class="ac">USD 13m+</b><span>of pharmaceutical trade facilitated</span></div>
+<div class="sc"><b>10</b><span>manufacturers represented, in selected partnerships</span></div>
+<div class="sc"><b>14</b><span>markets on 3 continents</span></div>
+<div class="sc"><b class="ac">300+</b><span>distributors profiled</span></div>
+<div class="sc"><b>1,000+</b><span>physicians in our Kazakhstan network</span></div>
+<div class="sc"><b>100+</b><span>distributor relationships in Kazakhstan</span></div></div>
+<div class="foot"><span>Nazryx · Company profile</span><span>04</span></div></section>
+<section class="s"><div class="top"><div class="logo"><svg viewBox="0 0 837 346"><path d="M171 0 L403 0 L613 210 L613 0 L837 0 L837 198 L689 346 L461 346 L295 179 L131 346 L0 346 L0 174 Z" fill="#1259E6"/></svg>Nazryx</div><span>04 · At a glance</span></div>
 <div class="grid" style="grid-template-columns:1.25fr 1fr;gap:64px;align-items:start;margin-top:10px">
-<div><div class="eb">Who we are</div><h2>You make medicines. <span class="ac">We open the markets that need them.</span></h2>
-<p class="lede" style="font-size:19px">Nazryx is a market data and market entry agency for pharmaceutical manufacturers. We know frontier markets line by line, and we take manufacturers into them, with the registrations in their name.</p>
-<p class="lede" style="font-size:19px;margin-top:14px">We work along the whole supply chain: with manufacturers of finished medicines and devices, with suppliers and distributors, and with institutional buyers.</p></div>
+<div><div class="eb">Who we are</div><h2>A market data and market entry agency, <span class="ac">built for frontier markets.</span></h2>
+<p class="lede" style="font-size:19px">We work along the whole supply chain: with manufacturers of finished medicines and devices, with suppliers and distributors, and with institutional buyers.</p></div>
 <dl class="facts" style="margin-top:34px">
 <div><dt>What we do</dt><dd>Market data · Market entry management</dd></div>
 <div><dt>Who we serve</dt><dd>Pharmaceutical manufacturers</dd></div>
@@ -124,68 +175,38 @@ tr:last-child .us{border-radius:0 0 12px 12px}
 <div><dt>Teams</dt><dd>Lahore · on the ground in Almaty</dd></div>
 <div><dt>How we work</dt><dd>Our own people and our own software</dd></div>
 <div><dt>Languages in-house</dt><dd>English · Russian · Kazakh</dd></div></dl></div>
-<div class="foot"><span>Nazryx · Company profile</span><span>02</span></div></section>
-<section class="s dark"><div class="top"><div class="logo"><svg viewBox="0 0 837 346"><path d="M171 0 L403 0 L613 210 L613 0 L837 0 L837 198 L689 346 L461 346 L295 179 L131 346 L0 346 L0 174 Z" fill="#1259E6"/></svg>Nazryx</div><span>02 · Our story</span></div>
+<div class="foot"><span>Nazryx · Company profile</span><span>05</span></div></section>
+<section class="s dark"><div class="top"><div class="logo"><svg viewBox="0 0 837 346"><path d="M171 0 L403 0 L613 210 L613 0 L837 0 L837 198 L689 346 L461 346 L295 179 L131 346 L0 346 L0 174 Z" fill="#1259E6"/></svg>Nazryx</div><span>05 · Our story</span></div>
 <div class="grid" style="grid-template-columns:.8fr 1.2fr;gap:64px;margin:auto 0;align-items:center">
 <div><div class="eb">Our story</div><h2 style="font-size:60px">Every tablet has a journey. <span class="ac">We make it work.</span></h2></div>
 <div class="prose"><p>A single tablet in a patient's hands in a village has a journey worth telling. It starts in a plant, crosses borders, passes a regulator, an importer and a pharmacy shelf, and only then reaches the person who needs it.</p>
-<p>Frontier markets import most of their medicines, yet their data is scattered and every country has its own rules. Manufacturers can't see where they fit. Buyers can't find reliable supply.</p>
-<p>Nazryx exists to close that gap.</p></div></div>
-<div class="foot"><span>Nazryx · Company profile</span><span>03</span></div></section>
-<section class="s"><div class="top"><div class="logo"><svg viewBox="0 0 837 346"><path d="M171 0 L403 0 L613 210 L613 0 L837 0 L837 198 L689 346 L461 346 L295 179 L131 346 L0 346 L0 174 Z" fill="#1259E6"/></svg>Nazryx</div><span>03 · Nazryx in numbers</span></div>
-<div class="eb">Nazryx in numbers</div><h2>A track record <span class="ac">across three continents.</span></h2>
-<div class="scale" style="margin-top:14px">
-<div class="sc"><b class="ac">USD 13m+</b><span>of pharmaceutical trade facilitated</span></div>
-<div class="sc"><b>14</b><span>markets on 3 continents</span></div>
-<div class="sc"><b>10</b><span>manufacturers represented, in selected partnerships</span></div>
-<div class="sc"><b class="ac">300+</b><span>distributors profiled</span></div>
-<div class="sc"><b>1,000+</b><span>physicians in our Kazakhstan network</span></div>
-<div class="sc"><b>100+</b><span>distributor relationships in Kazakhstan</span></div></div>
-<div class="foot"><span>Nazryx · Company profile</span><span>04</span></div></section>
-<section class="s"><div class="top"><div class="logo"><svg viewBox="0 0 837 346"><path d="M171 0 L403 0 L613 210 L613 0 L837 0 L837 198 L689 346 L461 346 L295 179 L131 346 L0 346 L0 174 Z" fill="#1259E6"/></svg>Nazryx</div><span>04 · Why frontier markets</span></div>
-<div class="eb">The opportunity</div><h2>Our markets import most of their medicines. <span class="ac">The gap is supply.</span></h2>
-<div class="grid" style="grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
-<div class="tile" style="background:var(--dk);color:#F2F1EC"><b class="big" style="font-size:84px">650m+</b><p style="color:var(--dktext);font-size:17px;margin-top:10px">people across the 14 markets we serve</p></div>
-<div class="tile" style="background:var(--dk);color:#F2F1EC"><b class="big ac" style="font-size:84px;color:var(--sky)">USD 10bn+</b><p style="color:var(--dktext);font-size:17px;margin-top:10px">of medicines imported a year into our markets (Nazryx estimate from national data, 2024–26)</p></div></div>
-<div class="imp">
-<div class="tile b"><b>85%</b><p>of medicines imported in Kazakhstan</p></div>
-<div class="tile m"><b>60%</b><p>of medicines imported in Nigeria</p></div>
-<div class="tile p"><b>95%</b><p>of medicines imported in Senegal</p></div></div>
-<div class="foot"><span>Nazryx · Company profile</span><span>05</span></div></section>
-<section class="s"><div class="top"><div class="logo"><svg viewBox="0 0 837 346"><path d="M171 0 L403 0 L613 210 L613 0 L837 0 L837 198 L689 346 L461 346 L295 179 L131 346 L0 346 L0 174 Z" fill="#1259E6"/></svg>Nazryx</div><span>05 · What we do</span></div>
-<div class="eb">What we do</div><h2>Two disciplines. <span class="ac">One team on the ground.</span></h2>
-<div class="grid g2" style="margin-top:12px">
-<div class="tile b"><div class="eb">Market data</div><h3 style="font-size:32px">Know what's open before you commit.</h3><p style="font-size:17px">We read each market against a manufacturer's portfolio: where products can win, where they can't, and where the price lands. So every decision starts from evidence.</p></div>
-<div class="tile m"><div class="eb">Market entry management</div><h3 style="font-size:32px">We take you there, in your name.</h3><p style="font-size:17px">We open markets in the maker's name and run them: registration, partners, pharmacy chains, state buyers and growth, with a written report every week.</p></div></div>
+<p>Manufacturers can't see where they fit. Buyers can't find reliable supply. Nazryx exists to close that gap.</p></div></div>
 <div class="foot"><span>Nazryx · Company profile</span><span>06</span></div></section>
-<section class="s"><div class="top"><div class="logo"><svg viewBox="0 0 837 346"><path d="M171 0 L403 0 L613 210 L613 0 L837 0 L837 198 L689 346 L461 346 L295 179 L131 346 L0 346 L0 174 Z" fill="#1259E6"/></svg>Nazryx</div><span>06 · How we work</span></div>
-<div class="eb">How we work</div><h2>From the first read <span class="ac">to steady reorders.</span></h2>
+<section class="s"><div class="top"><div class="logo"><svg viewBox="0 0 837 346"><path d="M171 0 L403 0 L613 210 L613 0 L837 0 L837 198 L689 346 L461 346 L295 179 L131 346 L0 346 L0 174 Z" fill="#1259E6"/></svg>Nazryx</div><span>06 · What we do</span></div>
+<div class="eb">What we do</div><h2>Two disciplines, <span class="ac">one outcome: your products selling.</span></h2>
+<div class="grid g2" style="margin-top:12px">
+<div class="tile b"><div class="eb">Market data</div><h3 style="font-size:32px">Know what's open before you commit.</h3><p style="font-size:17px">Each market read against a manufacturer's portfolio: where products can win, where they can't, and where the price lands.</p></div>
+<div class="tile m"><div class="eb">Market entry management</div><h3 style="font-size:32px">We take you there, in your name.</h3><p style="font-size:17px">Registration, partners, pharmacy chains, state buyers and growth, run on the ground with a written report every week.</p></div></div>
+<div class="foot"><span>Nazryx · Company profile</span><span>07</span></div></section>
+<section class="s"><div class="top"><div class="logo"><svg viewBox="0 0 837 346"><path d="M171 0 L403 0 L613 210 L613 0 L837 0 L837 198 L689 346 L461 346 L295 179 L131 346 L0 346 L0 174 Z" fill="#1259E6"/></svg>Nazryx</div><span>07 · How we work</span></div>
+<div class="eb">How we work</div><h2>Four steps, <span class="ac">from the first read to steady reorders.</span></h2>
 <div class="grid g4" style="gap:28px;margin-top:18px"><div class="pr"><b>1. Read</b><p>We read your portfolio against each market: what's open, thin or crowded, and in what order to launch.</p></div><div class="pr"><b>2. Register</b><p>We choose the route, complete the local dossier and follow the filing through, in your name.</p></div><div class="pr"><b>3. Launch</b><p>We vet and appoint the importer, secure pharmacy chain listings and prepare state bids.</p></div><div class="pr"><b>4. Grow</b><p>We stay on the account: doctors, prices, state rounds, reorders, and a written report every week.</p></div></div>
 <div class="grid g3" style="margin-top:34px">
 <div class="card"><span class="num">You</span><h3>Product, dossier, plant, brand, registrations</h3><p>Yours throughout, in every market.</p></div>
-<div class="card" style="border:2px solid var(--blue)"><span class="num">Nazryx</span><h3>Your local representative</h3><p>We act for you in the market. Never the holder; we never take title to stock.</p></div>
-<div class="card"><span class="num">The importer</span><h3>Stocks and sells</h3><p>Appointed with you, and replaceable without losing anything.</p></div></div>
-<div class="foot"><span>Nazryx · Company profile</span><span>07</span></div></section>
-<section class="s"><div class="top"><div class="logo"><svg viewBox="0 0 837 346"><path d="M171 0 L403 0 L613 210 L613 0 L837 0 L837 198 L689 346 L461 346 L295 179 L131 346 L0 346 L0 174 Z" fill="#1259E6"/></svg>Nazryx</div><span>07 · How we're different</span></div>
-<div class="eb">How we're different</div><h2>Not a consultancy. <span class="ac">Not a distributor.</span></h2>
-<div class="card" style="padding:10px 26px"><table><thead><tr><th></th><th>Typical regulatory consultancy</th><th>Typical distributor</th><th class="us">Nazryx</th></tr></thead><tbody><tr><td>Reads the market for you before you commit</td><td><span class="n">–</span></td><td><span class="n">–</span></td><td class="us"><span class="y">✓</span></td></tr><tr><td>Registers your products</td><td><span class="y">✓</span></td><td>sometimes</td><td class="us"><span class="y">✓</span></td></tr><tr><td>Registration held in your name</td><td><span class="y">✓</span></td><td>sometimes</td><td class="us"><span class="y">✓</span></td></tr><tr><td>Finds partners and buyers</td><td><span class="n">–</span></td><td>they are the buyer</td><td class="us"><span class="y">✓</span></td></tr><tr><td>Stays on the account after launch</td><td><span class="n">–</span></td><td><span class="y">✓</span></td><td class="us"><span class="y">✓</span></td></tr><tr><td>Rewarded for your sales</td><td><span class="n">–</span></td><td>margin on stock</td><td class="us"><span class="y">✓</span></td></tr></tbody></table></div>
+<div class="card" style="border:2px solid var(--blue)"><span class="num">Nazryx</span><h3>Your local representative</h3><p>Never the holder; we never take title to stock.</p></div>
+<div class="card"><span class="num">The importer</span><h3>Stocks and sells</h3><p>Appointed with you, and replaceable.</p></div></div>
 <div class="foot"><span>Nazryx · Company profile</span><span>08</span></div></section>
-<section class="s"><div class="top"><div class="logo"><svg viewBox="0 0 837 346"><path d="M171 0 L403 0 L613 210 L613 0 L837 0 L837 198 L689 346 L461 346 L295 179 L131 346 L0 346 L0 174 Z" fill="#1259E6"/></svg>Nazryx</div><span>08 · What we stand for</span></div>
-<div class="eb">What we stand for</div><h2>Four principles, <span class="ac">in every market.</span></h2>
-<div class="grid g4" style="gap:28px;margin-top:20px">
-<div class="pr"><b>Evidence first</b><p style="font-size:16px">We decide from data, and show the evidence before anything is signed.</p></div>
-<div class="pr"><b>The market stays yours</b><p style="font-size:16px">Registrations in the maker's name, partners that can be replaced.</p></div>
-<div class="pr"><b>On the ground</b><p style="font-size:16px">Local teams and networks, not advice from a distance.</p></div>
-<div class="pr"><b>Straight answers</b><p style="font-size:16px">If a market won't work, you hear it from us early.</p></div></div>
-<div class="tile b" style="margin-top:auto;margin-bottom:6px;display:flex;gap:40px;align-items:center"><b style="font:700 24px 'Inter Tight',sans-serif;white-space:nowrap">Written into every agreement</b><p style="font-size:16px">The registration is always yours. We tell you when not to enter. Your documents stay yours.</p></div>
+<section class="s"><div class="top"><div class="logo"><svg viewBox="0 0 837 346"><path d="M171 0 L403 0 L613 210 L613 0 L837 0 L837 198 L689 346 L461 346 L295 179 L131 346 L0 346 L0 174 Z" fill="#1259E6"/></svg>Nazryx</div><span>08 · How we're different</span></div>
+<div class="eb">How we're different</div><h2 style="font-size:40px">Not a consultancy, not a distributor: <span class="ac">one team from data to sales.</span></h2>
+<div class="card" style="padding:10px 26px"><table><thead><tr><th></th><th>Typical regulatory consultancy</th><th>Typical distributor</th><th class="us">Nazryx</th></tr></thead><tbody><tr><td>Reads the market for you before you commit</td><td><span class="n">–</span></td><td><span class="n">–</span></td><td class="us"><span class="y">✓</span></td></tr><tr><td>Registers your products</td><td><span class="y">✓</span></td><td>sometimes</td><td class="us"><span class="y">✓</span></td></tr><tr><td>Registration held in your name</td><td><span class="y">✓</span></td><td>sometimes</td><td class="us"><span class="y">✓</span></td></tr><tr><td>Finds partners and buyers</td><td><span class="n">–</span></td><td>they are the buyer</td><td class="us"><span class="y">✓</span></td></tr><tr><td>Stays on the account after launch</td><td><span class="n">–</span></td><td><span class="y">✓</span></td><td class="us"><span class="y">✓</span></td></tr><tr><td>Rewarded for your sales</td><td><span class="n">–</span></td><td>margin on stock</td><td class="us"><span class="y">✓</span></td></tr></tbody></table></div>
 <div class="foot"><span>Nazryx · Company profile</span><span>09</span></div></section>
 <section class="s"><div class="top"><div class="logo"><svg viewBox="0 0 837 346"><path d="M171 0 L403 0 L613 210 L613 0 L837 0 L837 198 L689 346 L461 346 L295 179 L131 346 L0 346 L0 174 Z" fill="#1259E6"/></svg>Nazryx</div><span>09 · Where we work</span></div>
-<div class="eb">Where we work</div><h2>14 markets on 3 continents. <span class="ac">From Almaty to Cape Town.</span></h2>
+<div class="eb">Where we work</div><h2>14 markets on 3 continents, <span class="ac">each one its own game.</span></h2>
 <div class="rg"><div class="card"><span>Central Asia and the Caucasus</span><h3>Kazakhstan · Uzbekistan · Azerbaijan</h3><p>One dossier can reach five EAEU markets.</p></div><div class="card"><span>East Africa</span><h3>Kenya · Uganda · Tanzania · Rwanda</h3><p>A shared dossier format opens the region.</p></div><div class="card"><span>West Africa</span><h3>Nigeria · Ghana · Senegal · Francophone West and Central Africa</h3><p>Import-led, with central state buyers.</p></div><div class="card"><span>North Africa and the Horn</span><h3>Sudan · Libya</h3><p>National buyers rebuilding supply.</p></div><div class="card"><span>Middle East</span><h3>Iraq</h3><p>One state importer sets the volume.</p></div><div class="card"><span>South America</span><h3>Peru</h3><p>A price-led market with a central state buyer.</p></div></div><div class="foot"><span>Nazryx · Company profile</span><span>10</span></div></section>
 <section class="s dark"><div class="top"><div class="logo"><svg viewBox="0 0 837 346"><path d="M171 0 L403 0 L613 210 L613 0 L837 0 L837 198 L689 346 L461 346 L295 179 L131 346 L0 346 L0 174 Z" fill="#1259E6"/></svg>Nazryx</div><span>10 · On the ground</span></div>
-<div class="eb">Our teams</div><h2>On the ground, <span class="ac">where it matters.</span></h2>
+<div class="eb">Our teams</div><h2>Local teams and networks, <span class="ac">not advice from a distance.</span></h2>
 <div class="grid g3" style="gap:36px;margin-top:20px">
-<div class="team" style="border-color:var(--blue)"><b>Lahore</b><p style="color:var(--dktext)">Our team in Pakistan: market data, research and the work behind every account.</p></div>
+<div class="team"><b>Lahore</b><p style="color:var(--dktext)">Our team in Pakistan: market data, research and the work behind every account.</p></div>
 <div class="team" style="border-color:#2E9E6B"><b>Almaty</b><p style="color:var(--dktext)">Our team on the ground in Kazakhstan, with Kazakh and Russian done in-house.</p></div>
 <div class="team" style="border-color:#E08A2E"><b>Local networks</b><p style="color:var(--dktext)">In every market we serve: importers, chains and the people who know the buyers.</p></div></div>
 <div class="grid g3" style="margin-top:auto;margin-bottom:6px">
@@ -193,12 +214,25 @@ tr:last-child .us{border-radius:0 0 12px 12px}
 <div><b class="big" style="font-size:64px">100+</b><p style="color:var(--dktext)">distributor relationships in Kazakhstan</p></div>
 <div><b class="big" style="font-size:64px">3</b><p style="color:var(--dktext)">manufacturers represented in Kazakhstan</p></div></div>
 <div class="foot"><span>Nazryx · Company profile</span><span>11</span></div></section>
-<section class="s dark"><div class="top"><div class="logo"><svg viewBox="0 0 837 346"><path d="M171 0 L403 0 L613 210 L613 0 L837 0 L837 198 L689 346 L461 346 L295 179 L131 346 L0 346 L0 174 Z" fill="#1259E6"/></svg>Nazryx</div><span>Contact</span></div>
-<div class="mid"><div class="eb">Talk to us</div><h1 style="font-size:68px">Let's open your <span class="ac">next market.</span></h1>
-<p class="lede" style="margin-top:20px">Tell us what you want, in one line. We reply within one working day.</p></div>
-<div class="grid g3 cont" style="border-top:1px solid var(--dkline);padding-top:26px">
-<div><i>Online</i><p>nazryx.com<br>contact@nazryx.com</p></div>
-<div><i>Phone and WhatsApp</i><p>+44 7466 253544 <small>UK</small><br>+7 708 692 2409 <small>Kazakhstan</small><br>+92 325 4307967 <small>Pakistan</small></p></div>
-<div><i>Our teams</i><p>Lahore<br>On the ground in Almaty</p><small>Part of the Nazir Group</small></div></div></section>
+<section class="s"><div class="top"><div class="logo"><svg viewBox="0 0 837 346"><path d="M171 0 L403 0 L613 210 L613 0 L837 0 L837 198 L689 346 L461 346 L295 179 L131 346 L0 346 L0 174 Z" fill="#1259E6"/></svg>Nazryx</div><span>11 · What we stand for</span></div>
+<div class="eb">What we stand for</div><h2>Four principles, <span class="ac">written into every agreement.</span></h2>
+<div class="grid g4" style="gap:28px;margin-top:20px">
+<div class="pr"><b>Evidence first</b><p style="font-size:16px">We decide from data, and show the evidence before anything is signed.</p></div>
+<div class="pr"><b>The market stays yours</b><p style="font-size:16px">Registrations in the maker's name, partners that can be replaced.</p></div>
+<div class="pr"><b>On the ground</b><p style="font-size:16px">Local teams and networks, not advice from a distance.</p></div>
+<div class="pr"><b>Straight answers</b><p style="font-size:16px">If a market won't work, you hear it from us early.</p></div></div>
+<div class="foot"><span>Nazryx · Company profile</span><span>12</span></div></section>
+<section class="s"><div class="top"><div class="logo"><svg viewBox="0 0 837 346"><path d="M171 0 L403 0 L613 210 L613 0 L837 0 L837 198 L689 346 L461 346 L295 179 L131 346 L0 346 L0 174 Z" fill="#1259E6"/></svg>Nazryx</div><span>12 · Next step</span></div>
+<div class="eb">Next step</div><h2>Start with a market read. <span class="ac">One line is enough.</span></h2>
+<div class="steps3" style="margin-top:18px">
+<div class="card"><b>1</b><h3>Tell us what you want</h3><p>A market, a product range, a question. At nazryx.com/start or contact@nazryx.com.</p></div>
+<div class="card"><b>2</b><h3>We reply within one working day</h3><p>With questions, or a time for a short call. We ask for anything else ourselves.</p></div>
+<div class="card" style="border:2px solid var(--blue)"><b>3</b><h3>Your market read</h3><p>What's open, thin or crowded, and where to start. Terms are agreed with you before any work begins.</p></div></div>
+<div class="foot"><span>Nazryx · Company profile</span><span>13</span></div></section>
+<section class="s back"><div class="in">
+<div class="wm" style="color:#F2F1EC"><span style="color:#1259E6;display:flex"><svg viewBox="0 0 837 346"><path d="M171 0 L403 0 L613 210 L613 0 L837 0 L837 198 L689 346 L461 346 L295 179 L131 346 L0 346 L0 174 Z" fill="currentColor"/></svg></span>Nazryx</div>
+<p class="tag">Bridging the gap in medical trade across frontier markets.</p>
+<div class="row"><div><b>Web</b>nazryx.com</div><div><b>Email</b>contact@nazryx.com</div><div><b>UK · WhatsApp</b>+44 7466 253544</div><div><b>Kazakhstan · WhatsApp</b>+7 708 692 2409</div><div><b>Pakistan</b>+92 325 4307967</div></div></div>
+<div class="grp">Part of the Nazir Group</div><div class="bar"></div></section>
 </body>
 </html>
