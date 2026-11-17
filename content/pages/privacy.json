@@ -10,14 +10,14 @@
       "side": { "kind": "kv", "title": "In short", "rows": [["Sold or shared", "Never"], ["Cookies", "None for analytics"], ["IP addresses", "Not stored"], ["Delete on request", "Yes"]] } },
     { "type": "cards", "id": "collect", "eyebrow": "What we collect", "title": "Only what you", "accent": "choose to send.", "cols": 3, "style": "plain",
       "items": [
-        { "title": "Market-read requests", "text": "Your name, company, work email, phone (optional), markets of interest and, if you send one, your product list." },
+        { "title": "Market-read requests", "text": "Your name, company, work email and what you tell us you want." },
         { "title": "Checklist requests", "text": "Your name, company and work email." },
         { "title": "Messages", "text": "Whatever you send us by email, phone or WhatsApp." }
       ] },
     { "type": "cards", "id": "use", "eyebrow": "How we use it", "title": "To respond,", "accent": "and nothing else.", "cols": 3, "style": "plain",
       "items": [
         { "title": "To reply to you", "text": "We use your details to answer your request and, if you ask, to prepare a market read." },
-        { "title": "Kept confidential", "text": "Your product list is used only to read the market for you. It is not shared with anyone else." },
+        { "title": "Kept confidential", "text": "What you share is used only to respond to you and read the market for you. It is not shared with anyone else." },
         { "title": "Never sold", "text": "We do not sell, rent or pass on your details." }
       ] },
     { "type": "cards", "id": "analytics", "eyebrow": "Anonymous analytics", "title": "We count visits,", "accent": "not people.", "cols": 3, "style": "plain",

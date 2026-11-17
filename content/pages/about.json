@@ -57,7 +57,8 @@
           "title": "On the ground",
           "text": "Teams in Lahore and Almaty, and local networks in every market we serve."
         }
-      ]
+      ],
+      "band": true
     },
     {
       "type": "cards",
@@ -123,7 +124,7 @@
       "type": "cta",
       "id": "contact",
       "title": "Talk to us.",
-      "text": "Send your product list, or book twenty minutes.",
+      "text": "Tell us what you want, or book twenty minutes.",
       "contact": true
     }
   ]

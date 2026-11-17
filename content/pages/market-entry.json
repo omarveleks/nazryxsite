@@ -59,7 +59,8 @@
           "title": "Own the market",
           "text": "Registrations in your name, partners you can replace. The position you build stays yours."
         }
-      ]
+      ],
+      "band": true
     },
     {
       "type": "phases",
@@ -80,7 +81,7 @@
             ],
             [
               "You provide",
-              "Your product list, dosage forms and strengths, and your certificates."
+              "One line on what you want. We ask for products and certificates ourselves."
             ],
             [
               "You receive",
@@ -247,7 +248,7 @@
       "type": "cta",
       "id": "contact",
       "title": "Start with the market read.",
-      "text": "Send your product list and the markets you are curious about. We will show you what is open before we talk about an agreement.",
+      "text": "Tell us what you want, in one line. We will show you what is open before we talk about an agreement.",
       "contact": true
     }
   ]

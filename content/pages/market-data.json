@@ -46,7 +46,8 @@
           "title": "Fresh beats thorough",
           "text": "A market changes every week. We keep the read current, not filed."
         }
-      ]
+      ],
+      "band": true
     },
     {
       "type": "cards",
@@ -233,7 +234,7 @@
       "type": "cta",
       "id": "contact",
       "title": "Request a market read.",
-      "text": "Send your product list and your target markets. We read them for you.",
+      "text": "Tell us what you want, in one line. We read the market for you.",
       "contact": true
     }
   ]

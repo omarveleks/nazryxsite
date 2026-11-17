@@ -9,6 +9,7 @@ Every page must have at least 6 sections (checked below).
 """
 import html
 import json
+import re
 import pathlib
 import hashlib
 
@@ -76,20 +77,55 @@ def contact_dl():
 
 
 # ------------------------------------------------------------------ section renderers
+def strip(cols, figs=False):
+    """Animated strip under a dark hero: a line draws in, then each column appears in turn."""
+    n, out = 0, ""
+    for ri, (label, items) in enumerate(cols):
+        its = ""
+        for it in items:
+            its += f'<i style="--d:{n}">{e(it)}</i>'
+            n += 1
+        out += f'<div class="ms-r" style="--r:{ri}"><span>{e(label)}</span><p>{its}</p></div>'
+    k = min(len(cols), 4) if len(cols) != 6 else 3
+    return f'<div class="mstrip{" figs" if figs else ""}" style="--cols:{k}"><div class="ms-line" aria-hidden="true"><b></b></div>{out}</div>'
+
+
+def hero_strip(sd):
+    if not sd or sd["kind"] == "regions":
+        return market_strip()
+    if sd["kind"] == "kv":
+        return strip([(k, [v]) for k, v in sd["rows"]])
+    return strip([(l, [v]) for v, l in map(stat, sd["items"])], figs=True)
+
+
 def r_hero(s, p):
-    btns = "".join(btn(c) for c in s.get("ctas", []))
+    cs = [D["primaryCta"] if c == "primary" else D["secondaryCta"] if c == "secondary" else c for c in s.get("ctas", [])]
+    btns = "".join(btn(c, "btn-blue" if i == 0 else "btn-ghostw") for i, c in enumerate(cs))
     trust = f'<p class="trust">{e(s["trust"])}</p>' if s.get("trust") else ""
     eb = f'<div class="eyebrow">{e(s["eyebrow"])}</div>' if s.get("eyebrow") else ""
-    sd = side(s["side"]) if s.get("side") else ""
-    return f'<section class="wrap hero"><div class="hero-grid"><div class="rv">{eb}{title(s, "h1")}<p class="lede">{e(s["lede"])}</p><div class="btns">{btns}</div>{trust}</div>{sd}</div></section>'
+    inner = f'<div class="flag rv">{eb}{title(s, "h1")}<p class="lede">{e(s["lede"])}</p><div class="btns">{btns}</div>{trust}</div>{hero_strip(s.get("side"))}'
+    return bleed(s, inner).replace('class="bleed dark"', 'class="bleed dark flagship page-hero"')
 
 
 def r_stats(s, p):
-    tiles = "".join(f'<div class="stat rv"><b>{e(v)}</b><span>{e(l)}</span></div>' for v, l in map(stat, s["items"]))
-    return f'<section class="wrap stats-sec" aria-label="Key figures"><div class="stats">{tiles}</div></section>'
+    out = ""
+    for v, l in map(stat, s["items"]):
+        m = re.match(r"^(\D*?)(\d[\d,.]*)(.*)$", v)
+        if m:
+            pre, n, suf = m.groups()
+            b = f'<b data-count="{n}" data-pre="{e(pre)}" data-suf="{e(suf)}">{e(v)}</b>'
+        else:
+            b = f"<b>{e(v)}</b>"
+        out += f'<div class="sc rv">{b}<span>{e(l)}</span></div>'
+    return f'<section class="wrap scale-sec" aria-label="Key figures"><div class="scale">{out}</div></section>'
 
 
 def r_cards(s, p):
+    if s.get("band"):
+        lines = "".join(f'<div class="mf rv"><b>{e(it["title"])}</b><p>{e(it["text"])}</p></div>' for it in s["items"])
+        lede = f'<p class="lede mf-lede">{e(s["lede"])}</p>' if s.get("lede") else ""
+        inner = f'<div class="eyebrow">{e(s.get("eyebrow", ""))}</div><h2 class="mf-h">{e(s["title"])} <span class="ac">{e(s.get("accent", ""))}</span></h2>{lede}<div class="mf-grid">{lines}</div>'
+        return bleed(s, inner, "light" if p.get("theme") == "dark" else "dark")
     out = ""
     for i, it in enumerate(s["items"], 1):
         n = f'<span class="n">{i:02d}</span>' if s.get("style") == "numbered" else ""
@@ -169,13 +205,14 @@ def r_faq(s, p):
 
 def r_cta(s, p):
     c = D["contact"]
-    btns = (f'<a class="btn btn-white" href="{D["primaryCta"]["href"]}" data-track="cta:request">{e(D["primaryCta"]["label"])}</a>'
-            f'<a class="btn btn-ghostw" href="{c["booking"]}" data-track="calendly">Book a call</a>'
+    btns = (btn("primary") if p["path"] != "/start" else "") + (f'<a class="btn btn-ghostw" href="{c["booking"]}" data-track="calendly">Book a call</a>'
             f'<a class="btn btn-ghostw" href="{c["whatsapp"]}" target="_blank" rel="noopener" data-track="whatsapp">WhatsApp</a>')
-    if p["path"] == "/start":
-        btns = btns.split("</a>", 1)[1]
-    text = s["text"] if "one working day" in s["text"] else s["text"] + " " + D["contact"]["reply"]
-    return f'<section class="wrap" id="{s["id"]}"><div class="cta rv"><div><h2>{e(s["title"])}</h2><p>{e(text)}</p><div class="btns">{btns}</div></div>{contact_dl()}</div></section>'
+    text = s["text"] if "one working day" in s["text"] else s["text"] + " " + c["reply"]
+    tone = "light" if p.get("theme") == "dark" else "dark"
+    if tone == "light":
+        btns = btns.replace("btn-ghostw", "btn-line")
+    inner = f'<div class="closing rv"><h2>{e(s["title"])} <span class="ac">{e(s.get("accent") or "")}</span></h2><p class="lede">{e(text)}</p><div class="btns">{btns}</div>{contact_dl()}</div>'
+    return bleed(s, inner, tone)
 
 
 def r_bars(s, p):
@@ -291,14 +328,7 @@ def bridge_svg():
 
 
 def market_strip():
-    n, cols = 0, ""
-    for ri, r in enumerate(D["regions"]):
-        ms = ""
-        for m in r["markets"]:
-            ms += f'<i style="--d:{n}">{e(D["markets"][m]["name"])}</i>'
-            n += 1
-        cols += f'<div class="ms-r" style="--r:{ri}"><span>{e(r["name"])}</span><p>{ms}</p></div>'
-    return f'<div class="mstrip" aria-label="Markets we serve"><div class="ms-line" aria-hidden="true"><b></b></div>{cols}</div>'
+    return strip([(r["name"], [D["markets"][m]["name"] for m in r["markets"]]) for r in D["regions"]])
 
 
 def r_flagship(s, p):
@@ -440,7 +470,7 @@ def shell(p, body):
 <meta name="twitter:description" content="{e(p["description"])}">
 <meta name="twitter:image" content="{BASE}/assets/og.png">
 {ld}</head>
-<body class="{p.get("theme", "light")}{" has-flag" if p.get("sections") and p["sections"][0]["type"] == "flagship" else ""}">
+<body class="{p.get("theme", "light")}{" has-flag" if p.get("sections") and p["sections"][0]["type"] in ("flagship", "hero") else ""}">
 <a class="skip" href="#main">Skip to content</a>
 <header class="hdr">
   <div class="hdr-in">

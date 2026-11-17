@@ -65,13 +65,14 @@
           "title": "Central Asia is opening",
           "text": "Uzbekistan cut registration review times to 60–120 days in Nov 2025. Early filers get the head start."
         }
-      ]
+      ],
+      "band": true
     },
     {
       "type": "cta",
       "id": "contact",
       "title": "Ask for a market file.",
-      "text": "Tell us which market and send your product list. We will show you what is open there.",
+      "text": "Tell us which market interests you. We will show you what is open there.",
       "contact": true
     }
   ]
