@@ -237,8 +237,16 @@ def r_table(s, p):
 
 
 def r_teams(s, p):
-    out = "".join(f'<div class="team rv"><b>{e(t["city"])}</b><span>{e(t["role"])}</span></div>' for t in D["contact"]["teams"])
-    return f'<section class="wrap" id="{s["id"]}">{head(s)}<div class="teams">{out}</div><p class="note">Local networks in every market we serve.</p></section>'
+    notes = {"Almaty": "Kazakh and Russian done in-house."}
+    cols = [(t["city"], t["role"] + ("." if not t["role"].endswith(".") else "") + (" " + notes[t["city"]] if t["city"] in notes else "")) for t in D["contact"]["teams"]]
+    cols.append(("Local networks", "In every market we serve: importers, chains and the people who know the buyers."))
+    lines = "".join(f'<div class="mf rv"><b>{e(a)}</b><p>{e(b)}</p></div>' for a, b in cols)
+    figs = ""
+    for k in ("kzPhysicians", "kzDistributors"):
+        v, l = stat(k)
+        m = re.match(r"^(\D*?)(\d[\d,.]*)(.*)$", v)
+        figs += f'<div class="sc rv"><b data-count="{m.group(2)}" data-suf="{e(m.group(3))}">{e(v)}</b><span>{e(l)}</span></div>'
+    return f'<section class="wrap" id="{s["id"]}">{head(s)}<div class="mf-grid" style="margin-top:8px">{lines}</div><div class="scale" style="grid-template-columns:1fr 1fr;margin-top:56px">{figs}</div></section>'
 
 
 def r_form(s, p):
